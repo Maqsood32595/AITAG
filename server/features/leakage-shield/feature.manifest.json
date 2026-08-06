@@ -1,0 +1,8 @@
+{
+  "id": "leakage-shield",
+  "name": "AITAG Real-Time PII & Contact Redaction Shield",
+  "version": "1.0.0",
+  "basePath": "/api/shield",
+  "enabled": true,
+  "dependencies": []
+}

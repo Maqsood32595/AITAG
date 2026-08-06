@@ -1,0 +1,8 @@
+{
+  "id": "escrow-payment",
+  "name": "RBI Escrow & Section 194-O TDS Compliance Engine",
+  "version": "1.0.0",
+  "basePath": "/api/escrow",
+  "enabled": true,
+  "dependencies": []
+}

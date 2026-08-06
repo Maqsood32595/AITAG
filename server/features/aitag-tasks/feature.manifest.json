@@ -1,0 +1,8 @@
+{
+  "id": "aitag-tasks",
+  "name": "AITAG Tasks — Post, Browse & Manage AI Tasks",
+  "version": "1.0.0",
+  "basePath": "/api/tasks",
+  "enabled": true,
+  "dependencies": ["aitag-auth"]
+}

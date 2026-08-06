@@ -1,0 +1,8 @@
+{
+  "id": "aitag-marketplace",
+  "name": "AITAG Marketplace Core & Role-Based Management",
+  "version": "1.0.0",
+  "basePath": "/api/marketplace",
+  "enabled": true,
+  "dependencies": []
+}

@@ -1,0 +1,8 @@
+{
+  "id": "sandwich-refactor-sandbox",
+  "name": "Browser-Based AI Sandbox & Sandwich AST Engine",
+  "version": "1.0.0",
+  "basePath": "/api/sandbox",
+  "enabled": true,
+  "dependencies": []
+}

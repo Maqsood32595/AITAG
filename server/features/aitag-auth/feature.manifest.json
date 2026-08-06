@@ -1,0 +1,8 @@
+{
+  "id": "aitag-auth",
+  "name": "AITAG Auth — JWT Registration & Login",
+  "version": "1.0.0",
+  "basePath": "/api/auth",
+  "enabled": true,
+  "dependencies": []
+}

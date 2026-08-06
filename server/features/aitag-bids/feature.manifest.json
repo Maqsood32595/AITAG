@@ -1,0 +1,8 @@
+{
+  "id": "aitag-bids",
+  "name": "AITAG Bids — AI Talent Bidding Engine",
+  "version": "1.0.0",
+  "basePath": "/api/bids",
+  "enabled": true,
+  "dependencies": ["aitag-auth", "aitag-tasks"]
+}

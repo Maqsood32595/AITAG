@@ -1,0 +1,19 @@
+{
+  "name": "aitag-platform",
+  "version": "1.0.0",
+  "description": "AITAG — SaaS-Enabled AI Freelance Marketplace & Browser-Based AI Sandbox with Light Theme, Sandwich AST Architecture, & Upwork/Fiverr Clone Workflows",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.1",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.3",
+    "ws": "^8.17.0"
+  }
+}
