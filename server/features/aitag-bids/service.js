@@ -78,6 +78,64 @@ class BidsService {
     if (error) throw new Error(error.message);
     return data;
   }
+
+  async acceptBid(bidId, requestingEmail) {
+    // 1. Fetch bid details
+    const { data: bid, error: bidErr } = await supabase
+      .from('aitag_bids')
+      .select('*')
+      .eq('id', bidId)
+      .single();
+
+    if (bidErr || !bid) throw new Error('Bid not found');
+    if (bid.task_owner_email !== requestingEmail) {
+      throw new Error('Unauthorized: only task owner can accept bids');
+    }
+
+    // 2. Fetch task
+    const task = await tasksService.getTaskById(bid.task_id);
+    if (!task) throw new Error('Associated task not found');
+
+    // 3. Update accepted bid status
+    const { data: updatedBid, error: updateBidErr } = await supabase
+      .from('aitag_bids')
+      .update({ status: 'accepted' })
+      .eq('id', bidId)
+      .select()
+      .single();
+
+    if (updateBidErr) throw new Error(updateBidErr.message);
+
+    // 4. Reject other competing bids on this task
+    await supabase
+      .from('aitag_bids')
+      .update({ status: 'rejected' })
+      .eq('task_id', bid.task_id)
+      .neq('id', bidId);
+
+    // 5. Update task status to in-progress
+    await tasksService.updateTask(task.id, requestingEmail, {
+      status: 'in-progress'
+    });
+
+    // 6. Section 194-O (1% TDS) & Escrow splits calculation
+    const gross = Number(task.budget);
+    const platformFee = Number((gross * 0.10).toFixed(2));
+    const tdsWithheld = Number((gross * 0.01).toFixed(2));
+    const netPayout = Number((gross - (platformFee + tdsWithheld)).toFixed(2));
+
+    return {
+      success: true,
+      bid: updatedBid,
+      escrow: {
+        grossAmount: gross,
+        platformFee,
+        section194OTDS: tdsWithheld,
+        freelancerNetPayout: netPayout,
+        status: 'HELD_IN_ESCROW'
+      }
+    };
+  }
 }
 
 module.exports = new BidsService();

@@ -41,6 +41,7 @@ export const bidsApi = {
   checkBid: (taskId: string) => api.get(`/bids/check/${taskId}`),
   getForTask: (taskId: string) => api.get(`/bids/task/${taskId}`),
   place: (taskId: string) => api.post('/bids', { taskId }),
+  accept: (bidId: string) => api.patch(`/bids/${bidId}/accept`),
 };
 
 export default api;

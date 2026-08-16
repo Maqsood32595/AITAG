@@ -1,7 +1,8 @@
 /**
  * AITAG Supabase Client — Shared across all Fractal Kernel feature slices
  */
-require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 // Detect placeholder — never send it to Supabase

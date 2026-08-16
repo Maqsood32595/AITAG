@@ -58,4 +58,15 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// PATCH /api/bids/:bidId/accept — accept bid and secure escrow (owner only, protected)
+router.patch('/:bidId/accept', auth, async (req, res) => {
+  try {
+    const result = await bidsService.acceptBid(req.params.bidId, req.user.email);
+    res.json(result);
+  } catch (err) {
+    const code = err.message.includes('Unauthorized') ? 403 : 500;
+    res.status(code).json({ error: err.message });
+  }
+});
+
 module.exports = router;
