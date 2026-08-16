@@ -27,9 +27,9 @@ const Footer = () => {
           <Grid xs={12} sm={6} md={2}>
             <Typography sx={{ fontWeight: 700, mb: 2.5 }}>Resources</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <Link href="#" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>Help Center</Link>
-              <Link href="#" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>Blog</Link>
-              <Link href="#" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>API Docs</Link>
+              <Link href="/blog" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>Blog</Link>
+              <Link href="/all_tasks" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>Browse Tasks</Link>
+              <Link href="/talent" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>AI Talent</Link>
             </Box>
           </Grid>
         </Grid>

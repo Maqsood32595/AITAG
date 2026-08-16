@@ -45,4 +45,10 @@ export const bidsApi = {
   accept: (bidId: string) => api.patch(`/bids/${bidId}/accept`),
 };
 
+// Blog
+export const blogApi = {
+  getAll: () => api.get('/blog'),
+  getBySlug: (slug: string) => api.get(`/blog/${slug}`),
+};
+
 export default api;

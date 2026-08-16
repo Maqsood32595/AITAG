@@ -1,0 +1,7 @@
+{
+  "id": "aitag-blog",
+  "name": "AITAG Blog Engine",
+  "version": "1.0.0",
+  "basePath": "/api/blog",
+  "enabled": true
+}

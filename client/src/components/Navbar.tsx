@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { label: 'Home', to: '/' },
   { label: 'Browse Tasks', to: '/all_tasks' },
   { label: 'AI Talent', to: '/talent' },
+  { label: 'Blog', to: '/blog' },
   { label: 'Post a Task', to: '/add_task' },
   { label: 'My Tasks', to: '/my_tasks' },
 ];
