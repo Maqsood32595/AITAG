@@ -20,6 +20,7 @@ const TaskDetails = lazy(() => import('./pages/TaskDetails'));
 const MyPostedTasks = lazy(() => import('./pages/MyPostedTasks'));
 const UpdateTask = lazy(() => import('./pages/UpdateTask'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AITalent = lazy(() => import('./pages/AITalent'));
 
 const Loader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -40,6 +41,7 @@ function App() {
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/all_tasks" element={<BrowseTasks />} />
+              <Route path="/talent" element={<AITalent />} />
               <Route path="/task-details/:id" element={<TaskDetails />} />
 
               {/* Protected */}

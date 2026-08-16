@@ -249,7 +249,7 @@ const HeroSection = () => {
               <Button
                 variant="contained"
                 size="large"
-                onClick={() => navigate('/all_tasks')}
+                onClick={() => navigate('/talent')}
                 sx={{
                   background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
                   fontWeight: 700,

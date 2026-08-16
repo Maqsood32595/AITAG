@@ -20,7 +20,7 @@ const Footer = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <Link href="/all_tasks" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>Browse Tasks</Link>
               <Link href="/add_task" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>Post a Task</Link>
-              <Link href="#" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>AI Talent</Link>
+              <Link href="/talent" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#fff' } }}>AI Talent</Link>
             </Box>
           </Grid>
           
