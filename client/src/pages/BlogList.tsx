@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box, Container, Typography, Grid, Card, CardContent, Chip,
-  TextField, InputAdornment, Stack, Paper, Avatar, Divider, CircularProgress
+  Stack, Paper, Avatar, Divider, Button
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Navbar from '../components/Navbar';
 import { blogApi } from '../api';
@@ -59,9 +57,7 @@ const CATEGORIES = ['All', 'Business & Productivity', 'Guides & Tips'];
 
 const BlogList = () => {
   const [articles, setArticles] = useState<ArticleSummary[]>(FALLBACK_ARTICLES);
-  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     blogApi.getAll()
@@ -76,104 +72,96 @@ const BlogList = () => {
   }, []);
 
   const filteredArticles = articles.filter((article) => {
-    const matchesCat = selectedCategory === 'All' || article.category === selectedCategory;
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCat && matchesSearch;
+    return selectedCategory === 'All' || article.category === selectedCategory;
   });
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
 
-      {/* Hero Header */}
-      <Box
-        sx={{
-          pt: 16,
-          pb: 8,
-          background: 'linear-gradient(180deg, rgba(79,70,229,0.06) 0%, rgba(248,250,252,1) 100%)',
-          textAlign: 'center',
-          position: 'relative',
-        }}
-      >
-        <Container maxWidth="md">
-          <Chip
-            icon={<MenuBookIcon sx={{ fontSize: '16px !important', color: '#4f46e5' }} />}
-            label="AITAG Blog & Insights"
-            sx={{
-              bgcolor: 'rgba(79,70,229,0.08)',
-              color: '#4f46e5',
-              fontWeight: 700,
-              mb: 2,
-              px: 1,
-            }}
-          />
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 900,
-              color: '#0f172a',
-              fontFamily: 'Inter, sans-serif',
-              letterSpacing: '-1.5px',
-              mb: 2,
-              fontSize: { xs: '2rem', md: '3rem' },
-            }}
-          >
-            Practical Insights on{' '}
-            <Box
-              component="span"
+      <Container maxWidth="xl" sx={{ pt: 14, pb: 12 }}>
+        {/* Clean Header Bar with Quick Action Buttons */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', md: 'center' },
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 2,
+            mb: 4,
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h4"
               sx={{
-                background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                fontWeight: 800,
+                color: '#0f172a',
+                fontFamily: 'Inter, sans-serif',
+                letterSpacing: '-1px',
               }}
             >
-              AI & Business Workflows
-            </Box>
-          </Typography>
-          <Typography sx={{ color: '#64748b', fontSize: '1.1rem', maxWidth: 620, mx: 'auto', mb: 4 }}>
-            Learn how modern companies hire AI talent on aitag.in to automate operations and reduce costs.
-          </Typography>
+              AITAG Blog & Articles
+            </Typography>
+            <Typography sx={{ color: '#64748b', mt: 0.5, fontSize: '0.95rem' }}>
+              Practical guides, case studies, and insights for hiring AI specialists on aitag.in
+            </Typography>
+          </Box>
 
-          {/* Search Bar */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 0.8,
-              borderRadius: '16px',
-              border: '1px solid rgba(79,70,229,0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
-              bgcolor: '#ffffff',
-            }}
-          >
-            <TextField
-              fullWidth
-              placeholder="Search articles by topic, keywords, or guides..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              variant="standard"
-              InputProps={{
-                disableUnderline: true,
-                startAdornment: (
-                  <InputAdornment position="start" sx={{ pl: 1.5 }}>
-                    <SearchIcon sx={{ color: '#4f46e5' }} />
-                  </InputAdornment>
-                ),
-                sx: { fontSize: '0.95rem' },
+          {/* Quick Action Navigation Buttons */}
+          <Stack direction="row" spacing={1.5} flexWrap="wrap" sx={{ gap: 1 }}>
+            <Button
+              component={Link}
+              to="/all_tasks"
+              variant="outlined"
+              sx={{
+                borderRadius: '10px',
+                color: '#4f46e5',
+                borderColor: 'rgba(79,70,229,0.3)',
+                fontWeight: 600,
+                textTransform: 'none',
+                px: 2,
+                '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' },
               }}
-            />
-          </Paper>
-        </Container>
-      </Box>
+            >
+              Browse Tasks
+            </Button>
+            <Button
+              component={Link}
+              to="/talent"
+              variant="outlined"
+              sx={{
+                borderRadius: '10px',
+                color: '#0891b2',
+                borderColor: 'rgba(8,145,178,0.3)',
+                fontWeight: 600,
+                textTransform: 'none',
+                px: 2,
+                '&:hover': { borderColor: '#0891b2', bgcolor: 'rgba(8,145,178,0.04)' },
+              }}
+            >
+              AI Talent Directory
+            </Button>
+            <Button
+              component={Link}
+              to="/add_task"
+              variant="contained"
+              sx={{
+                background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+                borderRadius: '10px',
+                fontWeight: 700,
+                textTransform: 'none',
+                px: 2.5,
+                boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
+              }}
+            >
+              + Post a Task
+            </Button>
+          </Stack>
+        </Box>
 
-      {/* Main Blog Feed */}
-      <Container maxWidth="lg" sx={{ pb: 12 }}>
         {/* Category Filters */}
-        <Stack direction="row" spacing={1} sx={{ mb: 4, justifyContent: { xs: 'flex-start', md: 'center' }, overflowX: 'auto', pb: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 4, overflowX: 'auto', pb: 1 }}>
           {CATEGORIES.map((cat) => (
             <Chip
               key={cat}
@@ -182,9 +170,9 @@ const BlogList = () => {
               sx={{
                 fontWeight: 700,
                 fontSize: '0.85rem',
-                py: 2.2,
+                py: 2,
                 px: 1.5,
-                borderRadius: '12px',
+                borderRadius: '10px',
                 cursor: 'pointer',
                 bgcolor: selectedCategory === cat ? '#4f46e5' : '#ffffff',
                 color: selectedCategory === cat ? '#ffffff' : '#64748b',
@@ -259,7 +247,6 @@ const BlogList = () => {
                       letterSpacing: '-0.5px',
                       mb: 1.5,
                       lineHeight: 1.3,
-                      '&:hover': { color: '#4f46e5' },
                     }}
                   >
                     {article.title}
@@ -297,17 +284,6 @@ const BlogList = () => {
             </Grid>
           ))}
         </Grid>
-
-        {filteredArticles.length === 0 && (
-          <Paper elevation={0} sx={{ textAlign: 'center', py: 8, borderRadius: '20px', border: '1px dashed rgba(79,70,229,0.2)' }}>
-            <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700, mb: 1 }}>
-              No articles found matching "{searchQuery}"
-            </Typography>
-            <Button variant="outlined" onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }} sx={{ borderRadius: '10px', mt: 2 }}>
-              Clear Search
-            </Button>
-          </Paper>
-        )}
       </Container>
     </Box>
   );
