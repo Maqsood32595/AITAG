@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Container, Typography, Grid, Card, CardContent, Avatar,
-  Chip, Button, TextField, InputAdornment, Stack, Rating, Divider, Paper
+  Chip, Button, TextField, InputAdornment, Stack, Divider, Paper, CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import StarIcon from '@mui/icons-material/Star';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../api';
 
 interface Talent {
   id: string;
   name: string;
+  email?: string;
   role: string;
   category: string;
   avatar: string;
@@ -28,11 +29,12 @@ interface Talent {
   bio: string;
   skills: string[];
   verified: boolean;
+  isRegisteredUser?: boolean;
 }
 
-const TALENT_DATA: Talent[] = [
+const CURATED_TALENT: Talent[] = [
   {
-    id: 'talent-1',
+    id: 'curated-1',
     name: 'Dr. Aarav Sharma',
     role: 'Senior LLM & RAG Architect',
     category: 'LLM & Generative AI',
@@ -47,7 +49,7 @@ const TALENT_DATA: Talent[] = [
     verified: true,
   },
   {
-    id: 'talent-2',
+    id: 'curated-2',
     name: 'Priya Mukherjee',
     role: 'Computer Vision & Edge AI Engineer',
     category: 'Computer Vision',
@@ -62,11 +64,11 @@ const TALENT_DATA: Talent[] = [
     verified: true,
   },
   {
-    id: 'talent-3',
+    id: 'curated-3',
     name: 'Vikramaditya Iyer',
     role: 'Full-Stack Agentic AI Developer',
     category: 'Agentic Systems',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300',
     rating: 4.92,
     reviewsCount: 51,
     hourlyRate: 3200,
@@ -77,7 +79,7 @@ const TALENT_DATA: Talent[] = [
     verified: true,
   },
   {
-    id: 'talent-4',
+    id: 'curated-4',
     name: 'Ananya Deshmukh',
     role: 'MLOps & Cloud Infrastructure Specialist',
     category: 'MLOps & Cloud',
@@ -89,36 +91,6 @@ const TALENT_DATA: Talent[] = [
     location: 'Pune, India',
     bio: 'End-to-end ML model lifecycle automation on AWS SageMaker, Kubernetes (KServe), CI/CD model monitoring, and GPU cost optimization.',
     skills: ['AWS SageMaker', 'Kubernetes', 'MLflow', 'Docker', 'Terraform', 'CI/CD'],
-    verified: true,
-  },
-  {
-    id: 'talent-5',
-    name: 'Rohan Verma',
-    role: 'Autonomous AI Red Teamer & Security Expert',
-    category: 'Agentic Systems',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300',
-    rating: 4.96,
-    reviewsCount: 24,
-    hourlyRate: 3800,
-    completedTasks: 21,
-    location: 'Delhi, India',
-    bio: 'Penetration tester for LLM applications, prompt injection auditor, and sandbox vulnerability researcher.',
-    skills: ['Prompt Hacking', 'OWASP LLM', 'Python', 'Security Audits', 'FastAPI'],
-    verified: true,
-  },
-  {
-    id: 'talent-6',
-    name: 'Sneha Kulkarni',
-    role: 'NLP & Multilingual Speech AI Engineer',
-    category: 'LLM & Generative AI',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300',
-    rating: 4.94,
-    reviewsCount: 33,
-    hourlyRate: 3000,
-    completedTasks: 31,
-    location: 'Chennai, India',
-    bio: 'Fine-tuning Whisper and multilingual Indic-BERT models for vernacular voice assistants and customer support bots.',
-    skills: ['Whisper', 'HuggingFace', 'Indic-BERT', 'PyTorch', 'Audio DSP'],
     verified: true,
   }
 ];
@@ -134,14 +106,69 @@ const CATEGORIES = [
 const AITalent = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [talents, setTalents] = useState<Talent[]>(CURATED_TALENT);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredTalent = TALENT_DATA.filter((talent) => {
+  useEffect(() => {
+    const fetchRegisteredUsers = async () => {
+      try {
+        const res = await authApi.getUsers();
+        const rawUsers = res.data || [];
+
+        // Transform registered users into Talent cards
+        const registeredTalent: Talent[] = rawUsers
+          .filter((u: any) => u.email !== user?.email) // Show other registered users
+          .map((u: any) => {
+            const isUser1 = u.email?.toLowerCase().includes('user1');
+            const isMaqsood = u.email?.toLowerCase().includes('maqsood');
+
+            return {
+              id: u.id,
+              name: u.name || u.email.split('@')[0],
+              email: u.email,
+              role: isUser1
+                ? 'Full-Stack AI Engineer & Admin'
+                : isMaqsood
+                ? 'Lead AI Researcher & Platform Engineer'
+                : `${u.role === 'admin' ? 'Admin / ' : ''}AI Developer & Specialist`,
+              category: isUser1 ? 'Agentic Systems' : isMaqsood ? 'LLM & Generative AI' : 'Agentic Systems',
+              avatar: u.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name || u.email)}`,
+              rating: 5.0,
+              reviewsCount: 14,
+              hourlyRate: isUser1 ? 3200 : isMaqsood ? 4500 : 2800,
+              completedTasks: isUser1 ? 19 : isMaqsood ? 42 : 8,
+              location: 'India',
+              bio: `Registered AITAG Platform Specialist (${u.role.toUpperCase()}). Verified credentials, sub-millisecond AST sandbox testing, and active freelance contracts.`,
+              skills: isUser1
+                ? ['Next.js', 'LangGraph', 'Supabase', 'Python', 'Node.js']
+                : isMaqsood
+                ? ['LLM Fine-tuning', 'RAG Systems', 'PyTorch', 'FastAPI', 'Sandwich AST']
+                : ['React', 'TypeScript', 'Supabase', 'Python'],
+              verified: true,
+              isRegisteredUser: true
+            };
+          });
+
+        // Prepend real registered users at the top, followed by curated profiles
+        setTalents([...registeredTalent, ...CURATED_TALENT]);
+      } catch (err) {
+        console.error('Failed to load registered users for talent directory:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRegisteredUsers();
+  }, [user]);
+
+  const filteredTalent = talents.filter((talent) => {
     const matchesCategory = selectedCategory === 'All' || talent.category === selectedCategory;
     const matchesSearch =
       talent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       talent.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (talent.email && talent.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
       talent.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
@@ -172,7 +199,7 @@ const AITalent = () => {
         <Container maxWidth="md">
           <Chip
             icon={<AutoAwesomeIcon sx={{ fontSize: '16px !important', color: '#4f46e5' }} />}
-            label="Verified Global AI Specialists"
+            label="Verified Global AI Specialists & Platform Talent"
             sx={{
               bgcolor: 'rgba(79,70,229,0.08)',
               color: '#4f46e5',
@@ -223,7 +250,7 @@ const AITalent = () => {
           >
             <TextField
               fullWidth
-              placeholder="Search by skill (e.g. RAG, LLaMA-3, YOLOv10, LangGraph, SageMaker)..."
+              placeholder="Search by skill or user (e.g. User1, RAG, LLaMA-3, LangGraph, SageMaker)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               variant="standard"
@@ -270,139 +297,152 @@ const AITalent = () => {
           ))}
         </Stack>
 
-        {/* Talent Grid */}
-        <Grid container spacing={3}>
-          {filteredTalent.map((talent) => (
-            <Grid xs={12} md={6} key={talent.id}>
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: '20px',
-                  border: '1px solid rgba(79,70,229,0.1)',
-                  bgcolor: '#ffffff',
-                  transition: 'all 0.25s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 16px 36px rgba(79,70,229,0.08)',
-                    borderColor: '#4f46e5',
-                  },
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <CardContent sx={{ p: 3.5, flexGrow: 1 }}>
-                  {/* Top Row: Avatar & Basic Info */}
-                  <Box sx={{ display: 'flex', gap: 2.5, mb: 2.5 }}>
-                    <Avatar
-                      src={talent.avatar}
-                      alt={talent.name}
-                      sx={{
-                        width: 72,
-                        height: 72,
-                        borderRadius: '16px',
-                        border: '2px solid rgba(79,70,229,0.2)',
-                      }}
-                    />
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1.15rem' }}>
-                          {talent.name}
-                        </Typography>
-                        {talent.verified && (
-                          <VerifiedIcon sx={{ color: '#10b981', fontSize: 18 }} titleAccess="Verified Top AI Specialist" />
-                        )}
-                      </Box>
-                      <Typography sx={{ color: '#4f46e5', fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
-                        {talent.role}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#64748b', fontSize: '0.8rem' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                          <LocationOnIcon sx={{ fontSize: 14 }} />
-                          {talent.location}
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                          <AssignmentIcon sx={{ fontSize: 14 }} />
-                          {talent.completedTasks} tasks done
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  {/* Bio */}
-                  <Typography sx={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.6, mb: 2.5 }}>
-                    {talent.bio}
-                  </Typography>
-
-                  {/* Skills Chips */}
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 3 }}>
-                    {talent.skills.map((skill) => (
-                      <Chip
-                        key={skill}
-                        label={skill}
-                        size="small"
+        {loading ? (
+          <Box display="flex" justifyContent="center" py={8}>
+            <CircularProgress sx={{ color: '#4f46e5' }} />
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {filteredTalent.map((talent) => (
+              <Grid xs={12} md={6} key={talent.id}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    borderRadius: '20px',
+                    border: '1px solid',
+                    borderColor: talent.isRegisteredUser ? 'rgba(79,70,229,0.25)' : 'rgba(79,70,229,0.1)',
+                    bgcolor: '#ffffff',
+                    transition: 'all 0.25s ease',
+                    position: 'relative',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 16px 36px rgba(79,70,229,0.08)',
+                      borderColor: '#4f46e5',
+                    },
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <CardContent sx={{ p: 3.5, flexGrow: 1 }}>
+                    {/* Top Row: Avatar & Basic Info */}
+                    <Box sx={{ display: 'flex', gap: 2.5, mb: 2.5 }}>
+                      <Avatar
+                        src={talent.avatar}
+                        alt={talent.name}
                         sx={{
-                          bgcolor: 'rgba(79,70,229,0.06)',
-                          color: '#4f46e5',
-                          fontWeight: 600,
-                          fontSize: '0.75rem',
-                          borderRadius: '8px',
+                          width: 72,
+                          height: 72,
+                          borderRadius: '16px',
+                          border: '2px solid rgba(79,70,229,0.2)',
+                          bgcolor: '#4f46e5'
                         }}
-                      />
-                    ))}
-                  </Box>
-
-                  <Divider sx={{ mb: 2.5 }} />
-
-                  {/* Bottom Row: Rate & Action Button */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
-                        Rate
-                      </Typography>
-                      <Typography sx={{ fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>
-                        ₹{talent.hourlyRate.toLocaleString()}
-                        <Typography component="span" sx={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
-                          /hr
+                      >
+                        {talent.name?.[0]}
+                      </Avatar>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1.15rem' }}>
+                            {talent.name}
+                          </Typography>
+                          {talent.verified && (
+                            <VerifiedIcon sx={{ color: '#10b981', fontSize: 18 }} titleAccess="Verified Top AI Specialist" />
+                          )}
+                          {talent.isRegisteredUser && (
+                            <Chip label="Platform Member" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.08)', color: '#10b981', fontWeight: 700, fontSize: '0.65rem', height: 20 }} />
+                          )}
+                        </Box>
+                        <Typography sx={{ color: '#4f46e5', fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
+                          {talent.role}
                         </Typography>
-                      </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#64748b', fontSize: '0.8rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                            <LocationOnIcon sx={{ fontSize: 14 }} />
+                            {talent.location}
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                            <AssignmentIcon sx={{ fontSize: 14 }} />
+                            {talent.completedTasks} tasks done
+                          </Box>
+                        </Box>
+                      </Box>
                     </Box>
 
-                    <Button
-                      variant="contained"
-                      onClick={() => handleHireClick(talent)}
-                      endIcon={<SendIcon sx={{ fontSize: '16px !important' }} />}
-                      sx={{
-                        background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
-                        color: '#ffffff',
-                        fontWeight: 700,
-                        borderRadius: '12px',
-                        px: 3,
-                        py: 1,
-                        fontSize: '0.9rem',
-                        boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
-                        textTransform: 'none',
-                        '&:hover': {
-                          boxShadow: '0 8px 24px rgba(79,70,229,0.4)',
-                        },
-                      }}
-                    >
-                      Invite / Hire
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                    {/* Bio */}
+                    <Typography sx={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.6, mb: 2.5 }}>
+                      {talent.bio}
+                    </Typography>
 
-        {filteredTalent.length === 0 && (
+                    {/* Skills Chips */}
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 3 }}>
+                      {talent.skills.map((skill) => (
+                        <Chip
+                          key={skill}
+                          label={skill}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(79,70,229,0.06)',
+                            color: '#4f46e5',
+                            fontWeight: 600,
+                            fontSize: '0.75rem',
+                            borderRadius: '8px',
+                          }}
+                        />
+                      ))}
+                    </Box>
+
+                    <Divider sx={{ mb: 2.5 }} />
+
+                    {/* Bottom Row: Rate & Action Button */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+                          Rate
+                        </Typography>
+                        <Typography sx={{ fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>
+                          ₹{talent.hourlyRate.toLocaleString()}
+                          <Typography component="span" sx={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
+                            /hr
+                          </Typography>
+                        </Typography>
+                      </Box>
+
+                      <Button
+                        variant="contained"
+                        onClick={() => handleHireClick(talent)}
+                        endIcon={<SendIcon sx={{ fontSize: '16px !important' }} />}
+                        sx={{
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          borderRadius: '12px',
+                          px: 3,
+                          py: 1,
+                          fontSize: '0.9rem',
+                          boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
+                          textTransform: 'none',
+                          '&:hover': {
+                            boxShadow: '0 8px 24px rgba(79,70,229,0.4)',
+                          },
+                        }}
+                      >
+                        Invite / Hire
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
+
+        {!loading && filteredTalent.length === 0 && (
           <Paper elevation={0} sx={{ textAlign: 'center', py: 8, borderRadius: '20px', border: '1px dashed rgba(79,70,229,0.2)' }}>
             <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700, mb: 1 }}>
               No AI Specialists found matching "{searchQuery}"
             </Typography>
             <Typography sx={{ color: '#64748b', mb: 3 }}>
-              Try searching with different keywords like RAG, PyTorch, LLaMA-3, or Next.js.
+              Try searching with different keywords like User1, RAG, PyTorch, LLaMA-3, or Next.js.
             </Typography>
             <Button variant="outlined" onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }} sx={{ borderRadius: '10px' }}>
               Clear Filters

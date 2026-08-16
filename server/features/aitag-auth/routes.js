@@ -65,4 +65,14 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/auth/users — list all registered platform users for talent directory
+router.get('/users', async (req, res) => {
+  try {
+    const users = await authService.getAllUsers();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

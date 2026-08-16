@@ -82,6 +82,16 @@ class AuthService {
     if (error || !user) throw new Error('User not found');
     return user;
   }
+
+  async getAllUsers() {
+    const { data, error } = await supabase
+      .from('aitag_users')
+      .select('id, name, email, role, photo_url, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data || [];
+  }
 }
 
 module.exports = new AuthService();

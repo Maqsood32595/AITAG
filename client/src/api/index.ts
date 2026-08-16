@@ -21,6 +21,7 @@ export const authApi = {
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
   me: () => api.get('/auth/me'),
+  getUsers: () => api.get('/auth/users'),
 };
 
 // Tasks
