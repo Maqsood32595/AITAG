@@ -1,27 +1,69 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Container, Typography, Grid, Paper, Chip, CircularProgress, Avatar, Button, Divider } from '@mui/material';
+import {
+  Box, Container, Typography, Grid, Paper, Chip, CircularProgress,
+  Avatar, Button, Divider, Stack, Alert
+} from '@mui/material';
 import TaskIcon from '@mui/icons-material/Assignment';
 import BidIcon from '@mui/icons-material/Gavel';
 import PostIcon from '@mui/icons-material/PostAdd';
+import MailIcon from '@mui/icons-material/Mail';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import Navbar from '../components/Navbar';
-import { tasksApi, bidsApi } from '../api';
+import { tasksApi, bidsApi, invitationsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [myTasks, setMyTasks] = useState<any[]>([]);
   const [myBids, setMyBids] = useState<any[]>([]);
+  const [invitations, setInvitations] = useState<any[]>([]);
   const [allCount, setAllCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [actionSuccess, setActionSuccess] = useState('');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const fetchDashboardData = () => {
+    Promise.all([
+      tasksApi.getMy().then(r => setMyTasks(r.data || [])),
+      tasksApi.getAll().then(r => setAllCount((r.data || []).length)),
+      bidsApi.getMy().then(r => setMyBids(r.data.bids || [])),
+      invitationsApi.getMy().then(r => setInvitations(r.data || [])).catch(() => setInvitations([])),
+    ]).catch(console.error).finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    Promise.all([
-      tasksApi.getMy().then(r => setMyTasks(r.data)),
-      tasksApi.getAll().then(r => setAllCount(r.data.length)),
-      bidsApi.getMy().then(r => setMyBids(r.data.bids || [])),
-    ]).catch(console.error).finally(() => setLoading(false));
+    fetchDashboardData();
   }, []);
+
+  const handleAcceptInvite = async (inviteId: string) => {
+    setActionLoading(inviteId);
+    try {
+      await invitationsApi.accept(inviteId);
+      setActionSuccess('🎉 Invitation accepted! Your proposal has been submitted to the client.');
+      fetchDashboardData();
+      setTimeout(() => setActionSuccess(''), 4000);
+    } catch (err: any) {
+      console.error('Accept invite error:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDeclineInvite = async (inviteId: string) => {
+    setActionLoading(inviteId);
+    try {
+      await invitationsApi.decline(inviteId);
+      fetchDashboardData();
+    } catch (err: any) {
+      console.error('Decline invite error:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const pendingInvites = invitations.filter(inv => inv.status === 'pending');
 
   const stats = [
     { icon: <TaskIcon sx={{ color: '#4f46e5' }} />, label: 'All Platform Tasks', value: allCount, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)' },
@@ -50,6 +92,98 @@ const Dashboard = () => {
             </Box>
           </Box>
         </Paper>
+
+        {actionSuccess && (
+          <Alert severity="success" sx={{ mb: 3, borderRadius: '12px' }}>
+            {actionSuccess}
+          </Alert>
+        )}
+
+        {/* Pending Task Invitations Banner */}
+        {pendingInvites.length > 0 && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3.5,
+              borderRadius: '16px',
+              border: '1px solid rgba(79,70,229,0.25)',
+              bgcolor: '#ffffff',
+              mb: 4,
+              boxShadow: '0 8px 30px rgba(79,70,229,0.06)',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <MailIcon sx={{ color: '#4f46e5' }} />
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1.1rem' }}>
+                Direct Task Invitations ({pendingInvites.length})
+              </Typography>
+            </Box>
+
+            <Stack spacing={2}>
+              {pendingInvites.map(inv => (
+                <Paper
+                  key={inv.id}
+                  elevation={0}
+                  sx={{
+                    p: 2.5,
+                    borderRadius: '12px',
+                    bgcolor: 'rgba(79,70,229,0.03)',
+                    border: '1px solid rgba(79,70,229,0.1)',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    justifyContent: 'space-between',
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                    gap: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1rem' }}>
+                      {inv.task_title}
+                    </Typography>
+                    <Typography sx={{ color: '#64748b', fontSize: '0.85rem', mt: 0.5 }}>
+                      Invited by: <strong>{inv.client_email}</strong> • Budget: <strong>₹{inv.task_budget?.toLocaleString() || 'Negotiable'}</strong>
+                    </Typography>
+                    {inv.message && (
+                      <Typography sx={{ color: '#475569', fontSize: '0.85rem', fontStyle: 'italic', mt: 1 }}>
+                        "{inv.message}"
+                      </Typography>
+                    )}
+                  </Box>
+
+                  <Stack direction="row" spacing={1.5}>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      size="small"
+                      disabled={actionLoading === inv.id}
+                      onClick={() => handleDeclineInvite(inv.id)}
+                      startIcon={<CancelIcon />}
+                      sx={{ borderRadius: '8px', color: '#64748b', textTransform: 'none' }}
+                    >
+                      Decline
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={actionLoading === inv.id}
+                      onClick={() => handleAcceptInvite(inv.id)}
+                      startIcon={actionLoading === inv.id ? <CircularProgress size={14} color="inherit" /> : <CheckCircleIcon />}
+                      sx={{
+                        background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        textTransform: 'none',
+                        px: 2,
+                      }}
+                    >
+                      Accept & Place Bid
+                    </Button>
+                  </Stack>
+                </Paper>
+              ))}
+            </Stack>
+          </Paper>
+        )}
 
         {/* Stats */}
         <Grid container spacing={3} sx={{ mb: 4 }}>

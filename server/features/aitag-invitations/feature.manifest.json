@@ -1,0 +1,7 @@
+{
+  "id": "aitag-invitations",
+  "name": "AITAG Talent Invitations Engine",
+  "version": "1.0.0",
+  "basePath": "/api/invitations",
+  "enabled": true
+}

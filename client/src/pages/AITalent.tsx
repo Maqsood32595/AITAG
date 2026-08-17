@@ -103,6 +103,8 @@ const CATEGORIES = [
   'MLOps & Cloud'
 ];
 
+import InviteModal from '../components/InviteModal';
+
 const AITalent = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -110,6 +112,8 @@ const AITalent = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
 
   useEffect(() => {
     const fetchRegisteredUsers = async () => {
@@ -177,7 +181,8 @@ const AITalent = () => {
     if (!user) {
       navigate('/signin', { state: { error: 'Please sign in to hire or invite talent.' }, replace: true });
     } else {
-      navigate('/add_task', { state: { preferredTalent: talent.name } });
+      setSelectedTalent(talent);
+      setInviteModalOpen(true);
     }
   };
 
@@ -450,6 +455,13 @@ const AITalent = () => {
           </Paper>
         )}
       </Container>
+
+      {/* Invite Talent Modal */}
+      <InviteModal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        talent={selectedTalent}
+      />
     </Box>
   );
 };

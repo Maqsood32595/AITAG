@@ -51,4 +51,13 @@ export const blogApi = {
   getBySlug: (slug: string) => api.get(`/blog/${slug}`),
 };
 
+// Invitations
+export const invitationsApi = {
+  send: (data: { taskId: string; freelancerEmail: string; message?: string }) =>
+    api.post('/invitations', data),
+  getMy: () => api.get('/invitations/my'),
+  accept: (id: string) => api.patch(`/invitations/${id}/accept`),
+  decline: (id: string) => api.patch(`/invitations/${id}/decline`),
+};
+
 export default api;
