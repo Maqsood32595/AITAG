@@ -104,6 +104,7 @@ const CATEGORIES = [
 ];
 
 import InviteModal from '../components/InviteModal';
+import TalentShowcaseModal from '../components/TalentShowcaseModal';
 
 const AITalent = () => {
   const navigate = useNavigate();
@@ -114,6 +115,8 @@ const AITalent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
+  const [showcaseModalOpen, setShowcaseModalOpen] = useState(false);
+  const [selectedShowcaseTalent, setSelectedShowcaseTalent] = useState<any>(null);
 
   useEffect(() => {
     const fetchRegisteredUsers = async () => {
@@ -398,8 +401,8 @@ const AITalent = () => {
 
                     <Divider sx={{ mb: 2.5 }} />
 
-                    {/* Bottom Row: Rate & Action Button */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {/* Bottom Row: Rate & Action Buttons */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
                       <Box>
                         <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
                           Rate
@@ -412,27 +415,44 @@ const AITalent = () => {
                         </Typography>
                       </Box>
 
-                      <Button
-                        variant="contained"
-                        onClick={() => handleHireClick(talent)}
-                        endIcon={<SendIcon sx={{ fontSize: '16px !important' }} />}
-                        sx={{
-                          background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
-                          color: '#ffffff',
-                          fontWeight: 700,
-                          borderRadius: '12px',
-                          px: 3,
-                          py: 1,
-                          fontSize: '0.9rem',
-                          boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
-                          textTransform: 'none',
-                          '&:hover': {
-                            boxShadow: '0 8px 24px rgba(79,70,229,0.4)',
-                          },
-                        }}
-                      >
-                        Invite / Hire
-                      </Button>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            setSelectedShowcaseTalent(talent);
+                            setShowcaseModalOpen(true);
+                          }}
+                          sx={{
+                            borderRadius: '10px',
+                            color: '#4f46e5',
+                            borderColor: 'rgba(79,70,229,0.3)',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            fontSize: '0.85rem',
+                          }}
+                        >
+                          🎬 View Workflows
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleHireClick(talent)}
+                          endIcon={<SendIcon sx={{ fontSize: '14px !important' }} />}
+                          sx={{
+                            background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                            color: '#ffffff',
+                            fontWeight: 700,
+                            borderRadius: '10px',
+                            px: 2,
+                            fontSize: '0.85rem',
+                            boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
+                            textTransform: 'none',
+                          }}
+                        >
+                          Invite
+                        </Button>
+                      </Stack>
                     </Box>
                   </CardContent>
                 </Card>
@@ -455,6 +475,14 @@ const AITalent = () => {
           </Paper>
         )}
       </Container>
+
+      {/* Talent Showcase Modal (Delivered Workflows + Video Demos) */}
+      <TalentShowcaseModal
+        open={showcaseModalOpen}
+        onClose={() => setShowcaseModalOpen(false)}
+        talent={selectedShowcaseTalent}
+        onInvite={(t) => handleHireClick(t)}
+      />
 
       {/* Invite Talent Modal */}
       <InviteModal

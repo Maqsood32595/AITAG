@@ -79,17 +79,36 @@ const Dashboard = () => {
       <Container maxWidth="lg" sx={{ pt: 12, pb: 6 }}>
         {/* Welcome */}
         <Paper elevation={0} sx={{ p: 4, borderRadius: '20px', mb: 4, background: 'linear-gradient(135deg, rgba(79,70,229,0.08) 0%, rgba(8,145,178,0.06) 100%)', border: '1px solid rgba(79,70,229,0.1)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
-            <Avatar src={user?.photo_url || undefined} sx={{ width: 56, height: 56, bgcolor: '#4f46e5', fontSize: '1.3rem', fontWeight: 700, border: '3px solid rgba(79,70,229,0.2)' }}>
-              {user?.name?.[0]?.toUpperCase()}
-            </Avatar>
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.5px' }}>
-                Welcome back, {user?.name}!
-              </Typography>
-              <Typography sx={{ color: '#64748b', fontSize: '0.9rem' }}>{user?.email}</Typography>
-              <Chip label={user?.role} size="small" sx={{ mt: 0.5, bgcolor: 'rgba(79,70,229,0.1)', color: '#4f46e5', fontWeight: 700, fontSize: '0.72rem', textTransform: 'capitalize' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, flexDirection: { xs: 'column', md: 'row' }, gap: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
+              <Avatar src={user?.photo_url || undefined} sx={{ width: 56, height: 56, bgcolor: '#4f46e5', fontSize: '1.3rem', fontWeight: 700, border: '3px solid rgba(79,70,229,0.2)' }}>
+                {user?.name?.[0]?.toUpperCase()}
+              </Avatar>
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.5px' }}>
+                  Welcome back, {user?.name}!
+                </Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.9rem' }}>{user?.email}</Typography>
+                <Chip label={user?.role} size="small" sx={{ mt: 0.5, bgcolor: 'rgba(79,70,229,0.1)', color: '#4f46e5', fontWeight: 700, fontSize: '0.72rem', textTransform: 'capitalize' }} />
+              </Box>
             </Box>
+
+            <Button
+              component={Link}
+              to="/profile"
+              variant="contained"
+              sx={{
+                background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+                borderRadius: '12px',
+                fontWeight: 700,
+                px: 3,
+                py: 1.2,
+                textTransform: 'none',
+                boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
+              }}
+            >
+              🎬 Manage Delivered Workflows & Profile
+            </Button>
           </Box>
         </Paper>
 

@@ -60,4 +60,11 @@ export const invitationsApi = {
   decline: (id: string) => api.patch(`/invitations/${id}/decline`),
 };
 
+// Profile & Delivered Workflows
+export const profileApi = {
+  getMe: () => api.get('/profile/me'),
+  updateMe: (data: object) => api.put('/profile/me', data),
+  getById: (userId: string) => api.get(`/profile/${userId}`),
+};
+
 export default api;

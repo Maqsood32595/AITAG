@@ -23,6 +23,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AITalent = lazy(() => import('./pages/AITalent'));
 const BlogList = lazy(() => import('./pages/BlogList'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 const Loader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -53,6 +54,7 @@ function App() {
               <Route path="/my_tasks" element={<PrivateRoute><MyPostedTasks /></PrivateRoute>} />
               <Route path="/update-task/:id" element={<PrivateRoute><UpdateTask /></PrivateRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             </Routes>
             <Footer />
           </Suspense>

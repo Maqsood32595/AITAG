@@ -1,0 +1,7 @@
+{
+  "id": "aitag-profile",
+  "name": "AITAG Delivered Workflows & Profile Showcase Engine",
+  "version": "1.0.0",
+  "basePath": "/api/profile",
+  "enabled": true
+}
