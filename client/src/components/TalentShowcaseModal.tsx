@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Typography, Button, Box, Chip, Stack, Avatar, Divider,
-  Card, CircularProgress, IconButton
+  Card, CircularProgress, IconButton, Paper
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
