@@ -56,7 +56,7 @@ class ProfileService {
         try {
           credentials = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
         } catch (e) {
-          console.warn('[ProfileService] Failed to parse GCS_CREDENTIALS JSON:', e.message);
+          console.warn('[ProfileService] Failed to parse GCS_CREDENTIALS JSON directly:', e.message);
         }
       }
 
@@ -70,20 +70,30 @@ class ProfileService {
         }
       }
 
+      // Ensure private_key has proper newlines for RSA PEM parser
+      if (credentials && credentials.private_key) {
+        credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+      }
+
       // 3. Local key file on disk
       if (!credentials) {
         const keyFile = process.env.GOOGLE_CLOUD_KEY_FILE || path.join(__dirname, '../../shortshub-service-account.json');
         if (fs.existsSync(keyFile)) {
           this.storage = new Storage({ projectId: PROJECT_ID, keyFilename: keyFile });
+          console.log('[ProfileService] Authenticated via local key file:', keyFile);
         } else {
           this.storage = new Storage({ projectId: PROJECT_ID });
+          console.log('[ProfileService] Using default GCP credentials');
         }
       } else {
-        this.storage = new Storage({ projectId: PROJECT_ID, credentials });
+        this.storage = new Storage({
+          projectId: credentials.project_id || PROJECT_ID,
+          credentials
+        });
+        console.log('[ProfileService] Authenticated with GCS environment credentials for project:', credentials.project_id || PROJECT_ID);
       }
 
       this.bucket = this.storage ? this.storage.bucket(BUCKET_NAME) : null;
-      console.log('✅ GCS Storage initialized successfully for bucket:', BUCKET_NAME);
     } catch (e) {
       console.warn('[ProfileService] GCS Storage init note:', e.message);
     }
