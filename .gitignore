@@ -24,3 +24,7 @@ test_*.py
 aitag-test-environment/
 
 workflows/
+
+# Credentials & Secrets
+*service-account*.json
+*.key.json
