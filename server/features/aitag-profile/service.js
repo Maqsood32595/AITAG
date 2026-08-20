@@ -46,15 +46,44 @@ const PROFILES_CACHE = new Map([
 ]);
 
 class ProfileService {
-    constructor() {
+      constructor() {
     try {
-      const keyFile = process.env.GOOGLE_CLOUD_KEY_FILE || path.join(__dirname, '../../shortshub-service-account.json');
-      if (fs.existsSync(keyFile)) {
-        this.storage = new Storage({ projectId: PROJECT_ID, keyFilename: keyFile });
-      } else {
-        this.storage = new Storage({ projectId: PROJECT_ID });
+      let credentials = null;
+
+      // 1. Direct JSON string from Render / Cloud Env
+      const rawJson = process.env.GCS_CREDENTIALS || process.env.GOOGLE_CREDENTIALS || process.env.GCS_KEY;
+      if (rawJson) {
+        try {
+          credentials = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+        } catch (e) {
+          console.warn('[ProfileService] Failed to parse GCS_CREDENTIALS JSON:', e.message);
+        }
       }
-      this.bucket = this.storage.bucket(BUCKET_NAME);
+
+      // 2. Base64 encoded JSON string from Render / Cloud Env
+      if (!credentials && process.env.GCS_KEY_BASE64) {
+        try {
+          const decoded = Buffer.from(process.env.GCS_KEY_BASE64, 'base64').toString('utf8');
+          credentials = JSON.parse(decoded);
+        } catch (e) {
+          console.warn('[ProfileService] Failed to parse GCS_KEY_BASE64:', e.message);
+        }
+      }
+
+      // 3. Local key file on disk
+      if (!credentials) {
+        const keyFile = process.env.GOOGLE_CLOUD_KEY_FILE || path.join(__dirname, '../../shortshub-service-account.json');
+        if (fs.existsSync(keyFile)) {
+          this.storage = new Storage({ projectId: PROJECT_ID, keyFilename: keyFile });
+        } else {
+          this.storage = new Storage({ projectId: PROJECT_ID });
+        }
+      } else {
+        this.storage = new Storage({ projectId: PROJECT_ID, credentials });
+      }
+
+      this.bucket = this.storage ? this.storage.bucket(BUCKET_NAME) : null;
+      console.log('✅ GCS Storage initialized successfully for bucket:', BUCKET_NAME);
     } catch (e) {
       console.warn('[ProfileService] GCS Storage init note:', e.message);
     }
@@ -144,60 +173,7 @@ class ProfileService {
     return updated;
   }
 
-      /**
-   * Direct Server-to-GCS buffer upload (Zero CORS, 100% authenticated)
-   */
-  async uploadWorkflowVideoBuffer(userId, { workflowId, filename, buffer, mimeType, durationSeconds }) {
-    if (!userId) throw new Error('Unauthorized');
-    const safeWfId = workflowId || 'wf-1';
-    if (!buffer || buffer.length === 0) throw new Error('Video file buffer is empty');
-
-    const durationNum = durationSeconds ? Number(durationSeconds) : 0;
-    if (durationNum > MAX_VIDEO_DURATION_SECONDS) {
-      throw new Error(`Video duration exceeds maximum allowed limit of 2 minutes (${MAX_VIDEO_DURATION_SECONDS}s). Provided: ${durationNum}s`);
-    }
-
-    const cleanFilename = (filename || 'workflow_demo.mp4').replace(/[^a-zA-Z0-9_.-]/g, '_');
-    const storagePath = `freelancers/${userId}/workflows/${safeWfId}/${Date.now()}_${cleanFilename}`;
-    const streamUrl = `/api/profile/workflows/stream-video?path=${encodeURIComponent(storagePath)}`;
-
-    try {
-      if (this.bucket) {
-        const file = this.bucket.file(storagePath);
-        await file.save(buffer, {
-          contentType: mimeType || 'video/mp4',
-          resumable: false,
-          metadata: {
-            cacheControl: 'public, max-age=31536000'
-          }
-        });
-      }
-    } catch (e) {
-      console.warn('[GCS Direct Upload Warning]:', e.message);
-    }
-
-    // Attach to profile workflow safely
-    try {
-      await this.attachVideoToWorkflow(userId, {
-        workflowId: safeWfId,
-        videoUrl: streamUrl,
-        durationSeconds: durationNum
-      });
-    } catch (e) {
-      console.warn('[Attach Video Note]:', e.message);
-    }
-
-    return {
-      success: true,
-      workflowId: safeWfId,
-      publicUrl: streamUrl,
-      storagePath,
-      durationSeconds: durationNum,
-      bucket: BUCKET_NAME
-    };
-  }
-
-    /**
+        /**
    * Secure Range (HTTP 206) Streamer for GCS Workflow Demo Videos
    */
   async streamWorkflowVideo(req, res, storagePath) {
@@ -207,13 +183,24 @@ class ProfileService {
 
     try {
       if (!this.bucket) {
-        return res.status(500).json({ error: 'Storage bucket not initialized' });
+        console.warn('[streamWorkflowVideo] GCS Bucket not initialized on server.');
+        return res.status(503).json({
+          error: 'Video storage bucket not initialized on cloud host. Please configure GCS_CREDENTIALS environment variable in Render.',
+          storagePath
+        });
       }
 
       const file = this.bucket.file(storagePath);
-      const [exists] = await file.exists();
+      let exists = false;
+      try {
+        const [fileExists] = await file.exists();
+        exists = fileExists;
+      } catch (checkErr) {
+        console.warn('[streamWorkflowVideo] file.exists check error:', checkErr.message);
+      }
+
       if (!exists) {
-        return res.status(404).json({ error: 'Video file not found in storage bucket' });
+        return res.status(404).json({ error: 'Video file not found in storage bucket', storagePath });
       }
 
       const [metadata] = await file.getMetadata();
@@ -257,9 +244,13 @@ class ProfileService {
         file.createReadStream().pipe(res);
       }
     } catch (err) {
-      console.error('[Video Stream Error]:', err);
+      console.error('[Video Stream Error]:', err.message);
       if (!res.headersSent) {
-        res.status(500).json({ error: 'Failed to stream video from storage' });
+        res.status(502).json({
+          error: 'Failed to stream video from Google Cloud Storage',
+          details: err.message,
+          storagePath
+        });
       }
     }
   }
