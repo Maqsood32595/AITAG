@@ -1,0 +1,43 @@
+services:
+  # -------------------------------------------------------------
+  # 🚀 Production Environment (main branch)
+  # -------------------------------------------------------------
+  - type: web
+    name: aitag-platform
+    env: node
+    plan: starter
+    region: oregon
+    branch: main
+    buildCommand: npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+
+  # -------------------------------------------------------------
+  # 🧪 Staging / Dev Environment (develop branch & PR Previews)
+  # -------------------------------------------------------------
+  - type: web
+    name: aitag-dev
+    env: node
+    plan: starter
+    region: oregon
+    branch: develop
+    buildCommand: npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: development
+      - key: PORT
+        value: 10000
+
+# -------------------------------------------------------------
+# 🔀 Automatic Pull Request Preview Environments
+# -------------------------------------------------------------
+previews:
+  generation: automatic
+  expireAfterDays: 3
