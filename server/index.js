@@ -1,24 +1,24 @@
-const fs = require('fs');
 /**
  * AITAG Platform — Express Server & Entry Point
- * Port: 5000 (Light Theme Architecture)
+ * Port: 5000 / 5005 (Light Theme Architecture)
  */
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const express = require('express');
 const http = require('http');
-const path = require('path');
 const cors = require('cors');
 const WebSocket = require('ws');
 const kernel = require('./kernel');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5005;
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://localhost:5005', 'https://aitag.pages.dev'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://localhost:5005', 'https://aitag.pages.dev', 'https://aitag.onrender.com', 'https://shortshub.app'],
   credentials: true
 }));
 app.use(express.json());
@@ -33,24 +33,25 @@ app.use((req, res, next) => {
 kernel.init(app);
 
 // -------------------------------------------------------------
-// Global Static Pipeline for Modern AITAG React Frontend (client/dist)
+// Global Static Pipeline for Modern AITAG React Frontend (SPA)
 // -------------------------------------------------------------
-const clientDist = path.join(__dirname, '../client/dist');
-if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/ws')) {
-      return next();
-    }
-    res.sendFile(path.join(clientDist, 'index.html'));
-  });
-} else {
-  // Fallback to public folder if dist not built yet
-  app.use(express.static(path.join(__dirname, 'public')));
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
-}
+const staticPath = fs.existsSync(path.join(__dirname, '../client/dist/index.html'))
+  ? path.join(__dirname, '../client/dist')
+  : path.join(__dirname, 'public');
+
+app.use(express.static(staticPath));
+
+// Universal SPA Catch-all for /dashboard, /profile, /signin, /tasks, /browse, etc.
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/ws')) {
+    return next();
+  }
+  const indexHtml = path.join(staticPath, 'index.html');
+  if (fs.existsSync(indexHtml)) {
+    return res.sendFile(indexHtml);
+  }
+  res.status(404).send('Frontend build not found.');
+});
 
 // WebSocket Handler
 wss.on('connection', (ws) => {
@@ -75,6 +76,6 @@ server.listen(PORT, () => {
   console.log(`🌟 AITAG SaaS AI Marketplace Platform Live!`);
   console.log(`URL: http://localhost:${PORT}`);
   console.log(`Theme: Modern Light UI Design`);
-  console.log(`Architecture: Sandwich AST + Fractal Kernel + AI Sandbox`);
+  console.log(`Static Path: ${staticPath}`);
   console.log(`=======================================================`);
 });
