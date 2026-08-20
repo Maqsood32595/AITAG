@@ -17,6 +17,8 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString(), env: process.env.NODE_ENV || 'production' }));
+
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://localhost:5005', 'https://aitag.pages.dev', 'https://aitag.onrender.com', 'https://shortshub.app'],
   credentials: true
@@ -71,7 +73,7 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`=======================================================`);
   console.log(`🌟 AITAG SaaS AI Marketplace Platform Live!`);
   console.log(`URL: http://localhost:${PORT}`);
