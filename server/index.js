@@ -1,3 +1,4 @@
+const fs = require('fs');
 /**
  * AITAG Platform — Express Server & Entry Point
  * Port: 5000 (Light Theme Architecture)
@@ -31,12 +32,25 @@ app.use((req, res, next) => {
 // Bootstrap Fractal Kernel
 kernel.init(app);
 
-// Global static pipeline for portal assets
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// -------------------------------------------------------------
+// Global Static Pipeline for Modern AITAG React Frontend (client/dist)
+// -------------------------------------------------------------
+const clientDist = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/ws')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  // Fallback to public folder if dist not built yet
+  app.use(express.static(path.join(__dirname, 'public')));
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+}
 
 // WebSocket Handler
 wss.on('connection', (ws) => {
