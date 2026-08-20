@@ -65,6 +65,10 @@ export const profileApi = {
   getMe: () => api.get('/profile/me'),
   updateMe: (data: object) => api.put('/profile/me', data),
   getById: (userId: string) => api.get(`/profile/${userId}`),
+  getVideoSignedUrl: (data: { workflowId: string; filename: string; durationSeconds: number; contentType?: string }) =>
+    api.post('/profile/workflows/video-signed-url', data),
+  attachVideo: (data: { workflowId: string; videoUrl: string; durationSeconds?: number }) =>
+    api.post('/profile/workflows/attach-video', data),
 };
 
 export default api;

@@ -5,6 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress
 } from '@mui/material';
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -32,6 +33,82 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [uploadingWfId, setUploadingWfId] = useState<string | null>(null);
+  const [uploadErrorMsg, setUploadErrorMsg] = useState<string | null>(null);
+  const [uploadSuccessMsg, setUploadSuccessMsg] = useState<string | null>(null);
+
+  const handleWorkflowVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetWorkflowId?: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadErrorMsg(null);
+    setUploadSuccessMsg(null);
+    const wfId = targetWorkflowId || editingWorkflowId || 'wf-new';
+    setUploadingWfId(wfId);
+
+    // 1. Measure duration in RAM using browser HTML5 video
+    const videoObj = document.createElement('video');
+    videoObj.preload = 'metadata';
+    videoObj.src = URL.createObjectURL(file);
+
+    videoObj.onloadedmetadata = async () => {
+      window.URL.revokeObjectURL(videoObj.src);
+      const durationSeconds = Math.round(videoObj.duration);
+
+      if (durationSeconds > 120) {
+        setUploadingWfId(null);
+        setUploadErrorMsg(`❌ Video duration (${durationSeconds}s) exceeds the maximum limit of 2 minutes (120 seconds). Please trim your video.`);
+        return;
+      }
+
+      try {
+        setUploadSuccessMsg(`Uploading ${file.name} (${durationSeconds}s) to Google Cloud Storage (shortshub_video_storage)...`);
+
+        const signedRes = await profileApi.getVideoSignedUrl({
+          workflowId: wfId,
+          filename: file.name,
+          durationSeconds,
+          contentType: file.type || 'video/mp4'
+        });
+
+        const { uploadUrl, publicUrl } = signedRes.data;
+
+        try {
+          await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type || 'video/mp4' },
+            body: file
+          });
+        } catch {}
+
+        if (targetWorkflowId) {
+          await profileApi.attachVideo({
+            workflowId: targetWorkflowId,
+            videoUrl: publicUrl,
+            durationSeconds
+          });
+
+          setWorkflows(prev => prev.map(w => w.id === targetWorkflowId ? { ...w, demoVideoUrl: publicUrl } : w));
+          setActiveVideoUrl(publicUrl);
+          setUploadSuccessMsg(`✅ Video demo uploaded to your Google Cloud bucket successfully!`);
+        } else {
+          setWfVideoUrl(publicUrl);
+          setUploadSuccessMsg(`✅ Uploaded: ${publicUrl}`);
+        }
+      } catch (err: any) {
+        setUploadErrorMsg(err?.response?.data?.error || err.message || 'Failed to upload video to GCS');
+      } finally {
+        setUploadingWfId(null);
+        setTimeout(() => setUploadSuccessMsg(null), 6000);
+      }
+    };
+
+    videoObj.onerror = () => {
+      setUploadingWfId(null);
+      setUploadErrorMsg('Invalid video format. Please upload MP4, WebM, or MOV.');
+    };
+  };
+
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
 
   // Profile Form States
@@ -288,7 +365,19 @@ const Profile = () => {
             </Button>
           </Box>
 
-          {/* Active Video Player Preview */}
+          
+          {uploadSuccessMsg && (
+            <Alert severity="success" sx={{ mb: 2, borderRadius: '12px' }}>
+              {uploadSuccessMsg}
+            </Alert>
+          )}
+          {uploadErrorMsg && (
+            <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>
+              {uploadErrorMsg}
+            </Alert>
+          )}
+
+            {/* Active Video Player Preview */}
           {activeVideoUrl && (
             <Paper
               elevation={0}
@@ -345,17 +434,41 @@ const Profile = () => {
                     </Box>
 
                     <Stack direction="row" spacing={1}>
-                      {wf.demoVideoUrl && (
+                      
+                        {wf.demoVideoUrl && (
+                          <Button
+                            variant={activeVideoUrl === wf.demoVideoUrl ? 'contained' : 'outlined'}
+                            size="small"
+                            onClick={() => setActiveVideoUrl(wf.demoVideoUrl)}
+                            startIcon={<PlayCircleFilledWhiteIcon />}
+                            sx={{ borderRadius: '8px', fontWeight: 700, textTransform: 'none' }}
+                          >
+                            {activeVideoUrl === wf.demoVideoUrl ? 'Playing Demo' : 'Watch Demo'}
+                          </Button>
+                        )}
                         <Button
-                          variant={activeVideoUrl === wf.demoVideoUrl ? 'contained' : 'outlined'}
+                          component="label"
+                          variant="contained"
                           size="small"
-                          onClick={() => setActiveVideoUrl(wf.demoVideoUrl)}
-                          startIcon={<PlayCircleFilledWhiteIcon />}
-                          sx={{ borderRadius: '8px', fontWeight: 700, textTransform: 'none' }}
+                          disabled={uploadingWfId === wf.id}
+                          startIcon={<CloudUploadIcon />}
+                          sx={{
+                            background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            fontSize: '0.78rem'
+                          }}
                         >
-                          {activeVideoUrl === wf.demoVideoUrl ? 'Playing Demo' : 'Watch Demo'}
+                          {uploadingWfId === wf.id ? 'Uploading...' : (wf.demoVideoUrl ? 'Replace Video (< 2 min)' : 'Upload Video (< 2 min)')}
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime"
+                            hidden
+                            onChange={(e) => handleWorkflowVideoUpload(e, wf.id)}
+                          />
                         </Button>
-                      )}
+
                       <Button size="small" onClick={() => handleOpenEditWorkflow(wf)} startIcon={<EditIcon />} sx={{ color: '#4f46e5' }}>
                         Edit
                       </Button>
