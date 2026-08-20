@@ -3,8 +3,8 @@ const path = require('path');
 const { Storage } = require('@google-cloud/storage');
 const supabase = require('../../supabase');
 
-const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'shortshub_video_storage';
-const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT || 'corded-cable-460921-u1';
+const BUCKET_NAME = process.env.GOOGLE_CLOUD_BUCKET_NAME || process.env.GCS_BUCKET_NAME || 'shortshub_video_storage';
+const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || 'corded-cable-460921-u1';
 const MAX_VIDEO_DURATION_SECONDS = 120; // 2 minutes strict limit
 
 // Fast memory fallback cache for profiles
