@@ -61,36 +61,22 @@ const Profile = () => {
         return;
       }
 
-      try {
+            try {
         setUploadSuccessMsg(`Uploading ${file.name} (${durationSeconds}s) to Google Cloud Storage (shortshub_video_storage)...`);
 
-        const signedRes = await profileApi.getVideoSignedUrl({
-          workflowId: wfId,
-          filename: file.name,
-          durationSeconds,
-          contentType: file.type || 'video/mp4'
-        });
+        // Use direct server-to-GCS multipart upload (Zero CORS issues)
+        const formData = new FormData();
+        formData.append('video', file);
+        formData.append('workflowId', wfId);
+        formData.append('durationSeconds', String(durationSeconds));
 
-        const { uploadUrl, publicUrl } = signedRes.data;
-
-        try {
-          await fetch(uploadUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': file.type || 'video/mp4' },
-            body: file
-          });
-        } catch {}
+        const res = await profileApi.uploadVideoDirect(formData);
+        const { publicUrl } = res.data;
 
         if (targetWorkflowId) {
-          await profileApi.attachVideo({
-            workflowId: targetWorkflowId,
-            videoUrl: publicUrl,
-            durationSeconds
-          });
-
-          setWorkflows(prev => prev.map(w => w.id === targetWorkflowId ? { ...w, demoVideoUrl: publicUrl } : w));
+          setWorkflows(prev => prev.map(w => w.id === targetWorkflowId ? { ...w, demoVideoUrl: publicUrl, videoDurationSeconds: durationSeconds } : w));
           setActiveVideoUrl(publicUrl);
-          setUploadSuccessMsg(`✅ Video demo uploaded to your Google Cloud bucket successfully!`);
+          setUploadSuccessMsg('✅ Video demo uploaded to your Google Cloud bucket successfully!');
         } else {
           setWfVideoUrl(publicUrl);
           setUploadSuccessMsg(`✅ Uploaded: ${publicUrl}`);

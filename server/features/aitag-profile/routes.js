@@ -9,6 +9,12 @@ const router = express.Router();
 const profileService = require('./service');
 const authRoutes = require('../aitag-auth/routes');
 const authMiddleware = authRoutes.authMiddleware;
+const multer = require('multer');
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 150 * 1024 * 1024 } // 150MB max video size
+});
+
 
 // GET /api/profile/me — Get authenticated user's profile and delivered workflows
 router.get('/me', authMiddleware, async (req, res) => {
@@ -31,6 +37,27 @@ router.put('/me', authMiddleware, async (req, res) => {
 });
 
 // POST /api/profile/workflows/video-signed-url — Request GCS signed URL with < 2 min check
+// POST /api/profile/workflows/video-upload — Multipart server-to-GCS upload (Zero CORS)
+router.post('/workflows/video-upload', authMiddleware, upload.single('video'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Video file is required' });
+    }
+    const { workflowId, durationSeconds } = req.body;
+    const result = await profileService.uploadWorkflowVideoBuffer(req.user.id, {
+      workflowId,
+      filename: req.file.originalname,
+      buffer: req.file.buffer,
+      mimeType: req.file.mimetype,
+      durationSeconds
+    });
+    res.json(result);
+  } catch (err) {
+    console.error('[Video Upload Error]:', err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
 router.post('/workflows/video-signed-url', authMiddleware, async (req, res) => {
   try {
     const result = await profileService.generateWorkflowVideoSignedUrl(req.user.id, req.body);

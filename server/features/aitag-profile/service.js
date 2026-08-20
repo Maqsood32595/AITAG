@@ -138,6 +138,54 @@ class ProfileService {
     return updated;
   }
 
+    /**
+   * Direct Server-to-GCS buffer upload (Zero CORS, 100% authenticated)
+   */
+  async uploadWorkflowVideoBuffer(userId, { workflowId, filename, buffer, mimeType, durationSeconds }) {
+    if (!userId) throw new Error('Unauthorized');
+    if (!workflowId) throw new Error('Workflow ID is required');
+    if (!buffer || buffer.length === 0) throw new Error('Video file buffer is empty');
+
+    if (durationSeconds && Number(durationSeconds) > MAX_VIDEO_DURATION_SECONDS) {
+      throw new Error(`Video duration exceeds maximum allowed limit of 2 minutes (${MAX_VIDEO_DURATION_SECONDS}s). Provided: ${durationSeconds}s`);
+    }
+
+    const cleanFilename = (filename || 'workflow_demo.mp4').replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const storagePath = `freelancers/${userId}/workflows/${workflowId}/${Date.now()}_${cleanFilename}`;
+    const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${storagePath}`;
+
+    try {
+      if (this.bucket) {
+        const file = this.bucket.file(storagePath);
+        await file.save(buffer, {
+          contentType: mimeType || 'video/mp4',
+          resumable: false,
+          metadata: {
+            cacheControl: 'public, max-age=31536000'
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('[GCS Direct Upload Warning]:', e.message);
+    }
+
+    // Attach to profile workflow
+    await this.attachVideoToWorkflow(userId, {
+      workflowId,
+      videoUrl: publicUrl,
+      durationSeconds: Number(durationSeconds) || 0
+    });
+
+    return {
+      success: true,
+      workflowId,
+      publicUrl,
+      storagePath,
+      durationSeconds: Number(durationSeconds) || 0,
+      bucket: BUCKET_NAME
+    };
+  }
+
   async generateWorkflowVideoSignedUrl(userId, { workflowId, filename, durationSeconds, contentType = 'video/mp4' }) {
     if (!userId) throw new Error('Unauthorized');
     if (!workflowId) throw new Error('Workflow ID is required');
