@@ -28,3 +28,8 @@ workflows/
 # Credentials & Secrets
 *service-account*.json
 *.key.json
+
+.env.local
+.env.development
+.env.production
+*.env
