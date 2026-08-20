@@ -1,11 +1,11 @@
-/**
- * AITAG Profile & Delivered Workflows Service
- * Fractal Kernel Slice: aitag-profile
- */
-
+const { Storage } = require('@google-cloud/storage');
+const path = require('path');
 const supabase = require('../../supabase');
 
-// Curated & Dynamic Profiles Store in Memory
+const BUCKET_NAME = process.env.GOOGLE_CLOUD_BUCKET_NAME || 'shortshub_video_storage';
+const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID || 'corded-cable-460921-u1';
+const MAX_VIDEO_DURATION_SECONDS = 120; // 2 minutes limit
+
 const PROFILES_CACHE = new Map([
   ['6e36f593-b9e6-4ead-8266-31ac91cf44c5', {
     userId: '6e36f593-b9e6-4ead-8266-31ac91cf44c5',
@@ -41,93 +41,41 @@ const PROFILES_CACHE = new Map([
         liveUrl: 'https://user1.ai/meta-ads-case-study'
       }
     ]
-  }],
-  ['curated-1', {
-    userId: 'curated-1',
-    name: 'Dr. Aarav Sharma',
-    role: 'Senior LLM & RAG Architect',
-    headline: 'Senior LLM & RAG Architect',
-    bio: 'Ex-AI Research Lead specializing in fine-tuning open-source LLMs (LLaMA-3, Mistral) and enterprise RAG pipelines with Pinecone and LangChain.',
-    hourlyRate: 3500,
-    skills: ['LLaMA-3', 'LangChain', 'Pinecone', 'Python', 'FastAPI', 'PyTorch'],
-    links: {
-      github: 'https://github.com/Maqsood32595',
-      linkedin: 'https://linkedin.com/in/maqsood',
-      website: 'https://aitag.in'
-    },
-    deliveredWorkflows: [
-      {
-        id: 'wf-rag-1',
-        title: 'Enterprise Legal Document RAG Search Pipeline',
-        category: 'LLM & Generative AI',
-        businessImpact: 'Indexed 1.2M legal PDF documents with sub-60ms semantic search latency and zero hallucinations.',
-        demoVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        techStack: ['LLaMA-3', 'Pinecone', 'LangChain', 'FastAPI', 'PyTorch'],
-        liveUrl: 'https://github.com/Maqsood32595/legal-rag-pipeline'
-      },
-      {
-        id: 'wf-rag-2',
-        title: 'Multi-Tenant LLM Gateway with Dynamic Rate Limiting',
-        category: 'AI Infrastructure',
-        businessImpact: 'Reduced enterprise LLM API expenditure by 42% via prompt caching and fallback routing.',
-        demoVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-        techStack: ['Python', 'Redis', 'LiteLLM', 'FastAPI', 'Docker'],
-        liveUrl: 'https://github.com/Maqsood32595/llm-gateway'
-      }
-    ]
-  }],
-  ['curated-2', {
-    userId: 'curated-2',
-    name: 'Priya Mukherjee',
-    role: 'Computer Vision & Edge AI Engineer',
-    headline: 'Computer Vision & Edge AI Engineer',
-    bio: 'Specialist in real-time defect detection, YOLOv10 deployment, OCR document mining, and low-latency ONNX runtime optimizations.',
-    hourlyRate: 2800,
-    skills: ['YOLOv10', 'OpenCV', 'PyTorch', 'TensorRT', 'Edge AI', 'Docker'],
-    links: {
-      github: 'https://github.com/Maqsood32595',
-      linkedin: 'https://linkedin.com/in/maqsood',
-      website: 'https://aitag.in'
-    },
-    deliveredWorkflows: [
-      {
-        id: 'wf-cv-1',
-        title: 'Real-Time Industrial Defect Detection with YOLOv10',
-        category: 'Computer Vision',
-        businessImpact: 'Processed 120 FPS video streams on edge NVIDIA Jetson devices with 99.4% precision.',
-        demoVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
-        techStack: ['YOLOv10', 'OpenCV', 'TensorRT', 'C++', 'Python'],
-        liveUrl: 'https://github.com/Maqsood32595/edge-cv'
-      }
-    ]
   }]
 ]);
 
 class ProfileService {
+  constructor() {
+    try {
+      this.storage = new Storage({ projectId: PROJECT_ID });
+      this.bucket = this.storage.bucket(BUCKET_NAME);
+    } catch (e) {
+      console.warn('[ProfileService] GCS Storage init note:', e.message);
+    }
+  }
+
   async getProfileByUserId(userId) {
-    // 1. Check curated / in-memory cache first
     const cached = PROFILES_CACHE.get(userId);
     if (cached) return cached;
 
-    // 2. Fetch user base record from Supabase
     let user = null;
     try {
-      const { data } = await supabase
-        .from('aitag_users')
-        .select('id, name, email, role, photo_url')
-        .eq('id', userId)
-        .single();
-      user = data;
-    } catch {
-      // Fallback
-    }
+      if (supabase && typeof supabase.from === 'function') {
+        const { data } = await supabase
+          .from('aitag_users')
+          .select('id, name, email, role, photo_url')
+          .eq('id', userId)
+          .single();
+        user = data;
+      }
+    } catch {}
 
     const name = user?.name || 'AITAG Specialist';
     const email = user?.email || '';
     const role = user?.role || 'freelancer';
     const photoUrl = user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || email)}`;
 
-    return {
+    const defaultProfile = {
       userId,
       name,
       email,
@@ -144,26 +92,29 @@ class ProfileService {
       },
       deliveredWorkflows: [
         {
-          id: 'wf-def-1',
+          id: 'wf-1',
           title: 'Automated Cold Email Sending & DNS Deliverability Pipeline',
           category: 'Email Automation & Growth',
           businessImpact: 'Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability.',
-          demoVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+          demoVideoUrl: '',
           techStack: ['Python', 'SendGrid API', 'DNS Automation', 'FastAPI', 'PostgreSQL'],
           liveUrl: 'https://github.com/Maqsood32595/email-pipeline-demo'
         },
         {
-          id: 'wf-def-2',
+          id: 'wf-2',
           title: 'Facebook & Meta Ads AI Optimization Engine',
           category: 'Growth & Ads',
           businessImpact: 'Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.',
-          demoVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+          demoVideoUrl: '',
           techStack: ['Meta Graph API', 'OpenAI GPT-4o', 'Zapier', 'Supabase'],
           liveUrl: 'https://user1.ai/meta-ads-case-study'
         }
       ],
       updatedAt: new Date().toISOString()
     };
+
+    PROFILES_CACHE.set(userId, defaultProfile);
+    return defaultProfile;
   }
 
   async updateProfile(userId, updateData) {
@@ -185,6 +136,67 @@ class ProfileService {
 
     PROFILES_CACHE.set(userId, updated);
     return updated;
+  }
+
+  async generateWorkflowVideoSignedUrl(userId, { workflowId, filename, durationSeconds, contentType = 'video/mp4' }) {
+    if (!userId) throw new Error('Unauthorized');
+    if (!workflowId) throw new Error('Workflow ID is required');
+    if (!filename) throw new Error('Filename is required');
+
+    if (durationSeconds && Number(durationSeconds) > MAX_VIDEO_DURATION_SECONDS) {
+      throw new Error(`Video duration exceeds maximum allowed limit of 2 minutes (${MAX_VIDEO_DURATION_SECONDS}s). Provided: ${durationSeconds}s`);
+    }
+
+    const cleanFilename = path.basename(filename).replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const storagePath = `freelancers/${userId}/workflows/${workflowId}/${Date.now()}_${cleanFilename}`;
+    
+    let uploadUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${storagePath}`;
+    try {
+      if (this.bucket) {
+        const file = this.bucket.file(storagePath);
+        const [signedUrl] = await file.getSignedUrl({
+          version: 'v4',
+          action: 'write',
+          expires: Date.now() + 15 * 60 * 1000,
+          contentType
+        });
+        uploadUrl = signedUrl;
+      }
+    } catch (e) {
+      console.warn('[GCS SignedUrl Warning]:', e.message);
+    }
+
+    const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${storagePath}`;
+
+    return {
+      success: true,
+      workflowId,
+      uploadUrl,
+      publicUrl,
+      storagePath,
+      maxDurationSeconds: MAX_VIDEO_DURATION_SECONDS,
+      bucket: BUCKET_NAME
+    };
+  }
+
+  async attachVideoToWorkflow(userId, { workflowId, videoUrl, durationSeconds }) {
+    const profile = await this.getProfileByUserId(userId);
+    
+    if (durationSeconds && Number(durationSeconds) > MAX_VIDEO_DURATION_SECONDS) {
+      throw new Error(`Video duration exceeds maximum allowed limit of 2 minutes (${MAX_VIDEO_DURATION_SECONDS}s)`);
+    }
+
+    const wfIndex = profile.deliveredWorkflows.findIndex(w => w.id === workflowId);
+    if (wfIndex === -1) {
+      throw new Error(`Delivered workflow ${workflowId} not found`);
+    }
+
+    profile.deliveredWorkflows[wfIndex].demoVideoUrl = videoUrl;
+    profile.deliveredWorkflows[wfIndex].videoDurationSeconds = durationSeconds || 0;
+    profile.deliveredWorkflows[wfIndex].updatedAt = new Date().toISOString();
+
+    await this.updateProfile(userId, { deliveredWorkflows: profile.deliveredWorkflows });
+    return profile.deliveredWorkflows[wfIndex];
   }
 }
 
