@@ -152,7 +152,8 @@ class ProfileService {
 
     const cleanFilename = (filename || 'workflow_demo.mp4').replace(/[^a-zA-Z0-9_.-]/g, '_');
     const storagePath = `freelancers/${userId}/workflows/${workflowId}/${Date.now()}_${cleanFilename}`;
-    const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${storagePath}`;
+    const streamUrl = `/api/profile/workflows/stream-video?path=${encodeURIComponent(storagePath)}`;
+    const publicUrl = streamUrl;
 
     try {
       if (this.bucket) {
@@ -184,6 +185,73 @@ class ProfileService {
       durationSeconds: Number(durationSeconds) || 0,
       bucket: BUCKET_NAME
     };
+  }
+
+    /**
+   * Secure Range (HTTP 206) Streamer for GCS Workflow Demo Videos
+   */
+  async streamWorkflowVideo(req, res, storagePath) {
+    if (!storagePath || storagePath.includes('..') || !storagePath.startsWith('freelancers/')) {
+      return res.status(403).json({ error: 'Access denied: Invalid or restricted video path' });
+    }
+
+    try {
+      if (!this.bucket) {
+        return res.status(500).json({ error: 'Storage bucket not initialized' });
+      }
+
+      const file = this.bucket.file(storagePath);
+      const [exists] = await file.exists();
+      if (!exists) {
+        return res.status(404).json({ error: 'Video file not found in storage bucket' });
+      }
+
+      const [metadata] = await file.getMetadata();
+      const fileSize = parseInt(metadata.size, 10);
+      const contentType = metadata.contentType || 'video/mp4';
+
+      const range = req.headers.range;
+
+      if (range) {
+        const parts = range.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+        if (start >= fileSize || end >= fileSize || start > end) {
+          res.writeHead(416, { 'Content-Range': `bytes */${fileSize}` });
+          return res.end();
+        }
+
+        const chunksize = (end - start) + 1;
+        const stream = file.createReadStream({ start, end });
+
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=86400',
+          'Access-Control-Allow-Origin': '*'
+        });
+
+        stream.pipe(res);
+      } else {
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': contentType,
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'public, max-age=86400',
+          'Access-Control-Allow-Origin': '*'
+        });
+
+        file.createReadStream().pipe(res);
+      }
+    } catch (err) {
+      console.error('[Video Stream Error]:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to stream video from storage' });
+      }
+    }
   }
 
   async generateWorkflowVideoSignedUrl(userId, { workflowId, filename, durationSeconds, contentType = 'video/mp4' }) {

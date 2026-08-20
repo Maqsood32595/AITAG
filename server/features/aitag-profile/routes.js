@@ -37,6 +37,12 @@ router.put('/me', authMiddleware, async (req, res) => {
 });
 
 // POST /api/profile/workflows/video-signed-url — Request GCS signed URL with < 2 min check
+// GET /api/profile/workflows/stream-video — Secure HTTP 206 video streamer
+router.get('/workflows/stream-video', async (req, res) => {
+  const storagePath = req.query.path;
+  await profileService.streamWorkflowVideo(req, res, storagePath);
+});
+
 // POST /api/profile/workflows/video-upload — Multipart server-to-GCS upload (Zero CORS)
 router.post('/workflows/video-upload', authMiddleware, upload.single('video'), async (req, res) => {
   try {

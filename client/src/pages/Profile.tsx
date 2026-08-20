@@ -28,6 +28,17 @@ interface DeliveredWorkflow {
   liveUrl: string;
 }
 
+
+export const resolveVideoUrl = (url?: string): string => {
+  if (!url) return '';
+  if (url.startsWith('/api')) {
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const base = isLocal ? 'http://localhost:5005' : '';
+    return `${base}${url}`;
+  }
+  return url;
+};
+
 const Profile = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -378,7 +389,7 @@ const Profile = () => {
               <video
                 controls
                 autoPlay
-                src={activeVideoUrl}
+                src={resolveVideoUrl(activeVideoUrl)}
                 style={{ width: '100%', maxHeight: '400px', display: 'block' }}
               />
             </Paper>
