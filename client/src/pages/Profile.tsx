@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Paper, Grid, TextField, Button,
   Chip, Avatar, Divider, Stack, Alert, Card, CardContent,
-  Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress
+  Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress,
+  Tab, Tabs, IconButton, Tooltip
 } from '@mui/material';
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -14,7 +15,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import LanguageIcon from '@mui/icons-material/Language';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import Navbar from '../components/Navbar';
+import UniversalVideoPlayer, { parseVideoSource } from '../components/UniversalVideoPlayer';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api';
 
@@ -24,147 +28,88 @@ interface DeliveredWorkflow {
   category: string;
   businessImpact: string;
   demoVideoUrl: string;
+  videoDurationSeconds?: number;
   techStack: string[];
   liveUrl: string;
 }
 
-
-export const resolveVideoUrl = (url?: string): string => {
-  if (!url) return '';
-  if (url.startsWith('/api')) {
-    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const base = isLocal ? 'http://localhost:5005' : '';
-    return `${base}${url}`;
-  }
-  return url;
-};
-
-const Profile = () => {
+export const Profile: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [uploadingWfId, setUploadingWfId] = useState<string | null>(null);
-  const [uploadErrorMsg, setUploadErrorMsg] = useState<string | null>(null);
-  const [uploadSuccessMsg, setUploadSuccessMsg] = useState<string | null>(null);
-
-  const handleWorkflowVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetWorkflowId?: string) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadErrorMsg(null);
-    setUploadSuccessMsg(null);
-    const wfId = targetWorkflowId || editingWorkflowId || 'wf-new';
-    setUploadingWfId(wfId);
-
-    // 1. Measure duration in RAM using browser HTML5 video
-    const videoObj = document.createElement('video');
-    videoObj.preload = 'metadata';
-    videoObj.src = URL.createObjectURL(file);
-
-    videoObj.onloadedmetadata = async () => {
-      window.URL.revokeObjectURL(videoObj.src);
-      const durationSeconds = Math.round(videoObj.duration);
-
-      if (durationSeconds > 120) {
-        setUploadingWfId(null);
-        setUploadErrorMsg(`❌ Video duration (${durationSeconds}s) exceeds the maximum limit of 2 minutes (120 seconds). Please trim your video.`);
-        return;
-      }
-
-            try {
-        setUploadSuccessMsg(`Uploading ${file.name} (${durationSeconds}s) to Google Cloud Storage (shortshub_video_storage)...`);
-
-        // Use direct server-to-GCS multipart upload (Zero CORS issues)
-        const formData = new FormData();
-        formData.append('video', file);
-        formData.append('workflowId', wfId);
-        formData.append('durationSeconds', String(durationSeconds));
-
-        const res = await profileApi.uploadVideoDirect(formData);
-        const { publicUrl } = res.data;
-
-        if (targetWorkflowId) {
-          setWorkflows(prev => prev.map(w => w.id === targetWorkflowId ? { ...w, demoVideoUrl: publicUrl, videoDurationSeconds: durationSeconds } : w));
-          setActiveVideoUrl(publicUrl);
-          setUploadSuccessMsg('✅ Video demo uploaded to your Google Cloud bucket successfully!');
-        } else {
-          setWfVideoUrl(publicUrl);
-          setUploadSuccessMsg(`✅ Uploaded: ${publicUrl}`);
-        }
-      } catch (err: any) {
-        setUploadErrorMsg(err?.response?.data?.error || err.message || 'Failed to upload video to GCS');
-      } finally {
-        setUploadingWfId(null);
-        setTimeout(() => setUploadSuccessMsg(null), 6000);
-      }
-    };
-
-    videoObj.onerror = () => {
-      setUploadingWfId(null);
-      setUploadErrorMsg('Invalid video format. Please upload MP4, WebM, or MOV.');
-    };
-  };
-
-  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
-
-  // Profile Form States
+  
+  // Profile Fields
   const [headline, setHeadline] = useState('');
   const [bio, setBio] = useState('');
-  const [hourlyRate, setHourlyRate] = useState<number | string>(3200);
-  const [github, setGithub] = useState('');
-  const [linkedin, setLinkedin] = useState('');
-  const [website, setWebsite] = useState('');
-  const [skills, setSkills] = useState<string[]>([]);
-  const [newSkillInput, setNewSkillInput] = useState('');
-  const [workflows, setWorkflows] = useState<DeliveredWorkflow[]>([]);
+  const [hourlyRate, setHourlyRate] = useState(2800);
+  const [skillsInput, setSkillsInput] = useState('');
+  const [githubUrl, setGithubUrl] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
 
-  // Workflow Editor Dialog States
+  // Workflows State
+  const [workflows, setWorkflows] = useState<DeliveredWorkflow[]>([]);
+  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null);
+
+  // Workflow Dialog State
   const [workflowDialogOpen, setWorkflowDialogOpen] = useState(false);
   const [editingWorkflowId, setEditingWorkflowId] = useState<string | null>(null);
   const [wfTitle, setWfTitle] = useState('');
-  const [wfCategory, setWfCategory] = useState('Email Automation & Growth');
+  const [wfCategory, setWfCategory] = useState('');
   const [wfImpact, setWfImpact] = useState('');
   const [wfVideoUrl, setWfVideoUrl] = useState('');
   const [wfTechInput, setWfTechInput] = useState('');
   const [wfLiveUrl, setWfLiveUrl] = useState('');
+  const [videoInputMode, setVideoInputMode] = useState<'upload' | 'youtube' | 'loom'>('upload');
+
+  // Video Upload State
+  const [uploading, setUploading] = useState(false);
+  const [uploadErrorMsg, setUploadErrorMsg] = useState<string | null>(null);
+  const [uploadSuccessMsg, setUploadSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    profileApi.getMe()
-      .then(res => {
-        const data = res.data;
-        setHeadline(data.headline || '');
-        setBio(data.bio || '');
-        setHourlyRate(data.hourlyRate || 3200);
-        setGithub(data.links?.github || '');
-        setLinkedin(data.links?.linkedin || '');
-        setWebsite(data.links?.website || '');
-        setSkills(data.skills || []);
-        const wfs = data.deliveredWorkflows || [];
-        setWorkflows(wfs);
-        if (wfs.length > 0 && wfs[0].demoVideoUrl) {
-          setActiveVideoUrl(wfs[0].demoVideoUrl);
-        }
-      })
-      .catch(err => {
-        console.error('Failed to load profile:', err);
-      })
-      .finally(() => setLoading(false));
+    loadProfile();
   }, []);
 
-  const handleSaveProfile = async () => {
-    setSaving(true);
-    setSuccessMessage('');
+  const loadProfile = async () => {
     try {
-      await profileApi.updateMe({
+      setLoading(true);
+      const res = await (profileApi.getProfile ? profileApi.getProfile() : profileApi.getMe());
+      const p = res.data;
+      setHeadline(p.headline || '');
+      setBio(p.bio || '');
+      setHourlyRate(p.hourlyRate || 2800);
+      setSkillsInput(p.skills ? p.skills.join(', ') : '');
+      setGithubUrl(p.links?.github || '');
+      setLinkedinUrl(p.links?.linkedin || '');
+      setWebsiteUrl(p.links?.website || '');
+      
+      const wfs = p.deliveredWorkflows || [];
+      setWorkflows(wfs);
+      if (wfs.length > 0) {
+        setActiveWorkflowId(wfs[0].id);
+      }
+    } catch (err) {
+      console.error('Failed to load profile:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAll = async () => {
+    try {
+      setSaving(true);
+      const skills = skillsInput.split(',').map(s => s.trim()).filter(Boolean);
+      await (profileApi.updateProfile ? profileApi.updateProfile : profileApi.updateMe)({
         headline,
         bio,
         hourlyRate: Number(hourlyRate),
         skills,
-        links: { github, linkedin, website },
+        links: { github: githubUrl, linkedin: linkedinUrl, website: websiteUrl },
         deliveredWorkflows: workflows,
       });
-      setSuccessMessage('🎉 Profile & Delivered Workflows saved successfully!');
+      setSuccessMessage('✅ Profile & Delivered Workflows saved successfully!');
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
       console.error('Save error:', err);
@@ -179,8 +124,11 @@ const Profile = () => {
     setWfCategory('Email Automation & Growth');
     setWfImpact('');
     setWfVideoUrl('');
-    setWfTechInput('');
+    setWfTechInput('Python, FastAPI, SendGrid API, PostgreSQL');
     setWfLiveUrl('');
+    setVideoInputMode('upload');
+    setUploadErrorMsg(null);
+    setUploadSuccessMsg(null);
     setWorkflowDialogOpen(true);
   };
 
@@ -190,486 +138,567 @@ const Profile = () => {
     setWfCategory(wf.category);
     setWfImpact(wf.businessImpact);
     setWfVideoUrl(wf.demoVideoUrl);
-    setWfTechInput(wf.techStack?.join(', ') || '');
+    setWfTechInput(wf.techStack ? wf.techStack.join(', ') : '');
     setWfLiveUrl(wf.liveUrl);
+
+    const parsed = parseVideoSource(wf.demoVideoUrl);
+    if (parsed.type === 'youtube') setVideoInputMode('youtube');
+    else if (parsed.type === 'loom') setVideoInputMode('loom');
+    else setVideoInputMode('upload');
+
+    setUploadErrorMsg(null);
+    setUploadSuccessMsg(null);
     setWorkflowDialogOpen(true);
   };
 
-  const handleSaveWorkflowModal = () => {
-    if (!wfTitle.trim()) return;
+  const handleSaveWorkflowDialog = async () => {
+    if (!wfTitle.trim()) {
+      setUploadErrorMsg('Please enter a title for the workflow');
+      return;
+    }
 
-    const techArray = wfTechInput
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
+    const techStack = wfTechInput.split(',').map(s => s.trim()).filter(Boolean);
+    let updatedList: DeliveredWorkflow[] = [];
 
     if (editingWorkflowId) {
-      setWorkflows(prev =>
-        prev.map(w =>
-          w.id === editingWorkflowId
-            ? {
-                ...w,
-                title: wfTitle,
-                category: wfCategory,
-                businessImpact: wfImpact,
-                demoVideoUrl: wfVideoUrl,
-                techStack: techArray,
-                liveUrl: wfLiveUrl,
-              }
-            : w
-        )
-      );
+      updatedList = workflows.map(w => {
+        if (w.id === editingWorkflowId) {
+          return {
+            ...w,
+            title: wfTitle,
+            category: wfCategory,
+            businessImpact: wfImpact,
+            demoVideoUrl: wfVideoUrl,
+            techStack,
+            liveUrl: wfLiveUrl
+          };
+        }
+        return w;
+      });
     } else {
       const newWf: DeliveredWorkflow = {
-        id: 'wf-' + Math.random().toString(36).substring(2, 9),
+        id: `wf-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
         title: wfTitle,
         category: wfCategory,
         businessImpact: wfImpact,
         demoVideoUrl: wfVideoUrl,
-        techStack: techArray,
-        liveUrl: wfLiveUrl,
+        techStack,
+        liveUrl: wfLiveUrl
       };
-      setWorkflows(prev => [newWf, ...prev]);
-      if (wfVideoUrl) setActiveVideoUrl(wfVideoUrl);
+      updatedList = [...workflows, newWf];
+      setActiveWorkflowId(newWf.id);
     }
-    setWorkflowDialogOpen(false);
-  };
 
-  const handleDeleteWorkflow = (id: string) => {
-    setWorkflows(prev => prev.filter(w => w.id !== id));
-  };
-
-  const handleAddSkill = () => {
-    if (newSkillInput.trim() && !skills.includes(newSkillInput.trim())) {
-      setSkills(prev => [...prev, newSkillInput.trim()]);
-      setNewSkillInput('');
+    try {
+      setSaving(true);
+      await (profileApi.updateProfile ? profileApi.updateProfile : profileApi.updateMe)({ deliveredWorkflows: updatedList });
+      setWorkflows(updatedList);
+      setWorkflowDialogOpen(false);
+      setSuccessMessage('✅ Workflow case study updated successfully!');
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (err: any) {
+      setUploadErrorMsg(err.message || 'Failed to save workflow');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleRemoveSkill = (skillToRemove: string) => {
-    setSkills(prev => prev.filter(s => s !== skillToRemove));
+  const handleDeleteWorkflow = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this delivered workflow?')) return;
+    const updatedList = workflows.filter(w => w.id !== id);
+    try {
+      setSaving(true);
+      await (profileApi.updateProfile ? profileApi.updateProfile : profileApi.updateMe)({ deliveredWorkflows: updatedList });
+      setWorkflows(updatedList);
+      if (activeWorkflowId === id) {
+        setActiveWorkflowId(updatedList[0]?.id || null);
+      }
+    } catch (err: any) {
+      alert('Failed to delete workflow: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const handleGcsFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadErrorMsg(null);
+    setUploadSuccessMsg(null);
+    setUploading(true);
+
+    const videoObj = document.createElement('video');
+    videoObj.preload = 'metadata';
+    videoObj.src = URL.createObjectURL(file);
+
+    videoObj.onloadedmetadata = async () => {
+      window.URL.revokeObjectURL(videoObj.src);
+      const durationSeconds = Math.round(videoObj.duration);
+
+      if (durationSeconds > 120) {
+        setUploadErrorMsg(`⚠️ Video is too long (${durationSeconds}s). Maximum allowed length is 2 minutes (120s).`);
+        setUploading(false);
+        return;
+      }
+
+      try {
+        setUploadSuccessMsg(`Uploading ${file.name} (${durationSeconds}s) to Google Cloud Storage...`);
+        const formData = new FormData();
+        formData.append('video', file);
+        formData.append('workflowId', editingWorkflowId || 'wf-draft');
+        formData.append('durationSeconds', String(durationSeconds));
+
+        const res = await profileApi.uploadVideoDirect(formData);
+        const { publicUrl } = res.data;
+        setWfVideoUrl(publicUrl);
+        setUploadSuccessMsg('✅ Video uploaded successfully to Google Cloud bucket!');
+      } catch (err: any) {
+        setUploadErrorMsg(err?.response?.data?.error || err.message || 'Upload failed');
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    videoObj.onerror = () => {
+      setUploadErrorMsg('Could not read video file. Please ensure it is a valid MP4/WebM video.');
+      setUploading(false);
+    };
+  };
+
+  const activeWf = workflows.find(w => w.id === activeWorkflowId) || workflows[0];
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="#f8fafc">
-        <CircularProgress sx={{ color: '#4f46e5' }} />
+      <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', pb: 12 }}>
       <Navbar />
 
-      <Container maxWidth="lg" sx={{ pt: 14, pb: 12 }}>
-        {/* Top Header Card */}
+      <Container maxWidth="lg" sx={{ pt: 5 }}>
+        {/* Header User Card */}
         <Paper
           elevation={0}
           sx={{
             p: 4,
-            borderRadius: '20px',
-            background: 'linear-gradient(135deg, rgba(79,70,229,0.08) 0%, rgba(8,145,178,0.06) 100%)',
-            border: '1px solid rgba(79,70,229,0.15)',
+            borderRadius: 3,
+            border: '1px solid #e2e8f0',
+            bgcolor: '#ffffff',
             mb: 4,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 2
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, flexDirection: { xs: 'column', md: 'row' }, gap: 2.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
-              <Avatar
-                src={user?.photo_url || undefined}
-                sx={{
-                  width: 64,
-                  height: 64,
-                  bgcolor: '#4f46e5',
-                  fontSize: '1.5rem',
-                  fontWeight: 800,
-                  border: '3px solid rgba(79,70,229,0.3)',
-                }}
-              >
-                {user?.name?.[0]?.toUpperCase()}
-              </Avatar>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 900, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
-                  {user?.name}
-                </Typography>
-                <Typography sx={{ color: '#64748b', fontSize: '0.9rem' }}>{user?.email}</Typography>
-                <Chip label={`Role: ${user?.role}`} size="small" sx={{ mt: 0.8, bgcolor: 'rgba(79,70,229,0.1)', color: '#4f46e5', fontWeight: 700, fontSize: '0.72rem' }} />
-              </Box>
-            </Box>
-
-            <Button
-              variant="contained"
-              disabled={saving}
-              onClick={handleSaveProfile}
-              startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
-              sx={{
-                background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
-                borderRadius: '12px',
-                fontWeight: 700,
-                px: 3.5,
-                py: 1.2,
-                textTransform: 'none',
-                boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
-              }}
+          <Stack direction="row" spacing={3} alignItems="center">
+            <Avatar
+              src={user?.photoURL}
+              sx={{ width: 72, height: 72, bgcolor: '#2563eb', fontSize: '1.8rem', fontWeight: 800 }}
             >
-              {saving ? 'Saving...' : 'Save All Changes'}
-            </Button>
-          </Box>
+              {user?.name?.[0] || 'M'}
+            </Avatar>
+            <Box>
+              <Typography variant="h5" fontWeight={800} color="#0f172a">
+                {user?.name || 'Maqs'}
+              </Typography>
+              <Typography variant="body2" color="#64748b">
+                {user?.email || 'l.maqsood.m@gmail.com'}
+              </Typography>
+              <Chip
+                label={`Role: ${user?.role || 'freelancer'}`}
+                size="small"
+                sx={{ mt: 1, bgcolor: '#eff6ff', color: '#1d4ed8', fontWeight: 700, fontSize: '0.75rem' }}
+              />
+            </Box>
+          </Stack>
+
+          <Button
+            variant="contained"
+            startIcon={saving ? <CircularProgress size={18} /> : <SaveIcon />}
+            onClick={handleSaveAll}
+            disabled={saving}
+            sx={{
+              bgcolor: '#2563eb',
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 3.5,
+              py: 1.2,
+              borderRadius: 2.5,
+              '&:hover': { bgcolor: '#1d4ed8' }
+            }}
+          >
+            {saving ? 'Saving...' : 'Save All Changes'}
+          </Button>
         </Paper>
 
-        {successMessage && (
-          <Alert severity="success" sx={{ mb: 4, borderRadius: '12px' }}>
-            {successMessage}
-          </Alert>
-        )}
+        {successMessage && <Alert severity="success" sx={{ mb: 4, borderRadius: 2 }}>{successMessage}</Alert>}
 
-        {/* 🎯 PRIMARY FOCUS: DELIVERED WORKFLOWS SHOWCASE GALLERY */}
+        {/* 🎬 DELIVERED WORKFLOWS & VIDEO CASE STUDIES */}
         <Paper
           elevation={0}
           sx={{
             p: 4,
-            borderRadius: '20px',
-            border: '1px solid rgba(79,70,229,0.15)',
+            borderRadius: 3,
+            border: '1px solid #e2e8f0',
             bgcolor: '#ffffff',
             mb: 5,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.03)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h5" fontWeight={800} color="#0f172a">
                 🎬 Delivered Workflows & Video Case Studies ({workflows.length})
               </Typography>
-              <Typography sx={{ color: '#64748b', fontSize: '0.9rem', mt: 0.5 }}>
-                Showcase working automations you have built (e.g. Email Pipelines, Meta Ads, OCR tools) with video demos.
+              <Typography variant="body2" color="#64748b" sx={{ mt: 0.5 }}>
+                Showcase working AI automations with Google Cloud MP4 videos, YouTube demos, or Loom walkthroughs.
               </Typography>
             </Box>
 
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleOpenAddWorkflow}
-              sx={{
-                background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
-                borderRadius: '10px',
-                fontWeight: 700,
-                textTransform: 'none',
-                px: 2.5,
-              }}
-            >
-              + Add Delivered Workflow
-            </Button>
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="outlined"
+                onClick={() => window.location.href = '/profile/workflows'}
+                sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2, borderColor: '#cbd5e1', color: '#334155' }}
+              >
+                Dedicated Page ➔
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpenAddWorkflow}
+                sx={{
+                  bgcolor: '#2563eb',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  px: 2.5,
+                  borderRadius: 2,
+                  '&:hover': { bgcolor: '#1d4ed8' }
+                }}
+              >
+                + Add Delivered Workflow
+              </Button>
+            </Stack>
           </Box>
 
-          
-          {uploadSuccessMsg && (
-            <Alert severity="success" sx={{ mb: 2, borderRadius: '12px' }}>
-              {uploadSuccessMsg}
-            </Alert>
-          )}
-          {uploadErrorMsg && (
-            <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>
-              {uploadErrorMsg}
-            </Alert>
-          )}
+          {/* Active Featured Video Player */}
+          {activeWf && (
+            <Paper sx={{ p: 3, borderRadius: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', mb: 4 }}>
+              <Typography variant="overline" color="#2563eb" fontWeight={800} letterSpacing={1}>
+                ▶️ ACTIVE VIDEO DEMO
+              </Typography>
+              <Typography variant="h6" fontWeight={800} color="#0f172a" sx={{ mb: 2 }}>
+                {activeWf.title}
+              </Typography>
 
-            {/* Active Video Player Preview */}
-          {activeVideoUrl && (
-            <Paper
-              elevation={0}
-              sx={{
-                borderRadius: '16px',
-                overflow: 'hidden',
-                my: 3,
-                bgcolor: '#0f172a',
-                border: '1px solid rgba(79,70,229,0.2)',
-              }}
-            >
-              <video
-                controls
-                autoPlay
-                src={resolveVideoUrl(activeVideoUrl)}
-                style={{ width: '100%', maxHeight: '400px', display: 'block' }}
-              />
+              <UniversalVideoPlayer url={activeWf.demoVideoUrl} title={activeWf.title} />
+
+              <Box sx={{ mt: 2.5, p: 2, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0' }}>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <TrendingUpIcon sx={{ color: '#16a34a' }} />
+                  <Typography variant="subtitle2" fontWeight={700} color="#166534">
+                    Business Impact:
+                  </Typography>
+                  <Typography variant="body2" color="#166534">
+                    {activeWf.businessImpact}
+                  </Typography>
+                </Stack>
+              </Box>
             </Paper>
           )}
 
-          {/* Workflows List */}
-          {workflows.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 6, bgcolor: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1', mt: 3 }}>
-              <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700, mb: 1 }}>
-                No Delivered Workflows Added Yet
-              </Typography>
-              <Typography sx={{ color: '#64748b', mb: 3 }}>
-                Add your first workflow (like an email automation or Meta marketing bot) to wow clients!
-              </Typography>
-              <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenAddWorkflow}>
-                Add Your First Workflow
-              </Button>
-            </Box>
-          ) : (
-            <Stack spacing={2.5} sx={{ mt: 3 }}>
-              {workflows.map((wf) => (
-                <Card
-                  key={wf.id}
-                  elevation={0}
-                  sx={{
-                    borderRadius: '16px',
-                    border: '1px solid',
-                    borderColor: activeVideoUrl === wf.demoVideoUrl ? '#4f46e5' : 'rgba(79,70,229,0.12)',
-                    bgcolor: activeVideoUrl === wf.demoVideoUrl ? 'rgba(79,70,229,0.02)' : '#ffffff',
-                    p: 3,
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1.5 }}>
-                    <Box>
-                      <Chip label={wf.category} size="small" sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 700, mb: 1 }} />
-                      <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>
+          {/* Workflow Cards Grid */}
+          <Grid container spacing={2.5}>
+            {workflows.map((wf) => {
+              const isSelected = activeWf?.id === wf.id;
+              const videoParsed = parseVideoSource(wf.demoVideoUrl);
+
+              return (
+                <Grid size={{ xs: 12, md: 6 }} key={wf.id}>
+                  <Card
+                    sx={{
+                      borderRadius: 3,
+                      border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                      boxShadow: isSelected ? '0 8px 25px rgba(37,99,235,0.1)' : '0 2px 10px rgba(0,0,0,0.02)',
+                      transition: 'all 0.2s ease',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      bgcolor: '#fff'
+                    }}
+                  >
+                    <CardContent sx={{ p: 3, flexGrow: 1 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
+                        <Chip
+                          label={wf.category}
+                          size="small"
+                          sx={{ bgcolor: '#e0e7ff', color: '#3730a3', fontWeight: 700, fontSize: '0.75rem' }}
+                        />
+                        <Chip
+                          icon={videoParsed.type === 'youtube' ? <YouTubeIcon sx={{ fontSize: 16 }} /> : <VideoLibraryIcon sx={{ fontSize: 16 }} />}
+                          label={videoParsed.type === 'youtube' ? 'YouTube' : videoParsed.type === 'loom' ? 'Loom' : 'GCS MP4'}
+                          size="small"
+                          sx={{ bgcolor: '#f1f5f9', color: '#475569', fontWeight: 600, fontSize: '0.7rem' }}
+                        />
+                      </Stack>
+
+                      <Typography variant="h6" fontWeight={800} color="#0f172a" sx={{ mb: 1.5, lineHeight: 1.3 }}>
                         {wf.title}
                       </Typography>
-                    </Box>
 
-                    <Stack direction="row" spacing={1}>
-                      
-                        {wf.demoVideoUrl && (
-                          <Button
-                            variant={activeVideoUrl === wf.demoVideoUrl ? 'contained' : 'outlined'}
-                            size="small"
-                            onClick={() => setActiveVideoUrl(wf.demoVideoUrl)}
-                            startIcon={<PlayCircleFilledWhiteIcon />}
-                            sx={{ borderRadius: '8px', fontWeight: 700, textTransform: 'none' }}
-                          >
-                            {activeVideoUrl === wf.demoVideoUrl ? 'Playing Demo' : 'Watch Demo'}
-                          </Button>
-                        )}
+                      <Typography variant="body2" color="#475569" sx={{ mb: 2, minHeight: 40 }}>
+                        {wf.businessImpact}
+                      </Typography>
+
+                      <Stack direction="row" flexWrap="wrap" gap={0.8} sx={{ mb: 3 }}>
+                        {wf.techStack?.map(t => (
+                          <Chip key={t} label={t} size="small" variant="outlined" sx={{ borderColor: '#cbd5e1', color: '#334155', fontSize: '0.75rem' }} />
+                        ))}
+                      </Stack>
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
                         <Button
-                          component="label"
-                          variant="contained"
+                          variant={isSelected ? 'contained' : 'outlined'}
                           size="small"
-                          disabled={uploadingWfId === wf.id}
-                          startIcon={<CloudUploadIcon />}
-                          sx={{
-                            background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
-                            borderRadius: '8px',
-                            fontWeight: 700,
-                            textTransform: 'none',
-                            fontSize: '0.78rem'
-                          }}
+                          startIcon={<PlayCircleFilledWhiteIcon />}
+                          onClick={() => setActiveWorkflowId(wf.id)}
+                          sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2 }}
                         >
-                          {uploadingWfId === wf.id ? 'Uploading...' : (wf.demoVideoUrl ? 'Replace Video (< 2 min)' : 'Upload Video (< 2 min)')}
-                          <input
-                            type="file"
-                            accept="video/mp4,video/webm,video/quicktime"
-                            hidden
-                            onChange={(e) => handleWorkflowVideoUpload(e, wf.id)}
-                          />
+                          {isSelected ? 'Playing' : 'Play Demo'}
                         </Button>
 
-                      <Button size="small" onClick={() => handleOpenEditWorkflow(wf)} startIcon={<EditIcon />} sx={{ color: '#4f46e5' }}>
-                        Edit
-                      </Button>
-                      <Button size="small" onClick={() => handleDeleteWorkflow(wf.id)} startIcon={<DeleteIcon />} sx={{ color: '#ef4444' }}>
-                        Delete
-                      </Button>
-                    </Stack>
-                  </Box>
-
-                  {/* Impact Metric */}
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, my: 1.5, p: 1.5, bgcolor: 'rgba(16,185,129,0.06)', borderRadius: '10px', border: '1px solid rgba(16,185,129,0.15)' }}>
-                    <TrendingUpIcon sx={{ color: '#10b981', fontSize: 20, mt: 0.2 }} />
-                    <Typography sx={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 600 }}>
-                      Business Impact: <span style={{ fontWeight: 400, color: '#334155' }}>{wf.businessImpact}</span>
-                    </Typography>
-                  </Box>
-
-                  {/* Tech Stack Chips */}
-                  {wf.techStack && wf.techStack.length > 0 && (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, alignItems: 'center', mt: 1.5 }}>
-                      {wf.techStack.map((tech) => (
-                        <Chip key={tech} label={tech} size="small" sx={{ bgcolor: '#f1f5f9', color: '#475569', fontSize: '0.72rem', fontWeight: 600 }} />
-                      ))}
-                      {wf.liveUrl && (
-                        <Button href={wf.liveUrl} target="_blank" size="small" sx={{ ml: 'auto', color: '#4f46e5', textTransform: 'none', fontSize: '0.75rem', fontWeight: 700 }}>
-                          View Live Repo →
-                        </Button>
-                      )}
-                    </Box>
-                  )}
-                </Card>
-              ))}
-            </Stack>
-          )}
+                        <Stack direction="row" spacing={1}>
+                          <IconButton size="small" onClick={() => handleOpenEditWorkflow(wf)} sx={{ border: '1px solid #e2e8f0', color: '#2563eb' }}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleDeleteWorkflow(wf.id)} sx={{ border: '1px solid #e2e8f0', color: '#ef4444' }}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
         </Paper>
 
-        {/* 📋 SECONDARY SECTION (BELOW WORKFLOWS): GENERAL INFO & SOCIAL LINKS */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 4,
-            borderRadius: '20px',
-            border: '1px solid rgba(79,70,229,0.12)',
-            bgcolor: '#ffffff',
-          }}
-        >
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', mb: 3 }}>
+        {/* General Profile Info */}
+        <Paper elevation={0} sx={{ p: 4, borderRadius: 3, border: '1px solid #e2e8f0', bgcolor: '#ffffff' }}>
+          <Typography variant="h6" fontWeight={800} color="#0f172a" sx={{ mb: 3 }}>
             General Profile & Contact Links
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid xs={12} md={8}>
+            <Grid size={{ xs: 12 }}>
               <TextField
-                fullWidth
                 label="Professional Headline / Specialty"
                 value={headline}
-                onChange={(e) => setHeadline(e.target.value)}
-                placeholder="e.g. Full-Stack AI Engineer & Automation Specialist"
-                sx={{ mb: 3 }}
-              />
-
-              <TextField
+                onChange={e => setHeadline(e.target.value)}
                 fullWidth
-                multiline
-                rows={4}
+              />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField
                 label="Detailed Bio / Background"
                 value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Describe your domain expertise, systems built, and typical response times..."
-                sx={{ mb: 3 }}
+                onChange={e => setBio(e.target.value)}
+                multiline
+                rows={3}
+                fullWidth
               />
-
-              {/* Skills Tags Editor */}
-              <Box sx={{ mb: 3 }}>
-                <Typography sx={{ fontWeight: 700, color: '#0f172a', mb: 1, fontSize: '0.9rem' }}>
-                  Skills & Frameworks
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
-                  <TextField
-                    size="small"
-                    placeholder="Add skill (e.g. SendGrid, Python, LangGraph)..."
-                    value={newSkillInput}
-                    onChange={(e) => setNewSkillInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
-                    sx={{ flexGrow: 1 }}
-                  />
-                  <Button variant="outlined" onClick={handleAddSkill} sx={{ borderRadius: '10px' }}>
-                    Add
-                  </Button>
-                </Box>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
-                  {skills.map((skill) => (
-                    <Chip key={skill} label={skill} onDelete={() => handleRemoveSkill(skill)} sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 600 }} />
-                  ))}
-                </Box>
-              </Box>
             </Grid>
-
-            <Grid xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
+                label="Skills & Frameworks (comma-separated)"
+                value={skillsInput}
+                onChange={e => setSkillsInput(e.target.value)}
                 fullWidth
-                type="number"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
                 label="Hourly Rate (₹/hr)"
+                type="number"
                 value={hourlyRate}
-                onChange={(e) => setHourlyRate(e.target.value)}
-                sx={{ mb: 3 }}
-              />
-
-              <TextField
+                onChange={e => setHourlyRate(Number(e.target.value))}
                 fullWidth
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TextField
                 label="GitHub URL"
-                value={github}
-                onChange={(e) => setGithub(e.target.value)}
-                placeholder="https://github.com/username"
-                InputProps={{ startAdornment: <GitHubIcon sx={{ color: '#64748b', mr: 1 }} /> }}
-                sx={{ mb: 3 }}
-              />
-
-              <TextField
+                value={githubUrl}
+                onChange={e => setGithubUrl(e.target.value)}
                 fullWidth
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TextField
                 label="LinkedIn URL"
-                value={linkedin}
-                onChange={(e) => setLinkedin(e.target.value)}
-                placeholder="https://linkedin.com/in/username"
-                InputProps={{ startAdornment: <LinkedInIcon sx={{ color: '#0077b5', mr: 1 }} /> }}
-                sx={{ mb: 3 }}
-              />
-
-              <TextField
+                value={linkedinUrl}
+                onChange={e => setLinkedinUrl(e.target.value)}
                 fullWidth
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TextField
                 label="Portfolio / Website URL"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                placeholder="https://yourportfolio.com"
-                InputProps={{ startAdornment: <LanguageIcon sx={{ color: '#4f46e5', mr: 1 }} /> }}
+                value={websiteUrl}
+                onChange={e => setWebsiteUrl(e.target.value)}
+                fullWidth
               />
             </Grid>
           </Grid>
         </Paper>
+
+        {/* Workflow Dialog Modal */}
+        <Dialog open={workflowDialogOpen} onClose={() => setWorkflowDialogOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle sx={{ fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #e2e8f0' }}>
+            {editingWorkflowId ? '✏️ Edit Delivered Workflow' : '✨ Add Delivered Workflow & Case Study'}
+          </DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            {uploadErrorMsg && <Alert severity="error" sx={{ mb: 2.5 }}>{uploadErrorMsg}</Alert>}
+            {uploadSuccessMsg && <Alert severity="success" sx={{ mb: 2.5 }}>{uploadSuccessMsg}</Alert>}
+
+            <Stack spacing={2.5} sx={{ mt: 1 }}>
+              <TextField
+                label="Workflow Title"
+                placeholder="e.g. Automated Cold Email Sending & DNS Deliverability Pipeline"
+                value={wfTitle}
+                onChange={e => setWfTitle(e.target.value)}
+                fullWidth
+                required
+              />
+
+              <TextField
+                label="Category / Niche"
+                placeholder="e.g. Email Automation, Computer Vision, LLM & RAG, Meta Ads"
+                value={wfCategory}
+                onChange={e => setWfCategory(e.target.value)}
+                fullWidth
+              />
+
+              <TextField
+                label="Business Impact Metrics"
+                placeholder="e.g. Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability."
+                value={wfImpact}
+                onChange={e => setWfImpact(e.target.value)}
+                multiline
+                rows={2}
+                fullWidth
+              />
+
+              <TextField
+                label="Tech Stack (comma separated)"
+                placeholder="Python, FastAPI, SendGrid API, PostgreSQL, Docker"
+                value={wfTechInput}
+                onChange={e => setWfTechInput(e.target.value)}
+                fullWidth
+              />
+
+              <TextField
+                label="Live Project / GitHub Repository Link"
+                placeholder="https://github.com/username/project"
+                value={wfLiveUrl}
+                onChange={e => setWfLiveUrl(e.target.value)}
+                fullWidth
+              />
+
+              {/* Video Demo Tabs Section */}
+              <Box sx={{ p: 2.5, bgcolor: '#f8fafc', borderRadius: 2.5, border: '1px solid #e2e8f0' }}>
+                <Typography variant="subtitle2" fontWeight={800} color="#0f172a" gutterBottom>
+                  🎬 Video Demo Integration (GCS MP4, YouTube, or Loom)
+                </Typography>
+
+                <Tabs
+                  value={videoInputMode}
+                  onChange={(_, val) => setVideoInputMode(val)}
+                  sx={{ mb: 2, borderBottom: '1px solid #e2e8f0' }}
+                >
+                  <Tab label="Direct GCS Video (< 2 min)" value="upload" sx={{ textTransform: 'none', fontWeight: 700 }} />
+                  <Tab label="YouTube URL" value="youtube" sx={{ textTransform: 'none', fontWeight: 700 }} />
+                  <Tab label="Loom URL" value="loom" sx={{ textTransform: 'none', fontWeight: 700 }} />
+                </Tabs>
+
+                {videoInputMode === 'upload' && (
+                  <Box>
+                    <Typography variant="body2" color="#64748b" sx={{ mb: 2 }}>
+                      Upload an MP4 video demo directly into Google Cloud Storage (limit: strictly under 2 minutes / 120 seconds).
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      component="label"
+                      startIcon={uploading ? <CircularProgress size={18} /> : <CloudUploadIcon />}
+                      disabled={uploading}
+                      sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2 }}
+                    >
+                      {uploading ? 'Uploading to GCS...' : 'Choose MP4 Video (< 2 min)'}
+                      <input type="file" hidden accept="video/mp4,video/webm" onChange={handleGcsFileUpload} />
+                    </Button>
+                  </Box>
+                )}
+
+                {videoInputMode === 'youtube' && (
+                  <TextField
+                    label="YouTube Video Link"
+                    placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                    value={wfVideoUrl}
+                    onChange={e => setWfVideoUrl(e.target.value)}
+                    fullWidth
+                    helperText="Enter any YouTube public or unlisted video URL."
+                  />
+                )}
+
+                {videoInputMode === 'loom' && (
+                  <TextField
+                    label="Loom Share Link"
+                    placeholder="https://www.loom.com/share/..."
+                    value={wfVideoUrl}
+                    onChange={e => setWfVideoUrl(e.target.value)}
+                    fullWidth
+                    helperText="Enter any Loom video share link."
+                  />
+                )}
+
+                {wfVideoUrl && (
+                  <Box sx={{ mt: 2.5 }}>
+                    <Typography variant="caption" fontWeight={700} color="#475569" display="block" sx={{ mb: 1 }}>
+                      Live Preview:
+                    </Typography>
+                    <UniversalVideoPlayer url={wfVideoUrl} title={wfTitle} />
+                  </Box>
+                )}
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2.5, borderTop: '1px solid #e2e8f0' }}>
+            <Button onClick={() => setWorkflowDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748b' }}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={saving ? <CircularProgress size={18} /> : <SaveIcon />}
+              onClick={handleSaveWorkflowDialog}
+              disabled={saving || uploading}
+              sx={{ bgcolor: '#2563eb', textTransform: 'none', fontWeight: 700, px: 3, borderRadius: 2 }}
+            >
+              {saving ? 'Saving...' : 'Save Workflow'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
-
-      {/* Add / Edit Workflow Dialog Modal */}
-      <Dialog open={workflowDialogOpen} onClose={() => setWorkflowDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}>
-        <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
-          {editingWorkflowId ? 'Edit Delivered Workflow' : 'Add Delivered Workflow'}
-        </DialogTitle>
-        <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <TextField
-            fullWidth
-            label="Workflow Title"
-            value={wfTitle}
-            onChange={(e) => setWfTitle(e.target.value)}
-            placeholder="e.g. Automated Cold Email & Deliverability Pipeline"
-          />
-
-          <TextField
-            fullWidth
-            label="Category"
-            value={wfCategory}
-            onChange={(e) => setWfCategory(e.target.value)}
-            placeholder="e.g. Email Automation, Meta Ads, OCR Extraction"
-          />
-
-          <TextField
-            fullWidth
-            multiline
-            rows={2}
-            label="Business Impact / Metrics"
-            value={wfImpact}
-            onChange={(e) => setWfImpact(e.target.value)}
-            placeholder="e.g. Scaled outreach to 10k leads/day with 99.2% inbox placement."
-          />
-
-          <TextField
-            fullWidth
-            label="Demo Video Link (MP4 / Loom / YouTube)"
-            value={wfVideoUrl}
-            onChange={(e) => setWfVideoUrl(e.target.value)}
-            placeholder="https://.../video.mp4"
-          />
-
-          <TextField
-            fullWidth
-            label="Tech Stack (Comma-separated)"
-            value={wfTechInput}
-            onChange={(e) => setWfTechInput(e.target.value)}
-            placeholder="Python, SendGrid, FastAPI, PostgreSQL"
-          />
-
-          <TextField
-            fullWidth
-            label="Live Repo or Demo URL"
-            value={wfLiveUrl}
-            onChange={(e) => setWfLiveUrl(e.target.value)}
-            placeholder="https://github.com/..."
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setWorkflowDialogOpen(false)} sx={{ color: '#64748b' }}>Cancel</Button>
-          <Button variant="contained" onClick={handleSaveWorkflowModal} sx={{ background: 'linear-gradient(135deg, #4f46e5, #0891b2)', fontWeight: 700, borderRadius: '10px' }}>
-            Save Workflow
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
