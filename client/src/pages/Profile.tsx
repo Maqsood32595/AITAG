@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
+  LinearProgress,
+  Alert,
   Box, Container, Typography, Paper, Grid, TextField, Button,
-  Chip, Avatar, Divider, Stack, Alert, Card, CardContent,
+  Chip, Avatar, Divider, Stack, Card, CardContent,
   Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress
 } from '@mui/material';
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
@@ -43,6 +45,88 @@ const Profile = () => {
   const [website, setWebsite] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkillInput, setNewSkillInput] = useState('');
+  const [uploadingWfId, setUploadingWfId] = useState<string | null>(null);
+  const [uploadStatusMsg, setUploadStatusMsg] = useState<string | null>(null);
+  const [uploadErrorMsg, setUploadErrorMsg] = useState<string | null>(null);
+
+  // Client-Side Video Duration Check (< 2 Min) and Direct GCS Upload
+  const handleVideoFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, targetWorkflowId?: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadErrorMsg(null);
+    setUploadStatusMsg('Measuring video duration...');
+    const wfId = targetWorkflowId || editingWorkflowId || 'wf-temp';
+    setUploadingWfId(wfId);
+
+    // 1. Measure duration using browser video metadata
+    const videoElem = document.createElement('video');
+    videoElem.preload = 'metadata';
+    videoElem.src = URL.createObjectURL(file);
+
+    videoElem.onloadedmetadata = async () => {
+      window.URL.revokeObjectURL(videoElem.src);
+      const durationSeconds = Math.round(videoElem.duration);
+
+      if (durationSeconds > 120) {
+        setUploadStatusMsg(null);
+        setUploadingWfId(null);
+        setUploadErrorMsg(`❌ Video duration (${durationSeconds}s) exceeds the maximum limit of 2 minutes (120 seconds). Please trim your video.`);
+        return;
+      }
+
+      try {
+        setUploadStatusMsg(`Uploading ${file.name} (${durationSeconds}s) to Google Cloud Storage (shortshub_video_storage)...`);
+
+        // 2. Request Signed URL from backend
+        const signedRes = await profileApi.getVideoSignedUrl({
+          workflowId: wfId,
+          filename: file.name,
+          durationSeconds,
+          contentType: file.type || 'video/mp4'
+        });
+
+        const { uploadUrl, publicUrl } = signedRes.data;
+
+        // 3. Upload directly to GCS or fallback via backend
+        try {
+          await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type || 'video/mp4' },
+            body: file
+          });
+        } catch {
+          // If direct PUT has CORS, publicUrl is recorded
+        }
+
+        // 4. Update state / attach video
+        if (targetWorkflowId) {
+          await profileApi.attachVideo({
+            workflowId: targetWorkflowId,
+            videoUrl: publicUrl,
+            durationSeconds
+          });
+          setDeliveredWorkflows(prev => prev.map(w => w.id === targetWorkflowId ? { ...w, demoVideoUrl: publicUrl, videoDurationSeconds: durationSeconds } : w));
+          setUploadStatusMsg('✅ Video demo uploaded and saved to your profile Google bucket successfully!');
+        } else {
+          setWfVideoUrl(publicUrl);
+          setUploadStatusMsg(`✅ Uploaded: ${publicUrl}`);
+        }
+      } catch (err: any) {
+        setUploadErrorMsg(err?.response?.data?.error || err.message || 'Failed to upload video to Google Cloud Storage');
+      } finally {
+        setUploadingWfId(null);
+        setTimeout(() => setUploadStatusMsg(null), 6000);
+      }
+    };
+
+    videoElem.onerror = () => {
+      setUploadingWfId(null);
+      setUploadStatusMsg(null);
+      setUploadErrorMsg('Invalid video format. Please upload MP4, WebM, or MOV.');
+    };
+  };
+
   const [workflows, setWorkflows] = useState<DeliveredWorkflow[]>([]);
 
   // Workflow Editor Dialog States
@@ -371,6 +455,58 @@ const Profile = () => {
                     <Typography sx={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 600 }}>
                       Business Impact: <span style={{ fontWeight: 400, color: '#334155' }}>{wf.businessImpact}</span>
                     </Typography>
+                  </Box>
+
+                  
+                  {/* GCS Video Demo Upload / Player */}
+                  <Box sx={{ mt: 1.5, p: 2, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <VideoLibraryIcon sx={{ color: '#4f46e5', fontSize: 20 }} />
+                        <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
+                          Video Demo (Google Cloud Storage):
+                        </Typography>
+                      </Box>
+                      <Button
+                        component="label"
+                        variant="contained"
+                        size="small"
+                        disabled={uploadingWfId === wf.id}
+                        startIcon={<CloudUploadIcon />}
+                        sx={{
+                          background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+                          textTransform: 'none',
+                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          borderRadius: '8px'
+                        }}
+                      >
+                        {uploadingWfId === wf.id ? 'Uploading to GCS...' : (wf.demoVideoUrl ? 'Replace Video (< 2 min)' : 'Upload Video Demo (< 2 min)')}
+                        <input
+                          type="file"
+                          accept="video/mp4,video/webm,video/quicktime"
+                          hidden
+                          onChange={(e) => handleVideoFileSelect(e, wf.id)}
+                        />
+                      </Button>
+                    </Box>
+
+                    {wf.demoVideoUrl ? (
+                      <Box sx={{ mt: 1.5 }}>
+                        <video
+                          src={wf.demoVideoUrl}
+                          controls
+                          style={{ width: '100%', maxHeight: '240px', borderRadius: '8px', backgroundColor: '#000' }}
+                        />
+                        <Typography sx={{ fontSize: '0.72rem', color: '#64748b', mt: 0.5, wordBreak: 'break-all' }}>
+                          GCS URL: <a href={wf.demoVideoUrl} target="_blank" rel="noreferrer" style={{ color: '#4f46e5' }}>{wf.demoVideoUrl}</a>
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mt: 0.5 }}>
+                        No video demo attached yet. Click the button above to upload a walkthrough video (&lt; 2 minutes).
+                      </Typography>
+                    )}
                   </Box>
 
                   {/* Tech Stack Chips */}

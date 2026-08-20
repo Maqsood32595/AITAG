@@ -1,0 +1,10 @@
+{
+  "id": "freelancer-workflow-videos",
+  "name": "Freelancer Workflow Proof Videos (GCS Storage)",
+  "version": "1.0.0",
+  "basePath": "/api/freelancer/workflow-videos",
+  "enabled": true,
+  "dependencies": [
+    "aitag-auth"
+  ]
+}
