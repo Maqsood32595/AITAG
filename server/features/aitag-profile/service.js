@@ -1,52 +1,63 @@
 const fs = require('fs');
-const { Storage } = require('@google-cloud/storage');
 const path = require('path');
+const { Storage } = require('@google-cloud/storage');
 const supabase = require('../../supabase');
 
-const BUCKET_NAME = process.env.GOOGLE_CLOUD_BUCKET_NAME || 'shortshub_video_storage';
-const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID || 'corded-cable-460921-u1';
-const MAX_VIDEO_DURATION_SECONDS = 120; // 2 minutes limit
+const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'shortshub_video_storage';
+const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT || 'corded-cable-460921-u1';
+const MAX_VIDEO_DURATION_SECONDS = 120; // 2 minutes strict limit
 
+// Fast memory fallback cache for profiles
 const PROFILES_CACHE = new Map([
-  ['6e36f593-b9e6-4ead-8266-31ac91cf44c5', {
-    userId: '6e36f593-b9e6-4ead-8266-31ac91cf44c5',
-    name: 'User1',
-    email: 'user1@aitag.com',
-    role: 'admin',
-    headline: 'Principal AI Systems Architect & Automation Specialist',
-    bio: 'Specializing in high-ROI automation pipelines, email deliverability engines, and Meta ads optimization.',
-    hourlyRate: 3500,
-    skills: ['Email Automation', 'Meta Marketing API', 'Python', 'FastAPI', 'LangGraph'],
-    links: {
-      github: 'https://github.com/Maqsood32595',
-      linkedin: 'https://linkedin.com/in/maqsood',
-      website: 'https://aitag.in'
-    },
-    deliveredWorkflows: [
-      {
-        id: 'wf-1',
-        title: 'Automated Cold Email Sending & DNS Deliverability Pipeline',
-        category: 'Email Automation & Growth',
-        businessImpact: 'Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability.',
-        demoVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        techStack: ['Python', 'SendGrid API', 'DNS Automation', 'FastAPI', 'PostgreSQL'],
-        liveUrl: 'https://github.com/Maqsood32595/email-pipeline-demo'
+  [
+    'f8dbf2cc-36a9-4228-bb50-13024787fd35',
+    {
+      userId: 'f8dbf2cc-36a9-4228-bb50-13024787fd35',
+      name: 'Maqs',
+      email: 'l.maqsood.m@gmail.com',
+      role: 'freelancer',
+      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs',
+      headline: 'Senior AI Automation & Machine Learning Specialist',
+      bio: 'Delivering production-grade AI automations, email pipelines, and machine learning tools.',
+      hourlyRate: 2800,
+      skills: ['Python', 'LangGraph', 'FastAPI', 'Supabase', 'SendGrid API', 'Meta Graph API', 'TypeScript'],
+      links: {
+        github: 'https://github.com/Maqsood32595',
+        linkedin: 'https://linkedin.com/in/maqsood',
+        website: 'https://aitag.in'
       },
-      {
-        id: 'wf-2',
-        title: 'Facebook & Meta Ads AI Optimization Engine',
-        category: 'Growth & Ads',
-        businessImpact: 'Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.',
-        demoVideoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-        techStack: ['Meta Graph API', 'OpenAI GPT-4o', 'Zapier', 'Supabase'],
-        liveUrl: 'https://user1.ai/meta-ads-case-study'
-      }
-    ]
-  }]
+      deliveredWorkflows: [
+        {
+          id: 'wf-1',
+          title: 'Automated Cold Email Sending & DNS Deliverability Pipeline',
+          category: 'Email Automation & Growth',
+          businessImpact: 'Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability.',
+          demoVideoUrl: '',
+          techStack: ['Python', 'SendGrid API', 'DNS Automation', 'FastAPI', 'PostgreSQL'],
+          liveUrl: 'https://github.com/Maqsood32595/email-pipeline-demo'
+        },
+        {
+          id: 'wf-2',
+          title: 'Facebook & Meta Ads AI Optimization Engine',
+          category: 'Growth & Ads',
+          businessImpact: 'Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.',
+          demoVideoUrl: '',
+          techStack: ['Meta Graph API', 'OpenAI GPT-4o', 'Zapier', 'Supabase'],
+          liveUrl: 'https://user1.ai/meta-ads-case-study'
+        }
+      ],
+      updatedAt: new Date().toISOString()
+    }
+  ]
 ]);
 
 class ProfileService {
-      constructor() {
+  /**
+   * Lazy On-Demand GCS Storage Initializer
+   */
+  getBucket() {
+    if (this.bucket) return this.bucket;
+
     try {
       let credentials = null;
 
@@ -75,7 +86,7 @@ class ProfileService {
         credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
       }
 
-      // 3. Local key file on disk
+      // 3. Local key file fallback
       if (!credentials) {
         const keyFile = process.env.GOOGLE_CLOUD_KEY_FILE || path.join(__dirname, '../../shortshub-service-account.json');
         if (fs.existsSync(keyFile)) {
@@ -94,8 +105,10 @@ class ProfileService {
       }
 
       this.bucket = this.storage ? this.storage.bucket(BUCKET_NAME) : null;
+      return this.bucket;
     } catch (e) {
-      console.warn('[ProfileService] GCS Storage init note:', e.message);
+      console.warn('[ProfileService] GCS getBucket error:', e.message);
+      return null;
     }
   }
 
@@ -162,7 +175,28 @@ class ProfileService {
     return defaultProfile;
   }
 
-    /**
+  async updateProfile(userId, updateData) {
+    const existing = await this.getProfileByUserId(userId);
+
+    const updated = {
+      ...existing,
+      headline: updateData.headline !== undefined ? updateData.headline : existing.headline,
+      bio: updateData.bio !== undefined ? updateData.bio : existing.bio,
+      hourlyRate: updateData.hourlyRate !== undefined ? Number(updateData.hourlyRate) : existing.hourlyRate,
+      skills: updateData.skills !== undefined ? updateData.skills : existing.skills,
+      links: {
+        ...(existing.links || {}),
+        ...(updateData.links || {})
+      },
+      deliveredWorkflows: updateData.deliveredWorkflows !== undefined ? updateData.deliveredWorkflows : existing.deliveredWorkflows,
+      updatedAt: new Date().toISOString()
+    };
+
+    PROFILES_CACHE.set(userId, updated);
+    return updated;
+  }
+
+  /**
    * Direct Server-to-GCS buffer upload (Zero CORS, 100% authenticated)
    */
   async uploadWorkflowVideoBuffer(userId, { workflowId, filename, buffer, mimeType, durationSeconds }) {
@@ -175,27 +209,24 @@ class ProfileService {
       throw new Error(`Video duration exceeds maximum allowed limit of 2 minutes (${MAX_VIDEO_DURATION_SECONDS}s). Provided: ${durationNum}s`);
     }
 
+    const bucket = this.getBucket();
+    if (!bucket) {
+      throw new Error('Google Cloud Storage bucket not configured on server. Please verify GCS_CREDENTIALS on Render.');
+    }
+
     const cleanFilename = (filename || 'workflow_demo.mp4').replace(/[^a-zA-Z0-9_.-]/g, '_');
     const storagePath = `freelancers/${userId}/workflows/${safeWfId}/${Date.now()}_${cleanFilename}`;
     const streamUrl = `/api/profile/workflows/stream-video?path=${encodeURIComponent(storagePath)}`;
 
-    try {
-      if (this.bucket) {
-        const file = this.bucket.file(storagePath);
-        await file.save(buffer, {
-          contentType: mimeType || 'video/mp4',
-          resumable: false,
-          metadata: {
-            cacheControl: 'public, max-age=31536000'
-          }
-        });
-        console.log('✅ Uploaded video buffer directly to GCS:', storagePath);
-      } else {
-        console.warn('⚠️ GCS bucket not initialized for uploadWorkflowVideoBuffer');
+    const file = bucket.file(storagePath);
+    await file.save(buffer, {
+      contentType: mimeType || 'video/mp4',
+      resumable: false,
+      metadata: {
+        cacheControl: 'public, max-age=31536000'
       }
-    } catch (e) {
-      console.warn('[GCS Direct Upload Warning]:', e.message);
-    }
+    });
+    console.log('✅ Uploaded video buffer directly to GCS:', storagePath);
 
     // Attach to profile workflow safely
     try {
@@ -218,28 +249,7 @@ class ProfileService {
     };
   }
 
-  async updateProfile(userId, updateData) {
-    const existing = await this.getProfileByUserId(userId);
-
-    const updated = {
-      ...existing,
-      headline: updateData.headline !== undefined ? updateData.headline : existing.headline,
-      bio: updateData.bio !== undefined ? updateData.bio : existing.bio,
-      hourlyRate: updateData.hourlyRate !== undefined ? Number(updateData.hourlyRate) : existing.hourlyRate,
-      skills: updateData.skills !== undefined ? updateData.skills : existing.skills,
-      links: {
-        ...(existing.links || {}),
-        ...(updateData.links || {})
-      },
-      deliveredWorkflows: updateData.deliveredWorkflows !== undefined ? updateData.deliveredWorkflows : existing.deliveredWorkflows,
-      updatedAt: new Date().toISOString()
-    };
-
-    PROFILES_CACHE.set(userId, updated);
-    return updated;
-  }
-
-        /**
+  /**
    * Secure Range (HTTP 206) Streamer for GCS Workflow Demo Videos
    */
   async streamWorkflowVideo(req, res, storagePath) {
@@ -248,7 +258,8 @@ class ProfileService {
     }
 
     try {
-      if (!this.bucket) {
+      const bucket = this.getBucket();
+      if (!bucket) {
         console.warn('[streamWorkflowVideo] GCS Bucket not initialized on server.');
         return res.status(503).json({
           error: 'Video storage bucket not initialized on cloud host. Please configure GCS_CREDENTIALS environment variable in Render.',
@@ -256,7 +267,7 @@ class ProfileService {
         });
       }
 
-      const file = this.bucket.file(storagePath);
+      const file = bucket.file(storagePath);
       let exists = false;
       try {
         const [fileExists] = await file.exists();
@@ -335,8 +346,9 @@ class ProfileService {
     
     let uploadUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${storagePath}`;
     try {
-      if (this.bucket) {
-        const file = this.bucket.file(storagePath);
+      const bucket = this.getBucket();
+      if (bucket) {
+        const file = bucket.file(storagePath);
         const [signedUrl] = await file.getSignedUrl({
           version: 'v4',
           action: 'write',
