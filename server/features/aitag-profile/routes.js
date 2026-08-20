@@ -30,26 +30,6 @@ router.put('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// POST /api/profile/workflows/video-signed-url — Request GCS signed URL with < 2 min check
-router.post('/workflows/video-signed-url', authMiddleware, async (req, res) => {
-  try {
-    const result = await profileService.generateWorkflowVideoSignedUrl(req.user.id, req.body);
-    res.json(result);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// POST /api/profile/workflows/attach-video — Attach uploaded video demo to workflow
-router.post('/workflows/attach-video', authMiddleware, async (req, res) => {
-  try {
-    const updatedWorkflow = await profileService.attachVideoToWorkflow(req.user.id, req.body);
-    res.json({ success: true, workflow: updatedWorkflow });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
 // GET /api/profile/:userId — Get public showcase profile for any specialist
 router.get('/:userId', async (req, res) => {
   try {
