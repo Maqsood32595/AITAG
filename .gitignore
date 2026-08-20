@@ -9,3 +9,18 @@ AITAG.mp4
 AITAG2.mp4
 AITAG_Video_Full.mp4
 quicklancer-source/
+
+
+# -------------------------------------------------------------
+# Isolated Testing & Sandboxes (Strictly Excluded From Git)
+# -------------------------------------------------------------
+tests/
+test/
+*.test.*
+test_*.js
+test_*.cjs
+test_*.py
+*test*
+aitag-test-environment/
+
+workflows/

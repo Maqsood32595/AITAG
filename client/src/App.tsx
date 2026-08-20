@@ -10,7 +10,7 @@ import Home from './pages/Home';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 
-// Placeholder pages (to be built next)
+// Lazy Pages
 import { lazy, Suspense } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -24,6 +24,7 @@ const AITalent = lazy(() => import('./pages/AITalent'));
 const BlogList = lazy(() => import('./pages/BlogList'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Workflows = lazy(() => import('./pages/Workflows'));
 
 const Loader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -49,12 +50,14 @@ function App() {
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/task-details/:id" element={<TaskDetails />} />
 
-              {/* Protected */}
+              {/* Protected / App Routes */}
               <Route path="/add_task" element={<PrivateRoute><AddTask /></PrivateRoute>} />
               <Route path="/my_tasks" element={<PrivateRoute><MyPostedTasks /></PrivateRoute>} />
               <Route path="/update-task/:id" element={<PrivateRoute><UpdateTask /></PrivateRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+              <Route path="/profile/workflows" element={<PrivateRoute><Workflows /></PrivateRoute>} />
+              <Route path="/workflows" element={<PrivateRoute><Workflows /></PrivateRoute>} />
             </Routes>
             <Footer />
           </Suspense>

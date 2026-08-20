@@ -65,7 +65,9 @@ export const invitationsApi = {
 // Profile & Delivered Workflows
 export const profileApi = {
   getMe: () => api.get('/profile/me'),
+  getProfile: () => api.get('/profile/me'),
   updateMe: (data: object) => api.put('/profile/me', data),
+  updateProfile: (data: object) => api.put('/profile/me', data),
   getById: (userId: string) => api.get(`/profile/${userId}`),
   uploadVideoDirect: (formData: FormData) => api.post('/profile/workflows/video-upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   getVideoSignedUrl: (data: { workflowId: string; filename: string; durationSeconds: number; contentType?: string }) =>
