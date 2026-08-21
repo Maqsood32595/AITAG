@@ -116,6 +116,26 @@ class ProfileService {
     const cached = PROFILES_CACHE.get(userId);
     if (cached) return cached;
 
+    // 1. Attempt to read persisted profile.json from shared Google Cloud Storage bucket
+    const bucket = this.getBucket();
+    if (bucket) {
+      try {
+        const gcsPath = `freelancers/${userId}/profile.json`;
+        const file = bucket.file(gcsPath);
+        const [exists] = await file.exists();
+        if (exists) {
+          const [content] = await file.download();
+          const parsed = JSON.parse(content.toString('utf8'));
+          PROFILES_CACHE.set(userId, parsed);
+          console.log(`✅ Loaded synchronized profile for ${userId} from GCS profile.json`);
+          return parsed;
+        }
+      } catch (e) {
+        console.warn('[ProfileService] GCS profile fetch notice:', e.message);
+      }
+    }
+
+    // 2. Supabase fallback
     let user = null;
     try {
       if (supabase && typeof supabase.from === 'function') {
@@ -128,8 +148,8 @@ class ProfileService {
       }
     } catch {}
 
-    const name = user?.name || 'AITAG Specialist';
-    const email = user?.email || '';
+    const name = user?.name || 'Maqs';
+    const email = user?.email || 'l.maqsood.m@gmail.com';
     const role = user?.role || 'freelancer';
     const photoUrl = user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || email)}`;
 
@@ -139,10 +159,10 @@ class ProfileService {
       email,
       role,
       photoUrl,
-      headline: role === 'admin' ? 'Full-Stack AI Engineer & Admin' : 'Senior AI Researcher & Specialist',
+      headline: role === 'admin' ? 'Full-Stack AI Engineer & Admin' : 'Senior AI Automation & Machine Learning Specialist',
       bio: 'Delivering production-grade AI automations, email pipelines, and machine learning tools.',
       hourlyRate: role === 'admin' ? 3500 : 2800,
-      skills: ['Python', 'LangGraph', 'FastAPI', 'Supabase', 'TypeScript'],
+      skills: ['Python', 'LangGraph', 'FastAPI', 'Supabase', 'SendGrid API', 'Meta Graph API', 'TypeScript'],
       links: {
         github: 'https://github.com/Maqsood32595',
         linkedin: 'https://linkedin.com/in/maqsood',
@@ -193,12 +213,27 @@ class ProfileService {
     };
 
     PROFILES_CACHE.set(userId, updated);
+
+    // Persist to shared Google Cloud Storage so Dev, Prod, and Local remain 100% in sync
+    const bucket = this.getBucket();
+    if (bucket) {
+      try {
+        const gcsPath = `freelancers/${userId}/profile.json`;
+        const file = bucket.file(gcsPath);
+        await file.save(Buffer.from(JSON.stringify(updated, null, 2)), {
+          contentType: 'application/json',
+          resumable: false
+        });
+        console.log(`✅ Persisted synchronized profile.json to GCS for ${userId}`);
+      } catch (e) {
+        console.warn('[ProfileService] GCS profile save notice:', e.message);
+      }
+    }
+
     return updated;
   }
 
-  /**
-   * Direct Server-to-GCS buffer upload (Zero CORS, 100% authenticated)
-   */
+
   async uploadWorkflowVideoBuffer(userId, { workflowId, filename, buffer, mimeType, durationSeconds }) {
     if (!userId) throw new Error('Unauthorized');
     const safeWfId = workflowId || 'wf-1';
