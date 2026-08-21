@@ -1,0 +1,87 @@
+{
+  "userId": "f8dbf2cc-36a9-4228-bb50-13024787fd35",
+  "name": "Maqs",
+  "email": "l.maqsood.m@gmail.com",
+  "role": "freelancer",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs",
+  "headline": "Senior AI Automation & Machine Learning Specialist",
+  "bio": "Delivering production-grade AI automations, email pipelines, and machine learning tools.",
+  "hourlyRate": 4500,
+  "skills": [
+    "Python",
+    "LangGraph",
+    "FastAPI",
+    "Supabase",
+    "SendGrid API",
+    "Google Cloud Storage",
+    "TypeScript",
+    "Docker",
+    "Zig"
+  ],
+  "links": {
+    "github": "https://github.com/Maqsood32595",
+    "linkedin": "https://linkedin.com/in/maqsood",
+    "website": "https://aitag.in"
+  },
+  "deliveredWorkflows": [
+    {
+      "id": "wf-1",
+      "title": "Automated Cold Email Sending & DNS Deliverability Pipeline",
+      "category": "Email Automation & Growth",
+      "businessImpact": "Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4",
+      "techStack": [
+        "Python",
+        "SendGrid API",
+        "DNS Automation",
+        "FastAPI",
+        "PostgreSQL"
+      ],
+      "liveUrl": "https://aitag.onrender.com"
+    },
+    {
+      "id": "wf-2",
+      "title": "Facebook & Meta Ads AI Optimization Engine",
+      "category": "Growth & Ads",
+      "businessImpact": "Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
+      "techStack": [
+        "Meta Graph API",
+        "OpenAI GPT-4o",
+        "Zapier",
+        "Supabase"
+      ],
+      "liveUrl": "https://user1.ai/meta-ads"
+    },
+    {
+      "id": "wf-3",
+      "title": "Meta Ads Dynamic Multi-Variant AI Engine",
+      "category": "Growth & Ads",
+      "businessImpact": "Scaled ROAS by 34% across 500 campaigns with real-time budget re-allocation and dynamic creative optimization.",
+      "demoVideoUrl": "https://www.youtube.com/watch?v=-sLXQz7ML9w",
+      "techStack": [
+        "Python",
+        "Meta Marketing API",
+        "FastAPI",
+        "Redis"
+      ],
+      "liveUrl": "https://aitag.in"
+    },
+    {
+      "id": "wf-4",
+      "title": "FractalSwarm (AetherSRE V2) — Autonomous Hierarchical SRE Control Plane",
+      "category": "Agentic Systems & SRE",
+      "businessImpact": "Automated cluster failure triage with sub-100ms self-healing actions across distributed Kubernetes pods.",
+      "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "techStack": [
+        "Zig",
+        "Rust",
+        "Kubernetes",
+        "TypeScript",
+        "eBPF"
+      ],
+      "liveUrl": "https://github.com/Maqsood32595"
+    }
+  ],
+  "updatedAt": "2026-08-21T22:46:43.794Z"
+}

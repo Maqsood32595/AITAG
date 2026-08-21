@@ -121,42 +121,75 @@ const AITalent = () => {
   useEffect(() => {
     const fetchRegisteredUsers = async () => {
       try {
-        const res = await authApi.getUsers();
+                const res = await authApi.getUsers();
         const rawUsers = res.data || [];
 
-        // Transform registered users into Talent cards
-        const registeredTalent: Talent[] = rawUsers
-           // Show other registered users
-          .map((u: any) => {
-            const isUser1 = u.email?.toLowerCase().includes('user1');
-            const isMaqsood = u.email?.toLowerCase().includes('maqsood');
+        // Deduplicate registered users and consolidate legacy records
+        const uniqueUsersMap = new Map();
 
-            return {
-              id: u.id,
-              name: u.name || u.email.split('@')[0],
-              email: u.email,
-              role: isUser1
-                ? 'Full-Stack AI Engineer & Admin'
-                : isMaqsood
-                ? 'Lead AI Researcher & Platform Engineer'
-                : `${u.role === 'admin' ? 'Admin / ' : ''}AI Developer & Specialist`,
-              category: isUser1 ? 'Agentic Systems' : isMaqsood ? 'LLM & Generative AI' : 'Agentic Systems',
-              avatar: u.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name || u.email)}`,
-              rating: 5.0,
-              reviewsCount: 14,
-              hourlyRate: isUser1 ? 3200 : isMaqsood ? 4500 : 2800,
-              completedTasks: isUser1 ? 19 : isMaqsood ? 42 : 8,
-              location: 'India',
-              bio: `Registered AITAG Platform Specialist (${u.role.toUpperCase()}). Verified credentials, sub-millisecond AST sandbox testing, and active freelance contracts.`,
-              skills: isUser1
-                ? ['Next.js', 'LangGraph', 'Supabase', 'Python', 'Node.js']
-                : isMaqsood
-                ? ['LLM Fine-tuning', 'RAG Systems', 'PyTorch', 'FastAPI', 'Sandwich AST']
-                : ['React', 'TypeScript', 'Supabase', 'Python'],
-              verified: true,
-              isRegisteredUser: true
-            };
-          });
+        rawUsers.forEach((u: any) => {
+          const cleanEmail = (u.email || '').trim().toLowerCase();
+          const cleanName = (u.name || '').trim();
+
+          // Consolidate legacy 'Mohammed Maqsood' into verified 'Maqs'
+          if (cleanEmail === 'l.maqsood.m@gmail.com' || cleanEmail === 'maqsood@gmail.com' || cleanName === 'Mohammed Maqsood' || cleanName === 'Maqs') {
+            if (!uniqueUsersMap.has('l.maqsood.m@gmail.com')) {
+              uniqueUsersMap.set('l.maqsood.m@gmail.com', {
+                id: 'f8dbf2cc-36a9-4228-bb50-13024787fd35',
+                name: 'Maqs',
+                email: 'l.maqsood.m@gmail.com',
+                role: 'freelancer',
+                photo_url: u.photo_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs'
+              });
+            }
+          } else if (cleanEmail === 'user1@aitag.com' || cleanName === 'User1 Admin' || cleanName === 'User1') {
+            if (!uniqueUsersMap.has('user1@aitag.com')) {
+              uniqueUsersMap.set('user1@aitag.com', {
+                id: '6e36f593-b9e6-4ead-8266-31ac91cf44c5',
+                name: 'User1',
+                email: 'user1@aitag.com',
+                role: 'admin',
+                photo_url: u.photo_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User1'
+              });
+            }
+          } else if (cleanEmail && !uniqueUsersMap.has(cleanEmail)) {
+            uniqueUsersMap.set(cleanEmail, u);
+          }
+        });
+
+        const dedupedUsers = Array.from(uniqueUsersMap.values());
+
+        // Transform registered users into Talent cards
+        const registeredTalent: Talent[] = dedupedUsers.map((u: any) => {
+          const isUser1 = u.email?.toLowerCase().includes('user1');
+          const isMaqsood = u.email?.toLowerCase().includes('maqsood') || u.name === 'Maqs';
+
+          return {
+            id: u.id,
+            name: u.name || u.email.split('@')[0],
+            email: u.email,
+            role: isUser1
+              ? 'Senior AI Automation & Full-Stack Machine Learning Engineer'
+              : isMaqsood
+              ? 'Lead AI Researcher & Platform Engineer'
+              : `${u.role === 'admin' ? 'Admin / ' : ''}AI Developer & Specialist`,
+            category: isUser1 ? 'Agentic Systems' : isMaqsood ? 'LLM & Generative AI' : 'Agentic Systems',
+            avatar: u.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name || u.email)}`,
+            rating: 5.0,
+            reviewsCount: isUser1 ? 19 : isMaqsood ? 42 : 14,
+            hourlyRate: isUser1 ? 3200 : isMaqsood ? 4500 : 2800,
+            completedTasks: isUser1 ? 19 : isMaqsood ? 42 : 8,
+            location: 'India',
+            bio: `Registered AITAG Platform Specialist (${u.role.toUpperCase()}). Verified credentials, sub-millisecond AST sandbox testing, and active freelance contracts.`,
+            skills: isUser1
+              ? ['Next.js', 'LangGraph', 'Supabase', 'Python', 'Node.js', 'Zig']
+              : isMaqsood
+              ? ['LLM Fine-tuning', 'RAG Systems', 'PyTorch', 'FastAPI', 'Sandwich AST']
+              : ['React', 'TypeScript', 'Supabase', 'Python'],
+            verified: true,
+            isRegisteredUser: true
+          };
+        });
 
         // Prepend real registered users at the top, followed by curated profiles
         setTalents([...registeredTalent, ...CURATED_TALENT]);

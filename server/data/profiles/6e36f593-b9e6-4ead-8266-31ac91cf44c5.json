@@ -1,0 +1,75 @@
+{
+  "userId": "6e36f593-b9e6-4ead-8266-31ac91cf44c5",
+  "name": "Maqs",
+  "email": "l.maqsood.m@gmail.com",
+  "role": "freelancer",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs",
+  "headline": "Senior AI Automation & Full-Stack Machine Learning Engineer",
+  "bio": "Delivering production-grade AI automations, scalable cold email infrastructure, and automated video pipelines.",
+  "hourlyRate": 3200,
+  "skills": [
+    "Python",
+    "FastAPI",
+    "LangGraph",
+    "Supabase",
+    "SendGrid API",
+    "Google Cloud Storage",
+    "TypeScript",
+    "Docker"
+  ],
+  "links": {
+    "github": "https://github.com/Maqsood32595",
+    "linkedin": "https://linkedin.com/in/maqsood",
+    "website": "https://aitag.in"
+  },
+  "deliveredWorkflows": [
+    {
+      "id": "wf-1",
+      "title": "AITAG Video Showcase & Automated AI Pipeline",
+      "category": "AI Video & Automation",
+      "businessImpact": "Built zero-latency streaming proxy and video case study showcase with sub-second playback and multi-tier GCS storage.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4",
+      "videoDurationSeconds": 75,
+      "techStack": [
+        "Node.js",
+        "Google Cloud Storage",
+        "React",
+        "TypeScript",
+        "TailwindCSS"
+      ],
+      "liveUrl": "https://aitag.onrender.com"
+    },
+    {
+      "id": "wf-2",
+      "title": "SRE Database Recovery & Error Prevention Automation",
+      "category": "DevOps & Reliability",
+      "businessImpact": "Automated PostgreSQL connection resilience, preventing production downtime and eliminating 500 error cascades across microservices.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
+      "videoDurationSeconds": 110,
+      "techStack": [
+        "PostgreSQL",
+        "Node.js",
+        "Docker",
+        "SRE Automation",
+        "GCP"
+      ],
+      "liveUrl": "https://github.com/Maqsood32595/AITAG"
+    },
+    {
+      "id": "wf-1787232449495",
+      "title": "Vercel & GitHub CI/CD Deployment Pipeline",
+      "category": "CI/CD & Cloud Infrastructure",
+      "businessImpact": "Configured automated multi-branch staging and zero-downtime containerized deployments with automated preview verification.",
+      "demoVideoUrl": "https://www.youtube.com/watch?v=w0vCs20XB5w",
+      "videoDurationSeconds": 95,
+      "techStack": [
+        "GitHub Actions",
+        "Vercel API",
+        "Docker",
+        "Render Blueprint"
+      ],
+      "liveUrl": "https://aitag-dev.onrender.com"
+    }
+  ],
+  "updatedAt": "2026-08-21T14:54:37.956Z"
+}
