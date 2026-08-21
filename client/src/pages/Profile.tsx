@@ -1,3 +1,13 @@
+export function formatExternalUrl(url?: string): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
 import React, { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Paper, Grid, TextField, Button,
@@ -106,7 +116,7 @@ export const Profile: React.FC = () => {
         bio,
         hourlyRate: Number(hourlyRate),
         skills,
-        links: { github: githubUrl, linkedin: linkedinUrl, website: websiteUrl },
+        links: { github: formatExternalUrl(githubUrl), linkedin: formatExternalUrl(linkedinUrl), website: formatExternalUrl(websiteUrl) },
         deliveredWorkflows: workflows,
       });
       setSuccessMessage('✅ Profile & Delivered Workflows saved successfully!');

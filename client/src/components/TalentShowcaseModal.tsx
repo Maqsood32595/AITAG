@@ -1,3 +1,14 @@
+
+export function formatExternalUrl(url?: string): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
 import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
@@ -15,6 +26,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CodeIcon from '@mui/icons-material/Code';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { profileApi } from '../api';
+import UniversalVideoPlayer, { parseVideoSource } from './UniversalVideoPlayer';
 
 interface TalentShowcaseModalProps {
   open: boolean;
@@ -233,7 +245,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                       ))}
                       {wf.liveUrl && (
                         <Button
-                          href={wf.liveUrl}
+                          href={formatExternalUrl(wf.liveUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
                           size="small"
@@ -268,7 +280,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                 variant="outlined"
                 size="small"
                 startIcon={<GitHubIcon />}
-                href={profileData.links.github}
+                href={formatExternalUrl(profileData.links.github)}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ borderRadius: '8px', color: '#0f172a', borderColor: '#cbd5e1', textTransform: 'none', fontWeight: 600 }}
@@ -281,7 +293,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                 variant="outlined"
                 size="small"
                 startIcon={<LinkedInIcon />}
-                href={profileData.links.linkedin}
+                href={formatExternalUrl(profileData.links.linkedin)}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ borderRadius: '8px', color: '#0077b5', borderColor: '#cbd5e1', textTransform: 'none', fontWeight: 600 }}
@@ -294,7 +306,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                 variant="outlined"
                 size="small"
                 startIcon={<LanguageIcon />}
-                href={profileData.links.website}
+                href={formatExternalUrl(profileData.links.website)}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ borderRadius: '8px', color: '#4f46e5', borderColor: '#cbd5e1', textTransform: 'none', fontWeight: 600 }}
