@@ -1,3 +1,4 @@
+require('events').EventEmitter.defaultMaxListeners = 50;
 /**
  * AITAG Platform — Express Server & Entry Point
  * Port: 5000 / 5005 (Light Theme Architecture)

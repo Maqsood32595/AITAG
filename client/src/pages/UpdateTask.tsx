@@ -53,7 +53,7 @@ const UpdateTask = () => {
               </Select>
             </FormControl>
             <TextField label="Description" required multiline rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} sx={fieldStyle} />
-            <TextField label="Deadline" type="date" required value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} InputLabelProps={{ shrink: true }} sx={fieldStyle} />
+            <TextField label="Deadline" type="date" required value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} InputLabelProps={{ shrink: true }} sx={{ '& .MuiInputLabel-root': { bgcolor: '#ffffff', px: 0.8, borderRadius: '4px', transform: 'translate(14px, -9px) scale(0.75)' } }} sx={fieldStyle} />
             <TextField label="Budget ($)" type="number" required value={form.budget} onChange={e => setForm({ ...form, budget: e.target.value })} sx={fieldStyle} />
             <TextField label="Image URL" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} sx={fieldStyle} />
             <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>

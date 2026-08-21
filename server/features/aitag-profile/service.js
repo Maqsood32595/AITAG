@@ -1,3 +1,4 @@
+require('events').EventEmitter.defaultMaxListeners = 50;
 const fs = require('fs');
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');

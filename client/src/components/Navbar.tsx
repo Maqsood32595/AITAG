@@ -98,7 +98,7 @@ const Navbar = () => {
               <Tooltip title={user.name}>
                 <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5 }}>
                   <Avatar
-                    src={user.photo_url || undefined}
+                    src={user.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name || user.email || 'Maqs')}`}
                     sx={{
                       width: 36,
                       height: 36,
