@@ -112,11 +112,32 @@ class ProfileService {
     }
   }
 
+  getLocalProfilePath(userId) {
+    const dir = path.join(__dirname, '../../data/profiles');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    return path.join(dir, `${userId}.json`);
+  }
+
   async getProfileByUserId(userId) {
     const cached = PROFILES_CACHE.get(userId);
     if (cached) return cached;
 
-    // 1. Attempt to read persisted profile.json from shared Google Cloud Storage bucket
+    // 1. Check local disk persistence
+    try {
+      const localFile = this.getLocalProfilePath(userId);
+      if (fs.existsSync(localFile)) {
+        const localData = JSON.parse(fs.readFileSync(localFile, 'utf8'));
+        if (localData && localData.deliveredWorkflows && localData.deliveredWorkflows.length > 0) {
+          PROFILES_CACHE.set(userId, localData);
+          console.log(`✅ Loaded profile for ${userId} from local disk persistence`);
+          return localData;
+        }
+      }
+    } catch (e) {
+      console.warn('[ProfileService] Local disk profile read note:', e.message);
+    }
+
+    // 2. Attempt to read persisted profile.json from shared Google Cloud Storage bucket
     const bucket = this.getBucket();
     if (bucket) {
       try {
@@ -127,6 +148,9 @@ class ProfileService {
           const [content] = await file.download();
           const parsed = JSON.parse(content.toString('utf8'));
           PROFILES_CACHE.set(userId, parsed);
+          try {
+            fs.writeFileSync(this.getLocalProfilePath(userId), JSON.stringify(parsed, null, 2), 'utf8');
+          } catch {}
           console.log(`✅ Loaded synchronized profile for ${userId} from GCS profile.json`);
           return parsed;
         }
@@ -135,34 +159,17 @@ class ProfileService {
       }
     }
 
-    // 2. Supabase fallback
-    let user = null;
-    try {
-      if (supabase && typeof supabase.from === 'function') {
-        const { data } = await supabase
-          .from('aitag_users')
-          .select('id, name, email, role, photo_url')
-          .eq('id', userId)
-          .single();
-        user = data;
-      }
-    } catch {}
-
-    const name = user?.name || 'Maqs';
-    const email = user?.email || 'l.maqsood.m@gmail.com';
-    const role = user?.role || 'freelancer';
-    const photoUrl = user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || email)}`;
-
+    // 3. Fallback default rich profile
     const defaultProfile = {
       userId,
-      name,
-      email,
-      role,
-      photoUrl,
-      headline: role === 'admin' ? 'Full-Stack AI Engineer & Admin' : 'Senior AI Automation & Machine Learning Specialist',
+      name: 'Maqs',
+      email: 'l.maqsood.m@gmail.com',
+      role: 'freelancer',
+      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs',
+      headline: 'Senior AI Automation & Machine Learning Specialist',
       bio: 'Delivering production-grade AI automations, email pipelines, and machine learning tools.',
-      hourlyRate: role === 'admin' ? 3500 : 2800,
-      skills: ['Python', 'LangGraph', 'FastAPI', 'Supabase', 'SendGrid API', 'Meta Graph API', 'TypeScript'],
+      hourlyRate: 3200,
+      skills: ['Python', 'LangGraph', 'FastAPI', 'Supabase', 'SendGrid API', 'Google Cloud Storage', 'TypeScript', 'Docker'],
       links: {
         github: 'https://github.com/Maqsood32595',
         linkedin: 'https://linkedin.com/in/maqsood',
@@ -171,27 +178,42 @@ class ProfileService {
       deliveredWorkflows: [
         {
           id: 'wf-1',
-          title: 'Automated Cold Email Sending & DNS Deliverability Pipeline',
-          category: 'Email Automation & Growth',
-          businessImpact: 'Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability.',
-          demoVideoUrl: '',
-          techStack: ['Python', 'SendGrid API', 'DNS Automation', 'FastAPI', 'PostgreSQL'],
-          liveUrl: 'https://github.com/Maqsood32595/email-pipeline-demo'
+          title: 'AITAG Video Showcase & Automated AI Pipeline',
+          category: 'AI Video & Automation',
+          businessImpact: 'Built zero-latency streaming proxy and video case study showcase with sub-second playback and multi-tier GCS storage.',
+          demoVideoUrl: `/api/profile/workflows/stream-video?path=freelancers%2F${userId}%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4`,
+          videoDurationSeconds: 75,
+          techStack: ['Node.js', 'Google Cloud Storage', 'React', 'TypeScript', 'TailwindCSS'],
+          liveUrl: 'https://aitag.onrender.com'
         },
         {
           id: 'wf-2',
-          title: 'Facebook & Meta Ads AI Optimization Engine',
-          category: 'Growth & Ads',
-          businessImpact: 'Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.',
-          demoVideoUrl: '',
-          techStack: ['Meta Graph API', 'OpenAI GPT-4o', 'Zapier', 'Supabase'],
-          liveUrl: 'https://user1.ai/meta-ads-case-study'
+          title: 'SRE Database Recovery & Error Prevention Automation',
+          category: 'DevOps & Reliability',
+          businessImpact: 'Automated PostgreSQL connection resilience, preventing production downtime and eliminating 500 error cascades across microservices.',
+          demoVideoUrl: `/api/profile/workflows/stream-video?path=freelancers%2F${userId}%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4`,
+          videoDurationSeconds: 110,
+          techStack: ['PostgreSQL', 'Node.js', 'Docker', 'SRE Automation', 'GCP'],
+          liveUrl: 'https://github.com/Maqsood32595/AITAG'
+        },
+        {
+          id: 'wf-1787232449495',
+          title: 'Vercel & GitHub CI/CD Deployment Pipeline',
+          category: 'CI/CD & Cloud Infrastructure',
+          businessImpact: 'Configured automated multi-branch staging and zero-downtime containerized deployments with automated preview verification.',
+          demoVideoUrl: `/api/profile/workflows/stream-video?path=freelancers%2F${userId}%2Fworkflows%2Fwf-1787232449495%2F1787233165363_VercelGithub.mp4`,
+          videoDurationSeconds: 95,
+          techStack: ['GitHub Actions', 'Vercel API', 'Docker', 'Render Blueprint'],
+          liveUrl: 'https://aitag-dev.onrender.com'
         }
       ],
       updatedAt: new Date().toISOString()
     };
 
     PROFILES_CACHE.set(userId, defaultProfile);
+    try {
+      fs.writeFileSync(this.getLocalProfilePath(userId), JSON.stringify(defaultProfile, null, 2), 'utf8');
+    } catch {}
     return defaultProfile;
   }
 
@@ -214,7 +236,15 @@ class ProfileService {
 
     PROFILES_CACHE.set(userId, updated);
 
-    // Persist to shared Google Cloud Storage so Dev, Prod, and Local remain 100% in sync
+    // 1. Save to local disk persistence
+    try {
+      fs.writeFileSync(this.getLocalProfilePath(userId), JSON.stringify(updated, null, 2), 'utf8');
+      console.log(`✅ Saved profile for ${userId} to local disk persistence`);
+    } catch (e) {
+      console.warn('[ProfileService] Local disk profile save note:', e.message);
+    }
+
+    // 2. Persist to shared Google Cloud Storage so Dev, Prod, and Local remain 100% in sync
     const bucket = this.getBucket();
     if (bucket) {
       try {
@@ -232,7 +262,6 @@ class ProfileService {
 
     return updated;
   }
-
 
   async uploadWorkflowVideoBuffer(userId, { workflowId, filename, buffer, mimeType, durationSeconds }) {
     if (!userId) throw new Error('Unauthorized');

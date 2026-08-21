@@ -126,7 +126,7 @@ const AITalent = () => {
 
         // Transform registered users into Talent cards
         const registeredTalent: Talent[] = rawUsers
-          .filter((u: any) => u.email !== user?.email) // Show other registered users
+           // Show other registered users
           .map((u: any) => {
             const isUser1 = u.email?.toLowerCase().includes('user1');
             const isMaqsood = u.email?.toLowerCase().includes('maqsood');
