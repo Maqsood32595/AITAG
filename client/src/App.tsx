@@ -52,6 +52,10 @@ function App() {
 
               {/* Protected / App Routes */}
               <Route path="/add_task" element={<PrivateRoute><AddTask /></PrivateRoute>} />
+                <Route path="/tasks/add" element={<PrivateRoute><AddTask /></PrivateRoute>} />
+                <Route path="/post-task" element={<PrivateRoute><AddTask /></PrivateRoute>} />
+                <Route path="/browse" element={<BrowseTasks />} />
+                <Route path="/tasks" element={<BrowseTasks />} />
               <Route path="/my_tasks" element={<PrivateRoute><MyPostedTasks /></PrivateRoute>} />
               <Route path="/update-task/:id" element={<PrivateRoute><UpdateTask /></PrivateRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
