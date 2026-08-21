@@ -37,16 +37,25 @@ const AddTask = () => {
           <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>Describe what you need — AI talent will bid on it</Typography>
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <TextField label="Task Title" required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} sx={fieldStyle} />
-            <FormControl sx={fieldStyle}>
-              <InputLabel>Category</InputLabel>
-              <Select value={form.category} label="Category" onChange={e => setForm({ ...form, category: e.target.value })}>
-                {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <TextField label="Description" required multiline rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} sx={fieldStyle} />
-            <TextField label="Deadline" type="date" required value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })}
-              InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} sx={fieldStyle} />
+            <Box sx={{ width: '100%' }}>
+                <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', mb: 0.8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Deadline *
+                </Typography>
+                <OutlinedInput
+                  type="date"
+                  required
+                  value={form.deadline}
+                  onChange={e => setForm({ ...form, deadline: e.target.value })}
+                  inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                  fullWidth
+                  sx={{
+                    borderRadius: '10px',
+                    bgcolor: '#ffffff',
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#4f46e5' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#4f46e5' }
+                  }}
+                />
+              </Box>
             <TextField label="Budget ($)" type="number" required value={form.budget} onChange={e => setForm({ ...form, budget: e.target.value })} sx={fieldStyle} />
             <TextField label="Image URL (optional)" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} sx={fieldStyle} />
             <Box sx={{ p: 2, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.08)' }}>
