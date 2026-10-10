@@ -16,6 +16,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Global response interceptor for 401 Unauthorized
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('aitag_token');
+      window.location.href = '/signin';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth
 export const authApi = {
   register: (data: { name: string; email: string; password: string; photoURL?: string; role?: string }) =>
@@ -64,9 +76,7 @@ export const invitationsApi = {
 
 // Profile & Delivered Workflows
 export const profileApi = {
-  getMe: () => api.get('/profile/me'),
   getProfile: () => api.get('/profile/me'),
-  updateMe: (data: object) => api.put('/profile/me', data),
   updateProfile: (data: object) => api.put('/profile/me', data),
   getById: (userId: string) => api.get(`/profile/${userId}`),
   uploadVideoDirect: (formData: FormData) => api.post('/profile/workflows/video-upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),

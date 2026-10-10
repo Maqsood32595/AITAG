@@ -27,7 +27,7 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import LanguageIcon from '@mui/icons-material/Language';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import Navbar from '../components/Navbar';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import UniversalVideoPlayer, { parseVideoSource } from '../components/UniversalVideoPlayer';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api';
@@ -287,10 +287,8 @@ export const Profile: React.FC = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', pb: 12 }}>
-      <Navbar />
-
-      <Container maxWidth="lg" sx={{ pt: 5 }}>
+    <DashboardLayout>
+      <Container maxWidth="lg">
         {/* Header User Card */}
         <Paper
           elevation={0}
@@ -709,7 +707,7 @@ export const Profile: React.FC = () => {
           </DialogActions>
         </Dialog>
       </Container>
-    </Box>
+    </DashboardLayout>
   );
 };
 

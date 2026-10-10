@@ -1,7 +1,8 @@
 -- ============================================================
 -- AITAG Fractal Kernel — Supabase Migration Script
--- Run this in your Supabase SQL Editor (new tables only)
--- Existing tables are NOT touched.
+-- Project: byekbjxiowkrtwpsxevz (byekbjxiowkrtwpsxevz.supabase.co)
+-- Run this in your Supabase SQL Editor
+-- All statements are idempotent (IF NOT EXISTS / OR REPLACE)
 -- ============================================================
 
 -- 1. AITAG Users Table
@@ -44,13 +45,63 @@ CREATE TABLE IF NOT EXISTS aitag_bids (
   UNIQUE(task_id, user_email)
 );
 
--- 4. Indexes for fast lookups
+-- 4. AITAG Invitations Table (was missing — was only in-memory before)
+CREATE TABLE IF NOT EXISTS aitag_invitations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES aitag_tasks(id) ON DELETE CASCADE,
+  task_title TEXT NOT NULL DEFAULT 'AI Task',
+  task_budget NUMERIC DEFAULT 0,
+  client_email TEXT NOT NULL,
+  freelancer_email TEXT NOT NULL,
+  message TEXT DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined')),
+  accepted_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(task_id, freelancer_email)
+);
+
+-- 5. AITAG Profiles Table (was only local disk/GCS — now persisted in Supabase)
+CREATE TABLE IF NOT EXISTS aitag_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID UNIQUE REFERENCES aitag_users(id) ON DELETE CASCADE,
+  user_email TEXT NOT NULL UNIQUE,
+  headline TEXT DEFAULT '',
+  bio TEXT DEFAULT '',
+  hourly_rate NUMERIC DEFAULT 0,
+  skills TEXT[] DEFAULT '{}',
+  links JSONB DEFAULT '{}',
+  delivered_workflows JSONB DEFAULT '[]',
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 6. Indexes for fast lookups
 CREATE INDEX IF NOT EXISTS idx_aitag_tasks_user_email ON aitag_tasks(user_email);
 CREATE INDEX IF NOT EXISTS idx_aitag_tasks_category ON aitag_tasks(category);
+CREATE INDEX IF NOT EXISTS idx_aitag_tasks_status ON aitag_tasks(status);
 CREATE INDEX IF NOT EXISTS idx_aitag_bids_user_email ON aitag_bids(user_email);
 CREATE INDEX IF NOT EXISTS idx_aitag_bids_task_id ON aitag_bids(task_id);
+CREATE INDEX IF NOT EXISTS idx_aitag_bids_task_owner ON aitag_bids(task_owner_email);
+CREATE INDEX IF NOT EXISTS idx_aitag_invitations_freelancer ON aitag_invitations(freelancer_email);
+CREATE INDEX IF NOT EXISTS idx_aitag_invitations_client ON aitag_invitations(client_email);
+CREATE INDEX IF NOT EXISTS idx_aitag_invitations_task ON aitag_invitations(task_id);
+CREATE INDEX IF NOT EXISTS idx_aitag_profiles_email ON aitag_profiles(user_email);
 
--- 5. Seed 8 featured AI tasks
+-- 7. Auto-increment total_bids trigger (fixes denormalized counter bug)
+CREATE OR REPLACE FUNCTION increment_task_bid_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE aitag_tasks SET total_bids = total_bids + 1 WHERE id = NEW.task_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS on_bid_inserted ON aitag_bids;
+CREATE TRIGGER on_bid_inserted
+  AFTER INSERT ON aitag_bids
+  FOR EACH ROW EXECUTE FUNCTION increment_task_bid_count();
+
+-- 8. Seed 8 featured AI tasks
 INSERT INTO aitag_tasks (title, category, description, deadline, budget, image, status, user_email, user_name)
 VALUES
   ('Build AI-Powered Resume Screener', 'AI Engineering', 'Develop an LLM-based resume screening tool that ranks candidates by role fit using GPT-4o and a custom scoring rubric.', '2026-09-15', 3500, 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800', 'open', 'client@aitag.com', 'AITAG Client'),

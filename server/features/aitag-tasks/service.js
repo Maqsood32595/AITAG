@@ -290,11 +290,51 @@ class TasksService {
   }
 
   async updateTask(id, userEmail, updates) {
-    return { ...updates, id, user_email: userEmail };
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data, error } = await supabase
+          .from('aitag_tasks')
+          .update(updates)
+          .eq('id', id)
+          .eq('user_email', userEmail)
+          .select()
+          .single();
+
+        if (!error && data) return data;
+      }
+    } catch (e) {
+      console.warn('[TasksService] Update task fallback:', e.message);
+    }
+
+    const index = SEED_FALLBACK_TASKS.findIndex(t => t.id === id && t.user_email === userEmail);
+    if (index !== -1) {
+      SEED_FALLBACK_TASKS[index] = { ...SEED_FALLBACK_TASKS[index], ...updates };
+      return SEED_FALLBACK_TASKS[index];
+    }
+    throw new Error('Task not found or unauthorized');
   }
 
   async deleteTask(id, userEmail) {
-    return { deleted: true, id };
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { error } = await supabase
+          .from('aitag_tasks')
+          .delete()
+          .eq('id', id)
+          .eq('user_email', userEmail);
+        
+        if (!error) return { deleted: true, id };
+      }
+    } catch (e) {
+      console.warn('[TasksService] Delete task fallback:', e.message);
+    }
+
+    const index = SEED_FALLBACK_TASKS.findIndex(t => t.id === id && t.user_email === userEmail);
+    if (index !== -1) {
+      SEED_FALLBACK_TASKS.splice(index, 1);
+      return { deleted: true, id };
+    }
+    throw new Error('Task not found or unauthorized');
   }
 
   async incrementBidCount(taskId) {

@@ -10,7 +10,7 @@ import PostIcon from '@mui/icons-material/PostAdd';
 import MailIcon from '@mui/icons-material/Mail';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import Navbar from '../components/Navbar';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import { tasksApi, bidsApi, invitationsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -74,9 +74,8 @@ const Dashboard = () => {
   if (loading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh"><CircularProgress sx={{ color: '#4f46e5' }} /></Box>;
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
-      <Navbar />
-      <Container maxWidth="lg" sx={{ pt: 12, pb: 6 }}>
+    <DashboardLayout>
+      <Container maxWidth="lg" sx={{ pb: 6 }}>
         {/* Welcome */}
         <Paper elevation={0} sx={{ p: 4, borderRadius: '20px', mb: 4, background: 'linear-gradient(135deg, rgba(79,70,229,0.08) 0%, rgba(8,145,178,0.06) 100%)', border: '1px solid rgba(79,70,229,0.1)' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, flexDirection: { xs: 'column', md: 'row' }, gap: 2.5 }}>
@@ -244,7 +243,7 @@ const Dashboard = () => {
           )}
         </Paper>
       </Container>
-    </Box>
+    </DashboardLayout>
   );
 };
 

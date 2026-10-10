@@ -114,7 +114,7 @@ class AuthService {
 
         if (!error && user) {
           const valid = await bcrypt.compare(password, user.password_hash);
-          if (valid || password === 'admin' || password === 'Password' || password === 'password') {
+          if (valid) {
             const { password_hash, ...safeUser } = user;
             const token = this.signToken(safeUser);
             return { user: safeUser, token };
@@ -128,13 +128,7 @@ class AuthService {
     // 2. Try Seed Fallback
     const seedUser = SEED_USERS.find(u => u.email.toLowerCase() === cleanEmail);
     if (seedUser) {
-      const match = (
-        password === 'admin' || 
-        password === 'Password' || 
-        password === 'password' || 
-        password === 'admin123' ||
-        await bcrypt.compare(password, seedUser.password_hash)
-      );
+      const match = await bcrypt.compare(password, seedUser.password_hash);
       if (match) {
         const { password_hash, ...safeUser } = seedUser;
         const token = this.signToken(safeUser);

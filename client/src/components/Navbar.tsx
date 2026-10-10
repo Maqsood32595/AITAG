@@ -23,7 +23,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileMenuAnchorEl, setMobileMenuAnchorEl] = useState<null | HTMLElement>(null);
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
 
   const handleLogout = () => {
@@ -91,8 +91,39 @@ const Navbar = () => {
           ))}
         </Box>
 
-        {/* Auth Buttons */}
+        {/* Auth Buttons & Mobile Menu Toggle */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <IconButton
+            sx={{ display: { xs: 'flex', md: 'none' }, color: '#0f172a' }}
+            onClick={(e) => setMobileMenuAnchorEl(e.currentTarget)}
+          >
+            <MenuIcon />
+          </IconButton>
+          
+          <Menu
+            anchorEl={mobileMenuAnchorEl}
+            open={Boolean(mobileMenuAnchorEl)}
+            onClose={() => setMobileMenuAnchorEl(null)}
+            sx={{ display: { xs: 'block', md: 'none' } }}
+          >
+            {NAV_LINKS.map((link) => (
+              <MenuItem
+                key={link.to}
+                component={Link}
+                to={link.to}
+                onClick={(e: React.MouseEvent) => {
+                  setMobileMenuAnchorEl(null);
+                  if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
+                    e.preventDefault();
+                    navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
+                  }
+                }}
+              >
+                {link.label}
+              </MenuItem>
+            ))}
+          </Menu>
+
           {user ? (
             <>
               <Tooltip title={user.name}>

@@ -4,6 +4,7 @@
  */
 const supabase = require('../../supabase');
 const tasksService = require('../aitag-tasks/service');
+const escrowPaymentService = require('../escrow-payment/service');
 
 const IN_MEMORY_BIDS = [];
 
@@ -112,23 +113,51 @@ class BidsService {
   }
 
   async acceptBid(bidId, requestingEmail) {
-    const bid = IN_MEMORY_BIDS.find(b => b.id === bidId);
-    if (bid) {
-      bid.status = 'accepted';
-      return {
-        success: true,
-        bid,
-        escrow: {
-          grossAmount: 15000,
-          platformFee: 1500,
-          section194OTDS: 150,
-          freelancerNetPayout: 13350,
-          status: 'HELD_IN_ESCROW'
+    let bid;
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data: sbBid, error: fetchError } = await supabase
+          .from('aitag_bids')
+          .select('*')
+          .eq('id', bidId)
+          .single();
+
+        if (sbBid && !fetchError) {
+          const { error: updateError } = await supabase
+            .from('aitag_bids')
+            .update({ status: 'accepted' })
+            .eq('id', bidId);
+          if (!updateError) {
+            sbBid.status = 'accepted';
+            bid = sbBid;
+          }
         }
-      };
+      }
+    } catch (e) {
+      console.warn('[BidsService] Accept bid fallback:', e.message);
     }
 
-    return { success: true };
+    if (!bid) {
+      bid = IN_MEMORY_BIDS.find(b => b.id === bidId);
+      if (bid) bid.status = 'accepted';
+    }
+
+    if (!bid) throw new Error('Bid not found');
+
+    const task = await tasksService.getTaskById(bid.task_id);
+    const escrow = escrowPaymentService.calculateSplits(task.budget);
+
+    return {
+      success: true,
+      bid,
+      escrow: {
+        grossAmount: escrow.grossAmount,
+        platformFee: escrow.splits.platformCommissionFee,
+        section194OTDS: escrow.splits.section194OTDSWithholding,
+        freelancerNetPayout: escrow.splits.freelancerNetPayout,
+        status: 'HELD_IN_ESCROW'
+      }
+    };
   }
 }
 

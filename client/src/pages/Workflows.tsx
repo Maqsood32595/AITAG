@@ -16,7 +16,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import UniversalVideoPlayer, { parseVideoSource } from '../components/UniversalVideoPlayer';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api';
@@ -224,10 +224,8 @@ export const Workflows: React.FC = () => {
   const activeWf = workflows.find(w => w.id === activeWorkflowId) || workflows[0];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', pb: 10 }}>
-      <Navbar />
-
-      <Container maxWidth="lg" sx={{ pt: 4 }}>
+    <DashboardLayout>
+      <Container maxWidth="lg">
         {/* Header Navigation */}
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -523,7 +521,7 @@ export const Workflows: React.FC = () => {
           </DialogActions>
         </Dialog>
       </Container>
-    </Box>
+    </DashboardLayout>
   );
 };
 

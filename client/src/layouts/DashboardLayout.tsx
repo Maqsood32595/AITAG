@@ -1,27 +1,26 @@
 import React from 'react';
 import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, AppBar, Toolbar, Avatar, IconButton } from '@mui/material';
-
-
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const drawerWidth = 260;
 
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
-  const isFreelancer = location.pathname.includes('/freelancer');
+  const isFreelancer = user?.role === 'freelancer';
 
   const menuItems = isFreelancer ? [
-    { text: 'Find Work', icon: <span>🔍</span>, path: '/freelancer' },
-    { text: 'My Proposals', icon: <span>📄</span>, path: '/freelancer/proposals' },
-    { text: 'Messages', icon: <span>💬</span>, path: '/freelancer/messages' },
-    { text: 'Wallet', icon: <span>💰</span>, path: '/freelancer/wallet' },
+    { text: 'Dashboard', icon: <span>📊</span>, path: '/dashboard' },
+    { text: 'Find Work', icon: <span>🔍</span>, path: '/browse' },
+    { text: 'My Profile', icon: <span>👤</span>, path: '/profile' },
+    { text: 'My Workflows', icon: <span>🎬</span>, path: '/workflows' },
   ] : [
-    { text: 'Post a Job', icon: <span>➕</span>, path: '/' },
-    { text: 'My Hires', icon: <span>👥</span>, path: '/hires' },
-    { text: 'Messages', icon: <span>💬</span>, path: '/messages' },
-    { text: 'Escrow Funding', icon: <span>💰</span>, path: '/escrow' },
+    { text: 'Dashboard', icon: <span>📊</span>, path: '/dashboard' },
+    { text: 'Post a Task', icon: <span>➕</span>, path: '/add_task' },
+    { text: 'My Posted Tasks', icon: <span>👥</span>, path: '/my_tasks' },
   ];
 
   return (
@@ -35,12 +34,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             <Typography variant="h6" sx={{ letterSpacing: '-0.5px', fontWeight: 800 }}>AITAG</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', fontWeight: 600, '&:hover': { color: 'primary.main' } }} onClick={() => navigate('/')}>Client Dashboard</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', fontWeight: 600, '&:hover': { color: 'primary.main' } }} onClick={() => navigate('/freelancer')}>Freelancer Dashboard</Typography>
-            
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>{user?.role === 'admin' ? 'Admin Dashboard' : isFreelancer ? 'Freelancer Dashboard' : 'Client Dashboard'}</Typography>
             <Box sx={{ display: 'flex', gap: 1, ml: 2, alignItems: 'center' }}>
               <IconButton size="small">🔔</IconButton>
-              <Avatar sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontSize: '14px', fontWeight: 700, ml: 1, border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>{isFreelancer ? 'FR' : 'CL'}</Avatar>
+              <Avatar src={user?.photo_url} sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontSize: '14px', fontWeight: 700, ml: 1, border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                {user?.name?.[0]?.toUpperCase()}
+              </Avatar>
             </Box>
           </Box>
         </Toolbar>

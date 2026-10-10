@@ -20,7 +20,7 @@ class InvitationsService {
 
     try {
       const { data: task } = await supabase
-        .from('tasks')
+        .from('aitag_tasks')
         .select('id, title, budget, user_email')
         .eq('id', taskId)
         .single();
@@ -128,7 +128,7 @@ class InvitationsService {
 
     try {
       const { data: createdBid } = await supabase
-        .from('bids')
+        .from('aitag_bids')
         .insert([bidRecord])
         .select()
         .single();

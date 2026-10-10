@@ -4,7 +4,7 @@ import { Box, Container, Typography, Table, TableBody, TableCell, TableHead, Tab
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import Navbar from '../components/Navbar';
+import { DashboardLayout } from '../layouts/DashboardLayout';
 import { tasksApi } from '../api';
 
 const MyPostedTasks = () => {
@@ -26,9 +26,8 @@ const MyPostedTasks = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
-      <Navbar />
-      <Container maxWidth="xl" sx={{ pt: 12, pb: 6 }}>
+    <DashboardLayout>
+      <Container maxWidth="xl" sx={{ pb: 6 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>My Posted Tasks</Typography>
@@ -84,7 +83,7 @@ const MyPostedTasks = () => {
           </Paper>
         )}
       </Container>
-    </Box>
+    </DashboardLayout>
   );
 };
 
