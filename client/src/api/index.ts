@@ -1,8 +1,16 @@
 import axios from 'axios';
 
-const BASE_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-  ? 'http://localhost:5005/api'
-  : (import.meta.env.VITE_API_BASE_URL || '/api');
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    if (window.location.port === '8000') return '/api';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return (import.meta.env.VITE_API_BASE_URL || '/api');
+    }
+  }
+  return import.meta.env.VITE_API_BASE_URL || '/api';
+};
+
+const BASE_URL = getBaseUrl();
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -84,6 +92,24 @@ export const profileApi = {
     api.post('/profile/workflows/video-signed-url', data),
   attachVideo: (data: { workflowId: string; videoUrl: string; durationSeconds?: number }) =>
     api.post('/profile/workflows/attach-video', data),
+};
+
+// Pilot AI Service Packages (Fixed Scope & Outcomes)
+export const servicePackagesApi = {
+  getAll: () => api.get('/service-packages'),
+  getBySlug: (slug: string) => api.get(`/service-packages/${slug}`),
+};
+
+// 8-Stage Service Orders Workflow
+export const serviceOrdersApi = {
+  create: (data: any) => api.post('/service-orders', data),
+  getAll: (params?: { role?: string; email?: string; status?: string }) => api.get('/service-orders', { params }),
+  getById: (id: string) => api.get(`/service-orders/${id}`),
+  assign: (id: string, data: { expertEmail: string; expertName?: string }) => api.post(`/service-orders/${id}/assign`, data),
+  activate: (id: string) => api.post(`/service-orders/${id}/activate`),
+  submitDraft: (id: string, data: { draftFiles: any[] }) => api.post(`/service-orders/${id}/draft`, data),
+  requestRevision: (id: string, data: { revisionNotes: string }) => api.post(`/service-orders/${id}/revision`, data),
+  approve: (id: string, data: { rating?: number; testimonial?: string; finalFiles?: any[] }) => api.post(`/service-orders/${id}/approve`, data),
 };
 
 export default api;

@@ -249,7 +249,11 @@ const HeroSection = () => {
               <Button
                 variant="contained"
                 size="large"
-                onClick={() => navigate('/talent')}
+                onClick={() => {
+                  const el = document.getElementById('packages');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  else navigate('/#packages');
+                }}
                 sx={{
                   background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
                   fontWeight: 700,
@@ -261,7 +265,7 @@ const HeroSection = () => {
                   '&:hover': { boxShadow: '0 12px 32px rgba(79,70,229,0.45)', transform: 'translateY(-2px)' },
                 }}
               >
-                Find AI Talent →
+                ✨ Explore AI Packages (From ₹499) →
               </Button>
               <Button
                 variant="outlined"

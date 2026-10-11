@@ -1,13 +1,17 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import HeroSection from '../components/HeroSection';
 import Navbar from '../components/Navbar';
+import HeroSection from '../components/HeroSection';
+import ServicePackagesSection from '../components/ServicePackagesSection';
+import Footer from '../components/Footer';
 
-const Home = () => {
+const Home: React.FC = () => {
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
       <HeroSection />
+      <ServicePackagesSection />
+      <Footer />
     </Box>
   );
 };

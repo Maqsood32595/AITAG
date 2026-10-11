@@ -5,6 +5,7 @@ dist/
 dist-ssr/
 *.local
 temp_fractal/
+temp_mail_reqs/
 AITAG.mp4
 AITAG2.mp4
 AITAG_Video_Full.mp4
@@ -16,6 +17,7 @@ quicklancer-source/
 # -------------------------------------------------------------
 tests/
 test/
+piet/
 *.test.*
 test_*.js
 test_*.cjs

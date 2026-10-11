@@ -3,6 +3,12 @@
  * Fractal Kernel Core Slice
  */
 const path = require('path');
+const fs = require('fs');
+
+const devEnvPath = path.resolve(__dirname, '../.env.development');
+if (fs.existsSync(devEnvPath) && (process.env.PORT === '8000' || process.env.NODE_ENV === 'development' || process.env.USE_DEV_DB === 'true')) {
+  require('dotenv').config({ path: devEnvPath, override: true });
+}
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');

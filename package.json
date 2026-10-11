@@ -6,7 +6,9 @@
   "scripts": {
     "build": "npm --prefix client install && npm --prefix client run build",
     "start": "node server/index.js",
-    "dev": "node server/index.js"
+    "dev": "node server/index.js",
+    "test:piet": "node tests/piet/piet.mjs",
+    "test": "node tests/piet/piet.mjs"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.0.1",

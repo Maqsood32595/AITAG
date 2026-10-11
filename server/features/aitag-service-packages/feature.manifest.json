@@ -1,0 +1,8 @@
+{
+  "id": "aitag-service-packages",
+  "name": "AITAG Pilot AI Service Packages & Tiers",
+  "version": "1.0.0",
+  "basePath": "/api/service-packages",
+  "enabled": true,
+  "dependencies": []
+}

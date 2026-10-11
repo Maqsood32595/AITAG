@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
+  { label: 'AI Packages', to: '/#packages' },
   { label: 'Browse Tasks', to: '/all_tasks' },
   { label: 'AI Talent', to: '/talent' },
   { label: 'Blog', to: '/blog' },

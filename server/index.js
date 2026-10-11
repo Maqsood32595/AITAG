@@ -6,6 +6,10 @@ require('events').EventEmitter.defaultMaxListeners = 50;
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
+const devEnvPath = path.join(__dirname, '../.env.development');
+if (fs.existsSync(devEnvPath) && (process.env.NODE_ENV === 'development' || process.env.USE_DEV_DB === 'true' || process.env.PORT === '8000')) {
+  require('dotenv').config({ path: devEnvPath, override: true });
+}
 
 const express = require('express');
 const http = require('http');
@@ -13,7 +17,7 @@ const cors = require('cors');
 const WebSocket = require('ws');
 const kernel = require('./kernel');
 
-const PORT = process.env.PORT || 5005;
+const PORT = process.env.PORT || 8000;
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -21,7 +25,7 @@ const wss = new WebSocket.Server({ server });
 app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString(), env: process.env.NODE_ENV || 'production' }));
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://localhost:5005', 'https://aitag.pages.dev', 'https://aitag.onrender.com', 'https://shortshub.app'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://localhost:5005', 'http://localhost:8000', 'https://aitag.pages.dev', 'https://aitag.onrender.com', 'https://aitag-dev.onrender.com', 'https://shortshub.app'],
   credentials: true
 }));
 app.use(express.json());
