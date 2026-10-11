@@ -16,6 +16,14 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
 
   # -------------------------------------------------------------
   # 🧪 Staging / Dev Environment (develop branch & PR Previews)
@@ -34,6 +42,14 @@ services:
         value: development
       - key: PORT
         value: 10000
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
 
 # -------------------------------------------------------------
 # 🔀 Automatic Pull Request Preview Environments
