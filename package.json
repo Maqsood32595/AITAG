@@ -4,7 +4,7 @@
   "description": "AITAG — SaaS-Enabled AI Freelance Marketplace & Browser-Based AI Sandbox with Light Theme, Sandwich AST Architecture, & Upwork/Fiverr Clone Workflows",
   "main": "server/index.js",
   "scripts": {
-    "build": "npm --prefix client install && npm --prefix client run build",
+    "build": "npm --prefix client install && npm --prefix client run build && node -e \"const fs=require('fs'); fs.cpSync('client/dist', 'server/public', {recursive: true});\"",
     "start": "node server/index.js",
     "dev": "node server/index.js",
     "test:piet": "node tests/piet/piet.mjs",
