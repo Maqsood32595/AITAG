@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
 import ServicePackagesSection from '../components/ServicePackagesSection';
-import Footer from '../components/Footer';
 
 const Home: React.FC = () => {
   return (
@@ -11,7 +10,6 @@ const Home: React.FC = () => {
       <Navbar />
       <HeroSection />
       <ServicePackagesSection />
-      <Footer />
     </Box>
   );
 };

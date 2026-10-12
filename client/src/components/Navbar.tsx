@@ -9,6 +9,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../context/AuthContext';
+import { getHappyPastelAvatar } from '../utils/avatar';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
@@ -58,7 +59,23 @@ const Navbar = () => {
             mr: 4,
           }}
         >
-          <img src="/small_logo.png" alt="AITAG Logo" style={{ height: 64, objectFit: 'contain' }} />
+          <img src="/small_logo.png" alt="AITAG Logo" style={{ height: 60, objectFit: 'contain' }} />
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 900,
+              fontFamily: 'Inter, sans-serif',
+              letterSpacing: '-0.5px',
+              background: 'linear-gradient(135deg, #0f172a 0%, #4f46e5 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              ml: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            AITAG
+          </Typography>
         </Box>
 
         {/* Desktop Nav Links */}
@@ -69,6 +86,16 @@ const Navbar = () => {
               component={Link}
               to={link.to}
               onClick={(e: React.MouseEvent) => {
+                if (link.to === '/#packages') {
+                  e.preventDefault();
+                  const el = document.getElementById('packages');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    navigate('/#packages');
+                  }
+                  return;
+                }
                 if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
                   e.preventDefault();
                   navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
@@ -114,6 +141,16 @@ const Navbar = () => {
                 to={link.to}
                 onClick={(e: React.MouseEvent) => {
                   setMobileMenuAnchorEl(null);
+                  if (link.to === '/#packages') {
+                    e.preventDefault();
+                    const el = document.getElementById('packages');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                      navigate('/#packages');
+                    }
+                    return;
+                  }
                   if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
                     e.preventDefault();
                     navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
@@ -130,11 +167,11 @@ const Navbar = () => {
               <Tooltip title={user.name}>
                 <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5 }}>
                   <Avatar
-                    src={user.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name || user.email || 'Maqs')}`}
+                    src={user.photo_url || getHappyPastelAvatar(user.name || user.email)}
                     sx={{
                       width: 36,
                       height: 36,
-                      bgcolor: '#4f46e5',
+                      bgcolor: '#c0aede',
                       fontSize: '0.875rem',
                       fontWeight: 700,
                       border: '2px solid rgba(79,70,229,0.2)',

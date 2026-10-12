@@ -145,7 +145,11 @@ export const OrderBriefModal: React.FC<OrderBriefModalProps> = ({
             />
             <Paper elevation={0} sx={{ p: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 2, mb: 3, textAlign: 'left' }}>
               <Typography variant="body2" color="#64748b" gutterBottom>
-                <strong>Package:</strong> {createdOrder.package_title} ({createdOrder.tier_name.toUpperCase()} Tier)
+                <strong>Package:</strong> {createdOrder.package_title} ({
+                  createdOrder.tier_name?.startsWith('package_')
+                    ? createdOrder.tier_name.replace('package_', 'Package ').toUpperCase()
+                    : createdOrder.tier_name?.toUpperCase()
+                })
               </Typography>
               <Typography variant="body2" color="#64748b" gutterBottom>
                 <strong>Fixed Price:</strong> ₹{createdOrder.agreed_price.toLocaleString('en-IN')}
@@ -156,7 +160,7 @@ export const OrderBriefModal: React.FC<OrderBriefModalProps> = ({
             </Paper>
 
             <Typography variant="body2" color="#475569" sx={{ mb: 2 }}>
-              An AITAG coordinator is currently qualifying your requirements and matching the best vetted specialist for your business. You will receive an update shortly!
+              An AITAG coordinator is currently qualifying your requirements and matching the best vetted AI expert for your business. You will receive an update shortly!
             </Typography>
           </Box>
         ) : (
@@ -188,7 +192,11 @@ export const OrderBriefModal: React.FC<OrderBriefModalProps> = ({
                     ₹{tier ? Number(tier.price_min).toLocaleString('en-IN') : '—'}
                   </Typography>
                   <Chip
-                    label={`${tier?.tier_name?.toUpperCase()} TIER`}
+                    label={
+                      tier?.tier_name?.startsWith('package_')
+                        ? tier.tier_name.replace('package_', 'Package ').toUpperCase()
+                        : (tier?.tier_name ? `${tier.tier_name.toUpperCase()} TIER` : 'PACKAGE 1')
+                    }
                     size="small"
                     sx={{ bgcolor: '#ede9fe', color: '#6d28d9', fontWeight: 700, fontSize: '0.65rem' }}
                   />

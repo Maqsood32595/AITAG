@@ -40,7 +40,17 @@ class ServiceOrdersService {
       throw new Error(`Package not found: ${package_slug}`);
     }
 
-    const tier = (pkg.tiers || []).find((t) => t.tier_name.toLowerCase() === tier_name.toLowerCase());
+    const targetTier = (tier_name || '').toLowerCase().trim();
+    const tier = (pkg.tiers || []).find((t) => {
+      const name = (t.tier_name || '').toLowerCase().trim();
+      return name === targetTier ||
+        (targetTier === 'beginner' && name === 'package_1') ||
+        (targetTier === 'medium' && name === 'package_2') ||
+        (targetTier === 'expert' && name === 'package_3') ||
+        (targetTier === 'package_1' && name === 'beginner') ||
+        (targetTier === 'package_2' && name === 'medium') ||
+        (targetTier === 'package_3' && name === 'expert');
+    });
     const agreed_price = tier ? Number(tier.price_min) : 999;
     const platform_fee = Math.round(agreed_price * 0.05); // 5% AITAG commission
     const expert_payout = agreed_price - platform_fee;

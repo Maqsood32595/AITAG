@@ -37,21 +37,39 @@ interface TalentShowcaseModalProps {
 const DEFAULT_WORKFLOWS = [
   {
     id: 'wf-1',
-    title: 'AITAG Video Showcase & Automated AI Pipeline',
-    category: 'AI Video & Automation',
-    businessImpact: 'Built zero-latency streaming proxy and video case study showcase with sub-second playback and multi-tier GCS storage.',
-    demoVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    techStack: ['Node.js', 'Google Cloud Storage', 'React', 'TypeScript', 'TailwindCSS'],
-    liveUrl: 'https://aitag.onrender.com'
+    title: 'AI Product Photo Makeover for Amazon & Meesho Store',
+    category: 'Product Visuals',
+    businessImpact: 'Converted 50+ raw smartphone camera photos into studio-grade marketplace listings with 100% white backgrounds and Amazon approval in 24 hours.',
+    demoVideoUrl: '',
+    techStack: ['AI Photo Studio', 'White Background Clean', 'Marketplace Compliance', 'Photoshop AI'],
+    liveUrl: 'https://aitag-dev.onrender.com/#packages'
   },
   {
     id: 'wf-2',
-    title: 'Facebook & Meta Ads AI Optimization Engine',
-    category: 'Growth & Ads',
-    businessImpact: 'Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.',
+    title: 'High-Converting One-Page Website with WhatsApp CTA',
+    category: 'Web & Funnels',
+    businessImpact: 'Built mobile-friendly landing page that doubled inbound WhatsApp customer enquiries within the first week of launch.',
     demoVideoUrl: '',
-    techStack: ['Meta Graph API', 'OpenAI GPT-4o', 'Zapier', 'Supabase'],
-    liveUrl: 'https://user1.ai/meta-ads-case-study'
+    techStack: ['AI Landing Builder', 'WhatsApp Click-to-Chat', 'Mobile Responsive', 'SEO Optimization'],
+    liveUrl: 'https://aitag-dev.onrender.com/#packages'
+  },
+  {
+    id: 'wf-3',
+    title: 'AI Product Listing & Multilingual Copywriting',
+    category: 'E-Commerce & Copy',
+    businessImpact: 'Optimized 30+ product listings with buyer keywords in Hindi and English, cutting customer sizing returns by 35%.',
+    demoVideoUrl: '',
+    techStack: ['Marketplace SEO', 'Multilingual Copy', 'Bullet Features', 'Catalogue Batch'],
+    liveUrl: 'https://aitag-dev.onrender.com/#packages'
+  },
+  {
+    id: 'wf-4',
+    title: '30-Day Festive Social Media Content Pack',
+    category: 'Social & Marketing',
+    businessImpact: 'Created 25 branded Instagram post designs, reels cover templates, and regional festive captions lifting profile engagement by 50%.',
+    demoVideoUrl: '',
+    techStack: ['Canva AI', 'Content Calendar', 'Festival Creatives', 'Hashtag Engine'],
+    liveUrl: 'https://aitag-dev.onrender.com/#packages'
   }
 ];
 
@@ -125,8 +143,10 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
     >
       <DialogTitle sx={{ m: 0, p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+import { getHappyPastelAvatar } from '../utils/avatar';
+
           <Avatar
-            src={talent.avatar || talent.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(talent.name || 'user')}`}
+            src={talent.avatar || talent.photo_url || getHappyPastelAvatar(talent.name || 'user')}
             sx={{ width: 60, height: 60, border: '2px solid #4f46e5' }}
           />
           <Box>

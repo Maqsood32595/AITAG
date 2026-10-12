@@ -147,18 +147,18 @@ const HeroSection = () => {
               </Box>
             </Typography>
 
-            {/* Sub-headline directly from Brand Sheet */}
+            {/* Sub-headline directly from Brand Sheet & Edits to MVP */}
             <Typography
               sx={{
                 fontSize: { xs: '1.05rem', md: '1.2rem' },
                 color: '#475569',
                 mb: 3.5,
                 lineHeight: 1.7,
-                maxWidth: 580,
+                maxWidth: 620,
                 fontFamily: 'Inter, sans-serif',
               }}
             >
-              A trusted marketplace connecting everyday entrepreneurs and small businesses with vetted experts who deliver practical, reliable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
+              A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
             </Typography>
 
             {/* Who We Serve Tags */}
@@ -173,7 +173,9 @@ const HeroSection = () => {
                     icon={tag.icon}
                     label={tag.label}
                     size="small"
+                    onClick={scrollToPackages}
                     sx={{
+                      cursor: 'pointer',
                       bgcolor: i === animatedIndex ? 'rgba(79,70,229,0.12)' : 'rgba(255,255,255,0.85)',
                       border: `1px solid ${i === animatedIndex ? 'rgba(79,70,229,0.4)' : 'rgba(0,0,0,0.08)'}`,
                       color: i === animatedIndex ? '#4f46e5' : '#475569',
@@ -183,7 +185,12 @@ const HeroSection = () => {
                       px: 0.5,
                       transition: 'all 0.3s ease',
                       transform: i === animatedIndex ? 'translateY(-2px)' : 'translateY(0)',
-                      boxShadow: i === animatedIndex ? '0 4px 12px rgba(79,70,229,0.15)' : 'none'
+                      boxShadow: i === animatedIndex ? '0 4px 12px rgba(79,70,229,0.15)' : 'none',
+                      '&:hover': {
+                        bgcolor: 'rgba(79,70,229,0.15)',
+                        borderColor: '#4f46e5',
+                        transform: 'translateY(-2px)'
+                      }
                     }}
                   />
                 ))}
@@ -267,7 +274,9 @@ const HeroSection = () => {
                 {BRAND_PILLARS.map((item) => (
                   <Box
                     key={item.title}
+                    onClick={scrollToPackages}
                     sx={{
+                      cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'flex-start',
                       gap: 2,
@@ -278,7 +287,7 @@ const HeroSection = () => {
                       transition: 'all 0.25s ease',
                       '&:hover': {
                         borderColor: item.color,
-                        boxShadow: '0 8px 20px rgba(0,0,0,0.04)',
+                        boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
                         transform: 'translateX(4px)',
                       },
                     }}

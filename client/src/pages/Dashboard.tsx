@@ -15,6 +15,8 @@ import { tasksApi, bidsApi, invitationsApi, serviceOrdersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 
+import { getHappyPastelAvatar } from '../utils/avatar';
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [myTasks, setMyTasks] = useState<any[]>([]);
@@ -87,7 +89,7 @@ const Dashboard = () => {
         <Paper elevation={0} sx={{ p: 4, borderRadius: '20px', mb: 4, background: 'linear-gradient(135deg, rgba(79,70,229,0.08) 0%, rgba(8,145,178,0.06) 100%)', border: '1px solid rgba(79,70,229,0.1)' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, flexDirection: { xs: 'column', md: 'row' }, gap: 2.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
-              <Avatar src={user?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || user?.email || 'Maqs')}`} sx={{ width: 56, height: 56, bgcolor: '#4f46e5', fontSize: '1.3rem', fontWeight: 700, border: '3px solid rgba(79,70,229,0.2)' }}>
+              <Avatar src={user?.photo_url || getHappyPastelAvatar(user?.name || user?.email)} sx={{ width: 56, height: 56, bgcolor: '#c0aede', fontSize: '1.3rem', fontWeight: 700, border: '3px solid rgba(79,70,229,0.2)' }}>
                 {user?.name?.[0]?.toUpperCase()}
               </Avatar>
               <Box>
@@ -305,7 +307,11 @@ const Dashboard = () => {
                             {ord.package_title}
                           </Typography>
                           <Chip
-                            label={`${ord.tier_name?.toUpperCase()} TIER`}
+                            label={
+                              ord.tier_name?.startsWith('package_')
+                                ? ord.tier_name.replace('package_', 'Package ').toUpperCase()
+                                : (ord.tier_name ? `${ord.tier_name.toUpperCase()} TIER` : 'PACKAGE 1')
+                            }
                             size="small"
                             sx={{ bgcolor: '#ede9fe', color: '#6d28d9', fontWeight: 700, fontSize: '0.65rem' }}
                           />

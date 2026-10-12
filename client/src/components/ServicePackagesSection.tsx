@@ -12,6 +12,9 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import ShareIcon from '@mui/icons-material/Share';
 import LanguageIcon from '@mui/icons-material/Language';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { servicePackagesApi } from '../api';
 import OrderBriefModal from './OrderBriefModal';
 
@@ -20,42 +23,97 @@ const FALLBACK_PACKAGES = [
     slug: 'ai-product-photo-makeover',
     title: 'AI Product Photo Makeover',
     tagline: 'Transform phone photos into studio-grade e-commerce product listings',
+    description: "Send us simple photos of your products taken on your phone. We'll use AI to remove messy backgrounds, fix the lighting and colours, and place your products in clean, professional settings. Your photos will be ready for Amazon, Flipkart, Meesho, Instagram or your WhatsApp catalogue. You don't need a studio or a photographer.",
     category: 'Product Visuals',
     badge: 'Best Seller',
     image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
+    benefits: [
+      'Better photos get more clicks and more sales online',
+      'Saves ₹5,000–₹20,000 compared with a studio photoshoot',
+      'Images meet marketplace rules (white background, correct size), so listings are less likely to be rejected'
+    ],
     tiers: [
       {
-        tier_name: 'beginner',
+        tier_name: 'package_1',
+        price_min: 999,
+        price_max: 999,
+        delivery_days_min: 2,
+        delivery_days_max: 3,
+        revisions_included: 1,
+        deliverable_summary: '5 photos, white background, 1 platform size, 1 revision',
+        inclusions: ['5 clean product photos', 'Pure white background', '1 platform size optimized', 'Lighting and color fixes', '1 revision included', 'High-quality JPG/PNG format'],
+        exclusions: ['Lifestyle background scenes', 'AI model placements']
+      },
+      {
+        tier_name: 'package_2',
+        price_min: 2999,
+        price_max: 2999,
+        delivery_days_min: 2,
+        delivery_days_max: 4,
+        revisions_included: 2,
+        deliverable_summary: '15 photos, white + lifestyle backgrounds, 2 platform sizes, 2 revisions',
+        inclusions: ['15 product photos (white & lifestyle)', 'Clean white + AI lifestyle scenes', '2 platform sizes optimized', 'Lighting & color fixes, blemish cleanup', '2 revisions included'],
+        exclusions: ['AI human model casting', '3D asset rendering']
+      },
+      {
+        tier_name: 'package_3',
+        price_min: 5999,
+        price_max: 7999,
+        delivery_days_min: 3,
+        delivery_days_max: 6,
+        revisions_included: 2,
+        deliverable_summary: '35 photos, AI model or lifestyle scenes, catalogue-ready set, 2 revisions',
+        inclusions: ['35 photos (full catalogue-ready set)', 'AI model or lifestyle scenes', 'Multi-angle scenes & closeups', 'Complete blemish & color correction', '2 revisions included'],
+        exclusions: ['Physical studio photoshoot']
+      }
+    ]
+  },
+  {
+    slug: 'ai-product-listing-description',
+    title: 'AI Product Listing & Description Writing',
+    tagline: 'High-ranking marketplace listings & descriptions that turn viewers into buyers',
+    description: "Tell us about your product. We'll write clear, attractive titles, descriptions and key features that help customers find it and decide to buy. We can write in English, Hindi or your regional language, for Amazon, Flipkart, Meesho, your website or WhatsApp.",
+    category: 'E-Commerce & Copy',
+    badge: 'Starts at ₹499',
+    image_url: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800',
+    benefits: [
+      'Your product shows up more often in marketplace searches',
+      'Clear descriptions mean fewer customer questions and fewer returns',
+      'One product can be listed across several platforms quickly'
+    ],
+    tiers: [
+      {
+        tier_name: 'package_1',
         price_min: 499,
         price_max: 999,
         delivery_days_min: 1,
         delivery_days_max: 2,
         revisions_included: 1,
-        deliverable_summary: '5 studio cutout images with pure white background',
-        inclusions: ['5 clean product photos', 'Pure white background', 'Standard marketplace size', '1 revision included'],
-        exclusions: ['Lifestyle background scenes', 'Infographics or text overlays']
+        deliverable_summary: '1 product, 1 language, 1 platform, 1 article, 1 revision',
+        inclusions: ['Product title with buyer keywords', '5 bullet-point features + full description', 'List of search keywords and tags', '1 language (English/Hindi/Regional)', 'Copy-paste ready file (Word/Excel)', '1 revision included'],
+        exclusions: ['Competitor keyword analysis', 'Multiple platform formatting']
       },
       {
-        tier_name: 'medium',
+        tier_name: 'package_2',
         price_min: 1499,
-        price_max: 2999,
+        price_max: 2499,
         delivery_days_min: 2,
-        delivery_days_max: 3,
+        delivery_days_max: 4,
         revisions_included: 2,
-        deliverable_summary: '15 photos with white background and AI lifestyle settings',
-        inclusions: ['15 product photos (white & lifestyle)', '3 AI lifestyle background scenes', 'Optimized for Amazon/Flipkart/Shopify', '2 revisions included'],
-        exclusions: ['3D model rendering', 'Packaging redesign']
+        deliverable_summary: '1 product, 1 language, 2 platforms, 2 articles, 2 revisions',
+        inclusions: ['Formatted for 2 platforms (e.g. Amazon & Meesho)', '2 articles / descriptions', 'Keyword tags & bullet features', 'Copy-paste ready file (Word/Excel)', '2 revisions included'],
+        exclusions: ['Direct seller account upload']
       },
       {
-        tier_name: 'expert',
-        price_min: 3999,
-        price_max: 7999,
-        delivery_days_min: 3,
-        delivery_days_max: 5,
+        tier_name: 'package_3',
+        price_min: 4299,
+        price_max: 6999,
+        delivery_days_min: 4,
+        delivery_days_max: 7,
         revisions_included: 2,
-        deliverable_summary: '30 catalogue-ready images + promotional banner',
-        inclusions: ['30 product photos (full catalogue)', 'Multi-angle scenes & closeups', '1 promotional graphic banner', 'Source files included', '2 revisions included'],
-        exclusions: ['Physical studio shipping']
+        deliverable_summary: '2 to 3 products, 1-3 languages, 1-3 platforms, 3 articles, competitor keyword check, 2 revisions',
+        inclusions: ['Full coverage for 2 to 3 products', '1–3 languages (multilingual listing)', 'Formatted for up to 3 platforms', 'Competitor keyword gap check', '2 revisions included'],
+        exclusions: ['Paid ads setup']
       }
     ]
   },
@@ -63,42 +121,48 @@ const FALLBACK_PACKAGES = [
     slug: 'ai-social-media-content-pack',
     title: 'AI Social Media Content Pack',
     tagline: 'A complete monthly social media calendar with branded graphics & copy',
+    description: "We'll create a month of ready-to-post content for your Instagram, Facebook or WhatsApp Status. That includes eye-catching designs, catchy captions and the right hashtags, all matched to your business and festival dates. You just post, or we can give you a calendar telling you what to post and when.",
     category: 'Social & Marketing',
     badge: 'Popular',
     image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
+    benefits: [
+      'You stay visible to customers every day without spending hours on content',
+      'Your brand looks professional and consistent',
+      'Festival and offer posts help bring in more enquiries'
+    ],
     tiers: [
       {
-        tier_name: 'beginner',
-        price_min: 1999,
+        tier_name: 'package_1',
+        price_min: 2499,
         price_max: 2999,
         delivery_days_min: 3,
-        delivery_days_max: 4,
+        delivery_days_max: 5,
         revisions_included: 1,
-        deliverable_summary: '12 graphics with captions and hashtags',
-        inclusions: ['12 ready-to-post graphics', 'AI-written captions in English/Hindi', 'Researched hashtag sets', 'Canva editable link', '1 revision included'],
-        exclusions: ['Video reels', 'Account management/daily posting']
+        deliverable_summary: '8 posts per month, 1 platform, captions in 1 language, 1 revision',
+        inclusions: ['8 designed post images in brand colors', 'Captions & hashtags for every post', '1 platform (Instagram/FB/WhatsApp)', '1 revision included'],
+        exclusions: ['Story templates', 'Content calendar schedule']
       },
       {
-        tier_name: 'medium',
-        price_min: 2999,
+        tier_name: 'package_2',
+        price_min: 3999,
         price_max: 4999,
         delivery_days_min: 4,
-        delivery_days_max: 5,
+        delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: '20 posts + 2 video reels + posting calendar',
-        inclusions: ['20 posts (mix of product, tips, offers)', '2 AI video reel templates', 'Festival greeting creative', 'Monthly posting calendar schedule', '2 revisions included'],
-        exclusions: ['Running paid ad campaigns']
+        deliverable_summary: '15 posts + 4 stories, 2 platforms, 1 language, festival posts, 2 revisions',
+        inclusions: ['15 designed posts + 4 stories', 'Festival and special offer posts', 'Formatted for 2 platforms', 'Content calendar with posting schedule', '2 revisions included'],
+        exclusions: ['Animated carousel videos']
       },
       {
-        tier_name: 'expert',
-        price_min: 5299,
+        tier_name: 'package_3',
+        price_min: 7499,
         price_max: 9299,
         delivery_days_min: 5,
         delivery_days_max: 7,
         revisions_included: 2,
-        deliverable_summary: 'Full month 30-post package + 4 reels + story templates',
-        inclusions: ['30 daily posts for entire month', '4 short video reels with AI voiceover', 'Monthly strategy & theme guide', 'Story creatives included', '2 revisions included'],
-        exclusions: ['Responding to customer DMs']
+        deliverable_summary: '25 posts + 6 stories, 1-2 languages, content calendar, carousel posts, 2 revisions',
+        inclusions: ['25 posts + 6 stories (full month coverage)', 'Carousel posts included', 'Captions in 1–2 languages', 'Complete monthly content calendar', '2 revisions included'],
+        exclusions: ['Daily manual posting/account login']
       }
     ]
   },
@@ -106,41 +170,48 @@ const FALLBACK_PACKAGES = [
     slug: 'ai-website-landing-page',
     title: 'AI Website Landing Page',
     tagline: 'High-converting one-page website designed to turn visitors into enquiries',
+    description: "Need a simple website for your business? We'll build a one-page website that tells customers who you are, what you sell, your prices or offers, and how to contact you. It works well on mobile phones and has a WhatsApp or call button, so customers can reach you in one tap. AI helps us write the text and design it quickly, so you get it faster and at a lower cost.",
     category: 'Web & Funnels',
     badge: 'High ROI',
     image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
+    benefits: [
+      'Your business looks trustworthy and can be found on Google',
+      'One link to share on WhatsApp, Instagram, visiting cards and Google Maps',
+      'Turns visitors into enquiries with call, WhatsApp and enquiry-form buttons',
+      'Much cheaper and faster than a full multi-page website'
+    ],
     tiers: [
       {
-        tier_name: 'beginner',
-        price_min: 2499,
+        tier_name: 'package_1',
+        price_min: 3499,
         price_max: 4999,
         delivery_days_min: 4,
         delivery_days_max: 5,
         revisions_included: 1,
-        deliverable_summary: '1-page website with 5 sections and direct WhatsApp CTA',
+        deliverable_summary: 'Ready-made template, up to 5 sections, WhatsApp/call button, mobile-friendly, 1 revision',
         inclusions: ['1-page mobile-friendly website', 'Up to 5 custom sections', 'WhatsApp click-to-chat & Call buttons', 'AI-crafted business copywriting', '1 revision included'],
-        exclusions: ['Domain and hosting charges (customer-owned)', 'Payment gateway integration']
+        exclusions: ['Domain & hosting fees (customer-owned)', 'Custom enquiry backend']
       },
       {
-        tier_name: 'medium',
-        price_min: 5999,
+        tier_name: 'package_2',
+        price_min: 7999,
         price_max: 9999,
         delivery_days_min: 5,
         delivery_days_max: 7,
         revisions_included: 2,
-        deliverable_summary: '8-section landing page with enquiry form and Google Maps',
+        deliverable_summary: 'Custom design, up to 8 sections, enquiry form, Google Maps, basic Google search setup, domain connection, 2 revisions',
         inclusions: ['Custom design with up to 8 sections', 'Lead capture enquiry form', 'Google Maps location embedding', 'Basic Google Search / SEO setup', 'Custom domain connection', '2 revisions included'],
         exclusions: ['Domain registration fees', 'Multi-page e-commerce cart']
       },
       {
-        tier_name: 'expert',
-        price_min: 14999,
+        tier_name: 'package_3',
+        price_min: 18999,
         price_max: 24999,
         delivery_days_min: 7,
         delivery_days_max: 10,
         revisions_included: 2,
-        deliverable_summary: 'Premium high-converting landing page with analytics & booking',
-        inclusions: ['Premium bespoke conversion design', 'Payment link or booking integration', 'Visitor analytics tracking (Google Analytics)', 'Mobile speed optimization', '30 days post-launch support', '2 revisions included'],
+        deliverable_summary: 'Premium design, booking or payment link, visitor tracking (Google Analytics), speed check, 30 days of support, 2 revisions',
+        inclusions: ['Premium bespoke conversion design', 'Payment link or booking integration', 'Visitor tracking (Google Analytics)', 'Mobile speed optimization', '30 days post-launch support', '2 revisions included'],
         exclusions: ['Hosting/domain subscriptions (customer-owned)']
       }
     ]
@@ -151,9 +222,10 @@ export const ServicePackagesSection: React.FC = () => {
   const [packages, setPackages] = useState<any[]>(FALLBACK_PACKAGES);
   const [loading, setLoading] = useState(false);
   const [selectedTiers, setSelectedTiers] = useState<Record<string, string>>({
-    'ai-product-photo-makeover': 'beginner',
-    'ai-social-media-content-pack': 'beginner',
-    'ai-website-landing-page': 'beginner'
+    'ai-product-photo-makeover': 'package_1',
+    'ai-product-listing-description': 'package_1',
+    'ai-social-media-content-pack': 'package_1',
+    'ai-website-landing-page': 'package_1'
   });
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -165,7 +237,18 @@ export const ServicePackagesSection: React.FC = () => {
         setLoading(true);
         const res = await servicePackagesApi.getAll();
         if (res.data?.success && res.data?.packages?.length > 0) {
-          setPackages(res.data.packages);
+          // Normalize tiers so package_1, package_2, package_3 are consistent
+          const normalized = res.data.packages.map((pkg: any) => ({
+            ...pkg,
+            tiers: (pkg.tiers || []).map((t: any) => {
+              let tier_name = t.tier_name.toLowerCase();
+              if (tier_name === 'beginner') tier_name = 'package_1';
+              if (tier_name === 'medium') tier_name = 'package_2';
+              if (tier_name === 'expert') tier_name = 'package_3';
+              return { ...t, tier_name };
+            })
+          }));
+          setPackages(normalized);
         }
       } catch (err) {
         console.warn('Using fallback package catalogue:', err);
@@ -187,7 +270,9 @@ export const ServicePackagesSection: React.FC = () => {
 
   const getPackageIcon = (category: string) => {
     if (category.includes('Visual')) return <CameraAltIcon sx={{ color: '#0891b2' }} />;
+    if (category.includes('Copy') || category.includes('Commerce')) return <EditNoteIcon sx={{ color: '#d97706' }} />;
     if (category.includes('Social')) return <ShareIcon sx={{ color: '#4f46e5' }} />;
+    if (category.includes('Video') || category.includes('Reels')) return <VideoCameraBackIcon sx={{ color: '#e11d48' }} />;
     return <LanguageIcon sx={{ color: '#10b981' }} />;
   };
 
@@ -198,7 +283,7 @@ export const ServicePackagesSection: React.FC = () => {
         <Box sx={{ textAlign: 'center', mb: 8 }}>
           <Chip
             icon={<AutoAwesomeIcon sx={{ fontSize: 16, color: '#4f46e5 !important' }} />}
-            label="PILOT CATALOGUE — FIXED OUTCOMES & TRANSPARENT PRICING"
+            label="PILOT CATALOGUE — 4 MVP OUTCOME CATEGORIES"
             sx={{
               bgcolor: '#eef2ff',
               color: '#4338ca',
@@ -226,13 +311,13 @@ export const ServicePackagesSection: React.FC = () => {
             fontWeight={500}
             color="#64748b"
             sx={{
-              maxWidth: 720,
+              maxWidth: 760,
               mx: 'auto',
               fontSize: { xs: '1rem', md: '1.15rem' },
               lineHeight: 1.6
             }}
           >
-            “You do not need to learn AI. Tell us what your business needs, and AITAG will connect you with vetted experts who deliver it.”
+            “You do not need to learn AI. Tell us what your business needs, and AITAG will connect you with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just ₹499.”
           </Typography>
         </Box>
 
@@ -243,16 +328,18 @@ export const ServicePackagesSection: React.FC = () => {
         ) : (
           <Grid container spacing={4} alignItems="stretch">
             {packages.map((pkg) => {
-              const currentTierKey = selectedTiers[pkg.slug] || 'beginner';
+              const currentTierKey = selectedTiers[pkg.slug] || 'package_1';
               const currentTier = (pkg.tiers || []).find(
                 (t: any) => t.tier_name.toLowerCase() === currentTierKey.toLowerCase()
               ) || pkg.tiers?.[0];
 
               return (
-                <Grid item xs={12} md={4} key={pkg.slug} sx={{ display: 'flex' }}>
+                <Grid item xs={12} md={6} key={pkg.slug} sx={{ display: 'flex' }}>
                   <Paper
                     elevation={0}
+                    onClick={() => handleOpenModal(pkg)}
                     sx={{
+                      cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
                       width: '100%',
@@ -263,13 +350,13 @@ export const ServicePackagesSection: React.FC = () => {
                       transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                       '&:hover': {
                         transform: 'translateY(-6px)',
-                        boxShadow: '0 20px 30px -10px rgba(79, 70, 229, 0.12)',
-                        borderColor: '#c7d2fe'
+                        boxShadow: '0 20px 30px -10px rgba(79, 70, 229, 0.14)',
+                        borderColor: '#a5b4fc'
                       }
                     }}
                   >
                     {/* Image Cover */}
-                    <Box sx={{ position: 'relative', height: 180, width: '100%', bgcolor: '#f1f5f9' }}>
+                    <Box sx={{ position: 'relative', height: 200, width: '100%', bgcolor: '#f1f5f9' }}>
                       <img
                         src={pkg.image_url}
                         alt={pkg.title}
@@ -306,36 +393,63 @@ export const ServicePackagesSection: React.FC = () => {
                             bgcolor: '#4f46e5',
                             color: '#ffffff',
                             fontWeight: 700,
-                            fontSize: '0.7rem'
+                            fontSize: '0.75rem',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
                           }}
                         />
                       )}
                     </Box>
 
                     {/* Card Content */}
-                    <Box sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="h6" fontWeight={800} color="#0f172a" gutterBottom>
+                    <Box sx={{ p: { xs: 2.5, sm: 3.5 }, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="h5" fontWeight={800} color="#0f172a" gutterBottom>
                         {pkg.title}
                       </Typography>
-                      <Typography variant="body2" color="#64748b" sx={{ minHeight: 40, mb: 2 }}>
+                      <Typography variant="body2" color="#64748b" sx={{ mb: 2 }}>
                         {pkg.tagline}
                       </Typography>
 
-                      {/* Tier Switcher Tabs */}
-                      <Box sx={{ borderBottom: '1px solid #e2e8f0', mb: 2.5 }}>
+                      {/* Full Service Description */}
+                      <Typography variant="body2" color="#334155" sx={{ mb: 2.5, lineHeight: 1.6, bgcolor: '#f8fafc', p: 2, borderRadius: 2, border: '1px solid #f1f5f9' }}>
+                        {pkg.description}
+                      </Typography>
+
+                      {/* How It Helps Your Business (Benefits) */}
+                      {pkg.benefits && pkg.benefits.length > 0 && (
+                        <Box sx={{ mb: 3, p: 2, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0' }}>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                            <TrendingUpIcon sx={{ fontSize: 18, color: '#16a34a' }} />
+                            <Typography variant="caption" fontWeight={800} color="#166534" letterSpacing={0.5}>
+                              HOW IT HELPS YOUR BUSINESS:
+                            </Typography>
+                          </Stack>
+                          {pkg.benefits.map((b: string, idx: number) => (
+                            <Stack direction="row" spacing={1} alignItems="flex-start" key={idx} sx={{ mb: 0.5 }}>
+                              <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 900 }}>•</Typography>
+                              <Typography variant="caption" color="#166534" sx={{ lineHeight: 1.45, fontWeight: 500 }}>
+                                {b}
+                              </Typography>
+                            </Stack>
+                          ))}
+                        </Box>
+                      )}
+
+                      {/* Tier Switcher Tabs (Package 1, Package 2, Package 3) */}
+                      <Box sx={{ borderBottom: '1px solid #e2e8f0', mb: 2.5 }} onClick={(e) => e.stopPropagation()}>
                         <Tabs
                           value={currentTierKey}
                           onChange={(_, val) => handleTierChange(pkg.slug, val)}
                           variant="fullWidth"
                           sx={{
-                            minHeight: 36,
+                            minHeight: 40,
                             '& .MuiTab-root': {
-                              minHeight: 36,
-                              py: 0.5,
-                              fontSize: '0.8rem',
-                              fontWeight: 700,
+                              minHeight: 40,
+                              py: 0.75,
+                              fontSize: '0.825rem',
+                              fontWeight: 800,
                               textTransform: 'none',
                               color: '#64748b',
+                              cursor: 'pointer',
                               '&.Mui-selected': { color: '#4f46e5' }
                             },
                             '& .MuiTabs-indicator': {
@@ -345,13 +459,13 @@ export const ServicePackagesSection: React.FC = () => {
                             }
                           }}
                         >
-                          <Tab label="Beginner" value="beginner" />
-                          <Tab label="Medium" value="medium" />
-                          <Tab label="Expert" value="expert" />
+                          <Tab label="Package 1" value="package_1" />
+                          <Tab label="Package 2" value="package_2" />
+                          <Tab label="Package 3" value="package_3" />
                         </Tabs>
                       </Box>
 
-                      {/* Pricing & Guarantee Box */}
+                      {/* Pricing & Accurate Delivery Time Box */}
                       <Box sx={{ mb: 2 }}>
                         <Stack direction="row" alignItems="baseline" spacing={1}>
                           <Typography variant="h4" fontWeight={800} color="#0f172a">
@@ -369,13 +483,13 @@ export const ServicePackagesSection: React.FC = () => {
                             icon={<BoltIcon sx={{ fontSize: 14, color: '#0891b2 !important' }} />}
                             label={`${currentTier?.delivery_days_min}–${currentTier?.delivery_days_max} Days Delivery`}
                             size="small"
-                            sx={{ bgcolor: '#ecfeff', color: '#0e7490', fontWeight: 600, fontSize: '0.7rem' }}
+                            sx={{ bgcolor: '#ecfeff', color: '#0e7490', fontWeight: 700, fontSize: '0.72rem' }}
                           />
                           <Chip
                             icon={<ReplayIcon sx={{ fontSize: 14, color: '#10b981 !important' }} />}
                             label={`${currentTier?.revisions_included} Revision Included`}
                             size="small"
-                            sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 600, fontSize: '0.7rem' }}
+                            sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 700, fontSize: '0.72rem' }}
                           />
                         </Stack>
                       </Box>
@@ -390,7 +504,7 @@ export const ServicePackagesSection: React.FC = () => {
                       {/* Inclusions List */}
                       <List dense sx={{ py: 0, mb: 2, flexGrow: 1 }}>
                         {(currentTier?.inclusions || []).map((inc: string, idx: number) => (
-                          <ListItem key={idx} disableGutters sx={{ py: 0.25, alignItems: 'flex-start' }}>
+                          <ListItem key={idx} disableGutters sx={{ py: 0.35, alignItems: 'flex-start' }}>
                             <ListItemIcon sx={{ minWidth: 24, mt: 0.5 }}>
                               <CheckCircleIcon sx={{ fontSize: 16, color: '#10b981' }} />
                             </ListItemIcon>
@@ -423,15 +537,20 @@ export const ServicePackagesSection: React.FC = () => {
                       <Button
                         variant="contained"
                         fullWidth
-                        onClick={() => handleOpenModal(pkg)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenModal(pkg);
+                        }}
                         sx={{
+                          cursor: 'pointer',
                           mt: 'auto',
                           bgcolor: '#4f46e5',
-                          '&:hover': { bgcolor: '#4338ca' },
-                          py: 1.25,
+                          '&:hover': { bgcolor: '#4338ca', transform: 'translateY(-1px)' },
+                          py: 1.4,
                           fontWeight: 700,
-                          fontSize: '0.9rem',
-                          borderRadius: 2
+                          fontSize: '0.925rem',
+                          borderRadius: 2.5,
+                          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)'
                         }}
                       >
                         Request This Package
@@ -450,7 +569,7 @@ export const ServicePackagesSection: React.FC = () => {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         selectedPackage={activePackage}
-        selectedTier={activePackage ? selectedTiers[activePackage.slug] || 'beginner' : 'beginner'}
+        selectedTier={activePackage ? selectedTiers[activePackage.slug] || 'package_1' : 'package_1'}
       />
     </Box>
   );
