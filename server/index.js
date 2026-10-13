@@ -42,19 +42,34 @@ kernel.init(app);
 // -------------------------------------------------------------
 // Global Static Pipeline for Modern AITAG React Frontend (SPA)
 // -------------------------------------------------------------
-const staticPath = fs.existsSync(path.join(__dirname, '../client/dist/index.html'))
-  ? path.join(__dirname, '../client/dist')
-  : path.join(__dirname, 'public');
+const clientDistPath = path.join(__dirname, '../client/dist');
+const serverPublicPath = path.join(__dirname, 'public');
 
+const staticPath = fs.existsSync(path.join(clientDistPath, 'index.html'))
+  ? clientDistPath
+  : serverPublicPath;
+
+// Serve static assets from both dist and public to prevent breaking active tabs
 app.use(express.static(staticPath));
+if (staticPath !== serverPublicPath && fs.existsSync(serverPublicPath)) {
+  app.use(express.static(serverPublicPath));
+}
 
-// Universal SPA Catch-all for /dashboard, /profile, /signin, /tasks, /browse, etc.
+// Missing /assets requests must return 404 with plain text, NEVER HTML!
+app.use('/assets', (req, res) => {
+  res.status(404).type('text/plain').send('Asset not found');
+});
+
+// Universal SPA Catch-all for /dashboard, /profile, /signin, /tasks, /browse, /all_tasks, etc.
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/ws')) {
     return next();
   }
   const indexHtml = path.join(staticPath, 'index.html');
   if (fs.existsSync(indexHtml)) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     return res.sendFile(indexHtml);
   }
   res.status(404).send('Frontend build not found.');

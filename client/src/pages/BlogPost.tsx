@@ -99,7 +99,7 @@ You can post an open task under **Post a Task** or explore verified profiles in 
 ### Step 1: Write a Clear Task Scope
 When posting a task on aitag.in, provide:
 * **Task Title**: Be descriptive (e.g., *"Build an automated PDF parsing tool for shipping receipts"*).
-* **Category**: Select the matching field (AI Engineering, Machine Learning, Web Development).
+* **Category**: Select the matching field (Product Visuals, E-Commerce & Copy, Social & Marketing, Web & Funnels).
 * **Budget & Deadline**: State your fixed price budget and expected completion date.
 
 ---

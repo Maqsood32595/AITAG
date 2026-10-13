@@ -9,7 +9,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../context/AuthContext';
-import { getHappyPastelAvatar } from '../utils/avatar';
+import AnimatedAvatar from './AnimatedAvatar';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
@@ -34,6 +34,38 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const handleHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (window.location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (window.location.hash) {
+        window.history.pushState(null, '', '/');
+      }
+    } else {
+      navigate('/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePackagesClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/') {
+      navigate('/#packages');
+      setTimeout(() => {
+        const el = document.getElementById('packages');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      const el = document.getElementById('packages');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        window.history.pushState(null, '', '/#packages');
+      }
+    }
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -52,11 +84,13 @@ const Navbar = () => {
         <Box
           component={Link}
           to="/"
+          onClick={handleHomeClick}
           sx={{
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
             mr: 4,
+            cursor: 'pointer',
           }}
         >
           <img src="/small_logo.png" alt="AITAG Logo" style={{ height: 60, objectFit: 'contain' }} />
@@ -86,14 +120,12 @@ const Navbar = () => {
               component={Link}
               to={link.to}
               onClick={(e: React.MouseEvent) => {
+                if (link.to === '/') {
+                  handleHomeClick(e);
+                  return;
+                }
                 if (link.to === '/#packages') {
-                  e.preventDefault();
-                  const el = document.getElementById('packages');
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    navigate('/#packages');
-                  }
+                  handlePackagesClick(e);
                   return;
                 }
                 if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
@@ -141,14 +173,12 @@ const Navbar = () => {
                 to={link.to}
                 onClick={(e: React.MouseEvent) => {
                   setMobileMenuAnchorEl(null);
+                  if (link.to === '/') {
+                    handleHomeClick(e);
+                    return;
+                  }
                   if (link.to === '/#packages') {
-                    e.preventDefault();
-                    const el = document.getElementById('packages');
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                      navigate('/#packages');
-                    }
+                    handlePackagesClick(e);
                     return;
                   }
                   if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
@@ -166,19 +196,11 @@ const Navbar = () => {
             <>
               <Tooltip title={user.name}>
                 <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5 }}>
-                  <Avatar
-                    src={user.photo_url || getHappyPastelAvatar(user.name || user.email)}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      bgcolor: '#c0aede',
-                      fontSize: '0.875rem',
-                      fontWeight: 700,
-                      border: '2px solid rgba(79,70,229,0.2)',
-                    }}
-                  >
-                    {user.name?.charAt(0).toUpperCase()}
-                  </Avatar>
+                  <AnimatedAvatar
+                    name={user.name || user.email}
+                    size={36}
+                    src={user.photo_url}
+                  />
                 </IconButton>
               </Tooltip>
               <Menu

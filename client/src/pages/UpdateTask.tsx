@@ -4,7 +4,7 @@ import { Box, Container, Paper, Typography, TextField, Button, Alert, MenuItem, 
 import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 
-const CATEGORIES = ['AI Engineering', 'Machine Learning', 'ML Ops', 'Data Science', 'Design', 'Writing', 'Web Development', 'Mobile Development', 'Data Entry'];
+const CATEGORIES = ['Product Visuals', 'E-Commerce & Copy', 'Social & Marketing', 'Web & Funnels'];
 
 const UpdateTask = () => {
   const { id } = useParams<{ id: string }>();

@@ -17,7 +17,7 @@ const SEED_USERS = [
     name: 'Maqs',
     email: 'l.maqsood.m@gmail.com',
     role: 'freelancer',
-    photo_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs',
+    photo_url: '',
     password_hash: bcrypt.hashSync('Password', 10),
     created_at: new Date().toISOString()
   },
@@ -26,7 +26,7 @@ const SEED_USERS = [
     name: 'User1 Admin',
     email: 'user1@aitag.com',
     role: 'admin',
-    photo_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=User1',
+    photo_url: '',
     password_hash: bcrypt.hashSync('admin', 10),
     created_at: new Date().toISOString()
   }

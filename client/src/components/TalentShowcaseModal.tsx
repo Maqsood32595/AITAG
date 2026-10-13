@@ -16,6 +16,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { profileApi } from '../api';
 import UniversalVideoPlayer, { parseVideoSource } from './UniversalVideoPlayer';
+import AnimatedAvatar from './AnimatedAvatar';
 
 export function formatExternalUrl(url?: string): string {
   if (!url) return '';
@@ -143,11 +144,10 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
     >
       <DialogTitle sx={{ m: 0, p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-import { getHappyPastelAvatar } from '../utils/avatar';
-
-          <Avatar
-            src={talent.avatar || talent.photo_url || getHappyPastelAvatar(talent.name || 'user')}
-            sx={{ width: 60, height: 60, border: '2px solid #4f46e5' }}
+          <AnimatedAvatar
+            name={talent.name}
+            size={60}
+            src={talent.avatar || talent.photo_url}
           />
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

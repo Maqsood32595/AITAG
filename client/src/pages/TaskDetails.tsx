@@ -198,7 +198,7 @@ const TaskDetails = () => {
               <Typography sx={{ fontWeight: 700, mb: 2.5, color: '#0f172a' }}>Task Overview</Typography>
               <Divider sx={{ mb: 2 }} />
               {[
-                { icon: <AttachMoneyIcon sx={{ color: '#10b981' }} />, label: 'Budget', value: `₹${task.budget}`, color: '#10b981' },
+                { icon: <AttachMoneyIcon sx={{ color: '#10b981' }} />, label: 'Budget', value: `₹${Number(task.budget).toLocaleString()}`, color: '#10b981' },
                 { icon: <CalendarMonthIcon sx={{ color: '#4f46e5' }} />, label: 'Deadline', value: new Date(task.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }), color: '#4f46e5' },
                 { icon: <PeopleIcon sx={{ color: '#0891b2' }} />, label: 'Total Bids', value: task.total_bids || bids.length || 0, color: '#0891b2' },
               ].map(item => (

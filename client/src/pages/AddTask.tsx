@@ -5,12 +5,12 @@ import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORIES = ['AI Engineering', 'Machine Learning', 'ML Ops', 'Data Science', 'Design', 'Writing', 'Web Development', 'Mobile Development', 'Data Entry'];
+const CATEGORIES = ['Product Visuals', 'E-Commerce & Copy', 'Social & Marketing', 'Web & Funnels'];
 
 const AddTask = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: '', category: 'AI Engineering', description: '', deadline: '', budget: '', image: '' });
+  const [form, setForm] = useState({ title: '', category: 'Product Visuals', description: '', deadline: '', budget: '', image: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 

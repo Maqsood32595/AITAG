@@ -8,6 +8,7 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
 import { tasksApi, invitationsApi } from '../api';
+import AnimatedAvatar from './AnimatedAvatar';
 
 interface InviteModalProps {
   open: boolean;
@@ -106,9 +107,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ open, onClose, talent }) => {
       <DialogContent dividers sx={{ borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}>
         {talent && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: '#f8fafc', borderRadius: '14px', mb: 3 }}>
-            <Avatar src={talent.avatar} alt={talent.name} sx={{ width: 48, height: 48, bgcolor: '#4f46e5' }}>
-              {talent.name[0]}
-            </Avatar>
+            <AnimatedAvatar name={talent.name} size={48} src={talent.avatar} />
             <Box>
               <Typography sx={{ fontWeight: 700, color: '#0f172a' }}>{talent.name}</Typography>
               <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>{talent.role}</Typography>

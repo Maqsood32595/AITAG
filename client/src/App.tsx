@@ -32,12 +32,15 @@ const Loader = () => (
   </Box>
 );
 
+import ScrollToTop from './components/ScrollToTop';
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Suspense fallback={<Loader />}>
             <Routes>
               {/* Public */}

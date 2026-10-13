@@ -13,7 +13,7 @@ import SendIcon from '@mui/icons-material/Send';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api';
-import { getHappyPastelAvatar } from '../utils/avatar';
+import AnimatedAvatar from '../components/AnimatedAvatar';
 
 interface Talent {
   id: string;
@@ -39,7 +39,7 @@ const CURATED_TALENT: Talent[] = [
     name: 'Dr. Aarav Sharma',
     role: 'AI Product Photo & Catalogue Makeover Specialist',
     category: 'Product Visuals',
-    avatar: getHappyPastelAvatar('Dr. Aarav Sharma'),
+    avatar: '',
     rating: 4.98,
     reviewsCount: 42,
     hourlyRate: 1200,
@@ -54,7 +54,7 @@ const CURATED_TALENT: Talent[] = [
     name: 'Priya Mukherjee',
     role: 'AI E-Commerce Listing & Multilingual Copy Specialist',
     category: 'E-Commerce & Copy',
-    avatar: getHappyPastelAvatar('Priya Mukherjee'),
+    avatar: '',
     rating: 4.95,
     reviewsCount: 29,
     hourlyRate: 800,
@@ -69,7 +69,7 @@ const CURATED_TALENT: Talent[] = [
     name: 'Vikramaditya Iyer',
     role: 'AI Social Media Content & Campaign Creator',
     category: 'Social & Marketing',
-    avatar: getHappyPastelAvatar('Vikramaditya Iyer'),
+    avatar: '',
     rating: 4.92,
     reviewsCount: 51,
     hourlyRate: 1200,
@@ -84,7 +84,7 @@ const CURATED_TALENT: Talent[] = [
     name: 'Ananya Deshmukh',
     role: 'AI Website & High-Converting Landing Page Builder',
     category: 'Web & Funnels',
-    avatar: getHappyPastelAvatar('Ananya Deshmukh'),
+    avatar: '',
     rating: 4.99,
     reviewsCount: 36,
     hourlyRate: 1500,
@@ -140,7 +140,7 @@ const AITalent = () => {
                 name: 'Maqs',
                 email: 'l.maqsood.m@gmail.com',
                 role: 'freelancer',
-                photo_url: u.photo_url || getHappyPastelAvatar('Maqs')
+                photo_url: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : ''
               });
             }
           } else if (cleanEmail === 'user1@aitag.com' || cleanName === 'User1 Admin' || cleanName === 'User1') {
@@ -150,7 +150,7 @@ const AITalent = () => {
                 name: 'User1',
                 email: 'user1@aitag.com',
                 role: 'admin',
-                photo_url: u.photo_url || getHappyPastelAvatar('User1')
+                photo_url: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : ''
               });
             }
           } else if (cleanEmail && !uniqueUsersMap.has(cleanEmail)) {
@@ -175,7 +175,7 @@ const AITalent = () => {
               ? 'AI Product Visuals & Catalogue Lead'
               : `${u.role === 'admin' ? 'Admin / ' : ''}AI Business Service Specialist`,
             category: isUser1 ? 'Web & Funnels' : isMaqsood ? 'Product Visuals' : 'E-Commerce & Copy',
-            avatar: u.photo_url || getHappyPastelAvatar(u.name || u.email),
+            avatar: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : '',
             rating: 5.0,
             reviewsCount: isUser1 ? 19 : isMaqsood ? 42 : 14,
             hourlyRate: isUser1 ? 1800 : isMaqsood ? 2500 : 1200,
@@ -372,20 +372,12 @@ const AITalent = () => {
                 >
                   <CardContent sx={{ p: 3.5, flexGrow: 1 }}>
                     {/* Top Row: Avatar & Basic Info */}
-                    <Box sx={{ display: 'flex', gap: 2.5, mb: 2.5 }}>
-                      <Avatar
+                    <Box sx={{ display: 'flex', gap: 2.5, mb: 2.5, alignItems: 'center' }}>
+                      <AnimatedAvatar
+                        name={talent.name}
+                        size={64}
                         src={talent.avatar}
-                        alt={talent.name}
-                        sx={{
-                          width: 72,
-                          height: 72,
-                          borderRadius: '16px',
-                          border: '2px solid rgba(79,70,229,0.2)',
-                          bgcolor: '#4f46e5'
-                        }}
-                      >
-                        {talent.name?.[0]}
-                      </Avatar>
+                      />
                       <Box sx={{ flexGrow: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
                           <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1.15rem' }}>
