@@ -1,25 +1,23 @@
 {
   "userId": "6e36f593-b9e6-4ead-8266-31ac91cf44c5",
-  "name": "Maqs",
-  "email": "l.maqsood.m@gmail.com",
-  "role": "freelancer",
-  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs",
-  "headline": "Senior AI Automation & Full-Stack Machine Learning Engineer",
-  "bio": "Delivering production-grade AI automations, scalable cold email infrastructure, and automated video pipelines.",
-  "hourlyRate": 3200,
+  "name": "User1 Admin",
+  "email": "user1@aitag.com",
+  "role": "admin",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=User1",
+  "serviceDomain": "Platform Operations & Marketplace Oversight",
+  "headline": "AITAG Platform Operations & Master Dispatcher",
+  "bio": "Supervising platform service delivery, vetted specialist matching, escrow governance, and milestone compliance across all 4 AI service domains.",
+  "hourlyRate": 0,
   "skills": [
-    "Python",
-    "FastAPI",
-    "LangGraph",
-    "Supabase",
-    "SendGrid API",
-    "Google Cloud Storage",
-    "TypeScript",
-    "Docker"
+    "Platform Operations",
+    "Product Visuals Oversight",
+    "Listings & Copy Dispatch",
+    "Escrow Governance",
+    "Dispute Resolution"
   ],
   "links": {
     "github": "https://github.com/Maqsood32595",
-    "linkedin": "https://linkedin.com/in/maqsood",
+    "linkedin": "https://linkedin.com/in/user1",
     "website": "https://aitag.in"
   },
   "deliveredWorkflows": [

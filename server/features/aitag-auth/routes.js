@@ -31,10 +31,36 @@ router.post('/register', async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email and password are required' });
     }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({ error: 'Invalid email address format' });
+    }
+
+    // Insecure/common password defense
+    const INSECURE_PASSWORDS = ['admin', 'password', '123456', 'qwerty', 'admin123', 'password123'];
+    if (INSECURE_PASSWORDS.includes(password.toLowerCase().trim())) {
+      return res.status(400).json({ error: 'Password is too common or insecure. Please choose a stronger password.' });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
-    const result = await authService.register({ name, email, password, photoURL, role });
+
+    // Strict RBAC mass assignment guard: only 'client' and 'freelancer' can self-register
+    const ALLOWED_REGISTRATION_ROLES = ['client', 'freelancer'];
+    if (role) {
+      const sanitizedRole = role.toLowerCase().trim();
+      if (!ALLOWED_REGISTRATION_ROLES.includes(sanitizedRole)) {
+        return res.status(400).json({
+          error: `Unauthorized registration role '${role}'. Self-registration is strictly restricted to 'client' and 'freelancer'. Admin accounts cannot be self-provisioned.`
+        });
+      }
+    }
+
+    const sanitizedRole = (role || 'freelancer').toLowerCase().trim();
+    const result = await authService.register({ name, email, password, photoURL, role: sanitizedRole });
     res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });

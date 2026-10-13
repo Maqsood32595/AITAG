@@ -64,6 +64,12 @@ class AuthService {
   }
 
   async register({ name, email, password, photoURL, role }) {
+    // Strict RBAC defense: public registration can only assign 'client' or 'freelancer'
+    const ALLOWED_ROLES = ['client', 'freelancer'];
+    const safeRole = (role && ALLOWED_ROLES.includes(role.toLowerCase().trim()))
+      ? role.toLowerCase().trim()
+      : 'freelancer';
+
     // Check if email already exists in Supabase
     try {
       if (supabase && typeof supabase.from === 'function') {
@@ -86,7 +92,7 @@ class AuthService {
             email: (email || '').trim().toLowerCase(),
             password_hash,
             photo_url: photoURL || '',
-            role: role || 'freelancer'
+            role: safeRole
           }])
           .select('id, name, email, role, photo_url, created_at')
           .single();
@@ -107,7 +113,7 @@ class AuthService {
       id: `user-${Date.now()}`,
       name,
       email: (email || '').trim().toLowerCase(),
-      role: role || 'freelancer',
+      role: safeRole,
       photo_url: photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
       password_hash,
       created_at: new Date().toISOString()
@@ -143,15 +149,22 @@ class AuthService {
       console.warn('[AuthService] Supabase query notice during login:', e.message);
     }
 
-    // 2. Try Seed Fallback
-    const seedUser = SEED_USERS.find(u => u.email.toLowerCase() === cleanEmail);
-    if (seedUser) {
-      const match = await bcrypt.compare(password, seedUser.password_hash);
-      if (match) {
-        const { password_hash, ...safeUser } = seedUser;
-        const token = this.signToken(safeUser);
-        return { user: safeUser, token };
+    // 2. Try Seed Fallback (only permitted in development or when explicitly configured)
+    const isProduction = process.env.NODE_ENV === 'production';
+    const allowSeedLogins = process.env.ALLOW_DEV_SEED_LOGINS === 'true' || !isProduction;
+
+    if (allowSeedLogins) {
+      const seedUser = SEED_USERS.find(u => u.email.toLowerCase() === cleanEmail);
+      if (seedUser) {
+        const match = await bcrypt.compare(password, seedUser.password_hash);
+        if (match) {
+          const { password_hash, ...safeUser } = seedUser;
+          const token = this.signToken(safeUser);
+          return { user: safeUser, token };
+        }
       }
+    } else {
+      console.warn(`[AuthService] Seed fallback blocked in production mode for: ${cleanEmail}`);
     }
 
     throw new Error('Invalid email or password');

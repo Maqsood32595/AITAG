@@ -81,6 +81,16 @@ router.post('/:id/assign', async (req, res) => {
   }
 });
 
+// POST /api/service-orders/:id/reset — Admin resets expert assignment back to REQUESTED
+router.post('/:id/reset', async (req, res) => {
+  try {
+    const order = await service.resetAssignment(req.params.id);
+    res.json({ success: true, order });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 // POST /api/service-orders/:id/activate — Admin marks payment received & activates project
 router.post('/:id/activate', async (req, res) => {
   try {

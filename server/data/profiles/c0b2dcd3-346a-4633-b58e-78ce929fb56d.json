@@ -1,26 +1,21 @@
 {
   "userId": "c0b2dcd3-346a-4633-b58e-78ce929fb56d",
-  "name": "Maqs",
-  "email": "l.maqsood.m@gmail.com",
-  "role": "freelancer",
-  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs",
-  "headline": "Senior AI Automation & Machine Learning Specialist",
-  "bio": "Delivering production-grade AI automations, email pipelines, and machine learning tools.",
-  "hourlyRate": 4500,
+  "name": "Client 1",
+  "email": "client1@aitag.com",
+  "role": "client",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Client1",
+  "serviceDomain": "Product Visuals & E-Commerce",
+  "businessName": "AITAG Business Client",
+  "industryCategory": "Retail & E-Commerce",
+  "billingEntity": "AITAG Business Client (GST Exemption Tier) • Currency: INR (₹)",
+  "hourlyRate": 0,
   "skills": [
-    "Python",
-    "LangGraph",
-    "FastAPI",
-    "Supabase",
-    "SendGrid API",
-    "Google Cloud Storage",
-    "TypeScript",
-    "Docker",
-    "Zig"
+    "Product Visuals",
+    "E-Commerce & Copy",
+    "Social & Marketing",
+    "Web & Funnels"
   ],
   "links": {
-    "github": "https://github.com/Maqsood32595",
-    "linkedin": "https://linkedin.com/in/maqsood",
     "website": "https://aitag.in"
   },
   "deliveredWorkflows": [

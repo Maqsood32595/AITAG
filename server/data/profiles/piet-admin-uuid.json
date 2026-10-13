@@ -1,26 +1,23 @@
 {
   "userId": "piet-admin-uuid",
-  "name": "Maqs",
-  "email": "l.maqsood.m@gmail.com",
-  "role": "freelancer",
-  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs",
-  "headline": "Senior AI Automation & Machine Learning Specialist",
-  "bio": "Delivering production-grade AI automations, email pipelines, and machine learning tools.",
-  "hourlyRate": 4500,
+  "name": "PIET Admin",
+  "email": "admin@aitag.com",
+  "role": "admin",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
+  "serviceDomain": "Platform Operations & Marketplace Oversight",
+  "headline": "AITAG Platform Operations & Master Dispatcher",
+  "bio": "Supervising platform service delivery, vetted specialist matching, escrow governance, and milestone compliance.",
+  "hourlyRate": 0,
   "skills": [
-    "Python",
-    "LangGraph",
-    "FastAPI",
-    "Supabase",
-    "SendGrid API",
-    "Google Cloud Storage",
-    "TypeScript",
-    "Docker",
-    "Zig"
+    "Platform Operations",
+    "Product Visuals Oversight",
+    "Listings & Copy Dispatch",
+    "Escrow Governance",
+    "Dispute Resolution"
   ],
   "links": {
     "github": "https://github.com/Maqsood32595",
-    "linkedin": "https://linkedin.com/in/maqsood",
+    "linkedin": "https://linkedin.com/in/admin",
     "website": "https://aitag.in"
   },
   "deliveredWorkflows": [

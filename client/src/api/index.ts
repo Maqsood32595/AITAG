@@ -106,6 +106,7 @@ export const serviceOrdersApi = {
   getAll: (params?: { role?: string; email?: string; status?: string }) => api.get('/service-orders', { params }),
   getById: (id: string) => api.get(`/service-orders/${id}`),
   assign: (id: string, data: { expertEmail: string; expertName?: string }) => api.post(`/service-orders/${id}/assign`, data),
+  reset: (id: string) => api.post(`/service-orders/${id}/reset`),
   activate: (id: string) => api.post(`/service-orders/${id}/activate`),
   submitDraft: (id: string, data: { draftFiles: any[] }) => api.post(`/service-orders/${id}/draft`, data),
   requestRevision: (id: string, data: { revisionNotes: string }) => api.post(`/service-orders/${id}/revision`, data),

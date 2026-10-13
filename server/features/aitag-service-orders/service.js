@@ -203,6 +203,13 @@ class ServiceOrdersService {
     });
   }
 
+  async resetAssignment(id) {
+    return this.updateOrderStatus(id, 'REQUESTED', {
+      assigned_expert_email: '',
+      assigned_expert_name: ''
+    });
+  }
+
   async activateProject(id) {
     return this.updateOrderStatus(id, 'ACTIVE');
   }

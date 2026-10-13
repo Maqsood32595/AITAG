@@ -18,6 +18,20 @@ class FractalKernel {
 
   init(app) {
     console.log('🌀 Bootstrapping AITAG Fractal Kernel Architecture...');
+
+    // 🛡️ Global Security Hardening: OWASP Headers, Rate Limiting, XSS Defense & Log Scrubbing
+    try {
+      const securityGuard = require('./features/aitag-security-guard/routes');
+      app.use(securityGuard.securityHeaders);
+      app.use(securityGuard.xssSanitizer);
+      app.use(securityGuard.logScrubberMiddleware);
+      app.use('/api/auth', securityGuard.authLimiter);
+      app.use('/api', securityGuard.apiLimiter);
+      console.log('🛡️ Fractal Kernel Security Guard active (OWASP Headers, Rate Limiting, XSS & Log Scrubber).');
+    } catch (e) {
+      console.warn('⚠️ Security Guard initialization fallback:', e.message);
+    }
+
     if (!fs.existsSync(this.featuresDir)) {
       fs.mkdirSync(this.featuresDir, { recursive: true });
     }

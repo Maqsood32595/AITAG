@@ -177,6 +177,21 @@ const Dashboard = () => {
     }
   };
 
+  // Reset Expert Assignment (Admin action)
+  const handleResetAssignment = async (order: any) => {
+    if (!window.confirm(`Reset assignment for Order ${order.order_number}? This will unassign the expert and return the brief to the matching queue.`)) return;
+    setActionLoading(`reset-${order.id}`);
+    try {
+      await serviceOrdersApi.reset(order.id);
+      showSuccessBanner(`🔁 Order ${order.order_number} has been reset. Status is now Pending Expert Matching.`);
+      fetchDashboardData();
+    } catch (err: any) {
+      showErrorBanner(err.response?.data?.error || 'Failed to reset assignment');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // 2. Activate Project (Confirm Payment)
   const handleActivateProject = async (order: any) => {
     setActionLoading(`activate-${order.id}`);
@@ -834,6 +849,23 @@ const Dashboard = () => {
                               >
                                 Change Expert
                               </Button>
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                disabled={actionLoading === `reset-${ord.id}`}
+                                onClick={() => handleResetAssignment(ord)}
+                                sx={{
+                                  textTransform: 'none',
+                                  borderRadius: '8px',
+                                  fontSize: '0.75rem',
+                                  borderColor: '#fca5a5',
+                                  color: '#dc2626',
+                                  '&:hover': { bgcolor: '#fef2f2', borderColor: '#ef4444' }
+                                }}
+                              >
+                                {actionLoading === `reset-${ord.id}` ? 'Resetting...' : 'Reset Assignment'}
+                              </Button>
                             </>
                           ) : (
                             <Chip
@@ -847,21 +879,42 @@ const Dashboard = () => {
                         {/* 3. ACTIVE State */}
                         {ord.status === 'ACTIVE' && (
                           (isAdmin || isFreelancer) ? (
-                            <Button
-                              variant="contained"
-                              size="small"
-                              startIcon={<CloudUploadIcon />}
-                              onClick={() => openDraftModal(ord)}
-                              sx={{
-                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                textTransform: 'none',
-                                fontWeight: 700,
-                                borderRadius: '8px',
-                                px: 2
-                              }}
-                            >
-                              Submit Draft Deliverables
-                            </Button>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<CloudUploadIcon />}
+                                onClick={() => openDraftModal(ord)}
+                                sx={{
+                                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                  textTransform: 'none',
+                                  fontWeight: 700,
+                                  borderRadius: '8px',
+                                  px: 2
+                                }}
+                              >
+                                Submit Draft Deliverables
+                              </Button>
+                              {isAdmin && (
+                                <Button
+                                  variant="outlined"
+                                  color="error"
+                                  size="small"
+                                  disabled={actionLoading === `reset-${ord.id}`}
+                                  onClick={() => handleResetAssignment(ord)}
+                                  sx={{
+                                    textTransform: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '0.75rem',
+                                    borderColor: '#fca5a5',
+                                    color: '#dc2626',
+                                    '&:hover': { bgcolor: '#fef2f2', borderColor: '#ef4444' }
+                                  }}
+                                >
+                                  {actionLoading === `reset-${ord.id}` ? 'Resetting...' : 'Reset Assignment'}
+                                </Button>
+                              )}
+                            </Box>
                           ) : (
                             <Chip
                               label="Project Active • Deliverables in Production"

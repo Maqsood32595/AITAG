@@ -1,26 +1,21 @@
 {
   "userId": "piet-client-uuid",
-  "name": "Maqs",
-  "email": "l.maqsood.m@gmail.com",
-  "role": "freelancer",
-  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs",
-  "headline": "Senior AI Automation & Machine Learning Specialist",
-  "bio": "Delivering production-grade AI automations, email pipelines, and machine learning tools.",
-  "hourlyRate": 4500,
+  "name": "PIET Client",
+  "email": "client@aitag.com",
+  "role": "client",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Client",
+  "serviceDomain": "Product Visuals & E-Commerce",
+  "businessName": "PIET Enterprise Client",
+  "industryCategory": "Retail & E-Commerce",
+  "billingEntity": "PIET Enterprise Client (GST Exemption Tier) • Currency: INR (₹)",
+  "hourlyRate": 0,
   "skills": [
-    "Python",
-    "LangGraph",
-    "FastAPI",
-    "Supabase",
-    "SendGrid API",
-    "Google Cloud Storage",
-    "TypeScript",
-    "Docker",
-    "Zig"
+    "Product Visuals",
+    "E-Commerce & Copy",
+    "Social & Marketing",
+    "Web & Funnels"
   ],
   "links": {
-    "github": "https://github.com/Maqsood32595",
-    "linkedin": "https://linkedin.com/in/maqsood",
     "website": "https://aitag.in"
   },
   "deliveredWorkflows": [

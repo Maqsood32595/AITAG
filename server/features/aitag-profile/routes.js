@@ -4,15 +4,28 @@
  * basePath: /api/profile
  */
 
+const path = require('path');
 const express = require('express');
 const router = express.Router();
 const profileService = require('./service');
 const authRoutes = require('../aitag-auth/routes');
 const authMiddleware = authRoutes.authMiddleware;
+const { sanitizeStoragePath } = require('../aitag-security-guard/middleware/ssrf-guard');
 const multer = require('multer');
+
+const ALLOWED_VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/quicktime'];
+const ALLOWED_EXTENSIONS = ['.mp4', '.webm', '.mov'];
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 150 * 1024 * 1024 } // 150MB max video size
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max video size
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    if (!ALLOWED_VIDEO_MIMES.includes(file.mimetype) || !ALLOWED_EXTENSIONS.includes(ext)) {
+      return cb(new Error('Invalid video format. Only MP4, WebM, and MOV files under 100MB are permitted.'));
+    }
+    cb(null, true);
+  }
 });
 
 
@@ -40,7 +53,11 @@ router.put('/me', authMiddleware, async (req, res) => {
 // GET /api/profile/workflows/stream-video — Secure HTTP 206 video streamer
 router.get('/workflows/stream-video', async (req, res) => {
   const storagePath = req.query.path;
-  await profileService.streamWorkflowVideo(req, res, storagePath);
+  const pathCheck = sanitizeStoragePath(storagePath);
+  if (!pathCheck.valid) {
+    return res.status(400).json({ error: pathCheck.reason });
+  }
+  await profileService.streamWorkflowVideo(req, res, pathCheck.cleanPath);
 });
 
 // POST /api/profile/workflows/video-upload — Multipart server-to-GCS upload (Zero CORS)

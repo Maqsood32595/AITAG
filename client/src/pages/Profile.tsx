@@ -12,7 +12,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box, Container, Typography, Paper, Grid, TextField, Button,
-  Chip, Stack, Alert, CircularProgress, IconButton, Tooltip
+  Chip, Stack, Alert, CircularProgress, IconButton, Tooltip,
+  FormControl, Select, MenuItem
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -37,30 +38,47 @@ import { profileApi, analyticsApi } from '../api';
 export const Profile: React.FC = () => {
   const { user } = useAuth();
   const isClient = user?.role === 'client';
+  const isAdmin = user?.role === 'admin';
+  const isFreelancer = user?.role === 'freelancer' || (!isClient && !isAdmin);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   
   // Account Dossier State
   const [accountIdentifier, setAccountIdentifier] = useState(
-    user?.id || (isClient ? 'c0b2dcd3-346a-4633-b58e-78ce929fb56d' : '0eaa9c88-d477-4308-bd37-f7ccf29c87f1')
+    user?.id || (isAdmin ? '6e36f593-b9e6-4ead-8266-31ac91cf44c5' : isClient ? 'c0b2dcd3-346a-4633-b58e-78ce929fb56d' : '0eaa9c88-d477-4308-bd37-f7ccf29c87f1')
   );
-  const [primaryEmail, setPrimaryEmail] = useState(user?.email || (isClient ? 'client1@aitag.com' : 'expert1@aitag.com'));
+  const [primaryEmail, setPrimaryEmail] = useState(user?.email || (isAdmin ? 'admin@aitag.com' : isClient ? 'client1@aitag.com' : 'expert1@aitag.com'));
   const [contactPhone, setContactPhone] = useState('+91 98860 31643');
   const [memberSince, setMemberSince] = useState('10 October 2026');
-  const [kycStatus, setKycStatus] = useState(isClient ? 'Active & KYC Verified' : 'Active & KYC Verified (Vetted AI Specialist)');
+  const [kycStatus, setKycStatus] = useState(
+    isAdmin ? 'Active & Verified Platform Admin' : isClient ? 'Active & KYC Verified (Client Enterprise)' : 'Active & KYC Verified (Vetted AI Specialist)'
+  );
   const [copiedId, setCopiedId] = useState(false);
 
   // Client Business & Billing Information State
   const [businessName, setBusinessName] = useState('AITAG Business Client');
   const [industryCategory, setIndustryCategory] = useState('Retail & E-Commerce');
   const [billingEntity, setBillingEntity] = useState('AITAG Business Client (GST Exemption Tier) • Currency: INR (₹)');
+  const [clientServiceNeed, setClientServiceNeed] = useState('Product Visuals');
 
-  // Freelancer / Expert Profile & Credentials State
-  const [headline, setHeadline] = useState('Senior AI Automation & Prompt Engineering Specialist');
-  const [bio, setBio] = useState('Specialist in end-to-end generative media workflows, LLM copy generation, and marketplace automation pipelines.');
-  const [hourlyRate, setHourlyRate] = useState(2800);
-  const [skillsInput, setSkillsInput] = useState('Python, FastAPI, ComfyUI, FLUX, LLM RAG, Photoshop AI');
+  // Freelancer / Expert & Admin Profile State (Strictly Aligned with AITAG AI Services)
+  const [serviceDomain, setServiceDomain] = useState(isAdmin ? 'Platform Operations & Oversight' : 'Product Visuals');
+  const [headline, setHeadline] = useState(
+    isAdmin 
+      ? 'AITAG Platform Operations & Master Dispatcher' 
+      : 'Senior AI Product Visuals & E-Commerce Media Specialist'
+  );
+  const [bio, setBio] = useState(
+    isAdmin
+      ? 'Supervising platform service delivery, vetted specialist matching, escrow governance, and milestone compliance across all 4 AI service domains.'
+      : 'Specialist delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance.'
+  );
+  const [skillsInput, setSkillsInput] = useState(
+    isAdmin
+      ? 'Platform Operations, Product Visuals Oversight, Listings & Copy Dispatch, Escrow Governance'
+      : 'FLUX.1-dev, Midjourney v6, ComfyUI, Photoshop Generative Fill, Photoroom API, Stable Diffusion XL'
+  );
   const [githubUrl, setGithubUrl] = useState('https://github.com/Maqsood32595');
   const [linkedinUrl, setLinkedinUrl] = useState('https://linkedin.com/in/maqsood');
   const [websiteUrl, setWebsiteUrl] = useState('https://aitag.in');
@@ -98,10 +116,11 @@ export const Profile: React.FC = () => {
         try {
           const res = await (profileApi.getProfile ? profileApi.getProfile() : profileApi.getMe());
           const p = res.data;
+          if (p.serviceDomain) setServiceDomain(p.serviceDomain);
           if (p.headline) setHeadline(p.headline);
           if (p.bio) setBio(p.bio);
-          if (p.hourlyRate) setHourlyRate(p.hourlyRate);
-          if (p.skills) setSkillsInput(p.skills.join(', '));
+          if (p.skills && Array.isArray(p.skills)) setSkillsInput(p.skills.join(', '));
+          if (p.payoutUpi) setPayoutUpi(p.payoutUpi);
           if (p.links?.github) setGithubUrl(p.links.github);
           if (p.links?.linkedin) setLinkedinUrl(p.links.linkedin);
           if (p.links?.website) setWebsiteUrl(p.links.website);
@@ -130,21 +149,36 @@ export const Profile: React.FC = () => {
           // resilient update
         }
         setSuccessMessage('✅ Account Identity & Business Dossier saved successfully!');
-      } else {
-        const skills = skillsInput.split(',').map(s => s.trim()).filter(Boolean);
+      } else if (isAdmin) {
         try {
           await (profileApi.updateProfile ? profileApi.updateProfile : profileApi.updateMe)({
             phone: contactPhone,
+            serviceDomain,
             headline,
             bio,
-            hourlyRate: Number(hourlyRate),
-            skills,
+            skills: skillsInput.split(',').map(s => s.trim()).filter(Boolean),
             links: { github: formatExternalUrl(githubUrl), linkedin: formatExternalUrl(linkedinUrl), website: formatExternalUrl(websiteUrl) },
           });
         } catch (e) {
           // resilient update
         }
-        setSuccessMessage('✅ Account Identity, Credentials & Payout Dossier saved successfully!');
+        setSuccessMessage('✅ Platform Operations & Marketplace Oversight saved successfully!');
+      } else {
+        const skills = skillsInput.split(',').map(s => s.trim()).filter(Boolean);
+        try {
+          await (profileApi.updateProfile ? profileApi.updateProfile : profileApi.updateMe)({
+            phone: contactPhone,
+            serviceDomain,
+            headline,
+            bio,
+            skills,
+            payoutUpi,
+            links: { github: formatExternalUrl(githubUrl), linkedin: formatExternalUrl(linkedinUrl), website: formatExternalUrl(websiteUrl) },
+          });
+        } catch (e) {
+          // resilient update
+        }
+        setSuccessMessage('✅ AI Specialist Credentials & Escrow Payout Dossier saved successfully!');
       }
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
@@ -184,20 +218,20 @@ export const Profile: React.FC = () => {
         >
           <Stack direction="row" spacing={3} alignItems="center">
             <AnimatedAvatar
-              name={user?.name || (isClient ? 'Client 1' : 'Expert 1')}
+              name={user?.name || (isAdmin ? 'Admin Console' : isClient ? 'Client 1' : 'Expert 1')}
               size={72}
               src={user?.photo_url || user?.photoURL}
             />
             <Box>
               <Typography variant="h5" fontWeight={800} color="#0f172a">
-                {user?.name || (isClient ? 'Client 1' : 'Expert 1')}
+                {user?.name || (isAdmin ? 'User1 Admin' : isClient ? 'Client 1' : 'Expert 1')}
               </Typography>
               <Typography variant="body2" color="#64748b">
-                {user?.email || (isClient ? 'client1@aitag.com' : 'expert1@aitag.com')}
+                {user?.email || (isAdmin ? 'admin@aitag.com' : isClient ? 'client1@aitag.com' : 'expert1@aitag.com')}
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
                 <Chip
-                  label={isClient ? "Client Portal" : "AI Specialist Hub"}
+                  label={isAdmin ? "Platform Operations" : isClient ? "Client Portal" : "AI Specialist Hub"}
                   size="small"
                   sx={{ bgcolor: '#eff6ff', color: '#1d4ed8', fontWeight: 700, fontSize: '0.75rem' }}
                 />
@@ -212,7 +246,7 @@ export const Profile: React.FC = () => {
           </Stack>
 
           <Stack direction="row" spacing={1.5} alignItems="center">
-            {!isClient && (
+            {isFreelancer && (
               <Button
                 component={Link}
                 to="/workflows"
@@ -229,6 +263,25 @@ export const Profile: React.FC = () => {
                 }}
               >
                 🎬 Manage Workflows
+              </Button>
+            )}
+            {isAdmin && (
+              <Button
+                component={Link}
+                to="/dashboard"
+                variant="outlined"
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  borderRadius: 2.5,
+                  py: 1.2,
+                  px: 2.5,
+                  borderColor: '#cbd5e1',
+                  color: '#334155',
+                  cursor: 'pointer !important'
+                }}
+              >
+                📊 Dispatch Center
               </Button>
             )}
             <Button
@@ -373,7 +426,7 @@ export const Profile: React.FC = () => {
               </Paper>
             </Grid>
 
-            {/* Card 2: Role-aware (Client: Business & Billing | Expert: Professional Credentials & Payout) */}
+            {/* Card 2: Role-aware (Client: Business & Invoicing | Admin: Operations & Oversight | Expert: AI Specialization & Escrow) */}
             <Grid size={{ xs: 12, md: 6 }}>
               {isClient ? (
                 <Paper
@@ -398,7 +451,7 @@ export const Profile: React.FC = () => {
                         Business & Billing Information
                       </Typography>
                       <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
-                        Commercial invoicing, business category, and tax tier
+                        Commercial invoicing, business category, and primary service requirement
                       </Typography>
                     </Box>
                   </Box>
@@ -418,19 +471,38 @@ export const Profile: React.FC = () => {
                       />
                     </Box>
 
-                    <Box>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                        Industry & Category
-                      </Typography>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        value={industryCategory}
-                        onChange={(e) => setIndustryCategory(e.target.value)}
-                        placeholder="Retail & E-Commerce"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-                      />
-                    </Box>
+                    <Grid container spacing={1.5}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
+                          Industry & Category
+                        </Typography>
+                        <TextField
+                          size="small"
+                          fullWidth
+                          value={industryCategory}
+                          onChange={(e) => setIndustryCategory(e.target.value)}
+                          placeholder="Retail & E-Commerce"
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
+                          Primary AI Service Need
+                        </Typography>
+                        <FormControl fullWidth size="small">
+                          <Select
+                            value={clientServiceNeed}
+                            onChange={(e) => setClientServiceNeed(e.target.value)}
+                            sx={{ borderRadius: '10px', fontSize: '0.85rem', fontWeight: 600 }}
+                          >
+                            <MenuItem value="Product Visuals">📸 Product Visuals</MenuItem>
+                            <MenuItem value="E-Commerce & Copy">📝 E-Commerce & Copy</MenuItem>
+                            <MenuItem value="Social & Marketing">📱 Social & Marketing</MenuItem>
+                            <MenuItem value="Web & Funnels">🌐 Web & Funnels</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
 
                     <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                       <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
@@ -471,6 +543,153 @@ export const Profile: React.FC = () => {
                     </Box>
                   </Stack>
                 </Paper>
+              ) : isAdmin ? (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 4,
+                    borderRadius: '20px',
+                    border: '1px solid #e2e8f0',
+                    bgcolor: '#ffffff',
+                    height: '100%',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                    <Box sx={{ p: 1, bgcolor: 'rgba(79,70,229,0.08)', borderRadius: '10px', color: '#4f46e5' }}>
+                      <ShieldIcon />
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
+                        Platform Operations & Marketplace Oversight
+                      </Typography>
+                      <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        Administrative governance across AITAG's 4 AI service domains & milestone dispatch
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Stack spacing={2} sx={{ flex: 1 }}>
+                    <Box>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
+                        Administrative Role & Authority
+                      </Typography>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={headline}
+                        onChange={(e) => setHeadline(e.target.value)}
+                        placeholder="AITAG Platform Operations & Master Dispatcher"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                      />
+                    </Box>
+
+                    <Box>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.8 }}>
+                        Supervised AI Service Domains (Catalogue Coverage)
+                      </Typography>
+                      <Grid container spacing={1}>
+                        <Grid size={{ xs: 6 }}>
+                          <Box sx={{ p: 1.2, borderRadius: '8px', bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                              📸 Product Visuals
+                            </Typography>
+                            <Typography sx={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              Photo Makeovers & E-Com
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Box sx={{ p: 1.2, borderRadius: '8px', bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                              📝 E-Commerce & Copy
+                            </Typography>
+                            <Typography sx={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              Listings, Bullets & SEO
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Box sx={{ p: 1.2, borderRadius: '8px', bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                              📱 Social & Marketing
+                            </Typography>
+                            <Typography sx={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              Monthly Content Packs
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Box sx={{ p: 1.2, borderRadius: '8px', bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                            <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                              🌐 Web & Funnels
+                            </Typography>
+                            <Typography sx={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              1-Page Landing Sites
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
+
+                    <Box>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
+                        Operations Oversight & Governance Bio
+                      </Typography>
+                      <TextField
+                        size="small"
+                        multiline
+                        rows={2}
+                        fullWidth
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        placeholder="Supervising platform service delivery, specialist matching, escrow governance, and milestone compliance."
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                      />
+                    </Box>
+
+                    <Box sx={{ p: 1.8, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
+                        Escrow Settlement & Platform Governance
+                      </Typography>
+                      <Stack direction="row" spacing={1} sx={{ mt: 0.5, flexWrap: 'wrap', gap: 0.5 }}>
+                        <Chip label="Escrow Milestone Protected" size="small" sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 700, fontSize: '0.7rem' }} />
+                        <Chip label="Zero-Fee Specialist Model" size="small" sx={{ bgcolor: '#eff6ff', color: '#1d4ed8', fontWeight: 700, fontSize: '0.7rem' }} />
+                        <Chip label="Reset Assignment Enabled" size="small" sx={{ bgcolor: '#fef3c7', color: '#b45309', fontWeight: 700, fontSize: '0.7rem' }} />
+                      </Stack>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5, flexWrap: 'wrap', gap: 1 }}>
+                      <Stack direction="row" spacing={1}>
+                        <TextField
+                          size="small"
+                          placeholder="GitHub URL"
+                          value={githubUrl}
+                          onChange={(e) => setGithubUrl(e.target.value)}
+                          sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem' } }}
+                        />
+                        <TextField
+                          size="small"
+                          placeholder="LinkedIn URL"
+                          value={linkedinUrl}
+                          onChange={(e) => setLinkedinUrl(e.target.value)}
+                          sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem' } }}
+                        />
+                      </Stack>
+                      <Button
+                        component={Link}
+                        to="/dashboard"
+                        variant="outlined"
+                        size="small"
+                        sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px', borderColor: '#cbd5e1', color: '#334155', cursor: 'pointer !important' }}
+                      >
+                        📊 Dispatch Center ➔
+                      </Button>
+                    </Box>
+                  </Stack>
+                </Paper>
               ) : (
                 <Paper
                   elevation={0}
@@ -491,53 +710,43 @@ export const Profile: React.FC = () => {
                     </Box>
                     <Box>
                       <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
-                        Professional Credentials & Payout Information
+                        AI Service Specialization & Escrow Settlement
                       </Typography>
                       <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
-                        Specialist capabilities, hourly pricing, and direct escrow UPI settlement
+                        Service domain, AI generative tooling stack, and direct milestone UPI settlement
                       </Typography>
                     </Box>
                   </Box>
 
                   <Stack spacing={2} sx={{ flex: 1 }}>
-                    <Box>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                        Professional Headline & Specialty
-                      </Typography>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        value={headline}
-                        onChange={(e) => setHeadline(e.target.value)}
-                        placeholder="Senior AI Automation & Prompt Engineering Specialist"
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-                      />
-                    </Box>
-
                     <Grid container spacing={1.5}>
                       <Grid size={{ xs: 12, sm: 5 }}>
                         <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                          Hourly Rate (₹/hr)
+                          Primary AI Service Domain
                         </Typography>
-                        <TextField
-                          size="small"
-                          fullWidth
-                          type="number"
-                          value={hourlyRate}
-                          onChange={(e) => setHourlyRate(Number(e.target.value))}
-                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-                        />
+                        <FormControl fullWidth size="small">
+                          <Select
+                            value={serviceDomain}
+                            onChange={(e) => setServiceDomain(e.target.value)}
+                            sx={{ borderRadius: '10px', fontSize: '0.85rem', fontWeight: 600 }}
+                          >
+                            <MenuItem value="Product Visuals">📸 Product Visuals</MenuItem>
+                            <MenuItem value="E-Commerce & Copy">📝 E-Commerce & Copy</MenuItem>
+                            <MenuItem value="Social & Marketing">📱 Social & Marketing</MenuItem>
+                            <MenuItem value="Web & Funnels">🌐 Web & Funnels</MenuItem>
+                          </Select>
+                        </FormControl>
                       </Grid>
                       <Grid size={{ xs: 12, sm: 7 }}>
                         <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                          Core Skills & Tooling
+                          Specialist Professional Headline
                         </Typography>
                         <TextField
                           size="small"
                           fullWidth
-                          value={skillsInput}
-                          onChange={(e) => setSkillsInput(e.target.value)}
-                          placeholder="Python, ComfyUI, FLUX, LLM RAG"
+                          value={headline}
+                          onChange={(e) => setHeadline(e.target.value)}
+                          placeholder="Senior AI Product Visuals & E-Commerce Media Specialist"
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
                         />
                       </Grid>
@@ -545,7 +754,33 @@ export const Profile: React.FC = () => {
 
                     <Box>
                       <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                        Specialist Bio
+                        AI Generative Models & Production Stack
+                      </Typography>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={skillsInput}
+                        onChange={(e) => setSkillsInput(e.target.value)}
+                        placeholder="FLUX.1-dev, Midjourney v6, ComfyUI, Photoshop Generative Fill, Photoroom API"
+                        helperText="List the AI models & production tools you use for service execution"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' }, '& .MuiFormHelperText-root': { fontSize: '0.68rem' } }}
+                      />
+                    </Box>
+
+                    <Box sx={{ p: 1.5, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.8 }}>
+                        Supported Fixed Package Tiers
+                      </Typography>
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                        <Chip label="📦 Package 1 (Starter Brief)" size="small" sx={{ bgcolor: '#eff6ff', color: '#1d4ed8', fontWeight: 700, fontSize: '0.72rem' }} />
+                        <Chip label="⚡ Package 2 (Growth Suite)" size="small" sx={{ bgcolor: '#f0fdf4', color: '#16a34a', fontWeight: 700, fontSize: '0.72rem' }} />
+                        <Chip label="👑 Package 3 (Full Catalogue)" size="small" sx={{ bgcolor: '#faf5ff', color: '#7e22ce', fontWeight: 700, fontSize: '0.72rem' }} />
+                      </Stack>
+                    </Box>
+
+                    <Box>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
+                        Specialist Methodology & Quality Bio
                       </Typography>
                       <TextField
                         size="small"
@@ -554,7 +789,7 @@ export const Profile: React.FC = () => {
                         fullWidth
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        placeholder="Specialist in end-to-end generative media workflows and automation pipelines."
+                        placeholder="Specialist delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance."
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
                       />
                     </Box>

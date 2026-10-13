@@ -141,6 +141,10 @@ class ProfileService {
       if (fs.existsSync(localFile)) {
         const localData = JSON.parse(fs.readFileSync(localFile, 'utf8'));
         if (localData && localData.deliveredWorkflows && localData.deliveredWorkflows.length > 0) {
+          localData.hourlyRate = 0;
+          if (!localData.serviceDomain) {
+            localData.serviceDomain = (localData.role === 'admin') ? 'Platform Operations' : 'Product Visuals';
+          }
           PROFILES_CACHE.set(userId, localData);
           return localData;
         }
@@ -174,20 +178,22 @@ class ProfileService {
     const isUser1 = (userId === USER1_ID || userId === 'user1@aitag.com');
     const defaultProfile = {
       userId,
-      name: isUser1 ? 'User1' : 'Maqs',
+      name: isUser1 ? 'User1 Admin' : 'Maqs',
       email: isUser1 ? 'user1@aitag.com' : 'l.maqsood.m@gmail.com',
       role: isUser1 ? 'admin' : 'freelancer',
       photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${isUser1 ? 'User1' : 'Maqs'}`,
+      serviceDomain: isUser1 ? 'Platform Operations' : 'Product Visuals',
       headline: isUser1 
-        ? 'Senior AI Automation & Full-Stack Machine Learning Engineer'
-        : 'Senior AI Automation & Machine Learning Specialist',
+        ? 'AITAG Platform Operations & Master Dispatcher'
+        : 'Senior AI Product Visuals & E-Commerce Media Specialist',
       bio: isUser1
-        ? 'Building autonomous multi-agent swarms with LangGraph, AutoGen, Next.js 15, and real-time streaming WebSocket sandboxes.'
-        : 'Delivering production-grade AI automations, email pipelines, and machine learning tools.',
-      hourlyRate: isUser1 ? 3200 : 4500,
+        ? 'Supervising platform service delivery, vetted specialist matching, and escrow compliance.'
+        : 'Delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance.',
+      hourlyRate: 0,
       skills: isUser1
-        ? ['Next.js', 'React', 'LangGraph', 'TypeScript', 'Supabase', 'Node.js', 'Zig']
-        : ['Python', 'LangGraph', 'FastAPI', 'Supabase', 'SendGrid API', 'Google Cloud Storage', 'TypeScript', 'Docker', 'Zig'],
+        ? ['Platform Oversight', 'Brief Matching', 'Escrow Management', 'Dispute Resolution']
+        : ['FLUX', 'Midjourney v6', 'ComfyUI', 'Photoshop Generative Fill', 'AI Background Replacement', 'E-Commerce Retouching'],
+      payoutUpi: 'expert1@okaxis',
       links: {
         github: 'https://github.com/Maqsood32595',
         linkedin: `https://linkedin.com/in/${isUser1 ? 'user1' : 'maqsood'}`,
@@ -211,10 +217,12 @@ class ProfileService {
 
     const updated = {
       ...existing,
+      serviceDomain: updateData.serviceDomain !== undefined ? updateData.serviceDomain : existing.serviceDomain,
       headline: updateData.headline !== undefined ? updateData.headline : existing.headline,
       bio: updateData.bio !== undefined ? updateData.bio : existing.bio,
-      hourlyRate: updateData.hourlyRate !== undefined ? Number(updateData.hourlyRate) : existing.hourlyRate,
+      hourlyRate: 0,
       skills: updateData.skills !== undefined ? updateData.skills : existing.skills,
+      payoutUpi: updateData.payoutUpi !== undefined ? updateData.payoutUpi : existing.payoutUpi,
       links: {
         ...(existing.links || {}),
         ...(updateData.links || {})
