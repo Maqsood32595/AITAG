@@ -14,6 +14,11 @@ class FractalKernel {
     this.features = new Map();
     this.mountedRoutes = new Map();
     this.featuresDir = path.join(__dirname, 'features');
+    try {
+      this.cache = require('./features/aitag-cache/service');
+    } catch {
+      this.cache = null;
+    }
   }
 
   init(app) {

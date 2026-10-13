@@ -8,9 +8,10 @@ const router = express.Router();
 const tasksService = require('./service');
 const authRoutes = require('../aitag-auth/routes');
 const auth = authRoutes.authMiddleware;
+const { cacheGuard, cacheService } = require('../aitag-cache/routes');
 
-// GET /api/tasks  — all tasks (public)
-router.get('/', async (req, res) => {
+// GET /api/tasks  — all tasks (public, cached 60s, Tag: tasks)
+router.get('/', cacheGuard({ ttlMs: 60000, tags: ['tasks'] }), async (req, res) => {
   try {
     const { category, search, limit } = req.query;
     const tasks = await tasksService.getAllTasks({ category, search, limit });
@@ -20,8 +21,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/tasks/featured  — top 8 by budget (public)
-router.get('/featured', async (req, res) => {
+// GET /api/tasks/featured  — top 8 by budget (public, cached 60s, Tag: tasks)
+router.get('/featured', cacheGuard({ ttlMs: 60000, tags: ['tasks'] }), async (req, res) => {
   try {
     const tasks = await tasksService.getFeaturedTasks();
     res.json(tasks);
@@ -30,8 +31,8 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// GET /api/tasks/my  — user's own tasks (protected)
-router.get('/my', auth, async (req, res) => {
+// GET /api/tasks/my  — user's own tasks (protected, user-scoped cache)
+router.get('/my', auth, cacheGuard({ ttlMs: 30000, scope: 'user', tags: (req) => ['tasks', `user:${req.user?.email}`] }), async (req, res) => {
   try {
     const tasks = await tasksService.getMyTasks(req.user.email);
     res.json(tasks);
@@ -40,8 +41,8 @@ router.get('/my', auth, async (req, res) => {
   }
 });
 
-// GET /api/tasks/:id  — single task (public)
-router.get('/:id', async (req, res) => {
+// GET /api/tasks/:id  — single task (public, cached 60s, Tag: tasks)
+router.get('/:id', cacheGuard({ ttlMs: 60000, tags: ['tasks'] }), async (req, res) => {
   try {
     const task = await tasksService.getTaskById(req.params.id);
     res.json(task);
@@ -50,7 +51,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/tasks  — create task (protected)
+// POST /api/tasks  — create task (protected, invalidates tasks cache)
 router.post('/', auth, async (req, res) => {
   try {
     const { title, category, description, deadline, budget, image } = req.body;
@@ -62,13 +63,15 @@ router.post('/', auth, async (req, res) => {
       userEmail: req.user.email,
       userName: req.user.name
     });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${req.user.email}`);
     res.status(201).json(task);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// PUT /api/tasks/:id  — update task (protected, owner only)
+// PUT /api/tasks/:id  — update task (protected, owner only, invalidates tasks cache)
 router.put('/:id', auth, async (req, res) => {
   try {
     const { title, category, description, deadline, budget, image, status } = req.body;
@@ -81,6 +84,8 @@ router.put('/:id', auth, async (req, res) => {
       ...(image && { image }),
       ...(status && { status })
     });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${req.user.email}`);
     res.json(task);
   } catch (err) {
     const code = err.message.includes('Unauthorized') ? 403 : 500;
@@ -88,10 +93,12 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-// DELETE /api/tasks/:id  — delete task (protected, owner only)
+// DELETE /api/tasks/:id  — delete task (protected, owner only, invalidates tasks cache)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const result = await tasksService.deleteTask(req.params.id, req.user.email);
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${req.user.email}`);
     res.json(result);
   } catch (err) {
     const code = err.message.includes('Unauthorized') ? 403 : 500;

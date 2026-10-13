@@ -76,25 +76,67 @@ To ensure the cloud database is 100% immune to direct REST dumping:
 
 ---
 
-## PIET Automated Gate 7 Verification Results
+## PIET Automated Gates Verification Results
 
-The zero-mock Persistent In-RAM Ephemeral Twin test suite confirms all invariants are green:
+The zero-mock Persistent In-RAM Ephemeral Twin test suite confirms all invariants are 100% green across all 8 gates:
 
 ```
 ==============================================================================
-🏁 PIET GATE 7 SECURITY INVARIANTS:
+🏁 PIET EXECUTION RESULTS:
 ==============================================================================
-  ✅ OWASP Security Headers invariant: verifies nosniff and frame protection headers
-  ✅ Security Guard endpoint invariant: GET /api/security/audit returns 20-point audit matrix
-  ✅ SSRF Defense invariant: blocks AWS metadata IP (169.254.169.254) and private subnets
-  ✅ Storage Path Traversal invariant: rejects ../ and traversal strings in stream endpoint
-  ✅ Production Source Maps invariant: verifies client/vite.config.ts explicitly sets sourcemap: false
-  ✅ Sensitive Log Scrubber invariant: verifies passwords, tokens and secrets are redacted
-  ✅ RBAC Mass Assignment Defense invariant: rejects registration with role: admin with HTTP 400
-  ✅ Weak Password & Input Validation invariant: rejects trivial passwords with HTTP 400
-  ✅ Credential Non-Leakage invariant: registration returns safe user without password_hash
+  ✅ [Gate 1: Falsification Probe] Proves harness catches closed port connection failure
+  ✅ [Gate 1: Falsification Probe] Negative input defense: rejects empty order payload with HTTP 400
+  ✅ [Gate 1: Falsification Probe] Negative input defense: rejects unauthenticated task creation with HTTP 401
+  ✅ [Gate 1: Falsification Probe] Negative input defense: rejects unauthenticated analytics request with HTTP 401
+  ✅ [Gate 2: AST & Manifest Integrity] Verifies all 15 Fractal Kernel feature manifests exist and parse cleanly
+  ✅ [Gate 2: AST & Manifest Integrity] Verifies aitag-analytics Grandchild Architecture module integrity
+  ✅ [Gate 2: AST & Manifest Integrity] Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 15 slices
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches live active packages list via /api/service-packages
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Verifies the 3 pilot packages exist with their exact slugs
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Verifies each package has 3 tiers (package_1/beginner, package_2/medium, package_3/expert)
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches live tasks via /api/tasks and proves zero legacy tech categories
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Filters tasks by category strictly via /api/tasks?category=Product%20Visuals
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches single task by ID via /api/tasks/:id with complete attributes
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches and filters service orders via /api/service-orders with role and status query params
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Enforces strict role-based data isolation on GET /api/service-orders
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches role-tailored Client analytics & user dossier via GET /api/analytics/me
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches role-tailored Admin platform analytics & master dossier via GET /api/analytics/me
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches role-tailored Freelancer earnings analytics via GET /api/analytics/me
+  ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches quick analytics summary cards via GET /api/analytics/summary
+  ✅ [Gate 4: Physical Invariants] Enforces pricing invariants: price_min <= price_max & delivery days valid
+  ✅ [Gate 4: Physical Invariants] Enforces task budget invariants: realistic small-business amounts (>= ₹499)
+  ✅ [Gate 4: Physical Invariants] Enforces category distribution: all 4 core MVP categories are active in tasks
+  ✅ [Gate 4: Physical Invariants] Enforces AI Service profile invariants: zero hourly rate & AI generative tooling
+  ✅ [Gate 5: Role Journeys] Customer submits brief for AI Product Listing & Description (REQUESTED)
+  ✅ [Gate 5: Role Journeys] Negative input defense: rejects assigning expert without expertEmail with HTTP 400
+  ✅ [Gate 5: Role Journeys] Admin qualifies & matches expert (MATCHED)
+  ✅ [Gate 5: Role Journeys] Admin resets task assignment back to REQUESTED matching pool
+  ✅ [Gate 5: Role Journeys] Admin confirms payment received (ACTIVE)
+  ✅ [Gate 5: Role Journeys] Negative input defense: rejects empty draft submission with HTTP 400
+  ✅ [Gate 5: Role Journeys] Expert submits draft deliverables (DRAFT_SUBMITTED)
+  ✅ [Gate 5: Role Journeys] Negative input defense: rejects empty revision notes with HTTP 400
+  ✅ [Gate 5: Role Journeys] Customer requests included revision (REVISION)
+  ✅ [Gate 5: Role Journeys] Expert resubmits revised draft deliverables (DRAFT_SUBMITTED)
+  ✅ [Gate 6: Deep Domain Contracts] Customer approves final output with 5-star rating (COMPLETED)
+  ✅ [Gate 6: Deep Domain Contracts] Enforces finished order physical invariants and 5% platform commission accounting
+  ✅ [Gate 7: Security Invariants] OWASP Security Headers invariant: verifies nosniff and frame protection headers
+  ✅ [Gate 7: Security Invariants] Security Guard endpoint invariant: GET /api/security/audit returns 20-point audit matrix
+  ✅ [Gate 7: Security Invariants] SSRF Defense invariant: blocks AWS metadata IP (169.254.169.254) and private subnets
+  ✅ [Gate 7: Security Invariants] Storage Path Traversal invariant: rejects ../ and traversal strings in stream endpoint
+  ✅ [Gate 7: Security Invariants] Production Source Maps invariant: verifies client/vite.config.ts explicitly sets sourcemap: false
+  ✅ [Gate 7: Sensitive Log Scrubber] verifies passwords, tokens and secrets are redacted
+  ✅ [Gate 7: Security Invariants] RBAC Mass Assignment Defense invariant: rejects registration with role: admin with HTTP 400
+  ✅ [Gate 7: Security Invariants] Weak Password & Input Validation invariant: rejects trivial passwords with HTTP 400
+  ✅ [Gate 7: Security Invariants] Credential Non-Leakage invariant: registration returns safe user without password_hash
+  ✅ [Gate 8: Adaptive Cache Invariants] Cache MISS & ETag Generation invariant: initial request populates cache with X-Cache: MISS
+  ✅ [Gate 8: Adaptive Cache Invariants] Cache HIT invariant: immediate repeat request serves from RAM with X-Cache: HIT
+  ✅ [Gate 8: Adaptive Cache Invariants] HTTP 304 Not Modified contract: If-None-Match header returns 304 with zero body payload
+  ✅ [Gate 8: Adaptive Cache Invariants] Tag-based Cache Invalidation contract: POST /api/cache/purge resets tag to X-Cache: MISS
+  ✅ [Gate 8: Adaptive Cache Invariants] User-scoped Cache Isolation contract: authenticated routes isolate tenant namespaces
+  ✅ [Gate 8: Adaptive Cache Invariants] In-RAM LRU Capacity & Eviction invariant: capacity limits prevent memory leaks
+  ✅ [Gate 8: Adaptive Cache Invariants] Cache Telemetry & Observability invariant: GET /api/cache/stats reports metrics
 ==============================================================================
-Summary: 44 Passed, 0 Failed out of 44 Assertions (100% Green).
+Summary: 51 Passed, 0 Failed out of 51 Assertions (100% Green).
 ==============================================================================
 ```
 

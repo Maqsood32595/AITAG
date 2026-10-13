@@ -5,9 +5,10 @@
 const express = require('express');
 const router = express.Router();
 const service = require('./service');
+const { cacheGuard } = require('../aitag-cache/routes');
 
-// GET /api/service-packages — List all active pilot packages with tiers
-router.get('/', async (req, res) => {
+// GET /api/service-packages — List all active pilot packages with tiers (Cached: 5 mins, Tag: packages)
+router.get('/', cacheGuard({ ttlMs: 300000, tags: ['packages'] }), async (req, res) => {
   try {
     const packages = await service.getAllPackages();
     res.json({ success: true, count: packages.length, packages });
@@ -16,8 +17,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/service-packages/:slug — Get single package by slug
-router.get('/:slug', async (req, res) => {
+// GET /api/service-packages/:slug — Get single package by slug (Cached: 5 mins, Tag: packages)
+router.get('/:slug', cacheGuard({ ttlMs: 300000, tags: ['packages'] }), async (req, res) => {
   try {
     const pkg = await service.getPackageBySlug(req.params.slug);
     if (!pkg) {

@@ -9,9 +9,10 @@ const router = express.Router();
 const service = require('./service');
 const authRoutes = require('../aitag-auth/routes');
 const auth = authRoutes.authMiddleware;
+const { cacheGuard } = require('../aitag-cache/routes');
 
-// GET /api/analytics/me — Authenticated user's role-aware analytics + complete dossier
-router.get('/me', auth, async (req, res) => {
+// GET /api/analytics/me — Authenticated user's role-aware analytics + complete dossier (user-scoped cache)
+router.get('/me', auth, cacheGuard({ ttlMs: 30000, scope: 'user', tags: (req) => ['analytics', `user:${req.user?.email}`] }), async (req, res) => {
   try {
     const data = await service.getUserAnalyticsAndDossier(req.user);
     res.json(data);
@@ -20,8 +21,8 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
-// GET /api/analytics/summary — Quick metrics cards
-router.get('/summary', auth, async (req, res) => {
+// GET /api/analytics/summary — Quick metrics cards (user-scoped cache)
+router.get('/summary', auth, cacheGuard({ ttlMs: 30000, scope: 'user', tags: (req) => ['analytics', `user:${req.user?.email}`] }), async (req, res) => {
   try {
     const data = await service.getUserAnalyticsAndDossier(req.user);
     res.json({

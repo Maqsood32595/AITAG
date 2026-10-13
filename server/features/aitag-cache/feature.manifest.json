@@ -1,0 +1,8 @@
+{
+  "id": "aitag-cache",
+  "name": "AITAG Fractal Kernel Adaptive Cache Engine",
+  "version": "1.0.0",
+  "basePath": "/api/cache",
+  "enabled": true,
+  "description": "High-performance two-tier in-RAM adaptive cache slice with TTL, LRU capacity capping, tag-based O(1) invalidation, HTTP ETag/304 negotiation, and telemetry metrics."
+}

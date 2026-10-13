@@ -7,6 +7,7 @@
 const crypto = require('crypto');
 const supabase = require('../../supabase');
 const packagesService = require('../aitag-service-packages/service');
+const cacheService = require('../aitag-cache/service');
 
 // Ephemeral in-memory fallback store
 const inMemoryOrders = new Map();
@@ -102,6 +103,11 @@ class ServiceOrdersService {
 
     // Fallback store
     inMemoryOrders.set(orderRecord.id, orderRecord);
+    try {
+      cacheService.invalidateByTag('orders');
+      cacheService.invalidateByTag('analytics');
+      cacheService.invalidateByTag(`user:${customer_email.toLowerCase()}`);
+    } catch {}
     return orderRecord;
   }
 
@@ -190,6 +196,12 @@ class ServiceOrdersService {
     if (existing) {
       const updated = { ...existing, ...updates };
       inMemoryOrders.set(id, updated);
+      try {
+        cacheService.invalidateByTag('orders');
+        cacheService.invalidateByTag('analytics');
+        if (updated.customer_email) cacheService.invalidateByTag(`user:${updated.customer_email.toLowerCase()}`);
+        if (updated.assigned_expert_email) cacheService.invalidateByTag(`user:${updated.assigned_expert_email.toLowerCase()}`);
+      } catch {}
       return updated;
     }
 
