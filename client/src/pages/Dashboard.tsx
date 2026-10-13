@@ -25,6 +25,7 @@ import { useAuth } from '../context/AuthContext';
 import { AnimatedAvatar } from '../components/AnimatedAvatar';
 
 const VETTED_SPECIALISTS = [
+  { name: 'Expert 1', email: 'expert1@aitag.com', role: 'Vetted AI Specialist' },
   { name: 'Dr. Aarav Sharma', email: 'dr.aarav@aitag.com', role: 'AI Product Photo Makeover Specialist' },
   { name: 'Priya Mukherjee', email: 'priya@aitag.com', role: 'AI E-Commerce Listing & Copy Specialist' },
   { name: 'Vikramaditya Iyer', email: 'vikram@aitag.com', role: 'AI Social Media Content Creator' },
@@ -81,7 +82,7 @@ const Dashboard = () => {
   const fetchDashboardData = () => {
     const ordersPromise = user?.role === 'admin'
       ? serviceOrdersApi.getAll()
-      : serviceOrdersApi.getAll({ email: user?.email });
+      : serviceOrdersApi.getAll({ role: user?.role, email: user?.email });
 
     Promise.all([
       tasksApi.getMy().then(r => setMyTasks(r.data || [])),
@@ -284,11 +285,22 @@ const Dashboard = () => {
   };
 
   const pendingInvites = invitations.filter(inv => inv.status === 'pending');
+  const isAdmin = user?.role === 'admin';
+  const isFreelancer = user?.role === 'freelancer';
+  const isClient = user?.role === 'client';
 
-  const stats = [
+  const stats = isAdmin ? [
     { icon: <TaskIcon sx={{ color: '#4f46e5' }} />, label: 'All Platform Tasks', value: allCount, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)' },
+    { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'Total Service Requests', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)' },
+    { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'Active Platform Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
+  ] : isFreelancer ? [
+    { icon: <TaskIcon sx={{ color: '#4f46e5' }} />, label: 'Tasks Available to Bid', value: allCount, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)' },
+    { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'My Placed Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
+    { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'My Assigned Projects', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)' },
+  ] : [
     { icon: <PostIcon sx={{ color: '#0891b2' }} />, label: 'My Posted Tasks', value: myTasks.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)' },
-    { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'My Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
+    { icon: <ShoppingBagIcon sx={{ color: '#4f46e5' }} />, label: 'My Service Requests', value: serviceOrders.length, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)' },
+    { icon: <TaskIcon sx={{ color: '#10b981' }} />, label: 'Marketplace Tasks', value: allCount, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
   ];
 
   const getStepIndex = (status: string) => {
@@ -319,9 +331,6 @@ const Dashboard = () => {
       </Box>
     );
   }
-
-  const isAdmin = user?.role === 'admin';
-  const isFreelancer = user?.role === 'freelancer';
 
   return (
     <DashboardLayout>
@@ -360,22 +369,25 @@ const Dashboard = () => {
               </Box>
             </Box>
 
-            <Button
-              component={Link}
-              to="/profile"
-              variant="contained"
-              sx={{
-                background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
-                borderRadius: '12px',
-                fontWeight: 700,
-                px: 3,
-                py: 1.2,
-                textTransform: 'none',
-                boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
-              }}
-            >
-              🎬 Manage Delivered Workflows & Profile
-            </Button>
+            {isClient && (
+              <Button
+                component={Link}
+                to="/add_task"
+                variant="contained"
+                startIcon={<PostIcon />}
+                sx={{
+                  background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  px: 3,
+                  py: 1.2,
+                  textTransform: 'none',
+                  boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
+                }}
+              >
+                + Post a New Task
+              </Button>
+            )}
           </Box>
         </Paper>
 
@@ -511,11 +523,17 @@ const Dashboard = () => {
               </Box>
               <Box>
                 <Typography sx={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a' }}>
-                  {isAdmin ? 'All Pilot Service Package Requests (Admin Management)' : 'My AI Service Package Requests'}
+                  {isAdmin
+                    ? 'All Pilot Service Package Requests (Admin Management)'
+                    : isFreelancer
+                    ? 'My Assigned Client Projects'
+                    : 'My AI Service Package Requests'}
                 </Typography>
                 <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
                   {isAdmin
                     ? 'Review customer briefs, assign vetted specialists, manage payment escrow, and approve deliverables'
+                    : isFreelancer
+                    ? 'Manage project deliverables, submit drafts for client approval, and receive escrow payouts'
                     : 'Track your requested outcome packages, status updates, and deliverables'}
                 </Typography>
               </Box>
@@ -529,13 +547,19 @@ const Dashboard = () => {
 
           {serviceOrders.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 5, bgcolor: '#f8fafc', borderRadius: 3, border: '1px dashed #cbd5e1' }}>
-              <Typography sx={{ color: '#64748b', fontWeight: 600, mb: 1, fontSize: '1.05rem' }}>No Service Package Requests Yet</Typography>
-              <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', mb: 2 }}>
-                Browse our fixed-scope pilot packages and request an outcome today.
+              <Typography sx={{ color: '#64748b', fontWeight: 600, mb: 1, fontSize: '1.05rem' }}>
+                {isFreelancer ? 'No Projects Assigned Yet' : 'No Service Package Requests Yet'}
               </Typography>
-              <Button component={Link} to="/" variant="contained" size="small" sx={{ bgcolor: '#4f46e5', textTransform: 'none', fontWeight: 700, borderRadius: 2 }}>
-                Explore Service Packages
-              </Button>
+              <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', mb: 2 }}>
+                {isFreelancer
+                  ? 'Once an Admin matches you with a client package brief, it will appear here.'
+                  : 'Browse our fixed-scope pilot packages and request an outcome today.'}
+              </Typography>
+              {!isFreelancer && (
+                <Button component={Link} to="/" variant="contained" size="small" sx={{ bgcolor: '#4f46e5', textTransform: 'none', fontWeight: 700, borderRadius: 2 }}>
+                  Explore Service Packages
+                </Button>
+              )}
             </Box>
           ) : (
             <Stack spacing={3}>
@@ -849,34 +873,42 @@ const Dashboard = () => {
 
                         {/* 4. DRAFT_SUBMITTED State */}
                         {ord.status === 'DRAFT_SUBMITTED' && (
-                          <>
-                            <Button
-                              variant="outlined"
-                              color="warning"
+                          (isAdmin || !isFreelancer) ? (
+                            <>
+                              <Button
+                                variant="outlined"
+                                color="warning"
+                                size="small"
+                                startIcon={<RateReviewIcon />}
+                                onClick={() => openRevisionModal(ord)}
+                                sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px' }}
+                              >
+                                Request Revision
+                              </Button>
+                              <Button
+                                variant="contained"
+                                color="success"
+                                size="small"
+                                startIcon={<CheckCircleIcon />}
+                                onClick={() => openApproveModal(ord)}
+                                sx={{
+                                  background: 'linear-gradient(135deg, #059669, #10b981)',
+                                  textTransform: 'none',
+                                  fontWeight: 700,
+                                  borderRadius: '8px',
+                                  px: 2
+                                }}
+                              >
+                                Approve & Complete
+                              </Button>
+                            </>
+                          ) : (
+                            <Chip
+                              label="Draft Deliverables Submitted • Awaiting Client Review"
                               size="small"
-                              startIcon={<RateReviewIcon />}
-                              onClick={() => openRevisionModal(ord)}
-                              sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px' }}
-                            >
-                              Request Revision
-                            </Button>
-                            <Button
-                              variant="contained"
-                              color="success"
-                              size="small"
-                              startIcon={<CheckCircleIcon />}
-                              onClick={() => openApproveModal(ord)}
-                              sx={{
-                                background: 'linear-gradient(135deg, #059669, #10b981)',
-                                textTransform: 'none',
-                                fontWeight: 700,
-                                borderRadius: '8px',
-                                px: 2
-                              }}
-                            >
-                              Approve & Complete
-                            </Button>
-                          </>
+                              sx={{ bgcolor: '#f3e8ff', color: '#7e22ce', fontWeight: 700, fontSize: '0.75rem', border: '1px solid #e9d5ff' }}
+                            />
+                          )
                         )}
 
                         {/* 5. REVISION State */}

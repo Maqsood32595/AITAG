@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, Button, Avatar, Menu, MenuItem,
   IconButton, Divider, Tooltip, useScrollTrigger, Slide,
@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../context/AuthContext';
 import AnimatedAvatar from './AnimatedAvatar';
@@ -24,14 +25,17 @@ const NAV_LINKS = [
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMenuAnchorEl, setMobileMenuAnchorEl] = useState<null | HTMLElement>(null);
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
 
+  const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
+
   const handleLogout = () => {
-    logout();
     setAnchorEl(null);
-    navigate('/');
+    logout();
+    navigate('/signin');
   };
 
   const handleHomeClick = (e: React.MouseEvent) => {
@@ -192,10 +196,11 @@ const Navbar = () => {
             ))}
           </Menu>
 
-          {user ? (
+          {/* User Menu / Auth Buttons */}
+          {user && !isAuthPage ? (
             <>
-              <Tooltip title={user.name}>
-                <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5 }}>
+              <Tooltip title={user.name || user.email}>
+                <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0.5, cursor: 'pointer !important' }}>
                   <AnimatedAvatar
                     name={user.name || user.email}
                     size={36}
@@ -239,18 +244,64 @@ const Navbar = () => {
                 <Divider />
                 <MenuItem
                   onClick={() => { navigate('/dashboard'); setAnchorEl(null); }}
-                  sx={{ gap: 1.5, py: 1.5, '&:hover': { color: '#4f46e5' } }}
+                  sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
                 >
                   <DashboardIcon fontSize="small" /> Dashboard
                 </MenuItem>
                 <MenuItem
+                  onClick={() => { navigate('/analytics'); setAnchorEl(null); }}
+                  sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
+                >
+                  <TrendingUpIcon fontSize="small" /> Analytics & Information
+                </MenuItem>
+                <MenuItem
                   onClick={handleLogout}
-                  sx={{ gap: 1.5, py: 1.5, color: '#ef4444', '&:hover': { bgcolor: 'rgba(239,68,68,0.06)' } }}
+                  sx={{ gap: 1.5, py: 1.5, color: '#ef4444', cursor: 'pointer !important', '&:hover': { bgcolor: 'rgba(239,68,68,0.06)' } }}
                 >
                   <LogoutIcon fontSize="small" /> Log Out
                 </MenuItem>
               </Menu>
             </>
+          ) : isAuthPage ? (
+            location.pathname === '/signin' ? (
+              <Button
+                component={Link}
+                to="/signup"
+                variant="contained"
+                sx={{
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  borderRadius: '10px',
+                  px: 2.5,
+                  cursor: 'pointer !important',
+                  boxShadow: '0 4px 14px rgba(79,70,229,0.35)',
+                  '&:hover': {
+                    boxShadow: '0 6px 20px rgba(79,70,229,0.45)',
+                    transform: 'translateY(-1px)',
+                  },
+                }}
+              >
+                Create Account
+              </Button>
+            ) : (
+              <Button
+                component={Link}
+                to="/signin"
+                variant="outlined"
+                sx={{
+                  borderColor: 'rgba(79,70,229,0.3)',
+                  color: '#4f46e5',
+                  fontWeight: 600,
+                  borderRadius: '10px',
+                  px: 2.5,
+                  cursor: 'pointer !important',
+                  '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' },
+                }}
+              >
+                Sign In
+              </Button>
+            )
           ) : (
             <>
               <Button
@@ -263,6 +314,7 @@ const Navbar = () => {
                   fontWeight: 600,
                   borderRadius: '10px',
                   px: 2.5,
+                  cursor: 'pointer !important',
                   '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' },
                   display: { xs: 'none', sm: 'flex' },
                 }}
@@ -279,6 +331,7 @@ const Navbar = () => {
                   fontWeight: 700,
                   borderRadius: '10px',
                   px: 2.5,
+                  cursor: 'pointer !important',
                   boxShadow: '0 4px 14px rgba(79,70,229,0.35)',
                   '&:hover': {
                     boxShadow: '0 6px 20px rgba(79,70,229,0.45)',

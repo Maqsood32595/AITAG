@@ -5,12 +5,19 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
 const SignIn = () => {
-  const { login } = useAuth();
+  const { login, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState(location.state?.error || '');
   const [loading, setLoading] = useState(false);
+
+  // If arriving on /signin, immediately clear any stale session so old avatars never persist
+  React.useEffect(() => {
+    if (user || localStorage.getItem('aitag_token')) {
+      logout();
+    }
+  }, []);
 
   React.useEffect(() => {
     if (location.state?.error) {
@@ -24,7 +31,7 @@ const SignIn = () => {
     setLoading(true);
     try {
       await login(form.email, form.password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
     } finally {

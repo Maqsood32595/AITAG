@@ -36,9 +36,17 @@ export const theme = createTheme({
     borderRadius: 12,
   },
   components: {
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          cursor: 'pointer !important',
+        }
+      }
+    },
     MuiButton: {
       styleOverrides: {
         root: {
+          cursor: 'pointer !important',
           borderRadius: '10px',
           boxShadow: 'none',
           '&:hover': {
@@ -46,6 +54,50 @@ export const theme = createTheme({
             transform: 'translateY(-1px)',
           },
           transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+        }
+      }
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          cursor: 'pointer !important',
+        }
+      }
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          cursor: 'pointer !important',
+        }
+      }
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          cursor: 'pointer !important',
+        }
+      }
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          cursor: 'pointer !important',
+        }
+      }
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          cursor: 'pointer !important',
+        }
+      }
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          '&.MuiChip-clickable': {
+            cursor: 'pointer !important',
+          }
         }
       }
     },

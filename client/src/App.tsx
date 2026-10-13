@@ -25,6 +25,7 @@ const BlogList = lazy(() => import('./pages/BlogList'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Workflows = lazy(() => import('./pages/Workflows'));
+const Analytics = lazy(() => import('./pages/Analytics'));
 
 const Loader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -33,6 +34,21 @@ const Loader = () => (
 );
 
 import ScrollToTop from './components/ScrollToTop';
+
+import { useLocation } from 'react-router-dom';
+
+const ConditionalFooter = () => {
+  const location = useLocation();
+  const dashboardRoutes = ['/dashboard', '/my_tasks', '/analytics', '/profile', '/account', '/workflows'];
+  const isDashboardRoute = dashboardRoutes.some(
+    (p) => location.pathname === p || location.pathname.startsWith(p + '/')
+  );
+
+  if (isDashboardRoute) {
+    return null;
+  }
+  return <Footer />;
+};
 
 function App() {
   return (
@@ -58,11 +74,13 @@ function App() {
               <Route path="/my_tasks" element={<PrivateRoute><MyPostedTasks /></PrivateRoute>} />
               <Route path="/update-task/:id" element={<PrivateRoute><UpdateTask /></PrivateRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/analytics" element={<PrivateRoute><Analytics /></PrivateRoute>} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+              <Route path="/account" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/workflows" element={<PrivateRoute><Workflows /></PrivateRoute>} />
             </Routes>
           </Suspense>
-          <Footer />
+          <ConditionalFooter />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

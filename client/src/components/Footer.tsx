@@ -25,16 +25,16 @@ const Footer: React.FC = () => {
               Launch Packages
             </Typography>
             <Stack spacing={1.5}>
-              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#818cf8' } }}>
+              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
                 AI Product Photo Makeover
               </Link>
-              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#818cf8' } }}>
+              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
                 AI Product Listing & Description Writing
               </Link>
-              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#818cf8' } }}>
+              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
                 AI Social Media Content Pack
               </Link>
-              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', '&:hover': { color: '#818cf8' } }}>
+              <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
                 AI Website Landing Page
               </Link>
             </Stack>
@@ -66,8 +66,8 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} AITAG — Affordable AI Business Services. All rights reserved.
           </Typography>
           <Box sx={{ display: 'flex', gap: 3 }}>
-            <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', '&:hover': { color: '#fff' } }}>Privacy</Link>
-            <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', '&:hover': { color: '#fff' } }}>Terms</Link>
+            <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#fff' } }}>Privacy</Link>
+            <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#fff' } }}>Terms</Link>
           </Box>
         </Box>
       </Container>

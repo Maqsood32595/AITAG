@@ -13,6 +13,59 @@ body {
   overflow-x: hidden;
 }
 
+/* ==========================================================================
+   Universal Cursor Pointer (Hand) for All Links, Buttons & Clickable Elements
+   ========================================================================== */
+a,
+a *,
+button,
+button *,
+[role="button"],
+[role="button"] *,
+[role="tab"],
+[role="tab"] *,
+[role="menuitem"],
+[role="menuitem"] *,
+[role="link"],
+[role="link"] *,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+select,
+.cursor-pointer,
+.cursor-pointer *,
+.pointer,
+[onclick],
+.MuiButtonBase-root,
+.MuiButtonBase-root *,
+.MuiButton-root,
+.MuiButton-root *,
+.MuiIconButton-root,
+.MuiIconButton-root *,
+.MuiListItem-root[role="button"],
+.MuiListItemButton-root,
+.MuiListItemButton-root *,
+.MuiMenuItem-root,
+.MuiMenuItem-root *,
+.MuiTab-root,
+.MuiTab-root *,
+.MuiChip-clickable,
+.MuiChip-clickable *,
+.MuiPaginationItem-root,
+.MuiSwitch-switchBase,
+.MuiCheckbox-root,
+.MuiRadio-root,
+.MuiSelect-select,
+.MuiAccordionSummary-root,
+.MuiLink-root,
+.MuiLink-root *,
+.clickable,
+[data-clickable="true"] {
+  cursor: pointer !important;
+}
+
 /* Animations */
 .fade-in-up {
   opacity: 0;
@@ -44,3 +97,4 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+

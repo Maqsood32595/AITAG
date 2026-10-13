@@ -112,4 +112,11 @@ export const serviceOrdersApi = {
   approve: (id: string, data: { rating?: number; testimonial?: string; finalFiles?: any[] }) => api.post(`/service-orders/${id}/approve`, data),
 };
 
+// Role-Aware Analytics & User Dossier Hub
+export const analyticsApi = {
+  getMyAnalytics: () => api.get('/analytics/me'),
+  getSummary: () => api.get('/analytics/summary'),
+};
+
 export default api;
+

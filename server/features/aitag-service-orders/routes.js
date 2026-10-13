@@ -6,6 +6,20 @@ const express = require('express');
 const router = express.Router();
 const service = require('./service');
 
+// Optional/flexible auth extractor to enforce identity without breaking unauthenticated probes
+const extractUser = (req, res, next) => {
+  const header = req.headers['authorization'];
+  if (header && header.startsWith('Bearer ')) {
+    try {
+      const authService = require('../aitag-auth/service');
+      req.user = authService.verifyToken(header.split(' ')[1]);
+    } catch {
+      // ignore invalid token
+    }
+  }
+  next();
+};
+
 // POST /api/service-orders — Submit customer brief & create order
 router.post('/', async (req, res) => {
   try {
@@ -16,10 +30,23 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/service-orders — List orders with optional role/email filters
-router.get('/', async (req, res) => {
+// GET /api/service-orders — List orders with strict role-based data scoping
+router.get('/', extractUser, async (req, res) => {
   try {
-    const { role, email, status } = req.query;
+    let { role, email, status } = req.query;
+
+    // Strict identity enforcement when user is authenticated:
+    if (req.user) {
+      if (req.user.role === 'client') {
+        role = 'client';
+        email = req.user.email;
+      } else if (req.user.role === 'freelancer') {
+        role = 'freelancer';
+        email = req.user.email;
+      }
+      // Admins retain full supervisory ability to view all orders or filter
+    }
+
     const orders = await service.listOrders({ role, email, status });
     res.json({ success: true, count: orders.length, orders });
   } catch (err) {

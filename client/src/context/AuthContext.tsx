@@ -56,7 +56,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('aitag_token');
+    try {
+      localStorage.removeItem('aitag_token');
+      sessionStorage.clear();
+    } catch (e) {
+      console.error('Error during logout:', e);
+    }
     setUser(null);
   };
 

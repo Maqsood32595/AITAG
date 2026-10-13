@@ -47,12 +47,33 @@ const BrowseTasks = () => {
             px: 0.5
           }}
         />
-        <Typography variant="h4" sx={{ fontWeight: 900, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>
-          Browse AI Tasks
-        </Typography>
-        <Typography sx={{ color: '#64748b', mb: 4, fontSize: '1.05rem', maxWidth: 700 }}>
-          Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services.
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 4 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 900, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>
+              Browse AI Tasks
+            </Typography>
+            <Typography sx={{ color: '#64748b', fontSize: '1.05rem', maxWidth: 700 }}>
+              Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services.
+            </Typography>
+          </Box>
+          <Button
+            component={Link}
+            to="/add_task"
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+              fontWeight: 700,
+              borderRadius: '10px',
+              boxShadow: '0 4px 16px rgba(79,70,229,0.3)',
+              px: 3,
+              py: 1.2,
+              whiteSpace: 'nowrap',
+              cursor: 'pointer !important'
+            }}
+          >
+            + Post a Task
+          </Button>
+        </Box>
 
         {/* Filters */}
         <Box sx={{ display: 'flex', gap: 2, mb: 5, flexWrap: 'wrap' }}>

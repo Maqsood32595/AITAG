@@ -29,6 +29,24 @@ const SEED_USERS = [
     photo_url: '',
     password_hash: bcrypt.hashSync('admin', 10),
     created_at: new Date().toISOString()
+  },
+  {
+    id: 'c0b2dcd3-346a-4633-b58e-78ce929fb56d',
+    name: 'Client 1',
+    email: 'client1@aitag.com',
+    role: 'client',
+    photo_url: '',
+    password_hash: bcrypt.hashSync('admin', 10),
+    created_at: new Date().toISOString()
+  },
+  {
+    id: '0eaa9c88-d477-4308-bd37-f7ccf29c87f1',
+    name: 'Expert 1',
+    email: 'expert1@aitag.com',
+    role: 'freelancer',
+    photo_url: '',
+    password_hash: bcrypt.hashSync('admin', 10),
+    created_at: new Date().toISOString()
   }
 ];
 

@@ -8,11 +8,18 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
 const SignUp = () => {
-  const { register } = useAuth();
+  const { register, logout, user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', photoURL: '', role: 'freelancer' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // If arriving on /signup, immediately clear any stale session
+  React.useEffect(() => {
+    if (user || localStorage.getItem('aitag_token')) {
+      logout();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +29,7 @@ const SignUp = () => {
     setLoading(true);
     try {
       await register(form);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
     } finally {

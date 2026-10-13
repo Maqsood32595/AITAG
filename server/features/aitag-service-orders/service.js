@@ -119,6 +119,8 @@ class ServiceOrdersService {
         query = query.eq('customer_email', email);
       } else if (role === 'freelancer' && email) {
         query = query.eq('assigned_expert_email', email);
+      } else if (email) {
+        query = query.or(`customer_email.eq.${email},assigned_expert_email.eq.${email}`);
       }
 
       const { data, error } = await query;
@@ -133,7 +135,8 @@ class ServiceOrdersService {
     let list = Array.from(inMemoryOrders.values());
     if (status) list = list.filter((o) => o.status === status);
     if (role === 'client' && email) list = list.filter((o) => o.customer_email === email);
-    if (role === 'freelancer' && email) list = list.filter((o) => o.assigned_expert_email === email);
+    else if (role === 'freelancer' && email) list = list.filter((o) => o.assigned_expert_email === email);
+    else if (email) list = list.filter((o) => o.customer_email === email || o.assigned_expert_email === email);
     return list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
