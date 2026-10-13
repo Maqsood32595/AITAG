@@ -1,8 +1,7 @@
 /**
- * Generates cheerful, pastel-colored smiling avatars (no dark/harsh bold colors)
- * Complies with D:\Hayat\Modifications Item 9
+ * Avatar utility - Dicebear cartoon avatars have been decommissioned in favor of AnimatedAvatar.
  */
-export const getHappyPastelAvatar = (seed: string = 'User') => {
-  const clean = encodeURIComponent(seed.trim() || 'User');
-  return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${clean}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+export const getHappyPastelAvatar = (_seed: string = 'User') => {
+  return '';
 };
+
