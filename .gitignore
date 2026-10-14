@@ -28,8 +28,6 @@ tests/*
 !tests/piet/
 !tests/piet/**
 
-workflows/
-
 # Credentials & Secrets
 *service-account*.json
 *.key.json
