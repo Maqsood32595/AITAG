@@ -63,8 +63,8 @@ const SignUp = () => {
             <FormControl sx={fieldStyle}>
               <InputLabel>I am a...</InputLabel>
               <Select value={form.role} label="I am a..." onChange={e => setForm({ ...form, role: e.target.value })}>
-                <MenuItem value="freelancer">Freelancer (AI Talent)</MenuItem>
-                <MenuItem value="client">Client (Post Tasks)</MenuItem>
+                <MenuItem value="freelancer">AI Expert</MenuItem>
+                <MenuItem value="client">Client</MenuItem>
               </Select>
             </FormControl>
 
