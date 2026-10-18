@@ -62,7 +62,7 @@ When `npm test` fails, identify the gate:
 - **Gate 1 Fail:** Network or port 5005 issue. Check `Get-NetTCPConnection -LocalPort 5005`.
 - **Gate 2 Fail:** A slice manifest or route file is missing or invalid JSON. Check `server/features/<slice>/feature.manifest.json`.
 - **Gate 3 Fail:** Supabase table or query failure. Check if Supabase keys in `.env` / `.env.development` are active.
-- **Gate 4 Fail:** Business rule regression (e.g. task budget < ₹499 or package price_min > price_max).
+- **Gate 4 Fail:** Business rule regression (e.g. task budget < ₹999 or package price_min > price_max).
 - **Gate 5 Fail:** Order state machine issue (e.g. expert assignment missing email).
 - **Gate 6 Fail:** Commission calculation mismatch (platform fee must equal 5% of agreed price).
 - **Gate 7 Fail:** Security invariant regression (e.g. missing security headers or unredacted password hashes).

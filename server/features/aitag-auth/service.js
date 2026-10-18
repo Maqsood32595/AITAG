@@ -206,6 +206,18 @@ class AuthService {
 
     return SEED_USERS.map(({ password_hash, ...safeUser }) => safeUser);
   }
+
+  deleteUserFromMemory(userId, email) {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const index = SEED_USERS.findIndex(
+      (u) => (userId && u.id === userId) || (cleanEmail && u.email.toLowerCase() === cleanEmail)
+    );
+    if (index !== -1) {
+      const removed = SEED_USERS.splice(index, 1);
+      return removed[0];
+    }
+    return null;
+  }
 }
 
 module.exports = new AuthService();

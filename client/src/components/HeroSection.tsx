@@ -8,17 +8,13 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BoltIcon from '@mui/icons-material/Bolt';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import { useAuth } from '../context/AuthContext';
 
 const AUDIENCE_TAGS = [
-  { icon: <HomeWorkIcon sx={{ fontSize: 16 }} />, label: 'Home Entrepreneurs' },
-  { icon: <StorefrontIcon sx={{ fontSize: 16 }} />, label: 'Local Businesses & Boutiques' },
-  { icon: <BusinessCenterIcon sx={{ fontSize: 16 }} />, label: 'Independent Professionals' },
-  { icon: <RocketLaunchIcon sx={{ fontSize: 16 }} />, label: 'Early-Stage Founders' },
+  { label: 'Home Entrepreneurs' },
+  { label: 'Local Businesses & Boutiques' },
+  { label: 'Independent Professionals' },
+  { label: 'Early-Stage Founders' },
 ];
 
 const BRAND_PILLARS = [
@@ -156,7 +152,7 @@ const HeroSection = () => {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
+          A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹999</strong>.
         </Typography>
 
         {/* Who We Serve Tags */}
@@ -168,7 +164,6 @@ const HeroSection = () => {
             {AUDIENCE_TAGS.map((tag, i) => (
               <Chip
                 key={tag.label}
-                icon={tag.icon}
                 label={tag.label}
                 size="small"
                 onClick={scrollToPackages}
@@ -180,7 +175,7 @@ const HeroSection = () => {
                   fontWeight: i === animatedIndex ? 700 : 500,
                   fontSize: '0.8rem',
                   py: 2,
-                  px: 0.5,
+                  px: 1.5,
                   transition: 'all 0.3s ease',
                   transform: i === animatedIndex ? 'translateY(-2px)' : 'translateY(0)',
                   boxShadow: i === animatedIndex ? '0 4px 12px rgba(79,70,229,0.15)' : 'none',
@@ -226,7 +221,7 @@ const HeroSection = () => {
               },
             }}
           >
-            ✨ Explore AI Packages (From ₹499) →
+            ✨ Explore AI Packages (From ₹999) →
           </Button>
           <Button
             variant="outlined"

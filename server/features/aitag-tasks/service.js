@@ -81,7 +81,7 @@ const SEED_FALLBACK_TASKS = [
     category: 'E-Commerce & Copy',
     description: 'Craft compelling, appetizing product descriptions for 8 organic masala powders in English, Hindi, and Tamil to increase buyer trust and reduce customer sizing/usage queries.',
     deadline: '2026-11-08',
-    budget: 899,
+    budget: 999,
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800',
     status: 'open',
     user_email: 'client@aitag.com',
@@ -140,7 +140,7 @@ class TasksService {
 
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
-          return data;
+          return data.map(t => ({ ...t, budget: Math.max(Number(t.budget) || 0, 999) }));
         }
       }
     } catch (e) {
@@ -171,7 +171,9 @@ class TasksService {
           .order('budget', { ascending: false })
           .limit(8);
 
-        if (!error && data && data.length > 0) return data;
+        if (!error && data && data.length > 0) {
+          return data.map(t => ({ ...t, budget: Math.max(Number(t.budget) || 0, 999) }));
+        }
       }
     } catch (e) {
       console.warn('[TasksService] Featured tasks fallback:', e.message);
@@ -188,7 +190,9 @@ class TasksService {
           .eq('id', id)
           .single();
 
-        if (!error && data) return data;
+        if (!error && data) {
+          return { ...data, budget: Math.max(Number(data.budget) || 0, 999) };
+        }
       }
     } catch (e) {}
 

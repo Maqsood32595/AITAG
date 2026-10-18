@@ -9,11 +9,11 @@ export function formatExternalUrl(url?: string): string {
 }
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box, Container, Typography, Paper, Grid, TextField, Button,
   Chip, Stack, Alert, CircularProgress, IconButton, Tooltip,
-  FormControl, Select, MenuItem
+  FormControl, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -30,19 +30,29 @@ import CheckIcon from '@mui/icons-material/Check';
 import ShieldIcon from '@mui/icons-material/Shield';
 import WorkIcon from '@mui/icons-material/Work';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CloseIcon from '@mui/icons-material/Close';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import AnimatedAvatar from '../components/AnimatedAvatar';
 import { useAuth } from '../context/AuthContext';
-import { profileApi, analyticsApi } from '../api';
+import { profileApi, analyticsApi, accountApi } from '../api';
 
 export const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const isClient = user?.role === 'client';
   const isAdmin = user?.role === 'admin';
   const isFreelancer = user?.role === 'freelancer' || (!isClient && !isAdmin);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Account Deletion State
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   
   // Account Dossier State
   const [accountIdentifier, setAccountIdentifier] = useState(
@@ -185,6 +195,26 @@ export const Profile: React.FC = () => {
       console.error('Save error:', err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.trim() !== 'DELETE') {
+      setDeleteError('Please type DELETE in capital letters to confirm.');
+      return;
+    }
+    try {
+      setIsDeleting(true);
+      setDeleteError('');
+      await accountApi.deleteAccount('DELETE');
+      setDeleteDialogOpen(false);
+      logout();
+      navigate('/signin', { replace: true, state: { message: 'Your account and all associated marketplace data have been permanently deleted.' } });
+    } catch (err: any) {
+      console.error('Account deletion error:', err);
+      setDeleteError(err.response?.data?.error || err.message || 'Failed to delete account. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -919,8 +949,215 @@ export const Profile: React.FC = () => {
               </Grid>
             </Grid>
           </Paper>
+
+          {/* Card 4: Danger Zone (Account Deletion & Data Wipe) */}
+          <Paper
+            elevation={0}
+            sx={{
+              mt: 3.5,
+              p: 3.5,
+              borderRadius: '20px',
+              border: '1px solid #fecaca',
+              bgcolor: '#fff5f5',
+              boxShadow: '0 4px 20px rgba(239, 68, 68, 0.04)',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+              <Box>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                  <DeleteForeverIcon sx={{ color: '#dc2626', fontSize: 22 }} />
+                  <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#991b1b', fontFamily: 'Inter, sans-serif' }}>
+                    Danger Zone: Delete Account & Wipe Data
+                  </Typography>
+                </Stack>
+                <Typography sx={{ fontSize: '0.84rem', color: '#7f1d1d', maxWidth: 640, lineHeight: 1.5 }}>
+                  Permanently delete your AITAG account, profile, active listings, bids, and all associated marketplace data. This action is immediate and cannot be undone.
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  setDeleteConfirmText('');
+                  setDeleteError('');
+                  setDeleteDialogOpen(true);
+                }}
+                sx={{
+                  bgcolor: '#dc2626',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  borderRadius: '10px',
+                  px: 2.8,
+                  py: 1.1,
+                  textTransform: 'none',
+                  boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)',
+                  '&:hover': {
+                    bgcolor: '#b91c1c',
+                    boxShadow: '0 6px 18px rgba(220, 38, 38, 0.45)',
+                  }
+                }}
+              >
+                Delete Account
+              </Button>
+            </Box>
+          </Paper>
         </Box>
       </Container>
+
+      {/* Inbuilt Account Deletion Modal — AITAG Color & Design Pattern */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => !isDeleting && setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '24px',
+            p: { xs: 2.5, sm: 3.5 },
+            border: '1px solid #fee2e2',
+            boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25)',
+            bgcolor: '#ffffff',
+            position: 'relative',
+          }
+        }}
+      >
+        <Box sx={{ position: 'absolute', top: 18, right: 18 }}>
+          <IconButton
+            size="small"
+            onClick={() => !isDeleting && setDeleteDialogOpen(false)}
+            disabled={isDeleting}
+            sx={{ color: '#94a3b8', '&:hover': { color: '#0f172a' } }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        <DialogTitle sx={{ p: 0, mb: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: '14px',
+                bgcolor: '#fef2f2',
+                border: '1px solid #fecaca',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <WarningAmberIcon sx={{ color: '#dc2626', fontSize: 26 }} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
+                Delete AITAG Account
+              </Typography>
+              <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>
+                Irreversible account and database wipe action
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 0, mb: 3 }}>
+          <Box sx={{ p: 2, mb: 2.5, borderRadius: '12px', bgcolor: '#fff5f5', border: '1px solid #fecaca' }}>
+            <Typography sx={{ fontSize: '0.84rem', color: '#991b1b', lineHeight: 1.5, fontWeight: 500 }}>
+              ⚠️ <strong>Warning:</strong> Deleting your account will permanently wipe your profile dossier, credentials, active bids, invitations, and tasks from the database and across all services. You will be logged out immediately.
+            </Typography>
+          </Box>
+
+          <Typography sx={{ fontSize: '0.88rem', color: '#334155', fontWeight: 600, mb: 1.5 }}>
+            To confirm deletion, please enter <span style={{ color: '#dc2626', fontWeight: 800 }}>DELETE</span> in capital letters:
+          </Typography>
+
+          <TextField
+            fullWidth
+            size="medium"
+            placeholder="DELETE"
+            value={deleteConfirmText}
+            onChange={(e) => {
+              setDeleteConfirmText(e.target.value);
+              if (deleteError) setDeleteError('');
+            }}
+            disabled={isDeleting}
+            autoFocus
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                fontFamily: 'monospace',
+                fontSize: '1rem',
+                letterSpacing: '1px',
+                fontWeight: 700,
+                '&.Mui-focused fieldset': {
+                  borderColor: deleteConfirmText === 'DELETE' ? '#dc2626' : '#4f46e5',
+                }
+              }
+            }}
+          />
+
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2, borderRadius: '10px' }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ p: 0, gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={isDeleting}
+            sx={{
+              textTransform: 'none',
+              borderRadius: '10px',
+              fontWeight: 600,
+              px: 3,
+              py: 1,
+              borderColor: '#cbd5e1',
+              color: '#475569',
+              '&:hover': {
+                borderColor: '#94a3b8',
+                bgcolor: '#f8fafc'
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleDeleteAccount}
+            disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+            sx={{
+              textTransform: 'none',
+              borderRadius: '10px',
+              fontWeight: 700,
+              px: 3,
+              py: 1,
+              bgcolor: '#dc2626',
+              boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)',
+              '&:hover': {
+                bgcolor: '#b91c1c',
+                boxShadow: '0 6px 18px rgba(220, 38, 38, 0.45)',
+              },
+              '&.Mui-disabled': {
+                bgcolor: '#fca5a5',
+                color: '#ffffff',
+                boxShadow: 'none'
+              }
+            }}
+          >
+            {isDeleting ? (
+              <Stack direction="row" spacing={1} alignItems="center">
+                <CircularProgress size={16} sx={{ color: '#ffffff' }} />
+                <span>Deleting Account...</span>
+              </Stack>
+            ) : (
+              'Delete Account Permanently'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardLayout>
   );
 };

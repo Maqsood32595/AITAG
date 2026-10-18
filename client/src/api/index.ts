@@ -126,5 +126,11 @@ export const analyticsApi = {
   getSummary: () => api.get('/analytics/summary'),
 };
 
+// Account Lifecycle & Deletion
+export const accountApi = {
+  deleteAccount: (confirmation: string) =>
+    api.delete('/account', { data: { confirmation } }),
+};
+
 export default api;
 

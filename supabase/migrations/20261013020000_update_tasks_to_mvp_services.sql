@@ -72,7 +72,7 @@ VALUES
     'E-Commerce & Copy',
     'Craft compelling, appetizing product descriptions for 8 organic masala powders in English, Hindi, and Tamil to increase buyer trust and reduce customer sizing/usage queries.',
     '2026-11-08',
-    899,
+    999,
     'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800',
     'open',
     'client@aitag.com',

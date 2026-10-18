@@ -8,6 +8,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../context/AuthContext';
 import AnimatedAvatar from './AnimatedAvatar';
@@ -253,6 +254,12 @@ const Navbar = () => {
                   sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
                 >
                   <TrendingUpIcon fontSize="small" /> Analytics & Information
+                </MenuItem>
+                <MenuItem
+                  onClick={() => { navigate('/account'); setAnchorEl(null); }}
+                  sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
+                >
+                  <AccountCircleIcon fontSize="small" /> Account Dossier
                 </MenuItem>
                 <MenuItem
                   onClick={handleLogout}

@@ -74,7 +74,7 @@ const FALLBACK_PACKAGES = [
     tagline: 'High-ranking marketplace listings & descriptions that turn viewers into buyers',
     description: "Tell us about your product. We'll write clear, attractive titles, descriptions and key features that help customers find it and decide to buy. We can write in English, Hindi or your regional language, for Amazon, Flipkart, Meesho, your website or WhatsApp.",
     category: 'E-Commerce & Copy',
-    badge: 'Starts at ₹499',
+    badge: 'Starts at ₹999',
     image_url: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800',
     benefits: [
       'Your product shows up more often in marketplace searches',
@@ -84,7 +84,7 @@ const FALLBACK_PACKAGES = [
     tiers: [
       {
         tier_name: 'package_1',
-        price_min: 499,
+        price_min: 999,
         price_max: 999,
         delivery_days_min: 1,
         delivery_days_max: 2,
@@ -318,7 +318,7 @@ export const ServicePackagesSection: React.FC = () => {
               lineHeight: 1.6
             }}
           >
-            “You do not need to learn AI. Tell us what your business needs, and AITAG will connect you with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just ₹499.”
+            “You do not need to learn AI. Tell us what your business needs, and AITAG will connect you with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just ₹999.”
           </Typography>
         </Box>
 

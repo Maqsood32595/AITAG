@@ -64,7 +64,7 @@ VALUES
     '["Physical studio photoshoot"]'::jsonb
   );
 
--- Insert 2: AI Product Listing & Description Writing (Starts at ₹499)
+-- Insert 2: AI Product Listing & Description Writing (Starts at ₹999)
 INSERT INTO aitag_packages (id, slug, title, tagline, description, category, icon, image_url, badge, display_order, benefits)
 VALUES (
   '22222222-2222-2222-2222-222222222222',
@@ -75,7 +75,7 @@ VALUES (
   'E-Commerce & Copy',
   'Edit3',
   'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800',
-  'Starts at ₹499',
+  'Starts at ₹999',
   2,
   '[
     "Your product shows up more often in marketplace searches",
@@ -90,7 +90,7 @@ VALUES
   (
     '22222222-2222-2222-2222-222222222222',
     'package_1',
-    499, 999, 1, 2, 1,
+    999, 999, 1, 2, 1,
     '1 product, 1 language, 1 platform, 1 article, 1 revision',
     '["Product title with buyer keywords", "5 bullet-point features + full description", "List of search keywords and tags", "1 language (English/Hindi/Regional)", "Copy-paste ready file (Word/Excel)", "1 revision included"]'::jsonb,
     '["Competitor keyword analysis", "Multiple platform formatting"]'::jsonb

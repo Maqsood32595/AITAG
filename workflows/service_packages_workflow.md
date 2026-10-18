@@ -28,7 +28,7 @@ AITAG bridges the gap between everyday Indian small businesses and advanced AI c
 
 | Tier | Price Range (₹) | Delivery | Key Inclusions | Revisions |
 | :--- | :--- | :--- | :--- | :--- |
-| **Beginner** | ₹499 – ₹999 | 1–2 days | 5 clean product photos, pure white background, standard marketplace size | 1 |
+| **Beginner** | ₹999 | 1–2 days | 5 clean product photos, pure white background, standard marketplace size | 1 |
 | **Medium** | ₹1,499 – ₹2,999 | 2–3 days | 15 photos (white & lifestyle), 3 AI background scenes, optimized for Shopify/Amazon | 2 |
 | **Expert** | ₹3,999 – ₹7,999 | 3–5 days | 30 photos (full catalogue), multi-angle scenes, 1 promo graphic banner, source files | 2 |
 
@@ -63,10 +63,10 @@ AITAG bridges the gap between everyday Indian small businesses and advanced AI c
 ## 3. The 5 Future Expansion Packages in Catalogue
 
 These 5 packages are fully documented and will be activated following the pilot:
-4. **AI Promo Video & Reels Creation:** ₹799 – ₹9,999 (15–30s AI video, voiceover, regional accents).
+4. **AI Promo Video & Reels Creation:** ₹999 – ₹9,999 (15–30s AI video, voiceover, regional accents).
 5. **AI WhatsApp Auto-Reply & FAQ Assistant:** ₹1,999 – ₹15,999 (Automated customer inquiry handling).
 6. **Instagram Launch Kit:** ₹1,999 – ₹14,999 (Bio, highlight covers, 9-post grid, hashtag packs).
-7. **AI Product Listing & Description Writing:** ₹499 – ₹6,999 (SEO titles, bullet points, e-commerce copy).
+7. **AI Product Listing & Description Writing:** ₹999 – ₹6,999 (SEO titles, bullet points, e-commerce copy).
 8. **AI FAQ Basic Chatbot:** ₹2,999 – ₹20,999 (Website chat widget with lead capture to Google Sheets).
 
 ---

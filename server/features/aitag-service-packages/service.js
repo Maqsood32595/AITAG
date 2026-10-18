@@ -67,7 +67,7 @@ const FALLBACK_PACKAGES = [
     category: 'E-Commerce & Copy',
     icon: 'Edit3',
     image_url: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800',
-    badge: 'Starts at ₹499',
+    badge: 'Starts at ₹999',
     display_order: 2,
     benefits: [
       'Your product shows up more often in marketplace searches',
@@ -77,7 +77,7 @@ const FALLBACK_PACKAGES = [
     tiers: [
       {
         tier_name: 'package_1',
-        price_min: 499,
+        price_min: 999,
         price_max: 999,
         delivery_days_min: 1,
         delivery_days_max: 2,
@@ -299,10 +299,18 @@ class ServicePackagesService {
           return (order[a.tier_name] || 0) - (order[b.tier_name] || 0);
         });
 
+        const resolvedTiers = sortedTiers.length > 0 ? sortedTiers : (FALLBACK_PACKAGES.find(f => f.slug === pkg.slug)?.tiers || []);
+        const sanitizedTiers = resolvedTiers.map(tier => ({
+          ...tier,
+          price_min: Math.max(Number(tier.price_min) || 0, 999),
+          price_max: Math.max(Number(tier.price_max) || 0, 999)
+        }));
+
         return {
           ...pkg,
+          badge: (pkg.badge || '').replace('₹499', '₹999'),
           benefits: pkg.benefits || [],
-          tiers: sortedTiers.length > 0 ? sortedTiers : (FALLBACK_PACKAGES.find(f => f.slug === pkg.slug)?.tiers || [])
+          tiers: sanitizedTiers
         };
       });
     } catch (err) {

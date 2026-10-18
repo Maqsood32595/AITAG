@@ -104,7 +104,7 @@ The zero-mock Persistent In-RAM Ephemeral Twin test suite confirms all invariant
   ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches role-tailored Freelancer earnings analytics via GET /api/analytics/me
   ✅ [Gate 3: Zero-Mock HTTP & DB Layer] Fetches quick analytics summary cards via GET /api/analytics/summary
   ✅ [Gate 4: Physical Invariants] Enforces pricing invariants: price_min <= price_max & delivery days valid
-  ✅ [Gate 4: Physical Invariants] Enforces task budget invariants: realistic small-business amounts (>= ₹499)
+  ✅ [Gate 4: Physical Invariants] Enforces task budget invariants: realistic small-business amounts (>= ₹999)
   ✅ [Gate 4: Physical Invariants] Enforces category distribution: all 4 core MVP categories are active in tasks
   ✅ [Gate 4: Physical Invariants] Enforces AI Service profile invariants: zero hourly rate & AI generative tooling
   ✅ [Gate 5: Role Journeys] Customer submits brief for AI Product Listing & Description (REQUESTED)

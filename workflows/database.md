@@ -4,7 +4,7 @@
 > **Location:** `workflows/database.md`  
 > **Status:** Active Production & Staging Schema Reference  
 > **Architecture:** Supabase (PostgreSQL 15+) with In-RAM Ephemeral Twin Fallbacks  
-> **Last Verified:** October 2026 (Fractal Kernel 15 Slices)
+> **Last Verified:** October 2026 (Fractal Kernel 17 Slices)
 
 ---
 
@@ -207,7 +207,7 @@ CREATE TABLE IF NOT EXISTS aitag_tasks (
   )),
   description TEXT NOT NULL,
   deadline DATE NOT NULL,
-  budget NUMERIC NOT NULL CHECK (budget >= 499),
+  budget NUMERIC NOT NULL CHECK (budget >= 999),
   image TEXT DEFAULT 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800',
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in-progress', 'completed', 'cancelled')),
   user_email TEXT NOT NULL,
@@ -440,7 +440,49 @@ When running in local sandboxes without live cloud internet, during automated te
 
 ---
 
-## 7. Migration & Rollback Runbook
+## 7. Account Lifecycle & GDPR Right-to-be-Forgotten Cascading Architecture
+
+The `aitag-account-lifecycle` slice (`/api/account`) provides full GDPR / DPDP Act compliant account and data erasure. When a user requests account deletion by supplying the explicit confirmation token `{ "confirmation": "DELETE" }`, the system performs atomic, cross-table cascading purges across all persistence layers:
+
+### Cascading Deletion Graph & Order of Operations
+
+```mermaid
+flowchart TD
+    Req["DELETE /api/account (Bearer JWT)"] --> Check{"confirmation === 'DELETE'?"}
+    Check -- No --> Err["400 Bad Request: Confirmation failed"]
+    Check -- Yes --> Purge["AccountLifecycleService.purgeAccount(user)"]
+    
+    Purge --> Bids["1. aitag_bids: Delete user_email bids"]
+    Purge --> Inv["2. aitag_invitations: Delete client_email / freelancer_email"]
+    Purge --> Prof["3. aitag_profiles: Delete user_email / user_id profile"]
+    Purge --> Tasks["4. aitag_tasks: Delete user_email tasks (FK cascades child bids)"]
+    Purge --> Users["5. aitag_users: Delete email / id record"]
+    Purge --> Mem["6. In-Memory SEED_USERS: authService.deleteUserFromMemory()"]
+    Purge --> Cache["7. Cache Invalidation: profile:* & analytics:* keys purged"]
+    
+    Users --> Done["HTTP 200: Account & Data Permanently Deleted"]
+```
+
+### Table Cascading Integrity Matrix
+
+| Database Entity | Lookup Key(s) | Deletion Mechanism | Cascade Effect |
+| :--- | :--- | :--- | :--- |
+| **`aitag_bids`** | `user_email = cleanEmail` | Direct SQL `DELETE` | Removes active bids submitted by user |
+| **`aitag_invitations`** | `client_email = cleanEmail` OR `freelancer_email = cleanEmail` | Direct SQL `DELETE` | Cleans pending/accepted invitations |
+| **`aitag_profiles`** | `user_email = cleanEmail` OR `user_id = userId` | `ON DELETE CASCADE` + Direct SQL | Wipes portfolio, skills, and links |
+| **`aitag_tasks`** | `user_email = cleanEmail` | Direct SQL `DELETE` | Any task-level foreign keys cascade |
+| **`aitag_users`** | `email = cleanEmail` OR `id = userId` | Direct SQL `DELETE` | Root credential and identity erasure |
+| **In-Memory Twin** | `userId` OR `cleanEmail` | `deleteUserFromMemory()` | Evicts fast-path fallback seed users |
+| **Adaptive Cache** | `profile:*`, `analytics:*` | `cacheService.del()` | Prevents stale cached profile renders |
+
+### Security Safeguards
+1. **Strict Confirmation Invariant:** Deletion requests that pass empty payloads, incorrect text (e.g. lowercase `"delete"`), or whitespace fail immediately with `HTTP 400 Bad Request`.
+2. **Authenticated Scope Only:** Users can only invoke deletion on their own authenticated identity extracted from the verified JWT.
+3. **Audit Scrubbing:** Logs record that an account was erased without retaining sensitive PII.
+
+---
+
+## 8. Migration & Rollback Runbook
 
 ### How to Apply a New Migration
 

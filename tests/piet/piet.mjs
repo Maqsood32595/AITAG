@@ -125,19 +125,27 @@ async function runPietSuite() {
       eq(res.status, 401, 'Unauthenticated analytics request must return 401 Unauthorized');
     });
 
+    await t('Negative input defense: rejects unauthenticated DELETE /api/account with HTTP 401', async () => {
+      const res = await requestJson('/api/account', {
+        method: 'DELETE',
+        body: JSON.stringify({ confirmation: 'DELETE' })
+      });
+      eq(res.status, 401, 'Unauthenticated DELETE /api/account must return 401 Unauthorized');
+    });
+
     // --------------------------------------------------------------------------
     // GATE 2: AST & Manifest Integrity
     // --------------------------------------------------------------------------
     gate('Gate 2: AST & Manifest Integrity');
 
-    await t('Verifies all 16 Fractal Kernel feature manifests exist and parse cleanly', () => {
+    await t('Verifies all 17 Fractal Kernel feature manifests exist and parse cleanly', () => {
       const featuresDir = resolve('server/features');
       const expectedSlices = [
         'aitag-auth', 'aitag-bids', 'aitag-blog', 'aitag-invitations',
         'aitag-marketplace', 'aitag-profile', 'aitag-service-orders',
         'aitag-service-packages', 'aitag-tasks', 'escrow-payment',
         'leakage-shield', 'sandwich-refactor-sandbox', 'aitag-analytics',
-        'aitag-security-guard', 'aitag-cache', 'aitag-oauth'
+        'aitag-security-guard', 'aitag-cache', 'aitag-oauth', 'aitag-account-lifecycle'
       ];
 
       for (const slice of expectedSlices) {
@@ -268,7 +276,7 @@ async function runPietSuite() {
       eq(res.data.id, firstTask.id, 'Task ID must match');
       eq(res.data.title, firstTask.title, 'Task title must match');
       eq(res.data.category, firstTask.category, 'Task category must match');
-      assert(Number(res.data.budget) >= 499, 'Task budget must be >= 499');
+      assert(Number(res.data.budget) >= 999, 'Task budget must be >= 999');
     });
 
     await t('Fetches and filters service orders via /api/service-orders with role and status query params', async () => {
@@ -382,11 +390,11 @@ async function runPietSuite() {
       }
     });
 
-    await t('Enforces task budget invariants: realistic small-business amounts (>= ₹499)', () => {
+    await t('Enforces task budget invariants: realistic small-business amounts (>= ₹999)', () => {
       for (const task of allTasks) {
         const budget = Number(task.budget);
         assert(!isNaN(budget), `Task ${task.id} budget must be a valid number`);
-        assert(budget >= 499, `Task "${task.title}" budget ₹${budget} is below minimum ₹499`);
+        assert(budget >= 999, `Task "${task.title}" budget ₹${budget} is below minimum ₹999`);
         assert(budget <= 15000, `Task "${task.title}" budget ₹${budget} exceeds reasonable small business cap ₹15,000`);
       }
     });
@@ -442,9 +450,9 @@ async function runPietSuite() {
       ephemeralOrderId = order.id;
 
       eq(order.status, 'REQUESTED', 'Initial order status must be REQUESTED');
-      eq(Number(order.agreed_price), 499, 'Agreed price must match Package 1 min price (₹499)');
-      eq(Number(order.platform_fee), 25, 'Platform fee must be 5% (Math.round(499 * 0.05) = 25)');
-      eq(Number(order.expert_payout), 474, 'Expert payout must be 95% (499 - 25 = 474)');
+      eq(Number(order.agreed_price), 999, 'Agreed price must match Package 1 min price (₹999)');
+      eq(Number(order.platform_fee), 50, 'Platform fee must be 5% (Math.round(999 * 0.05) = 50)');
+      eq(Number(order.expert_payout), 949, 'Expert payout must be 95% (999 - 50 = 949)');
     });
 
     await t('Negative input defense: rejects assigning expert without expertEmail with HTTP 400', async () => {
@@ -587,9 +595,9 @@ async function runPietSuite() {
       const order = res.data.order;
       eq(order.status, 'COMPLETED', 'Order status must be COMPLETED');
       eq(order.rating, 5, 'Order rating must be 5');
-      eq(Number(order.agreed_price), 499, 'Agreed price must remain ₹499');
-      eq(Number(order.platform_fee), 25, 'Platform commission must be 5% (₹25)');
-      eq(Number(order.expert_payout), 474, 'Expert net payout must be 95% (₹474)');
+      eq(Number(order.agreed_price), 999, 'Agreed price must remain ₹999');
+      eq(Number(order.platform_fee), 50, 'Platform commission must be 5% (₹50)');
+      eq(Number(order.expert_payout), 949, 'Expert net payout must be 95% (₹949)');
       assert(order.assigned_expert_email === NONCE_EXPERT, 'Assigned expert email preserved');
     });
 
@@ -815,6 +823,72 @@ async function runPietSuite() {
       assert(res.data.metrics.hits >= 1, 'Stats must register at least 1 cache hit');
       assert(res.data.metrics.misses >= 1, 'Stats must register at least 1 cache miss');
       assert(res.data.metrics.hitRatio >= 0 && res.data.metrics.hitRatio <= 1, 'Hit ratio must be between 0 and 1');
+    });
+
+    await t('Account Deletion negative defense: rejects incorrect confirmation string with HTTP 400', async () => {
+      // Register ephemeral test user
+      const testEmail = `piet-del-neg-${RUN_ID}@aitag-test.local`;
+      const regRes = await requestJson('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: 'Delete Neg Test',
+          email: testEmail,
+          password: 'TestPassword123!',
+          role: 'client'
+        })
+      });
+      eq(regRes.status, 201, 'Register must succeed');
+      const token = regRes.data.token;
+
+      // Send lowercase 'delete'
+      const badRes = await requestJson('/api/account', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ confirmation: 'delete' })
+      });
+      eq(badRes.status, 400, 'Lowercase confirmation must return 400 Bad Request');
+
+      // Send missing confirmation
+      const emptyRes = await requestJson('/api/account', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({})
+      });
+      eq(emptyRes.status, 400, 'Empty confirmation must return 400 Bad Request');
+    });
+
+    await t('Account Lifecycle purge contract: DELETE /api/account wipes user and prevents re-login', async () => {
+      const testEmail = `piet-del-purge-${RUN_ID}@aitag-test.local`;
+      const regRes = await requestJson('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: 'Delete Purge Test',
+          email: testEmail,
+          password: 'TestPassword123!',
+          role: 'client'
+        })
+      });
+      eq(regRes.status, 201, 'Register must succeed');
+      const token = regRes.data.token;
+
+      // Perform account purge with exact 'DELETE' string
+      const delRes = await requestJson('/api/account', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ confirmation: 'DELETE' })
+      });
+      eq(delRes.status, 200, 'DELETE /api/account with exact confirmation must return 200');
+      eq(delRes.data.success, true, 'Deletion must report success: true');
+
+      // Attempt to login with deleted credentials -> must fail with HTTP 401
+      const loginRes = await requestJson('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: testEmail,
+          password: 'TestPassword123!'
+        })
+      });
+      eq(loginRes.status, 401, 'Login must fail with 401 for deleted user');
     });
 
   } finally {

@@ -29,14 +29,14 @@ When demonstrating AITAG to angel investors, do not click around aimlessly. Walk
 
 ### Step 1: Problem & Target Customer (The Hook)
 * **Action:** Open Homepage.
-* **Pitch:** *"India has 63 million small businesses. They know AI exists, but they don't have time to learn prompts or hire expensive full-time agencies. AITAG delivers ready business outcomes starting at ₹499."*
+* **Pitch:** *"India has 63 million small businesses. They know AI exists, but they don't have time to learn prompts or hire expensive full-time agencies. AITAG delivers ready business outcomes starting at ₹999."*
 
 ### Step 2: The Productised Catalogue
 * **Action:** Scroll to the 3 launch packages.
 * **Pitch:** *"Unlike Upwork or Fiverr where clients suffer through open bidding, AITAG packages outcomes with fixed scopes, delivery days, and transparent INR pricing."*
 
 ### Step 3: Package Deep Dive & Tier Selection
-* **Action:** Click **"AI Product Photo Makeover"**. Show Beginner (₹499), Medium (₹1,499), and Expert (₹3,999) tabs.
+* **Action:** Click **"AI Product Photo Makeover"**. Show Package 1 (₹999), Package 2 (₹2,999), and Package 3 (₹5,999) tabs.
 * **Pitch:** *"The client sees exactly what is included, what is excluded, and how many revisions they get."*
 
 ### Step 4: The Frictionless Brief Submission
@@ -63,4 +63,4 @@ When demonstrating AITAG to angel investors, do not click around aimlessly. Walk
 
 ### Step 10: Unit Economics & Metrics Dashboard
 * **Action:** Open Metrics View.
-* **Pitch:** *"On this ₹499 transaction, AITAG recorded its platform fee and expert payout. This repeatable, operations-assisted flywheel proves demand and margin before heavy engineering."*
+* **Pitch:** *"On this ₹999 transaction, AITAG recorded its platform fee and expert payout. This repeatable, operations-assisted flywheel proves demand and margin before heavy engineering."*
