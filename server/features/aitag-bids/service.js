@@ -145,6 +145,10 @@ class BidsService {
     if (!bid) throw new Error('Bid not found');
 
     const task = await tasksService.getTaskById(bid.task_id);
+    if (task) {
+      await tasksService.updateTask(task.id, task.user_email, { status: 'in-progress' }).catch(() => {});
+      task.status = 'in-progress';
+    }
     const escrow = escrowPaymentService.calculateSplits(task.budget);
 
     return {

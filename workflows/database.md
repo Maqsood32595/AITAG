@@ -209,6 +209,7 @@ CREATE TABLE IF NOT EXISTS aitag_tasks (
   deadline DATE NOT NULL,
   budget NUMERIC NOT NULL CHECK (budget >= 999),
   image TEXT DEFAULT 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800',
+  attachments JSONB NOT NULL DEFAULT '[]'::jsonb,
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in-progress', 'completed', 'cancelled')),
   user_email TEXT NOT NULL,
   user_name TEXT NOT NULL,

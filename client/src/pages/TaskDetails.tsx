@@ -10,10 +10,16 @@ import PeopleIcon from '@mui/icons-material/People';
 import GavelIcon from '@mui/icons-material/Gavel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SecurityIcon from '@mui/icons-material/Security';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import ForumIcon from '@mui/icons-material/Forum';
+import DownloadIcon from '@mui/icons-material/Download';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import Navbar from '../components/Navbar';
 import AnimatedAvatar from '../components/AnimatedAvatar';
 import { tasksApi, bidsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { TaskAssetsModal } from '../components/TaskAssetsModal';
+import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
 
 const TaskDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +32,10 @@ const TaskDetails = () => {
   const [bids, setBids] = useState<any[]>([]);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Modals
+  const [assetsModalOpen, setAssetsModalOpen] = useState(false);
+  const [discussionModalOpen, setDiscussionModalOpen] = useState(false);
 
   const fetchTaskAndBids = async () => {
     try {
@@ -113,6 +123,83 @@ const TaskDetails = () => {
               <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>{task.description}</Typography>
             </Paper>
 
+            {/* Attached Project Assets Card */}
+            <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid rgba(79,70,229,0.08)', mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Typography sx={{ fontWeight: 700, color: '#0f172a' }}>
+                    Project Assets & Materials ({(task.attachments || []).length})
+                  </Typography>
+                </Box>
+                {isOwner && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AttachFileIcon sx={{ fontSize: 16 }} />}
+                    onClick={() => setAssetsModalOpen(true)}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      borderRadius: '8px',
+                      color: '#4f46e5',
+                      borderColor: 'rgba(79, 70, 229, 0.3)',
+                      fontSize: '0.78rem'
+                    }}
+                  >
+                    + Upload / Manage Assets
+                  </Button>
+                )}
+              </Box>
+
+              {(!task.attachments || task.attachments.length === 0) ? (
+                <Typography sx={{ color: '#94a3b8', fontSize: '0.85rem' }}>
+                  No reference files or assets attached yet. {isOwner && 'Click above to upload product cutouts, briefs, or brand guidelines.'}
+                </Typography>
+              ) : (
+                <Grid container spacing={1.5}>
+                  {task.attachments.map((asset: any) => (
+                    <Grid xs={12} sm={6} key={asset.id}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: '10px',
+                          border: '1px solid #e2e8f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 1,
+                          '&:hover': { bgcolor: '#f8fafc' }
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, minWidth: 0 }}>
+                          <InsertDriveFileIcon sx={{ color: '#4f46e5', fontSize: 20 }} />
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {asset.name}
+                            </Typography>
+                            <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
+                              {asset.size ? `${(asset.size / 1024).toFixed(0)} KB` : 'Attached file'}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <IconButton
+                          size="small"
+                          component="a"
+                          href={asset.url}
+                          download={asset.name}
+                          target="_blank"
+                          sx={{ color: '#4f46e5' }}
+                        >
+                          <DownloadIcon fontSize="small" />
+                        </IconButton>
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Paper>
+
             {message && <Alert severity={message.type} sx={{ borderRadius: '12px', mb: 3 }}>{message.text}</Alert>}
 
             {/* Owner Proposals & Bids Section */}
@@ -188,7 +275,7 @@ const TaskDetails = () => {
                   fontWeight: 700, borderRadius: '14px', py: 2, fontSize: '1rem',
                   boxShadow: hasBid ? 'none' : '0 8px 24px rgba(79,70,229,0.3)',
                 }}>
-                {hasBid ? 'Bid Already Placed ✓' : bidding ? 'Placing Bid...' : 'Place Your Bid'}
+                  {hasBid ? 'Bid Already Placed ✓' : bidding ? 'Placing Bid...' : 'Place Your Bid'}
               </Button>
             )}
             {deadlinePassed && !isOwner && <Alert severity="warning" sx={{ borderRadius: '12px' }}>This task's deadline has passed.</Alert>}
@@ -211,6 +298,32 @@ const TaskDetails = () => {
                   </Box>
                 </Box>
               ))}
+
+              {/* Direct Communication with Admin */}
+              <Box sx={{ mt: 2.5 }}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<ForumIcon />}
+                  onClick={() => setDiscussionModalOpen(true)}
+                  sx={{
+                    py: 1.2,
+                    borderRadius: '12px',
+                    borderColor: 'rgba(79, 70, 229, 0.35)',
+                    color: '#4f46e5',
+                    bgcolor: 'rgba(79, 70, 229, 0.04)',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    fontSize: '0.875rem',
+                    '&:hover': {
+                      bgcolor: 'rgba(79, 70, 229, 0.1)',
+                      borderColor: '#4f46e5'
+                    }
+                  }}
+                >
+                  Chat with Admin
+                </Button>
+              </Box>
 
               {/* Escrow Breakdown Card */}
               <Box sx={{ mt: 3, p: 2, borderRadius: '12px', bgcolor: 'rgba(79,70,229,0.04)', border: '1px dashed rgba(79,70,229,0.2)' }}>
@@ -238,6 +351,23 @@ const TaskDetails = () => {
             </Paper>
           </Grid>
         </Grid>
+
+        {/* Task Assets Modal */}
+        <TaskAssetsModal
+          open={assetsModalOpen}
+          onClose={() => setAssetsModalOpen(false)}
+          task={task}
+          onTaskUpdated={(updatedTask) => setTask((prev: any) => ({ ...prev, ...updatedTask }))}
+          isOwner={isOwner}
+        />
+
+        {/* Task Discussion Channel Modal */}
+        <CaseDiscussionModal
+          open={discussionModalOpen}
+          onClose={() => setDiscussionModalOpen(false)}
+          task={task}
+          currentUser={user}
+        />
       </Container>
     </Box>
   );

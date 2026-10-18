@@ -63,6 +63,7 @@ async function runPietSuite() {
 
   let localServer = null;
   let ephemeralOrderId = null;
+  let ephemeralTaskId = null;
 
   // Auto-boot In-RAM Server Twin if port is closed
   try {
@@ -687,6 +688,96 @@ async function runPietSuite() {
       eq(checkRes.data.messages[1].sender_role, 'freelancer', 'Second is expert');
     });
 
+    ephemeralTaskId = null;
+    await t('Client creates task with asset attachments and receives persistent record', async () => {
+      const res = await requestJson('/api/tasks', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` },
+        body: JSON.stringify({
+          title: 'PIET Test Task with Multi-Asset Attachments',
+          category: 'Product Visuals',
+          description: 'Testing asset attachments pipeline and admin communication',
+          deadline: '2026-11-30',
+          budget: 1500,
+          attachments: [
+            {
+              id: 'att-task-1',
+              name: 'raw_product_photo_1.png',
+              url: '/uploads/tasks/raw_product_photo_1.png',
+              size: 1048576,
+              type: 'image/png'
+            }
+          ]
+        })
+      });
+
+      eq(res.status, 201, 'POST /api/tasks must return 201 Created');
+      assert(res.data.id, 'Task ID must be returned');
+      ephemeralTaskId = res.data.id;
+      assert(Array.isArray(res.data.attachments), 'Attachments must be array');
+      eq(res.data.attachments.length, 1, 'Must have 1 attachment');
+      eq(res.data.attachments[0].name, 'raw_product_photo_1.png', 'Attachment name preserved');
+    });
+
+    await t('Client appends additional assets to existing task post-creation', async () => {
+      const updateRes = await requestJson(`/api/tasks/${ephemeralTaskId}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${clientToken}` },
+        body: JSON.stringify({
+          attachments: [
+            {
+              id: 'att-task-1',
+              name: 'raw_product_photo_1.png',
+              url: '/uploads/tasks/raw_product_photo_1.png',
+              size: 1048576,
+              type: 'image/png'
+            },
+            {
+              id: 'att-task-2',
+              name: 'brand_guidelines.pdf',
+              url: '/uploads/tasks/brand_guidelines.pdf',
+              size: 512000,
+              type: 'application/pdf'
+            }
+          ]
+        })
+      });
+
+      eq(updateRes.status, 200, 'PUT /api/tasks/:id must return 200 OK');
+      eq(updateRes.data.attachments.length, 2, 'Task attachments updated to 2 files');
+    });
+
+    await t('Client initiates persistent discussion with Admin on task with attached brief', async () => {
+      const msgRes = await requestJson(`/api/case-discussions/${ephemeralTaskId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` },
+        body: JSON.stringify({
+          message: 'Hello Admin, I have attached the high-res brand guidelines for review.',
+          attachments: [
+            {
+              id: 'att-task-chat-1',
+              name: 'clarification_note.txt',
+              url: '/uploads/discussions/note.txt',
+              size: 1024,
+              type: 'text/plain'
+            }
+          ]
+        })
+      });
+
+      eq(msgRes.status, 201, 'POST /api/case-discussions/:taskId must return 201 Created');
+      eq(msgRes.data.message.order_id, ephemeralTaskId, 'Message order_id matches taskId');
+      eq(msgRes.data.message.sender_role, 'client', 'Sender role is client');
+
+      // Admin retrieves chronological task discussion
+      const listRes = await requestJson(`/api/case-discussions/${ephemeralTaskId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      eq(listRes.status, 200, 'Admin GET /api/case-discussions/:taskId must return 200 OK');
+      assert(listRes.data.messages.length >= 1, 'Must contain client message');
+      eq(listRes.data.messages[0].order_id, ephemeralTaskId, 'Message tied to task');
+    });
+
     // --------------------------------------------------------------------------
     // GATE 7: Security Invariants & Hardening
     // --------------------------------------------------------------------------
@@ -994,6 +1085,28 @@ async function runPietSuite() {
         console.log(`\n🧹 Ephemeral Teardown: Deleted test order ${ephemeralOrderId} (Zero Ghost Records).`);
       } catch (err) {
         console.warn('⚠️ Teardown cleanup note:', err.message);
+      }
+    }
+
+    // Teardown: Clean up ephemeral test task
+    if (ephemeralTaskId) {
+      try {
+        const rawSupabase = await import('../../server/supabase.js');
+        const supabase = rawSupabase.default || rawSupabase;
+        await supabase.from('aitag_tasks').delete().eq('id', ephemeralTaskId);
+        try {
+          const rawTasks = await import('../../server/features/aitag-tasks/service.js');
+          const tasksService = rawTasks.default || rawTasks;
+          await tasksService.deleteTask(ephemeralTaskId, 'piet-client-uuid@aitag.com').catch(() => {});
+        } catch {}
+        try {
+          const rawDiscussions = await import('../../server/features/aitag-case-discussions/service.js');
+          const discussionsService = rawDiscussions.default || rawDiscussions;
+          await discussionsService.purgeByOrderId(ephemeralTaskId);
+        } catch {}
+        console.log(`🧹 Ephemeral Teardown: Deleted test task ${ephemeralTaskId} (Zero Ghost Records).`);
+      } catch (err) {
+        console.warn('⚠️ Task teardown cleanup note:', err.message);
       }
     }
 

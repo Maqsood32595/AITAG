@@ -217,15 +217,29 @@ class TasksService {
     return SEED_FALLBACK_TASKS.filter(t => t.user_email === email);
   }
 
-  async createTask({ title, category, description, deadline, budget, image, userEmail, userName }) {
+  async createTask({ title, category, description, deadline, budget, image, attachments, userEmail, userName }) {
+    const cleanAttachments = Array.isArray(attachments) ? attachments : [];
+    let coverImage = (image || '').trim();
+    if (!coverImage && cleanAttachments.length > 0) {
+      const firstImg = cleanAttachments.find(a => 
+        (a.type && a.type.startsWith('image/')) || 
+        (a.url && a.url.match(/\.(png|jpg|jpeg|webp|svg)$/i))
+      );
+      if (firstImg) coverImage = firstImg.url;
+    }
+    if (!coverImage) {
+      coverImage = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800';
+    }
+
     const newTask = {
       id: `task-${Date.now()}`,
       title,
       category,
       description,
       deadline,
-      budget: Number(budget) || 10000,
-      image: image || 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800',
+      budget: Number(budget) || 1000,
+      image: coverImage,
+      attachments: cleanAttachments,
       status: 'open',
       user_email: userEmail,
       user_name: userName,
@@ -274,6 +288,28 @@ class TasksService {
       return SEED_FALLBACK_TASKS[index];
     }
     throw new Error('Task not found or unauthorized');
+  }
+
+  async addAttachments(id, userEmail, newAttachments) {
+    const task = await this.getTaskById(id);
+    if (!task) throw new Error('Task not found');
+    if (task.user_email !== userEmail) throw new Error('Unauthorized: only the task owner can append assets');
+
+    const current = Array.isArray(task.attachments) ? task.attachments : [];
+    const updated = [...current, ...newAttachments];
+
+    return await this.updateTask(id, userEmail, { attachments: updated });
+  }
+
+  async removeAttachment(id, userEmail, attachmentId) {
+    const task = await this.getTaskById(id);
+    if (!task) throw new Error('Task not found');
+    if (task.user_email !== userEmail) throw new Error('Unauthorized: only the task owner can remove assets');
+
+    const current = Array.isArray(task.attachments) ? task.attachments : [];
+    const updated = current.filter(a => a.id !== attachmentId);
+
+    return await this.updateTask(id, userEmail, { attachments: updated });
   }
 
   async deleteTask(id, userEmail) {

@@ -63,6 +63,16 @@ export const tasksApi = {
   create: (data: object) => api.post('/tasks', data),
   update: (id: string, data: object) => api.put(`/tasks/${id}`, data),
   delete: (id: string) => api.delete(`/tasks/${id}`),
+  uploadFiles: (formData: FormData) =>
+    api.post('/tasks/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  appendAttachments: (id: string, formData: FormData) =>
+    api.post(`/tasks/${id}/attachments`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  removeAttachment: (id: string, assetId: string) =>
+    api.delete(`/tasks/${id}/attachments/${assetId}`)
 };
 
 // Bids

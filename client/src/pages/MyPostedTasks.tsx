@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, Paper, Chip, Button, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import {
+  Box, Container, Typography, Table, TableBody, TableCell, TableHead,
+  TableRow, Paper, Chip, Button, CircularProgress, IconButton, Tooltip, Stack
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import ForumIcon from '@mui/icons-material/Forum';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { tasksApi } from '../api';
+import { useAuth } from '../context/AuthContext';
+import { TaskAssetsModal } from '../components/TaskAssetsModal';
+import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
 
 const MyPostedTasks = () => {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Modals state
+  const [activeAssetTask, setActiveAssetTask] = useState<any | null>(null);
+  const [assetsModalOpen, setAssetsModalOpen] = useState(false);
+  const [activeDiscussionTask, setActiveDiscussionTask] = useState<any | null>(null);
+  const [discussionModalOpen, setDiscussionModalOpen] = useState(false);
 
   useEffect(() => {
     tasksApi.getMy().then(res => setTasks(res.data)).catch(console.error).finally(() => setLoading(false));
@@ -25,13 +40,28 @@ const MyPostedTasks = () => {
     }
   };
 
+  const handleOpenAssets = (task: any) => {
+    setActiveAssetTask(task);
+    setAssetsModalOpen(true);
+  };
+
+  const handleOpenDiscussion = (task: any) => {
+    setActiveDiscussionTask(task);
+    setDiscussionModalOpen(true);
+  };
+
+  const handleTaskUpdated = (updatedTask: any) => {
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? { ...t, ...updatedTask } : t));
+    setActiveAssetTask(updatedTask);
+  };
+
   return (
     <DashboardLayout>
       <Container maxWidth="xl" sx={{ pb: 6 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>My Posted Tasks</Typography>
-            <Typography sx={{ color: '#64748b', mt: 0.5 }}>Manage and track your posted AI tasks</Typography>
+            <Typography sx={{ color: '#64748b', mt: 0.5 }}>Manage, track, upload assets, and communicate with admin on your tasks</Typography>
           </Box>
           <Button component={Link} to="/add_task" variant="contained"
             sx={{ background: 'linear-gradient(135deg, #4f46e5, #0891b2)', fontWeight: 700, borderRadius: '10px', boxShadow: '0 4px 16px rgba(79,70,229,0.3)' }}>
@@ -46,7 +76,7 @@ const MyPostedTasks = () => {
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                  {['Task Title', 'Category', 'Deadline', 'Budget', 'Bids', 'Status', 'Actions'].map(h => (
+                  {['Task Title', 'Category', 'Deadline', 'Budget', 'Bids', 'Status', 'Assets & Chat', 'Actions'].map(h => (
                     <TableCell key={h} sx={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem', py: 2 }}>{h}</TableCell>
                   ))}
                 </TableRow>
@@ -54,14 +84,58 @@ const MyPostedTasks = () => {
               <TableBody>
                 {tasks.map(task => (
                   <TableRow key={task.id} sx={{ '&:hover': { bgcolor: 'rgba(79,70,229,0.02)' } }}>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', maxWidth: 200 }}>{task.title}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', maxWidth: 220 }}>{task.title}</TableCell>
                     <TableCell><Chip label={task.category} size="small" sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 600, fontSize: '0.72rem' }} /></TableCell>
                     <TableCell sx={{ color: '#64748b', fontSize: '0.85rem' }}>{new Date(task.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#10b981' }}>${task.budget}</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#10b981' }}>₹{Number(task.budget).toLocaleString()}</TableCell>
                     <TableCell sx={{ fontWeight: 600, color: '#0891b2' }}>{task.total_bids || 0}</TableCell>
                     <TableCell>
                       <Chip label={task.status || 'open'} size="small"
                         sx={{ bgcolor: task.status === 'completed' ? 'rgba(16,185,129,0.1)' : task.status === 'in-progress' ? 'rgba(79,70,229,0.1)' : 'rgba(100,116,139,0.1)', color: task.status === 'completed' ? '#10b981' : task.status === 'in-progress' ? '#4f46e5' : '#64748b', fontWeight: 600, textTransform: 'capitalize' }} />
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<AttachFileIcon sx={{ fontSize: 14 }} />}
+                          onClick={() => handleOpenAssets(task)}
+                          sx={{
+                            borderRadius: '8px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            borderColor: 'rgba(79, 70, 229, 0.3)',
+                            color: '#4f46e5',
+                            bgcolor: 'rgba(79, 70, 229, 0.04)',
+                            py: 0.3,
+                            px: 1,
+                            '&:hover': { bgcolor: 'rgba(79, 70, 229, 0.1)' }
+                          }}
+                        >
+                          Assets ({(task.attachments || []).length})
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<ForumIcon sx={{ fontSize: 14 }} />}
+                          onClick={() => handleOpenDiscussion(task)}
+                          sx={{
+                            borderRadius: '8px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            borderColor: 'rgba(8, 145, 178, 0.3)',
+                            color: '#0891b2',
+                            bgcolor: 'rgba(8, 145, 178, 0.04)',
+                            py: 0.3,
+                            px: 1,
+                            '&:hover': { bgcolor: 'rgba(8, 145, 178, 0.1)' }
+                          }}
+                        >
+                          Chat Admin
+                        </Button>
+                      </Stack>
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -82,6 +156,23 @@ const MyPostedTasks = () => {
             )}
           </Paper>
         )}
+
+        {/* Task Assets Modal */}
+        <TaskAssetsModal
+          open={assetsModalOpen}
+          onClose={() => setAssetsModalOpen(false)}
+          task={activeAssetTask}
+          onTaskUpdated={handleTaskUpdated}
+          isOwner={true}
+        />
+
+        {/* Task Discussion Channel Modal */}
+        <CaseDiscussionModal
+          open={discussionModalOpen}
+          onClose={() => setDiscussionModalOpen(false)}
+          task={activeDiscussionTask}
+          currentUser={user}
+        />
       </Container>
     </DashboardLayout>
   );

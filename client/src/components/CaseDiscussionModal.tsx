@@ -37,7 +37,8 @@ interface MessageRecord {
 interface CaseDiscussionModalProps {
   open: boolean;
   onClose: () => void;
-  order: any;
+  order?: any;
+  task?: any;
   currentUser: any;
 }
 
@@ -45,8 +46,13 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
   open,
   onClose,
   order,
+  task,
   currentUser
 }) => {
+  const target = order || task;
+  const targetId = target?.id;
+  const isTask = !order && !!task;
+
   const [messages, setMessages] = useState<MessageRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -63,9 +69,9 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
   };
 
   const fetchMessages = async () => {
-    if (!order?.id) return;
+    if (!targetId) return;
     try {
-      const res = await caseDiscussionsApi.getMessages(order.id);
+      const res = await caseDiscussionsApi.getMessages(targetId);
       if (res.data?.success && Array.isArray(res.data.messages)) {
         setMessages(res.data.messages);
       }
@@ -75,13 +81,13 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
   };
 
   useEffect(() => {
-    if (open && order?.id) {
+    if (open && targetId) {
       setLoading(true);
       setError(null);
       setNewMsg('');
       setAttachments([]);
       caseDiscussionsApi
-        .getMessages(order.id)
+        .getMessages(targetId)
         .then((res) => {
           if (res.data?.success && Array.isArray(res.data.messages)) {
             setMessages(res.data.messages);
@@ -99,7 +105,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
       const interval = setInterval(fetchMessages, 6000);
       return () => clearInterval(interval);
     }
-  }, [open, order?.id]);
+  }, [open, targetId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -107,7 +113,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0 || !order?.id) return;
+    if (!files || files.length === 0 || !targetId) return;
 
     setUploading(true);
     setError(null);
@@ -117,7 +123,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
         formData.append('files', files[i]);
       }
 
-      const res = await caseDiscussionsApi.uploadAttachments(order.id, formData);
+      const res = await caseDiscussionsApi.uploadAttachments(targetId, formData);
       if (res.data?.success && Array.isArray(res.data.attachments)) {
         setAttachments((prev) => [...prev, ...res.data.attachments]);
       }
@@ -135,7 +141,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!order?.id) return;
+    if (!targetId) return;
 
     const trimmed = newMsg.trim();
     if (!trimmed && attachments.length === 0) return;
@@ -143,7 +149,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
     setSending(true);
     setError(null);
     try {
-      const res = await caseDiscussionsApi.postMessage(order.id, {
+      const res = await caseDiscussionsApi.postMessage(targetId, {
         message: trimmed,
         attachments
       });
@@ -168,7 +174,15 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  if (!order) return null;
+  if (!target) return null;
+
+  const itemTag = isTask
+    ? `Task #${String(task.id).replace('task-', '').slice(-6)}`
+    : `Order ${order.order_number}`;
+  const statusLabel = isTask ? (task.status || 'open') : order.status;
+  const subtitle = isTask
+    ? `${task.category} • Budget: ₹${Number(task.budget).toLocaleString()}`
+    : `${order.package_title} • ${order.tier_name?.startsWith('package_') ? order.tier_name.replace('package_', 'Package ').toUpperCase() : order.tier_name?.toUpperCase()} Tier`;
 
   return (
     <Dialog
@@ -199,26 +213,27 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
         <Box>
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
-              Case Discussion
+              {isTask ? 'Task Discussion' : 'Case Discussion'}
             </Typography>
             <Chip
-              label={`Order ${order.order_number}`}
+              label={itemTag}
               size="small"
               sx={{ bgcolor: '#e0e7ff', color: '#4338ca', fontWeight: 800, fontSize: '0.75rem' }}
             />
             <Chip
-              label={order.status}
+              label={statusLabel}
               size="small"
               sx={{
-                bgcolor: order.status === 'COMPLETED' ? '#ecfdf5' : order.status === 'ACTIVE' ? '#eff6ff' : '#fef3c7',
-                color: order.status === 'COMPLETED' ? '#047857' : order.status === 'ACTIVE' ? '#1d4ed8' : '#b45309',
+                bgcolor: statusLabel === 'COMPLETED' || statusLabel === 'completed' ? '#ecfdf5' : statusLabel === 'ACTIVE' || statusLabel === 'in-progress' ? '#eff6ff' : '#fef3c7',
+                color: statusLabel === 'COMPLETED' || statusLabel === 'completed' ? '#047857' : statusLabel === 'ACTIVE' || statusLabel === 'in-progress' ? '#1d4ed8' : '#b45309',
                 fontWeight: 700,
-                fontSize: '0.72rem'
+                fontSize: '0.72rem',
+                textTransform: 'capitalize'
               }}
             />
           </Stack>
           <Typography sx={{ color: '#64748b', fontSize: '0.8rem', mt: 0.5 }}>
-            {order.package_title} &bull; {order.tier_name?.startsWith('package_') ? order.tier_name.replace('package_', 'Package ').toUpperCase() : order.tier_name?.toUpperCase()} Tier
+            {subtitle}
           </Typography>
         </Box>
         <IconButton onClick={onClose} size="small" sx={{ color: '#94a3b8', '&:hover': { color: '#0f172a' } }}>
@@ -228,59 +243,101 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
 
       <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '620px' }}>
         {/* Parties Dossier Banner */}
-        <Box
-          sx={{
-            px: 3,
-            py: 1.75,
-            bgcolor: '#f1f5f9',
-            borderBottom: '1px solid #e2e8f0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 2
-          }}
-        >
-          <Stack direction="row" spacing={1} alignItems="center">
-            <PersonIcon sx={{ fontSize: 18, color: '#475569' }} />
-            <Box>
-              <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
-                Customer: {order.customer_name}
-              </Typography>
-              <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
-                {order.customer_email}
-              </Typography>
-            </Box>
-          </Stack>
+        {isTask ? (
+          <Box
+            sx={{
+              px: 3,
+              py: 1.75,
+              bgcolor: '#f1f5f9',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2
+            }}
+          >
+            <Stack direction="row" spacing={1} alignItems="center">
+              <PersonIcon sx={{ fontSize: 18, color: '#475569' }} />
+              <Box>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
+                  Client: {task.user_name}
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
+                  {task.user_email}
+                </Typography>
+              </Box>
+            </Stack>
 
-          <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
 
-          <Stack direction="row" spacing={1} alignItems="center">
-            <PsychologyIcon sx={{ fontSize: 18, color: '#059669' }} />
-            <Box>
-              <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#065f46' }}>
-                Matched Expert: {order.assigned_expert_name || 'AI Specialist'}
-              </Typography>
-              <Typography sx={{ fontSize: '0.7rem', color: '#047857' }}>
-                {order.assigned_expert_email || 'Pending assignment'}
-              </Typography>
-            </Box>
-          </Stack>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <AdminPanelSettingsIcon sx={{ fontSize: 18, color: '#4f46e5' }} />
+              <Box>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#4338ca' }}>
+                  Admin Support & Direct Communication
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#6366f1' }}>
+                  Real-time Platform Oversight
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              px: 3,
+              py: 1.75,
+              bgcolor: '#f1f5f9',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2
+            }}
+          >
+            <Stack direction="row" spacing={1} alignItems="center">
+              <PersonIcon sx={{ fontSize: 18, color: '#475569' }} />
+              <Box>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
+                  Customer: {order.customer_name}
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
+                  {order.customer_email}
+                </Typography>
+              </Box>
+            </Stack>
 
-          <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
 
-          <Stack direction="row" spacing={1} alignItems="center">
-            <AdminPanelSettingsIcon sx={{ fontSize: 18, color: '#4f46e5' }} />
-            <Box>
-              <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#4338ca' }}>
-                AITAG Operations
-              </Typography>
-              <Typography sx={{ fontSize: '0.7rem', color: '#6366f1' }}>
-                Active Case Oversight
-              </Typography>
-            </Box>
-          </Stack>
-        </Box>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <PsychologyIcon sx={{ fontSize: 18, color: '#059669' }} />
+              <Box>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#065f46' }}>
+                  Matched Expert: {order.assigned_expert_name || 'AI Specialist'}
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#047857' }}>
+                  {order.assigned_expert_email || 'Pending assignment'}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
+
+            <Stack direction="row" spacing={1} alignItems="center">
+              <AdminPanelSettingsIcon sx={{ fontSize: 18, color: '#4f46e5' }} />
+              <Box>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#4338ca' }}>
+                  AITAG Operations
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#6366f1' }}>
+                  Active Case Oversight
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+        )}
 
         {error && (
           <Alert severity="error" sx={{ mx: 3, mt: 2, borderRadius: '10px' }} onClose={() => setError(null)}>

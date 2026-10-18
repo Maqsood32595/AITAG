@@ -73,7 +73,7 @@ const UpdateTask = () => {
                 }
               }}
             />
-            <TextField label="Budget ($) *" type="number" required value={form.budget} onChange={e => setForm({ ...form, budget: e.target.value })} sx={fieldStyle} />
+            <TextField label="Budget (₹) *" type="number" required value={form.budget} onChange={e => setForm({ ...form, budget: e.target.value })} sx={fieldStyle} />
             <TextField label="Image URL" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} sx={fieldStyle} />
             <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
               <Button type="button" variant="outlined" fullWidth onClick={() => navigate('/my_tasks')}
