@@ -87,35 +87,39 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
   useEffect(() => {
     if (open && talent) {
       setLoading(true);
-      
-      const initialWorkflows = talent.deliveredWorkflows && talent.deliveredWorkflows.length > 0 
-        ? talent.deliveredWorkflows 
-        : DEFAULT_WORKFLOWS;
+      setActiveVideoUrl(null);
+
+      // For curated placeholder IDs, start with empty workflows so we don't show fake data
+      const isCuratedPlaceholder = /^curated-/.test(talent.id);
+      const initialWorkflows = (!isCuratedPlaceholder && talent.deliveredWorkflows && talent.deliveredWorkflows.length > 0)
+        ? talent.deliveredWorkflows
+        : [];
 
       setProfileData({
         ...talent,
         deliveredWorkflows: initialWorkflows,
-        links: talent.links || {
-          github: 'https://github.com/Maqsood32595',
-          linkedin: 'https://linkedin.com/in/maqsood',
-          website: 'https://aitag.in'
-        }
+        links: talent.links || {},
       });
 
-      // Set initial video from workflows if available
       const firstValidVideo = initialWorkflows.find((w: any) => w.demoVideoUrl)?.demoVideoUrl;
       setActiveVideoUrl(firstValidVideo || null);
 
-      // Fetch dynamic profile from backend
+      // Fetch live profile — always use the server's data as source of truth
       profileApi.getById(talent.id)
         .then(res => {
           if (res.data) {
-            setProfileData(res.data);
+            setProfileData(prev => ({
+              ...prev,
+              ...res.data,
+              // Merge: prefer server's workflows; fall back to initial if server returns empty AND we already had real ones
+              deliveredWorkflows:
+                (res.data.deliveredWorkflows && res.data.deliveredWorkflows.length > 0)
+                  ? res.data.deliveredWorkflows
+                  : initialWorkflows,
+            }));
             const wfs = res.data.deliveredWorkflows || [];
             const videoToPlay = wfs.find((w: any) => w.demoVideoUrl)?.demoVideoUrl;
-            if (videoToPlay) {
-              setActiveVideoUrl(videoToPlay);
-            }
+            if (videoToPlay) setActiveVideoUrl(videoToPlay);
           }
         })
         .catch(() => {})
@@ -125,7 +129,8 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
 
   if (!talent) return null;
 
-  const workflows = profileData?.deliveredWorkflows || DEFAULT_WORKFLOWS;
+  const workflows = profileData?.deliveredWorkflows ?? [];
+  const hasWorkflows = workflows.length > 0;
 
   return (
     <Dialog
@@ -178,13 +183,37 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
           <Box sx={{ mb: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 1 }}>
-                🎬 Delivered Workflows & Video Case Studies ({workflows.length})
+                🎬 Delivered Workflows & Video Case Studies {hasWorkflows ? `(${workflows.length})` : ''}
               </Typography>
             </Box>
 
-            <Typography sx={{ color: '#64748b', fontSize: '0.9rem', mb: 2.5 }}>
-              Watch verified video walkthroughs of production automations, pipelines, and tools delivered by this specialist.
-            </Typography>
+            {loading ? (
+              <Box sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 1.5 }}>
+                <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem' }}>Loading specialist profile…</Typography>
+              </Box>
+            ) : !hasWorkflows ? (
+              /* ── Empty state: specialist hasn't published workflows yet ── */
+              <Box
+                sx={{
+                  py: 5,
+                  px: 3,
+                  textAlign: 'center',
+                  borderRadius: '16px',
+                  border: '2px dashed rgba(79,70,229,0.2)',
+                  bgcolor: 'rgba(79,70,229,0.02)',
+                }}
+              >
+                <Typography sx={{ fontSize: '2rem', mb: 1.5 }}>🎬</Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a', mb: 0.5 }}>
+                  Workflows coming soon
+                </Typography>
+                <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', maxWidth: 360, mx: 'auto' }}>
+                  This specialist hasn't published any delivered workflow demos yet.
+                  Once they update their profile, videos and case studies will appear here.
+                </Typography>
+              </Box>
+            ) : (
+              <>
 
             {/* Active Universal Video Player */}
             {activeVideoUrl && (
@@ -295,7 +324,9 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                 );
               })}
             </Stack>
-          </Box>
+          </>
+        )}
+      </Box>
 
           <Divider sx={{ my: 3 }} />
 

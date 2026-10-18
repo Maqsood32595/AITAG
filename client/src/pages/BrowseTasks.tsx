@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  Box, Container, Typography, Grid, Card, CardMedia, CardContent,
-  CardActions, Button, TextField, MenuItem, Select, InputLabel,
-  FormControl, Chip, Skeleton, InputAdornment
+  Box, Container, Typography, Card, CardContent,
+  Button, TextField, MenuItem, Select, InputLabel,
+  FormControl, Chip, Skeleton, InputAdornment, Divider, Stack
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import ShareIcon from '@mui/icons-material/Share';
+import LanguageIcon from '@mui/icons-material/Language';
 import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 
 const CATEGORIES = ['all', 'Product Visuals', 'E-Commerce & Copy', 'Social & Marketing', 'Web & Funnels'];
+
+const getCategoryIcon = (category: string) => {
+  if (category?.includes('Visual')) return <CameraAltIcon sx={{ fontSize: 13, color: '#38bdf8' }} />;
+  if (category?.includes('Copy') || category?.includes('Commerce')) return <EditNoteIcon sx={{ fontSize: 13, color: '#fbbf24' }} />;
+  if (category?.includes('Social')) return <ShareIcon sx={{ fontSize: 13, color: '#a5b4fc' }} />;
+  return <LanguageIcon sx={{ fontSize: 13, color: '#34d399' }} />;
+};
 
 const BrowseTasks = () => {
   const [searchParams] = useSearchParams();
@@ -32,30 +43,49 @@ const BrowseTasks = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
-      <Container maxWidth="xl" sx={{ pt: 14, pb: 8 }}>
-        <Chip
-          label="PRACTICAL BUSINESS AI TASKS"
-          size="small"
-          sx={{
-            bgcolor: 'rgba(79,70,229,0.08)',
-            color: '#4f46e5',
-            fontWeight: 800,
-            fontSize: '0.75rem',
-            letterSpacing: '0.5px',
-            borderRadius: '16px',
-            mb: 1.5,
-            px: 0.5
-          }}
-        />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 4 }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 900, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>
-              Browse AI Tasks
-            </Typography>
-            <Typography sx={{ color: '#64748b', fontSize: '1.05rem', maxWidth: 700 }}>
-              Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services.
-            </Typography>
-          </Box>
+      <Container maxWidth="lg" sx={{ pt: 14, pb: 8 }}>
+        {/* Section Header - Central Pattern */}
+        <Box sx={{ textAlign: 'center', mb: 5 }}>
+          <Chip
+            icon={<AutoAwesomeIcon sx={{ fontSize: '15px !important', color: '#4f46e5' }} />}
+            label="PRACTICAL BUSINESS AI TASKS — PILOT CATALOGUE"
+            sx={{
+              bgcolor: '#eef2ff',
+              color: '#4338ca',
+              fontWeight: 700,
+              letterSpacing: '0.5px',
+              fontSize: '0.75rem',
+              mb: 2,
+              px: 1
+            }}
+          />
+          <Typography
+            variant="h3"
+            fontWeight={800}
+            color="#0f172a"
+            sx={{
+              letterSpacing: '-1px',
+              fontSize: { xs: '2rem', md: '2.5rem' },
+              mb: 1.5,
+              fontFamily: 'Inter, sans-serif'
+            }}
+          >
+            Browse AI Tasks & Projects
+          </Typography>
+          <Typography
+            variant="body1"
+            fontWeight={500}
+            color="#64748b"
+            sx={{
+              maxWidth: 720,
+              mx: 'auto',
+              fontSize: '1.05rem',
+              lineHeight: 1.6,
+              mb: 3
+            }}
+          >
+            “Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services — starting at just ₹499.”
+          </Typography>
           <Button
             component={Link}
             to="/add_task"
@@ -65,9 +95,10 @@ const BrowseTasks = () => {
               fontWeight: 700,
               borderRadius: '10px',
               boxShadow: '0 4px 16px rgba(79,70,229,0.3)',
-              px: 3,
+              px: 3.5,
               py: 1.2,
-              whiteSpace: 'nowrap',
+              fontSize: '0.92rem',
+              textTransform: 'none',
               cursor: 'pointer !important'
             }}
           >
@@ -75,78 +106,149 @@ const BrowseTasks = () => {
           </Button>
         </Box>
 
-        {/* Filters */}
-        <Box sx={{ display: 'flex', gap: 2, mb: 5, flexWrap: 'wrap' }}>
+        {/* Centered Search & Category Filters */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 4.5, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 840, mx: 'auto', width: '100%' }}>
           <TextField
             placeholder="Search by service or keyword (e.g. Saree, Amazon, Instagram, WhatsApp, Website)..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: '#4f46e5' }} /></InputAdornment> }}
-            sx={{ flex: 1, minWidth: 260, ...fieldStyle }}
+            sx={{ flex: 1, minWidth: 280, ...fieldStyle }}
           />
           <FormControl sx={{ minWidth: 220 }}>
             <InputLabel>Category</InputLabel>
-            <Select value={category} label="Category" onChange={e => setCategory(e.target.value)} sx={{ borderRadius: '12px', fontWeight: 600 }}>
+            <Select value={category} label="Category" onChange={e => setCategory(e.target.value)} sx={{ borderRadius: '10px', fontWeight: 600 }}>
               {CATEGORIES.map(c => <MenuItem key={c} value={c} sx={{ fontWeight: 600 }}>{c === 'all' ? 'All Services (4 Categories)' : c}</MenuItem>)}
             </Select>
           </FormControl>
         </Box>
 
-        {/* Grid */}
-        <Grid container spacing={3}>
+        {/* Tasks List */}
+        <Stack spacing={3} sx={{ width: '100%' }}>
           {loading
-            ? Array(8).fill(0).map((_, i) => (
-              <Grid xs={12} sm={6} md={4} lg={3} key={i}>
-                <Skeleton variant="rectangular" height={280} sx={{ borderRadius: '16px' }} />
-              </Grid>
-            ))
+            ? Array(4).fill(0).map((_, i) => (
+                <Skeleton key={i} variant="rectangular" height={310} sx={{ borderRadius: '16px', width: '100%' }} />
+              ))
             : filtered.map(task => (
-              <Grid xs={12} sm={6} md={4} lg={3} key={task.id}>
-                <Card elevation={0} sx={{
-                  borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', height: '100%',
-                  display: 'flex', flexDirection: 'column', transition: 'all 0.25s',
-                  bgcolor: '#ffffff',
-                  '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 16px 36px rgba(79,70,229,0.1)', borderColor: '#4f46e5' }
-                }}>
-                  <CardMedia component="img" height="170" image={task.image} alt={task.title} sx={{ objectFit: 'cover' }} />
-                  <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
-                    <Chip
-                      label={task.category}
-                      size="small"
-                      sx={{
-                        mb: 1.5,
-                        bgcolor: 'rgba(79,70,229,0.08)',
-                        color: '#4f46e5',
-                        fontWeight: 700,
-                        fontSize: '0.72rem',
-                        borderRadius: '8px'
-                      }}
+                <Card
+                  key={task.id}
+                  elevation={0}
+                  sx={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0',
+                    overflow: 'hidden',
+                    height: '310px',
+                    minHeight: '310px',
+                    maxHeight: '310px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    bgcolor: '#ffffff',
+                    transition: 'all 0.25s ease',
+                    '&:hover': {
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 12px 28px rgba(79,70,229,0.08)',
+                      borderColor: '#4f46e5'
+                    }
+                  }}
+                >
+                  {/* Image Cover matching #packages style */}
+                  <Box sx={{ position: 'relative', height: 160, width: '100%', bgcolor: '#f1f5f9', overflow: 'hidden' }}>
+                    <img
+                      src={task.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80'}
+                      alt={task.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.98rem', color: '#0f172a', mb: 1, lineHeight: 1.4 }}>
-                      {task.title}
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.84rem', color: '#64748b', mb: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.5 }}>
-                      {task.description}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, mt: 'auto' }}>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, mr: 0.5 }}>
-                        Budget:
+                    {/* Category Pill Top-Left */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        left: 12,
+                        bgcolor: 'rgba(15, 23, 42, 0.85)',
+                        backdropFilter: 'blur(8px)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        px: 1.2,
+                        py: 0.4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        letterSpacing: 0.3
+                      }}
+                    >
+                      {getCategoryIcon(task.category)}
+                      {task.category}
+                    </Box>
+                    {/* Status Pill Top-Right */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        bgcolor: 'rgba(79, 70, 229, 0.9)',
+                        backdropFilter: 'blur(8px)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        px: 1.2,
+                        py: 0.4,
+                        fontSize: '0.68rem',
+                        fontWeight: 700
+                      }}
+                    >
+                      Open Task
+                    </Box>
+                  </Box>
+
+                  <CardContent sx={{ p: 2, pb: '16px !important', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography sx={{ fontWeight: 750, fontSize: '0.95rem', color: '#0f172a', mb: 0.5, lineHeight: 1.35, minHeight: '2.5rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                        {task.title}
                       </Typography>
-                      <Typography sx={{ fontWeight: 900, color: '#10b981', fontSize: '1.2rem' }}>
-                        ₹{Number(task.budget).toLocaleString()}
+                      <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mb: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.45, minHeight: '2.35rem' }}>
+                        {task.description}
                       </Typography>
                     </Box>
+
+                    <Box>
+                      <Divider sx={{ my: 1 }} />
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                        <Box>
+                          <Typography sx={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.5 }}>
+                            Budget
+                          </Typography>
+                          <Typography sx={{ fontWeight: 850, color: '#10b981', fontSize: '1.1rem', lineHeight: 1.1 }}>
+                            ₹{Number(task.budget).toLocaleString()}
+                          </Typography>
+                        </Box>
+                        <Button
+                          component={Link}
+                          to={`/task-details/${task.id}`}
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            borderColor: 'rgba(79,70,229,0.3)',
+                            color: '#4f46e5',
+                            textTransform: 'none',
+                            fontSize: '0.78rem',
+                            py: 0.4,
+                            px: 1.8,
+                            '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' }
+                          }}
+                        >
+                          See Details
+                        </Button>
+                      </Box>
+                    </Box>
                   </CardContent>
-                  <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0 }}>
-                    <Button component={Link} to={`/task-details/${task.id}`} variant="outlined" fullWidth
-                      sx={{ borderRadius: '10px', fontWeight: 700, borderColor: 'rgba(79,70,229,0.3)', color: '#4f46e5', textTransform: 'none', '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' } }}>
-                      See Details
-                    </Button>
-                  </CardActions>
                 </Card>
-              </Grid>
-            ))}
-        </Grid>
+              ))}
+        </Stack>
         {!loading && filtered.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 10 }}>
             <Typography sx={{ color: '#94a3b8', fontSize: '1.1rem' }}>No tasks found. Try a different search or category.</Typography>

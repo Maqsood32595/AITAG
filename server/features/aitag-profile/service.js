@@ -132,10 +132,16 @@ class ProfileService {
     return userId;
   }
 
+
+  /** IDs that are curated showcase placeholders — no real profile data exists for them until updated. */
+  isCuratedPlaceholder(userId) {
+    return /^curated-/.test(userId);
+  }
+
   async getProfileByUserId(rawUserId) {
     const userId = this.normalizeUserId(rawUserId);
 
-    // 1. Check local disk persistence
+    // 1. Check local disk persistence (if expert has customized / saved their profile)
     try {
       const localFile = this.getLocalProfilePath(userId);
       if (fs.existsSync(localFile)) {
@@ -150,6 +156,17 @@ class ProfileService {
         }
       }
     } catch (e) {}
+
+    // 2. Curated placeholder IDs have blank workflows until the expert updates their profile
+    if (this.isCuratedPlaceholder(userId)) {
+      return {
+        userId,
+        deliveredWorkflows: [],
+        skills: [],
+        links: {},
+        bio: ''
+      };
+    }
 
     // 2. Check in-memory cache
     const cached = PROFILES_CACHE.get(userId);

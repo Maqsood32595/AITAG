@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import { GoogleAuthButton } from '../components/GoogleAuthButton';
 
 const SignUp = () => {
   const { register, logout, user } = useAuth();
@@ -51,6 +52,26 @@ const SignUp = () => {
 
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
 
+          {/* Role Selection for Google & Email Registration */}
+          <Box sx={{ mb: 3 }}>
+            <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', mb: 1 }}>
+              I want to join as:
+            </Typography>
+            <FormControl fullWidth sx={{ ...fieldStyle, mb: 2 }}>
+              <InputLabel>Account Role</InputLabel>
+              <Select value={form.role} label="Account Role" onChange={e => setForm({ ...form, role: e.target.value })}>
+                <MenuItem value="freelancer">AI Expert</MenuItem>
+                <MenuItem value="client">Client</MenuItem>
+              </Select>
+            </FormControl>
+
+            <GoogleAuthButton mode="signup" role={form.role} onError={err => setError(err)} />
+          </Box>
+
+          <Divider sx={{ mb: 3, color: '#94a3b8', fontSize: '0.85rem' }}>
+            or register with email
+          </Divider>
+
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <TextField label="Full Name" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
               sx={fieldStyle} />
@@ -60,13 +81,6 @@ const SignUp = () => {
               helperText="Min 6 chars, at least one uppercase" sx={fieldStyle} />
             <TextField label="Photo URL (optional)" value={form.photoURL} onChange={e => setForm({ ...form, photoURL: e.target.value })}
               sx={fieldStyle} />
-            <FormControl sx={fieldStyle}>
-              <InputLabel>I am a...</InputLabel>
-              <Select value={form.role} label="I am a..." onChange={e => setForm({ ...form, role: e.target.value })}>
-                <MenuItem value="freelancer">AI Expert</MenuItem>
-                <MenuItem value="client">Client</MenuItem>
-              </Select>
-            </FormControl>
 
             <Button type="submit" variant="contained" size="large" disabled={loading}
               sx={{

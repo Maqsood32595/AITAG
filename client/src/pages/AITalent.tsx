@@ -348,147 +348,167 @@ const AITalent = () => {
             <CircularProgress sx={{ color: '#4f46e5' }} />
           </Box>
         ) : (
-          <Grid container spacing={3}>
+          <Stack spacing={2.5} sx={{ width: '100%' }}>
             {filteredTalent.map((talent) => (
-              <Grid xs={12} md={6} key={talent.id}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    borderRadius: '20px',
-                    border: '1px solid',
-                    borderColor: talent.isRegisteredUser ? 'rgba(79,70,229,0.25)' : 'rgba(79,70,229,0.1)',
-                    bgcolor: '#ffffff',
-                    transition: 'all 0.25s ease',
-                    position: 'relative',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 16px 36px rgba(79,70,229,0.08)',
-                      borderColor: '#4f46e5',
-                    },
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <CardContent sx={{ p: 3.5, flexGrow: 1 }}>
-                    {/* Top Row: Avatar & Basic Info */}
-                    <Box sx={{ display: 'flex', gap: 2.5, mb: 2.5, alignItems: 'center' }}>
-                      <AnimatedAvatar
-                        name={talent.name}
-                        size={64}
-                        src={talent.avatar}
+              <Card
+                key={talent.id}
+                elevation={0}
+                sx={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  borderRadius: '16px',
+                  border: '1px solid',
+                  borderColor: talent.isRegisteredUser ? 'rgba(79,70,229,0.25)' : 'rgba(79,70,229,0.1)',
+                  bgcolor: '#ffffff',
+                  transition: 'all 0.25s ease',
+                  position: 'relative',
+                  '&:hover': {
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 12px 28px rgba(79,70,229,0.08)',
+                    borderColor: '#4f46e5',
+                  },
+                  height: '215px',
+                  minHeight: '215px',
+                  maxHeight: '215px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <CardContent sx={{ p: 2, pb: '16px !important', height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  {/* Top Row: Avatar & Basic Info */}
+                  <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
+                    <AnimatedAvatar
+                      name={talent.name}
+                      size={46}
+                      src={talent.avatar}
+                    />
+                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
+                        <Typography sx={{ fontWeight: 750, color: '#0f172a', fontSize: '1rem', lineHeight: 1.2 }}>
+                          {talent.name}
+                        </Typography>
+                        {talent.verified && (
+                          <VerifiedIcon sx={{ color: '#10b981', fontSize: 16 }} titleAccess="Verified Top AI Specialist" />
+                        )}
+                        {talent.isRegisteredUser && (
+                          <Chip label="Platform Member" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.08)', color: '#10b981', fontWeight: 700, fontSize: '0.62rem', height: 18 }} />
+                        )}
+                      </Box>
+                      <Typography sx={{ color: '#4f46e5', fontWeight: 600, fontSize: '0.8rem', mt: 0.2 }}>
+                        {talent.role}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#64748b', fontSize: '0.72rem', mt: 0.2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                          <LocationOnIcon sx={{ fontSize: 13 }} />
+                          {talent.location}
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                          <AssignmentIcon sx={{ fontSize: 13 }} />
+                          {talent.completedTasks} tasks done
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* Bio */}
+                  <Typography
+                    sx={{
+                      color: '#475569',
+                      fontSize: '0.8rem',
+                      lineHeight: 1.4,
+                      my: 0.5,
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      minHeight: '2.25rem',
+                    }}
+                  >
+                    {talent.bio}
+                  </Typography>
+
+                  {/* Skills Chips */}
+                  <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'hidden', gap: 0.7, mb: 0.5 }}>
+                    {talent.skills.map((skill) => (
+                      <Chip
+                        key={skill}
+                        label={skill}
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(79,70,229,0.06)',
+                          color: '#4f46e5',
+                          fontWeight: 600,
+                          fontSize: '0.7rem',
+                          height: '22px',
+                          borderRadius: '6px',
+                          flexShrink: 0,
+                        }}
                       />
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
-                          <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1.15rem' }}>
-                            {talent.name}
-                          </Typography>
-                          {talent.verified && (
-                            <VerifiedIcon sx={{ color: '#10b981', fontSize: 18 }} titleAccess="Verified Top AI Specialist" />
-                          )}
-                          {talent.isRegisteredUser && (
-                            <Chip label="Platform Member" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.08)', color: '#10b981', fontWeight: 700, fontSize: '0.65rem', height: 20 }} />
-                          )}
-                        </Box>
-                        <Typography sx={{ color: '#4f46e5', fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
-                          {talent.role}
+                    ))}
+                  </Box>
+
+                  <Divider sx={{ my: 0.5 }} />
+
+                  {/* Bottom Row: Rate & Action Buttons */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                    <Box>
+                      <Typography sx={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.5 }}>
+                        Rate
+                      </Typography>
+                      <Typography sx={{ fontWeight: 850, color: '#0f172a', fontSize: '1.1rem', lineHeight: 1.1 }}>
+                        ₹{talent.hourlyRate.toLocaleString()}
+                        <Typography component="span" sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
+                          /hr
                         </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#64748b', fontSize: '0.8rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                            <LocationOnIcon sx={{ fontSize: 14 }} />
-                            {talent.location}
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                            <AssignmentIcon sx={{ fontSize: 14 }} />
-                            {talent.completedTasks} tasks done
-                          </Box>
-                        </Box>
-                      </Box>
+                      </Typography>
                     </Box>
 
-                    {/* Bio */}
-                    <Typography sx={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.6, mb: 2.5 }}>
-                      {talent.bio}
-                    </Typography>
-
-                    {/* Skills Chips */}
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 3 }}>
-                      {talent.skills.map((skill) => (
-                        <Chip
-                          key={skill}
-                          label={skill}
-                          size="small"
-                          sx={{
-                            bgcolor: 'rgba(79,70,229,0.06)',
-                            color: '#4f46e5',
-                            fontWeight: 600,
-                            fontSize: '0.75rem',
-                            borderRadius: '8px',
-                          }}
-                        />
-                      ))}
-                    </Box>
-
-                    <Divider sx={{ mb: 2.5 }} />
-
-                    {/* Bottom Row: Rate & Action Buttons */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
-                      <Box>
-                        <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
-                          Rate
-                        </Typography>
-                        <Typography sx={{ fontWeight: 900, color: '#0f172a', fontSize: '1.25rem' }}>
-                          ₹{talent.hourlyRate.toLocaleString()}
-                          <Typography component="span" sx={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
-                            /hr
-                          </Typography>
-                        </Typography>
-                      </Box>
-
-                      <Stack direction="row" spacing={1}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => {
-                            setSelectedShowcaseTalent(talent);
-                            setShowcaseModalOpen(true);
-                          }}
-                          sx={{
-                            borderRadius: '10px',
-                            color: '#4f46e5',
-                            borderColor: 'rgba(79,70,229,0.3)',
-                            fontWeight: 700,
-                            textTransform: 'none',
-                            fontSize: '0.85rem',
-                          }}
-                        >
-                          🎬 View Workflows
-                        </Button>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleHireClick(talent)}
-                          endIcon={<SendIcon sx={{ fontSize: '14px !important' }} />}
-                          sx={{
-                            background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
-                            color: '#ffffff',
-                            fontWeight: 700,
-                            borderRadius: '10px',
-                            px: 2,
-                            fontSize: '0.85rem',
-                            boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
-                            textTransform: 'none',
-                          }}
-                        >
-                          Invite
-                        </Button>
-                      </Stack>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => {
+                          setSelectedShowcaseTalent(talent);
+                          setShowcaseModalOpen(true);
+                        }}
+                        sx={{
+                          borderRadius: '8px',
+                          color: '#4f46e5',
+                          borderColor: 'rgba(79,70,229,0.3)',
+                          fontWeight: 700,
+                          textTransform: 'none',
+                          fontSize: '0.78rem',
+                          py: 0.4,
+                          px: 1.5,
+                        }}
+                      >
+                        🎬 View Workflows
+                      </Button>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleHireClick(talent)}
+                        endIcon={<SendIcon sx={{ fontSize: '13px !important' }} />}
+                        sx={{
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          borderRadius: '8px',
+                          px: 1.8,
+                          py: 0.4,
+                          fontSize: '0.78rem',
+                          boxShadow: '0 3px 10px rgba(79,70,229,0.25)',
+                          textTransform: 'none',
+                        }}
+                      >
+                        Invite
+                      </Button>
+                    </Stack>
+                  </Box>
+                </CardContent>
+              </Card>
             ))}
-          </Grid>
+          </Stack>
         )}
 
         {!loading && filteredTalent.length === 0 && (

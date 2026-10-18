@@ -1,0 +1,8 @@
+{
+  "id": "aitag-oauth",
+  "name": "AITAG Google OAuth & Social Auth Engine",
+  "version": "1.0.0",
+  "description": "Fractal Kernel slice for Google OAuth 2.0 and Gmail one-click registration & sign-in",
+  "basePath": "/api/oauth",
+  "enabled": true
+}

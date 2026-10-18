@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Box, Container, Paper, Typography, TextField, Button, Alert, Divider } from '@mui/material';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import { GoogleAuthButton } from '../components/GoogleAuthButton';
 
 const SignIn = () => {
   const { login, logout, user } = useAuth();
@@ -52,6 +53,15 @@ const SignIn = () => {
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
+
+          {/* Google 1-Click Sign In */}
+          <Box sx={{ mb: 3 }}>
+            <GoogleAuthButton mode="signin" onError={err => setError(err)} />
+          </Box>
+
+          <Divider sx={{ mb: 3, color: '#94a3b8', fontSize: '0.85rem' }}>
+            or continue with email
+          </Divider>
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <TextField label="Email" type="email" required value={form.email}

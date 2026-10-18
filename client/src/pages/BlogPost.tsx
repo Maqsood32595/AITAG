@@ -12,6 +12,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Navbar from '../components/Navbar';
+import AnimatedAvatar from '../components/AnimatedAvatar';
 import { blogApi } from '../api';
 
 const FALLBACK_FULL_ARTICLES: Record<string, any> = {
@@ -281,9 +282,7 @@ const BlogPost = () => {
           {/* Author & Actions Bar */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', mb: 4, flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar src={article.author.avatar} alt={article.author.name} sx={{ width: 44, height: 44, bgcolor: '#4f46e5' }}>
-                {article.author.name[0]}
-              </Avatar>
+              <AnimatedAvatar src={article.author.avatar} name={article.author.name} size={44} />
               <Box>
                 <Typography sx={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>
                   {article.author.name}

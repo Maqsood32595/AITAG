@@ -130,14 +130,14 @@ async function runPietSuite() {
     // --------------------------------------------------------------------------
     gate('Gate 2: AST & Manifest Integrity');
 
-    await t('Verifies all 15 Fractal Kernel feature manifests exist and parse cleanly', () => {
+    await t('Verifies all 16 Fractal Kernel feature manifests exist and parse cleanly', () => {
       const featuresDir = resolve('server/features');
       const expectedSlices = [
         'aitag-auth', 'aitag-bids', 'aitag-blog', 'aitag-invitations',
         'aitag-marketplace', 'aitag-profile', 'aitag-service-orders',
         'aitag-service-packages', 'aitag-tasks', 'escrow-payment',
         'leakage-shield', 'sandwich-refactor-sandbox', 'aitag-analytics',
-        'aitag-security-guard', 'aitag-cache'
+        'aitag-security-guard', 'aitag-cache', 'aitag-oauth'
       ];
 
       for (const slice of expectedSlices) {
@@ -170,11 +170,11 @@ async function runPietSuite() {
       }
     });
 
-    await t('Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 15 slices', async () => {
+    await t('Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 16 slices', async () => {
       const res = await requestJson('/api/features');
       eq(res.status, 200, 'GET /api/features must return 200 OK');
       assert(Array.isArray(res.data), '/api/features must return array');
-      assert(res.data.length >= 15, 'Kernel must mount at least 15 feature slices');
+      assert(res.data.length >= 16, 'Kernel must mount at least 16 feature slices');
       const ids = res.data.map((f) => f.id);
       assert(ids.includes('aitag-service-orders'), 'Kernel missing aitag-service-orders slice');
       assert(ids.includes('aitag-service-packages'), 'Kernel missing aitag-service-packages slice');
@@ -182,6 +182,23 @@ async function runPietSuite() {
       assert(ids.includes('aitag-analytics'), 'Kernel missing aitag-analytics slice');
       assert(ids.includes('aitag-security-guard'), 'Kernel missing aitag-security-guard slice');
       assert(ids.includes('aitag-cache'), 'Kernel missing aitag-cache slice');
+      assert(ids.includes('aitag-oauth'), 'Kernel missing aitag-oauth slice');
+    });
+
+    await t('Verifies aitag-oauth config endpoint and input validation contract', async () => {
+      const configRes = await requestJson('/api/oauth/config');
+      eq(configRes.status, 200, 'GET /api/oauth/config must return 200 OK');
+      eq(configRes.data.success, true, 'Config response success must be true');
+      eq(configRes.data.service, 'aitag-oauth', 'Service identifier must match aitag-oauth');
+      assert(configRes.data.clientId && configRes.data.clientId.includes('apps.googleusercontent.com'), 'Valid clientId must be returned');
+
+      // Negative input defense: missing credential rejected with 400
+      const negRes = await requestJson('/api/oauth/google', {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+      eq(negRes.status, 400, 'Empty credential token must return 400 Bad Request');
+      eq(negRes.data.success, false, 'Response must indicate failure');
     });
 
     // --------------------------------------------------------------------------

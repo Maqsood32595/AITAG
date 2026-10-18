@@ -11,6 +11,7 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SecurityIcon from '@mui/icons-material/Security';
 import Navbar from '../components/Navbar';
+import AnimatedAvatar from '../components/AnimatedAvatar';
 import { tasksApi, bidsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -103,7 +104,7 @@ const TaskDetails = () => {
             </Box>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>{task.title}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <Avatar sx={{ width: 28, height: 28, bgcolor: '#4f46e5', fontSize: '0.75rem' }}>{task.user_name?.[0]}</Avatar>
+              <AnimatedAvatar name={task.user_name} size={28} />
               <Typography sx={{ color: '#64748b', fontSize: '0.875rem' }}>Posted by <strong>{task.user_name}</strong></Typography>
             </Box>
 
@@ -134,7 +135,7 @@ const TaskDetails = () => {
                         <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              <Avatar sx={{ bgcolor: '#4f46e5', fontWeight: 700 }}>{b.user_name?.[0] || 'U'}</Avatar>
+                              <AnimatedAvatar name={b.user_name || 'User'} size={40} />
                               <Box>
                                 <Typography sx={{ fontWeight: 700, color: '#0f172a' }}>{b.user_name}</Typography>
                                 <Typography sx={{ color: '#64748b', fontSize: '0.8rem' }}>{b.user_email}</Typography>

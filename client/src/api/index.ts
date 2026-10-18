@@ -46,6 +46,13 @@ export const authApi = {
   getUsers: () => api.get('/auth/users'),
 };
 
+// OAuth (Google / Social Auth)
+export const oauthApi = {
+  getConfig: () => api.get('/oauth/config'),
+  google: (data: { credential: string; role?: string }) =>
+    api.post('/oauth/google', data),
+};
+
 // Tasks
 export const tasksApi = {
   getAll: (params?: { category?: string; search?: string; limit?: number }) =>

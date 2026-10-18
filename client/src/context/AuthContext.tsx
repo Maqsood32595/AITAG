@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authApi } from '../api';
+import { authApi, oauthApi } from '../api';
 
 interface User {
   id: string;
@@ -14,6 +14,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  loginWithGoogle: (credential: string, role?: string) => Promise<{ isNew: boolean }>;
   logout: () => void;
 }
 
@@ -55,6 +56,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(res.data.user);
   };
 
+  const loginWithGoogle = async (credential: string, role?: string) => {
+    const res = await oauthApi.google({ credential, role });
+    localStorage.setItem('aitag_token', res.data.token);
+    setUser(res.data.user);
+    return { isNew: res.data.isNew };
+  };
+
   const logout = () => {
     try {
       localStorage.removeItem('aitag_token');
@@ -66,7 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

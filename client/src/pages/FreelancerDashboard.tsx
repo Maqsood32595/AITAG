@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Button, Grid, Chip, TextField, InputAdornment, Avatar } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, TextField, InputAdornment } from '@mui/material';
+import AnimatedAvatar from '../components/AnimatedAvatar';
 
 
 export const FreelancerDashboard = () => {
@@ -81,7 +82,7 @@ export const FreelancerDashboard = () => {
         <Grid xs={12} md={5}>
           <Paper className="fade-in-up stagger-2" sx={{ height: '550px', display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden' }}>
             <Box sx={{ p: 2, borderBottom: '1px solid #e2e8f0', bgcolor: '#f8fafc', display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar src="https://ui-avatars.com/api/?name=Enterprise+Client&background=0D8ABC&color=fff" />
+              <AnimatedAvatar name="Enterprise Client" size={40} src="https://ui-avatars.com/api/?name=Enterprise+Client&background=0D8ABC&color=fff" />
               <Box>
                 <Typography fontWeight={700}>Enterprise Client</Typography>
                 <Typography variant="caption" color="success.main" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

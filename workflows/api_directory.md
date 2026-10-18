@@ -36,6 +36,7 @@
 | `escrow-payment` | `/api/escrow` | RBI Compliance, 5% Platform Fee, UPI Settlement | None (Financial transactions) |
 | `leakage-shield` | `/api/shield` | Real-time PII & External Contact Redaction | None (Real-time filter) |
 | `sandwich-refactor-sandbox`| `/api/sandbox` | In-RAM AI Sandbox & AST Verification Engine | None (Ephemeral execution) |
+| `aitag-oauth` | `/api/oauth` | Google OAuth 2.0 & Gmail Registration / Login | None (Auth sensitive) |
 
 ---
 
@@ -218,3 +219,17 @@
 - **`GET /api/security/audit`**
   - **Auth:** Public / Monitoring
   - **Response 200:** Returns the 20-point security matrix status (`ENFORCED`, `PATCHED`, `CONFIGURED`).
+
+---
+
+### 8. `aitag-oauth` (`/api/oauth`)
+- **`GET /api/oauth/config`**
+  - **Auth:** Public
+  - **Response 200:** `{ "success": true, "service": "aitag-oauth", "clientId": "...", "supportedProviders": ["google"] }`
+- **`POST /api/oauth/google`**
+  - **Auth:** Public
+  - **Body:** `{ "credential": "<google_jwt_token>", "role": "client" | "freelancer" }`
+  - **Functionality:** Verifies Google ID token cryptographically, auto-provisions user in `aitag_users` if new Gmail ID, issues AITAG session JWT.
+  - **Response 200:** `{ "success": true, "token": "...", "user": { ... }, "isNew": true | false }`
+- **`GET /api/oauth/health`**
+  - **Response 200:** `{ "status": "healthy", "slice": "aitag-oauth" }`

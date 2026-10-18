@@ -1,1 +1,0 @@
-import{ct as e,on as t}from"./AnimatedAvatar-ZhVHMz34.js";var n=t(),r=e((0,n.jsx)(`path`,{d:`M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5z`}),`Shield`);export{r as t};
