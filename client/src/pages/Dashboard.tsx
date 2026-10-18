@@ -19,10 +19,13 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import StarIcon from '@mui/icons-material/Star';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ForumIcon from '@mui/icons-material/Forum';
+import PersonIcon from '@mui/icons-material/Person';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { tasksApi, bidsApi, invitationsApi, serviceOrdersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedAvatar } from '../components/AnimatedAvatar';
+import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
 
 const VETTED_SPECIALISTS = [
   { name: 'Expert 1', email: 'expert1@aitag.com', role: 'Vetted AI Specialist' },
@@ -78,6 +81,15 @@ const Dashboard = () => {
   const [ratingVal, setRatingVal] = useState<number | null>(5);
   const [testimonial, setTestimonial] = useState('');
   const [finalFileUrl, setFinalFileUrl] = useState('');
+
+  // Case Discussion Modal
+  const [discussionModalOpen, setDiscussionModalOpen] = useState(false);
+  const [activeDiscussionOrder, setActiveDiscussionOrder] = useState<any | null>(null);
+
+  const openDiscussionModal = (order: any) => {
+    setActiveDiscussionOrder(order);
+    setDiscussionModalOpen(true);
+  };
 
   const fetchDashboardData = () => {
     const ordersPromise = user?.role === 'admin'
@@ -778,19 +790,47 @@ const Dashboard = () => {
                           Requested on {new Date(ord.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
                         </Typography>
                         <Chip
-                          label={ord.assigned_expert_email ? `Expert: ${ord.assigned_expert_name || ord.assigned_expert_email}` : 'Pending Expert Matching'}
+                          icon={<PersonIcon sx={{ fontSize: '15px !important', color: ord.assigned_expert_email ? '#0284c7 !important' : '#b45309 !important' }} />}
+                          label={
+                            ord.assigned_expert_email
+                              ? `Expert: ${ord.assigned_expert_name ? `${ord.assigned_expert_name} (${ord.assigned_expert_email})` : ord.assigned_expert_email}`
+                              : 'Pending Expert Matching'
+                          }
                           size="small"
                           sx={{
                             bgcolor: ord.assigned_expert_email ? '#e0f2fe' : '#fef3c7',
                             color: ord.assigned_expert_email ? '#0369a1' : '#b45309',
-                            fontSize: '0.72rem',
-                            fontWeight: 700
+                            fontSize: '0.74rem',
+                            fontWeight: 700,
+                            px: 0.5
                           }}
                         />
                       </Box>
 
                       {/* Right: Interactive State Action Buttons */}
                       <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
+                        {/* Persistent Case Discussion Button */}
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<ForumIcon sx={{ fontSize: 16 }} />}
+                          onClick={() => openDiscussionModal(ord)}
+                          sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            borderRadius: '8px',
+                            color: '#4f46e5',
+                            borderColor: 'rgba(79, 70, 229, 0.35)',
+                            bgcolor: 'rgba(79, 70, 229, 0.04)',
+                            fontSize: '0.75rem',
+                            '&:hover': {
+                              bgcolor: 'rgba(79, 70, 229, 0.1)',
+                              borderColor: '#4f46e5'
+                            }
+                          }}
+                        >
+                          Case Discussion
+                        </Button>
                         {/* 1. REQUESTED State */}
                         {ord.status === 'REQUESTED' && (
                           isAdmin ? (
@@ -1261,6 +1301,14 @@ const Dashboard = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* 5. Persistent Case Discussion Modal */}
+        <CaseDiscussionModal
+          open={discussionModalOpen}
+          onClose={() => setDiscussionModalOpen(false)}
+          order={activeDiscussionOrder}
+          currentUser={user}
+        />
       </Container>
     </DashboardLayout>
   );

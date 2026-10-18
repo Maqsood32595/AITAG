@@ -379,6 +379,25 @@ CREATE INDEX IF NOT EXISTS idx_aitag_orders_status ON aitag_orders(status);
 CREATE INDEX IF NOT EXISTS idx_aitag_orders_order_number ON aitag_orders(order_number);
 ```
 
+### Table 9: `aitag_case_messages`
+- **Feature Slice:** `server/features/aitag-case-discussions/`
+- **Purpose:** Persistent case communication stream between Admin and Expert (or Client) with asset attachments.
+```sql
+CREATE TABLE IF NOT EXISTS aitag_case_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES aitag_orders(id) ON DELETE CASCADE,
+  sender_email TEXT NOT NULL,
+  sender_name TEXT NOT NULL,
+  sender_role TEXT NOT NULL CHECK (sender_role IN ('admin', 'freelancer', 'client')),
+  message TEXT NOT NULL,
+  attachments JSONB NOT NULL DEFAULT '[]'::jsonb, -- Array of { id, name, url, size, type, uploaded_at }
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_case_messages_order_id ON aitag_case_messages(order_id);
+CREATE INDEX IF NOT EXISTS idx_case_messages_sender_email ON aitag_case_messages(LOWER(sender_email));
+CREATE INDEX IF NOT EXISTS idx_case_messages_created_at ON aitag_case_messages(created_at ASC);
+```
+
 ---
 
 ## 4. Triggers & Custom Functions

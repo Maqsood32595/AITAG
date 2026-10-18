@@ -133,19 +133,25 @@ async function runPietSuite() {
       eq(res.status, 401, 'Unauthenticated DELETE /api/account must return 401 Unauthorized');
     });
 
+    await t('Negative input defense: rejects unauthenticated discussion access with HTTP 401', async () => {
+      const res = await requestJson('/api/case-discussions/arbitrary-order-id');
+      eq(res.status, 401, 'Unauthenticated discussion request must return 401 Unauthorized');
+    });
+
     // --------------------------------------------------------------------------
     // GATE 2: AST & Manifest Integrity
     // --------------------------------------------------------------------------
     gate('Gate 2: AST & Manifest Integrity');
 
-    await t('Verifies all 17 Fractal Kernel feature manifests exist and parse cleanly', () => {
+    await t('Verifies all 18 Fractal Kernel feature manifests exist and parse cleanly', () => {
       const featuresDir = resolve('server/features');
       const expectedSlices = [
         'aitag-auth', 'aitag-bids', 'aitag-blog', 'aitag-invitations',
         'aitag-marketplace', 'aitag-profile', 'aitag-service-orders',
         'aitag-service-packages', 'aitag-tasks', 'escrow-payment',
         'leakage-shield', 'sandwich-refactor-sandbox', 'aitag-analytics',
-        'aitag-security-guard', 'aitag-cache', 'aitag-oauth', 'aitag-account-lifecycle'
+        'aitag-security-guard', 'aitag-cache', 'aitag-oauth', 'aitag-account-lifecycle',
+        'aitag-case-discussions'
       ];
 
       for (const slice of expectedSlices) {
@@ -178,11 +184,11 @@ async function runPietSuite() {
       }
     });
 
-    await t('Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 16 slices', async () => {
+    await t('Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 17 slices', async () => {
       const res = await requestJson('/api/features');
       eq(res.status, 200, 'GET /api/features must return 200 OK');
       assert(Array.isArray(res.data), '/api/features must return array');
-      assert(res.data.length >= 16, 'Kernel must mount at least 16 feature slices');
+      assert(res.data.length >= 17, 'Kernel must mount at least 17 feature slices');
       const ids = res.data.map((f) => f.id);
       assert(ids.includes('aitag-service-orders'), 'Kernel missing aitag-service-orders slice');
       assert(ids.includes('aitag-service-packages'), 'Kernel missing aitag-service-packages slice');
@@ -191,6 +197,7 @@ async function runPietSuite() {
       assert(ids.includes('aitag-security-guard'), 'Kernel missing aitag-security-guard slice');
       assert(ids.includes('aitag-cache'), 'Kernel missing aitag-cache slice');
       assert(ids.includes('aitag-oauth'), 'Kernel missing aitag-oauth slice');
+      assert(ids.includes('aitag-case-discussions'), 'Kernel missing aitag-case-discussions slice');
     });
 
     await t('Verifies aitag-oauth config endpoint and input validation contract', async () => {
@@ -601,6 +608,85 @@ async function runPietSuite() {
       assert(order.assigned_expert_email === NONCE_EXPERT, 'Assigned expert email preserved');
     });
 
+    let postedDiscussionId = null;
+    await t('Admin posts persistent directive with asset attachment to case discussion', async () => {
+      // Negative input defense: empty message and no attachments rejected with 400
+      const negRes = await requestJson(`/api/case-discussions/${ephemeralOrderId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ message: '', attachments: [] })
+      });
+      eq(negRes.status, 400, 'Empty message without attachments must return 400');
+
+      // Admin posts directive with asset attachment
+      const res = await requestJson(`/api/case-discussions/${ephemeralOrderId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          message: 'Specialist, please calibrate shadows to pure white Amazon background specs.',
+          attachments: [
+            {
+              id: 'att-101',
+              name: 'amazon_white_bg_spec.pdf',
+              url: '/uploads/discussions/spec.pdf',
+              size: 15420,
+              type: 'application/pdf'
+            }
+          ]
+        })
+      });
+
+      eq(res.status, 201, 'POST /api/case-discussions must return 201 Created');
+      eq(res.data.success, true, 'Discussion post must succeed');
+      const msg = res.data.message;
+      assert(msg.id, 'Message ID must exist');
+      postedDiscussionId = msg.id;
+      eq(msg.order_id, ephemeralOrderId, 'Order ID must match case');
+      eq(msg.sender_role, 'admin', 'Sender role must be admin');
+      assert(msg.attachments.length === 1, 'Attachments array must contain 1 attachment');
+      eq(msg.attachments[0].name, 'amazon_white_bg_spec.pdf', 'Attachment filename preserved');
+    });
+
+    await t('Expert retrieves persistent discussion history and replies with asset preview', async () => {
+      // Expert retrieves message history
+      const listRes = await requestJson(`/api/case-discussions/${ephemeralOrderId}`, {
+        headers: { Authorization: `Bearer ${freelancerToken}` }
+      });
+      eq(listRes.status, 200, 'GET /api/case-discussions must return 200 OK');
+      assert(Array.isArray(listRes.data.messages), 'Messages must be array');
+      assert(listRes.data.messages.length >= 1, 'Must contain at least 1 message');
+      eq(listRes.data.messages[0].id, postedDiscussionId, 'First message matches admin post');
+
+      // Expert posts reply with deliverable preview attachment
+      const replyRes = await requestJson(`/api/case-discussions/${ephemeralOrderId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${freelancerToken}` },
+        body: JSON.stringify({
+          message: 'Understood! Uploaded initial cutout preview for lab check.',
+          attachments: [
+            {
+              id: 'att-102',
+              name: 'sample_cutout_preview.png',
+              url: '/uploads/discussions/sample.png',
+              size: 204800,
+              type: 'image/png'
+            }
+          ]
+        })
+      });
+
+      eq(replyRes.status, 201, 'Expert reply must return 201 Created');
+      eq(replyRes.data.message.sender_role, 'freelancer', 'Sender role must be freelancer');
+
+      // Admin verifies chronological message stream
+      const checkRes = await requestJson(`/api/case-discussions/${ephemeralOrderId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      eq(checkRes.data.messages.length, 2, 'Must contain exactly 2 messages');
+      eq(checkRes.data.messages[0].sender_role, 'admin', 'First is admin');
+      eq(checkRes.data.messages[1].sender_role, 'freelancer', 'Second is expert');
+    });
+
     // --------------------------------------------------------------------------
     // GATE 7: Security Invariants & Hardening
     // --------------------------------------------------------------------------
@@ -898,6 +984,13 @@ async function runPietSuite() {
         const rawSupabase = await import('../../server/supabase.js');
         const supabase = rawSupabase.default || rawSupabase;
         await supabase.from('aitag_orders').delete().eq('id', ephemeralOrderId);
+        
+        try {
+          const rawDiscussions = await import('../../server/features/aitag-case-discussions/service.js');
+          const discussionsService = rawDiscussions.default || rawDiscussions;
+          await discussionsService.purgeByOrderId(ephemeralOrderId);
+        } catch {}
+
         console.log(`\n🧹 Ephemeral Teardown: Deleted test order ${ephemeralOrderId} (Zero Ghost Records).`);
       } catch (err) {
         console.warn('⚠️ Teardown cleanup note:', err.message);

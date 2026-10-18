@@ -1,0 +1,7 @@
+{
+  "id": "aitag-case-discussions",
+  "name": "AITAG Case Discussions & Communications Slice",
+  "version": "1.0.0",
+  "basePath": "/api/case-discussions",
+  "enabled": true
+}

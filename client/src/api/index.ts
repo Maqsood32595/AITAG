@@ -132,5 +132,16 @@ export const accountApi = {
     api.delete('/account', { data: { confirmation } }),
 };
 
+// Case Discussions & Persistent Communication
+export const caseDiscussionsApi = {
+  getMessages: (orderId: string) => api.get(`/case-discussions/${orderId}`),
+  postMessage: (orderId: string, data: { message: string; attachments?: any[] }) =>
+    api.post(`/case-discussions/${orderId}`, data),
+  uploadAttachments: (orderId: string, formData: FormData) =>
+    api.post(`/case-discussions/${orderId}/attachments`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+};
+
 export default api;
 

@@ -65,7 +65,14 @@ class AccountLifecycleService {
           .eq('user_email', cleanEmail);
         if (!tasksErr) deletionReport.entities_purged.push('aitag_tasks');
 
-        // E. Purge root user record from aitag_users
+        // E. Purge user case discussion messages
+        const { error: msgErr } = await supabase
+          .from('aitag_case_messages')
+          .delete()
+          .eq('sender_email', cleanEmail);
+        if (!msgErr) deletionReport.entities_purged.push('aitag_case_messages');
+
+        // F. Purge root user record from aitag_users
         const { error: userErr } = await supabase
           .from('aitag_users')
           .delete()
