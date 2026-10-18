@@ -277,13 +277,13 @@ export const ServicePackagesSection: React.FC = () => {
   };
 
   return (
-    <Box id="packages" sx={{ py: 10, bgcolor: '#f8fafc', position: 'relative' }}>
+    <Box id="packages" sx={{ pt: 5, pb: 10, bgcolor: '#f8fafc', position: 'relative' }}>
       <Container maxWidth="lg">
         {/* Section Header */}
         <Box sx={{ textAlign: 'center', mb: 8 }}>
           <Chip
             icon={<AutoAwesomeIcon sx={{ fontSize: 16, color: '#4f46e5 !important' }} />}
-            label="PILOT CATALOGUE — 4 MVP OUTCOME CATEGORIES"
+            label="POPULAR BUSINESS PACKAGES"
             sx={{
               bgcolor: '#eef2ff',
               color: '#4338ca',
@@ -300,20 +300,21 @@ export const ServicePackagesSection: React.FC = () => {
             color="#0f172a"
             sx={{
               letterSpacing: '-1px',
-              fontSize: { xs: '2rem', md: '2.75rem' },
-              mb: 2
+              fontSize: { xs: '2rem', md: '2.5rem' },
+              mb: 1.5,
+              fontFamily: 'Inter, sans-serif'
             }}
           >
             Affordable AI Services for Everyday Entrepreneurs
           </Typography>
           <Typography
-            variant="h6"
+            variant="body1"
             fontWeight={500}
             color="#64748b"
             sx={{
-              maxWidth: 760,
+              maxWidth: 720,
               mx: 'auto',
-              fontSize: { xs: '1rem', md: '1.15rem' },
+              fontSize: '1.05rem',
               lineHeight: 1.6
             }}
           >
@@ -378,7 +379,7 @@ export const ServicePackagesSection: React.FC = () => {
                         }}
                       >
                         {getPackageIcon(pkg.category)}
-                        <Typography variant="caption" fontWeight={700} color="#ffffff">
+                        <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: '#ffffff', letterSpacing: 0.3 }}>
                           {pkg.category}
                         </Typography>
                       </Box>
@@ -393,40 +394,40 @@ export const ServicePackagesSection: React.FC = () => {
                             bgcolor: '#4f46e5',
                             color: '#ffffff',
                             fontWeight: 700,
-                            fontSize: '0.75rem',
+                            fontSize: '0.68rem',
                             boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
                           }}
                         />
                       )}
                     </Box>
 
-                    {/* Card Content */}
-                    <Box sx={{ p: { xs: 2.5, sm: 3.5 }, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="h5" fontWeight={800} color="#0f172a" gutterBottom>
+                    {/* Card Content — Matching BrowseTasks Typography */}
+                    <Box sx={{ p: { xs: 2.5, sm: 3 }, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Typography sx={{ fontWeight: 750, fontSize: '0.95rem', color: '#0f172a', mb: 0.5, lineHeight: 1.35, fontFamily: 'Inter, sans-serif' }}>
                         {pkg.title}
                       </Typography>
-                      <Typography variant="body2" color="#64748b" sx={{ mb: 2 }}>
+                      <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mb: 1.5, lineHeight: 1.45, fontFamily: 'Inter, sans-serif' }}>
                         {pkg.tagline}
                       </Typography>
 
                       {/* Full Service Description */}
-                      <Typography variant="body2" color="#334155" sx={{ mb: 2.5, lineHeight: 1.6, bgcolor: '#f8fafc', p: 2, borderRadius: 2, border: '1px solid #f1f5f9' }}>
+                      <Typography sx={{ fontSize: '0.8rem', color: '#334155', mb: 2, lineHeight: 1.5, bgcolor: '#f8fafc', p: 1.5, borderRadius: 2, border: '1px solid #f1f5f9', fontFamily: 'Inter, sans-serif' }}>
                         {pkg.description}
                       </Typography>
 
                       {/* How It Helps Your Business (Benefits) */}
                       {pkg.benefits && pkg.benefits.length > 0 && (
-                        <Box sx={{ mb: 3, p: 2, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0' }}>
-                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                            <TrendingUpIcon sx={{ fontSize: 18, color: '#16a34a' }} />
-                            <Typography variant="caption" fontWeight={800} color="#166534" letterSpacing={0.5}>
+                        <Box sx={{ mb: 2.5, p: 1.5, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0' }}>
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.75 }}>
+                            <TrendingUpIcon sx={{ fontSize: 16, color: '#16a34a' }} />
+                            <Typography sx={{ fontSize: '0.68rem', fontWeight: 800, color: '#166534', letterSpacing: 0.5 }}>
                               HOW IT HELPS YOUR BUSINESS:
                             </Typography>
                           </Stack>
                           {pkg.benefits.map((b: string, idx: number) => (
-                            <Stack direction="row" spacing={1} alignItems="flex-start" key={idx} sx={{ mb: 0.5 }}>
-                              <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 900 }}>•</Typography>
-                              <Typography variant="caption" color="#166534" sx={{ lineHeight: 1.45, fontWeight: 500 }}>
+                            <Stack direction="row" spacing={1} alignItems="flex-start" key={idx} sx={{ mb: 0.25 }}>
+                              <Typography sx={{ color: '#16a34a', fontWeight: 900, fontSize: '0.72rem' }}>•</Typography>
+                              <Typography sx={{ lineHeight: 1.45, fontWeight: 500, fontSize: '0.78rem', color: '#166534' }}>
                                 {b}
                               </Typography>
                             </Stack>
@@ -435,18 +436,18 @@ export const ServicePackagesSection: React.FC = () => {
                       )}
 
                       {/* Tier Switcher Tabs (Package 1, Package 2, Package 3) */}
-                      <Box sx={{ borderBottom: '1px solid #e2e8f0', mb: 2.5 }} onClick={(e) => e.stopPropagation()}>
+                      <Box sx={{ borderBottom: '1px solid #e2e8f0', mb: 2 }} onClick={(e) => e.stopPropagation()}>
                         <Tabs
                           value={currentTierKey}
                           onChange={(_, val) => handleTierChange(pkg.slug, val)}
                           variant="fullWidth"
                           sx={{
-                            minHeight: 40,
+                            minHeight: 36,
                             '& .MuiTab-root': {
-                              minHeight: 40,
-                              py: 0.75,
-                              fontSize: '0.825rem',
-                              fontWeight: 800,
+                              minHeight: 36,
+                              py: 0.5,
+                              fontSize: '0.78rem',
+                              fontWeight: 750,
                               textTransform: 'none',
                               color: '#64748b',
                               cursor: 'pointer',
@@ -465,14 +466,17 @@ export const ServicePackagesSection: React.FC = () => {
                         </Tabs>
                       </Box>
 
-                      {/* Pricing & Accurate Delivery Time Box */}
+                      {/* Pricing & Accurate Delivery Time Box — Matching BrowseTasks Budget Size */}
                       <Box sx={{ mb: 2 }}>
+                        <Typography sx={{ fontSize: '0.68rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.5 }}>
+                          Package Pricing
+                        </Typography>
                         <Stack direction="row" alignItems="baseline" spacing={1}>
-                          <Typography variant="h4" fontWeight={800} color="#0f172a">
+                          <Typography sx={{ fontWeight: 850, color: '#10b981', fontSize: '1.1rem', lineHeight: 1.1 }}>
                             ₹{currentTier ? Number(currentTier.price_min).toLocaleString('en-IN') : '—'}
                           </Typography>
                           {currentTier && currentTier.price_max > currentTier.price_min && (
-                            <Typography variant="body2" color="#64748b">
+                            <Typography sx={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
                               – ₹{Number(currentTier.price_max).toLocaleString('en-IN')}
                             </Typography>
                           )}
@@ -480,16 +484,16 @@ export const ServicePackagesSection: React.FC = () => {
 
                         <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                           <Chip
-                            icon={<BoltIcon sx={{ fontSize: 14, color: '#0891b2 !important' }} />}
+                            icon={<BoltIcon sx={{ fontSize: 13, color: '#0891b2 !important' }} />}
                             label={`${currentTier?.delivery_days_min}–${currentTier?.delivery_days_max} Days Delivery`}
                             size="small"
-                            sx={{ bgcolor: '#ecfeff', color: '#0e7490', fontWeight: 700, fontSize: '0.72rem' }}
+                            sx={{ bgcolor: '#ecfeff', color: '#0e7490', fontWeight: 700, fontSize: '0.68rem' }}
                           />
                           <Chip
-                            icon={<ReplayIcon sx={{ fontSize: 14, color: '#10b981 !important' }} />}
+                            icon={<ReplayIcon sx={{ fontSize: 13, color: '#10b981 !important' }} />}
                             label={`${currentTier?.revisions_included} Revision Included`}
                             size="small"
-                            sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 700, fontSize: '0.72rem' }}
+                            sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 700, fontSize: '0.68rem' }}
                           />
                         </Stack>
                       </Box>
@@ -497,20 +501,20 @@ export const ServicePackagesSection: React.FC = () => {
                       <Divider sx={{ my: 1.5, borderColor: '#f1f5f9' }} />
 
                       {/* Deliverable Summary */}
-                      <Typography variant="subtitle2" fontWeight={700} color="#1e293b" gutterBottom>
+                      <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#1e293b', mb: 1 }}>
                         {currentTier?.deliverable_summary}
                       </Typography>
 
                       {/* Inclusions List */}
                       <List dense sx={{ py: 0, mb: 2, flexGrow: 1 }}>
                         {(currentTier?.inclusions || []).map((inc: string, idx: number) => (
-                          <ListItem key={idx} disableGutters sx={{ py: 0.35, alignItems: 'flex-start' }}>
-                            <ListItemIcon sx={{ minWidth: 24, mt: 0.5 }}>
-                              <CheckCircleIcon sx={{ fontSize: 16, color: '#10b981' }} />
+                          <ListItem key={idx} disableGutters sx={{ py: 0.25, alignItems: 'flex-start' }}>
+                            <ListItemIcon sx={{ minWidth: 22, mt: 0.4 }}>
+                              <CheckCircleIcon sx={{ fontSize: 15, color: '#10b981' }} />
                             </ListItemIcon>
                             <ListItemText
                               primary={inc}
-                              primaryTypographyProps={{ variant: 'body2', color: '#334155', fontSize: '0.825rem' }}
+                              primaryTypographyProps={{ color: '#334155', fontSize: '0.78rem', lineHeight: 1.4 }}
                             />
                           </ListItem>
                         ))}
@@ -518,14 +522,14 @@ export const ServicePackagesSection: React.FC = () => {
 
                       {/* Out-of-Scope (Exclusions) Note */}
                       {(currentTier?.exclusions || []).length > 0 && (
-                        <Box sx={{ bgcolor: '#f8fafc', p: 1.5, borderRadius: 2, mb: 2.5, border: '1px dashed #cbd5e1' }}>
-                          <Typography variant="caption" fontWeight={700} color="#64748b" display="block" gutterBottom>
+                        <Box sx={{ bgcolor: '#f8fafc', p: 1.2, borderRadius: 2, mb: 2, border: '1px dashed #cbd5e1' }}>
+                          <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', display: 'block', mb: 0.5 }}>
                             Exclusions (Transparent Scope):
                           </Typography>
                           {currentTier.exclusions.map((exc: string, idx: number) => (
-                            <Stack direction="row" spacing={0.5} alignItems="center" key={idx} sx={{ mb: 0.25 }}>
+                            <Stack direction="row" spacing={0.5} alignItems="center" key={idx} sx={{ mb: 0.2 }}>
                               <CloseIcon sx={{ fontSize: 12, color: '#94a3b8' }} />
-                              <Typography variant="caption" color="#64748b">
+                              <Typography sx={{ fontSize: '0.72rem', color: '#64748b' }}>
                                 {exc}
                               </Typography>
                             </Stack>
@@ -546,9 +550,9 @@ export const ServicePackagesSection: React.FC = () => {
                           mt: 'auto',
                           bgcolor: '#4f46e5',
                           '&:hover': { bgcolor: '#4338ca', transform: 'translateY(-1px)' },
-                          py: 1.4,
+                          py: 1,
                           fontWeight: 700,
-                          fontSize: '0.925rem',
+                          fontSize: '0.82rem',
                           borderRadius: 2.5,
                           boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)'
                         }}

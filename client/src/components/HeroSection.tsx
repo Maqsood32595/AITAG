@@ -66,7 +66,6 @@ const HeroSection = () => {
   return (
     <Box
       sx={{
-        minHeight: '92vh',
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
@@ -96,265 +95,287 @@ const HeroSection = () => {
         }
       }} />
 
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, pt: { xs: 14, md: 16 }, pb: 8 }}>
-        <Grid container spacing={6} sx={{ alignItems: 'center' }}>
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, pt: { xs: 14, md: 16 }, pb: 5, textAlign: 'center' }}>
+        {/* Top Chip */}
+        <Box sx={{ mb: 2.5, display: 'flex', justifyContent: 'center' }}>
+          <Chip
+            icon={<AutoAwesomeIcon sx={{ fontSize: '15px !important', color: '#4f46e5 !important' }} />}
+            label="AFFORDABLE AI-POWERED BUSINESS SERVICES"
+            sx={{
+              bgcolor: 'rgba(79,70,229,0.08)',
+              color: '#4f46e5',
+              fontWeight: 800,
+              fontSize: '0.78rem',
+              letterSpacing: '0.5px',
+              border: '1px solid rgba(79,70,229,0.2)',
+              borderRadius: '20px',
+              px: 1.5,
+              height: 32,
+            }}
+          />
+        </Box>
 
-          {/* LEFT — Brand Positioning & CTAs */}
-          <Grid item xs={12} md={7}>
-            {/* Top Chip */}
-            <Box sx={{ mb: 3 }}>
+        {/* Headline */}
+        <Typography
+          variant="h1"
+          sx={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 900,
+            fontSize: { xs: '2.2rem', sm: '3rem', md: '3.6rem' },
+            lineHeight: 1.15,
+            letterSpacing: '-1.5px',
+            color: '#0f172a',
+            mb: 2,
+            maxWidth: 920,
+            mx: 'auto'
+          }}
+        >
+          You Don't Need to Learn AI.{' '}
+          <Box
+            component="span"
+            sx={{
+              background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              display: { xs: 'block', sm: 'inline-block' }
+            }}
+          >
+            We Deliver the Outcomes.
+          </Box>
+        </Typography>
+
+        {/* Sub-headline */}
+        <Typography
+          sx={{
+            fontSize: { xs: '1.05rem', md: '1.18rem' },
+            color: '#475569',
+            mb: 3.5,
+            lineHeight: 1.7,
+            maxWidth: 780,
+            mx: 'auto',
+            fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
+        </Typography>
+
+        {/* Who We Serve Tags */}
+        <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.5px', display: 'block', mb: 1.5, textTransform: 'uppercase' }}>
+            Who We Serve:
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', maxWidth: 840 }}>
+            {AUDIENCE_TAGS.map((tag, i) => (
               <Chip
-                icon={<AutoAwesomeIcon sx={{ fontSize: '15px !important', color: '#4f46e5 !important' }} />}
-                label="AFFORDABLE AI-POWERED BUSINESS SERVICES"
+                key={tag.label}
+                icon={tag.icon}
+                label={tag.label}
+                size="small"
+                onClick={scrollToPackages}
                 sx={{
-                  bgcolor: 'rgba(79,70,229,0.08)',
-                  color: '#4f46e5',
-                  fontWeight: 800,
-                  fontSize: '0.78rem',
-                  letterSpacing: '0.5px',
-                  border: '1px solid rgba(79,70,229,0.2)',
-                  borderRadius: '20px',
-                  px: 1,
-                  height: 32,
+                  cursor: 'pointer',
+                  bgcolor: i === animatedIndex ? 'rgba(79,70,229,0.12)' : 'rgba(255,255,255,0.85)',
+                  border: `1px solid ${i === animatedIndex ? 'rgba(79,70,229,0.4)' : 'rgba(0,0,0,0.08)'}`,
+                  color: i === animatedIndex ? '#4f46e5' : '#475569',
+                  fontWeight: i === animatedIndex ? 700 : 500,
+                  fontSize: '0.8rem',
+                  py: 2,
+                  px: 0.5,
+                  transition: 'all 0.3s ease',
+                  transform: i === animatedIndex ? 'translateY(-2px)' : 'translateY(0)',
+                  boxShadow: i === animatedIndex ? '0 4px 12px rgba(79,70,229,0.15)' : 'none',
+                  '&:hover': {
+                    bgcolor: 'rgba(79,70,229,0.15)',
+                    borderColor: '#4f46e5',
+                    transform: 'translateY(-2px)'
+                  }
                 }}
               />
-            </Box>
+            ))}
+          </Box>
+        </Box>
 
-            {/* Headline */}
-            <Typography
-              variant="h1"
-              sx={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 900,
-                fontSize: { xs: '2.2rem', sm: '3rem', md: '3.5rem' },
-                lineHeight: 1.15,
-                letterSpacing: '-1.5px',
-                color: '#0f172a',
-                mb: 1.5,
-              }}
-            >
-              You Don't Need to Learn AI.{' '}
-              <Box
-                component="span"
+        {/* CTA Buttons — Strictly Centered */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            width: '100%',
+            mx: 'auto',
+            mb: 7
+          }}
+        >
+          <Button
+            variant="contained"
+            size="large"
+            onClick={scrollToPackages}
+            sx={{
+              background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+              fontWeight: 800,
+              borderRadius: '12px',
+              px: 4,
+              py: 1.75,
+              fontSize: '1rem',
+              boxShadow: '0 8px 24px rgba(79,70,229,0.35)',
+              '&:hover': {
+                boxShadow: '0 12px 32px rgba(79,70,229,0.45)',
+                transform: 'translateY(-2px)'
+              },
+            }}
+          >
+            ✨ Explore AI Packages (From ₹499) →
+          </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={scrollToPackages}
+            sx={{
+              borderColor: 'rgba(79,70,229,0.35)',
+              color: '#4f46e5',
+              fontWeight: 700,
+              borderRadius: '12px',
+              px: 3.5,
+              py: 1.75,
+              fontSize: '1rem',
+              bgcolor: 'rgba(255,255,255,0.7)',
+              '&:hover': {
+                borderColor: '#4f46e5',
+                bgcolor: 'rgba(79,70,229,0.04)',
+                transform: 'translateY(-2px)'
+              },
+            }}
+          >
+            How It Works
+          </Button>
+        </Box>
+
+        {/* The 3 Brand Pillars (The AITAG Difference) — Smaller Horizontally & Centered */}
+        <Box
+          sx={{
+            maxWidth: 520,
+            mx: 'auto',
+            bgcolor: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '24px',
+            p: { xs: 2.5, sm: 3 },
+            border: '1px solid rgba(79,70,229,0.12)',
+            boxShadow: '0 20px 60px rgba(79,70,229,0.08)',
+          }}
+        >
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} sx={{ mb: 0.75 }}>
+              <AutoAwesomeIcon sx={{ color: '#4f46e5', fontSize: 18 }} />
+              <Typography
                 sx={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  display: 'inline-block'
-                }}
-              >
-                We Deliver the Outcomes.
-              </Box>
-            </Typography>
-
-            {/* Sub-headline directly from Brand Sheet & Edits to MVP */}
-            <Typography
-              sx={{
-                fontSize: { xs: '1.05rem', md: '1.2rem' },
-                color: '#475569',
-                mb: 3.5,
-                lineHeight: 1.7,
-                maxWidth: 620,
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
-            </Typography>
-
-            {/* Who We Serve Tags */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.5px', display: 'block', mb: 1.5, textTransform: 'uppercase' }}>
-                Who We Serve:
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {AUDIENCE_TAGS.map((tag, i) => (
-                  <Chip
-                    key={tag.label}
-                    icon={tag.icon}
-                    label={tag.label}
-                    size="small"
-                    onClick={scrollToPackages}
-                    sx={{
-                      cursor: 'pointer',
-                      bgcolor: i === animatedIndex ? 'rgba(79,70,229,0.12)' : 'rgba(255,255,255,0.85)',
-                      border: `1px solid ${i === animatedIndex ? 'rgba(79,70,229,0.4)' : 'rgba(0,0,0,0.08)'}`,
-                      color: i === animatedIndex ? '#4f46e5' : '#475569',
-                      fontWeight: i === animatedIndex ? 700 : 500,
-                      fontSize: '0.8rem',
-                      py: 2,
-                      px: 0.5,
-                      transition: 'all 0.3s ease',
-                      transform: i === animatedIndex ? 'translateY(-2px)' : 'translateY(0)',
-                      boxShadow: i === animatedIndex ? '0 4px 12px rgba(79,70,229,0.15)' : 'none',
-                      '&:hover': {
-                        bgcolor: 'rgba(79,70,229,0.15)',
-                        borderColor: '#4f46e5',
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            {/* CTA Buttons */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={scrollToPackages}
-                sx={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
                   fontWeight: 800,
-                  borderRadius: '12px',
-                  px: 4,
-                  py: 1.75,
-                  fontSize: '1rem',
-                  boxShadow: '0 8px 24px rgba(79,70,229,0.35)',
-                  '&:hover': {
-                    boxShadow: '0 12px 32px rgba(79,70,229,0.45)',
-                    transform: 'translateY(-2px)'
-                  },
+                  fontSize: '1.15rem',
+                  color: '#0f172a',
+                  fontFamily: 'Inter, sans-serif',
                 }}
               >
-                ✨ Explore AI Packages (From ₹499) →
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                onClick={scrollToPackages}
-                sx={{
-                  borderColor: 'rgba(79,70,229,0.35)',
-                  color: '#4f46e5',
-                  fontWeight: 700,
-                  borderRadius: '12px',
-                  px: 3.5,
-                  py: 1.75,
-                  fontSize: '1rem',
-                  bgcolor: 'rgba(255,255,255,0.6)',
-                  '&:hover': {
-                    borderColor: '#4f46e5',
-                    bgcolor: 'rgba(79,70,229,0.04)',
-                    transform: 'translateY(-2px)'
-                  },
-                }}
-              >
-                How It Works
-              </Button>
+                The AITAG Difference
+              </Typography>
             </Stack>
-          </Grid>
-
-          {/* RIGHT — The 3 Brand Pillars from Brand Sheet */}
-          <Grid item xs={12} md={5}>
-            <Box
+            <Typography
               sx={{
-                bgcolor: 'rgba(255,255,255,0.85)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '24px',
-                p: { xs: 3, sm: 4 },
-                border: '1px solid rgba(79,70,229,0.12)',
-                boxShadow: '0 20px 60px rgba(79,70,229,0.08)',
+                fontSize: '0.85rem',
+                color: '#64748b',
+                maxWidth: 480,
+                mx: 'auto',
+                lineHeight: 1.5
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
-                <AutoAwesomeIcon sx={{ color: '#4f46e5', fontSize: 20 }} />
+              Built specifically for everyday entrepreneurs — clear packages, vetted specialists, and real business deliverables.
+            </Typography>
+          </Box>
+
+          <Stack spacing={2} sx={{ mb: 2.5 }}>
+            {BRAND_PILLARS.map((item) => (
+              <Box
+                key={item.title}
+                onClick={scrollToPackages}
+                sx={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  p: 2.2,
+                  borderRadius: '16px',
+                  bgcolor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  transition: 'all 0.25s ease',
+                  '&:hover': {
+                    borderColor: item.color,
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.05)',
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: '12px',
+                    bgcolor: `${item.color}15`,
+                    color: item.color,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1.5,
+                  }}
+                >
+                  {item.icon}
+                </Box>
                 <Typography
                   sx={{
                     fontWeight: 800,
-                    fontSize: '1.15rem',
+                    fontSize: '0.95rem',
                     color: '#0f172a',
                     fontFamily: 'Inter, sans-serif',
+                    letterSpacing: '0.5px',
+                    mb: 0.5,
                   }}
                 >
-                  The AITAG Difference
+                  {item.title}
                 </Typography>
-              </Stack>
-
-              <Stack spacing={2.5}>
-                {BRAND_PILLARS.map((item) => (
-                  <Box
-                    key={item.title}
-                    onClick={scrollToPackages}
-                    sx={{
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: 2,
-                      p: 2,
-                      borderRadius: '16px',
-                      bgcolor: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      transition: 'all 0.25s ease',
-                      '&:hover': {
-                        borderColor: item.color,
-                        boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
-                        transform: 'translateX(4px)',
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: '12px',
-                        bgcolor: `${item.color}15`,
-                        color: item.color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {item.icon}
-                    </Box>
-                    <Box>
-                      <Typography
-                        sx={{
-                          fontWeight: 800,
-                          fontSize: '0.95rem',
-                          color: '#0f172a',
-                          fontFamily: 'Inter, sans-serif',
-                          letterSpacing: '0.5px',
-                          mb: 0.5,
-                        }}
-                      >
-                        {item.title}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: '0.85rem',
-                          color: '#64748b',
-                          fontFamily: 'Inter, sans-serif',
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {item.desc}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-
-                <Divider sx={{ borderColor: 'rgba(79,70,229,0.08)', my: 1 }} />
-
                 <Typography
                   sx={{
-                    fontSize: '0.85rem',
-                    color: '#4338ca',
-                    fontWeight: 600,
-                    textAlign: 'center',
+                    fontSize: '0.82rem',
+                    color: '#64748b',
                     fontFamily: 'Inter, sans-serif',
-                    bgcolor: '#eef2ff',
-                    p: 1.5,
-                    borderRadius: '10px'
+                    lineHeight: 1.5,
+                    maxWidth: 460
                   }}
                 >
-                  “Tell us what your business needs. AITAG experts deliver it.”
+                  {item.desc}
                 </Typography>
-              </Stack>
-            </Box>
-          </Grid>
+              </Box>
+            ))}
+          </Stack>
 
-        </Grid>
+          {/* Highlight Quote */}
+          <Typography
+            sx={{
+              fontSize: '0.85rem',
+              color: '#4338ca',
+              fontWeight: 700,
+              textAlign: 'center',
+              fontFamily: 'Inter, sans-serif',
+              bgcolor: '#eef2ff',
+              p: 1.4,
+              borderRadius: '10px',
+              border: '1px solid #e0e7ff',
+              maxWidth: 520,
+              mx: 'auto'
+            }}
+          >
+            “Tell us what your business needs. AITAG experts deliver it.”
+          </Typography>
+        </Box>
       </Container>
     </Box>
   );

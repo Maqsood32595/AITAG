@@ -128,60 +128,11 @@ const BlogList = () => {
               mx: 'auto',
               fontSize: '1.05rem',
               lineHeight: 1.6,
-              mb: 3
+              mb: 4
             }}
           >
             “Practical guides, tutorials, and field insights for hiring vetted AI specialists to scale operations and business revenue.”
           </Typography>
-          <Stack direction="row" spacing={1.5} justifyContent="center" flexWrap="wrap" sx={{ gap: 1 }}>
-            <Button
-              component={Link}
-              to="/all_tasks"
-              variant="outlined"
-              sx={{
-                borderRadius: '10px',
-                color: '#4f46e5',
-                borderColor: 'rgba(79,70,229,0.3)',
-                fontWeight: 600,
-                textTransform: 'none',
-                px: 2.5,
-                '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' },
-              }}
-            >
-              Browse Tasks
-            </Button>
-            <Button
-              component={Link}
-              to="/talent"
-              variant="outlined"
-              sx={{
-                borderRadius: '10px',
-                color: '#0891b2',
-                borderColor: 'rgba(8,145,178,0.3)',
-                fontWeight: 600,
-                textTransform: 'none',
-                px: 2.5,
-                '&:hover': { borderColor: '#0891b2', bgcolor: 'rgba(8,145,178,0.04)' },
-              }}
-            >
-              AI Talent Directory
-            </Button>
-            <Button
-              component={Link}
-              to="/add_task"
-              variant="contained"
-              sx={{
-                background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
-                borderRadius: '10px',
-                fontWeight: 700,
-                textTransform: 'none',
-                px: 3,
-                boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
-              }}
-            >
-              + Post a Task
-            </Button>
-          </Stack>
         </Box>
 
         {/* Centered Category Filters */}
