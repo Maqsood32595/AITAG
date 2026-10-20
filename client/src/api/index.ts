@@ -72,7 +72,11 @@ export const tasksApi = {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
   removeAttachment: (id: string, assetId: string) =>
-    api.delete(`/tasks/${id}/attachments/${assetId}`)
+    api.delete(`/tasks/${id}/attachments/${assetId}`),
+  assign: (id: string, data: { expertEmail: string; expertName?: string }) =>
+    api.post(`/tasks/${id}/assign`, data),
+  resetAssignment: (id: string) =>
+    api.post(`/tasks/${id}/reset`)
 };
 
 // Bids

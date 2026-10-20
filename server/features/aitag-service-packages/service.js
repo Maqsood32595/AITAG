@@ -117,7 +117,7 @@ const FALLBACK_PACKAGES = [
     description: 'We\'ll create a month of ready-to-post content for your Instagram, Facebook or WhatsApp Status. That includes eye-catching designs, catchy captions and the right hashtags, all matched to your business and festival dates. You just post, or we can give you a calendar telling you what to post and when.',
     category: 'Social & Marketing',
     icon: 'Share2',
-    image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
+    image_url: '/images/packages/nt-text-logo.png',
     badge: 'Popular',
     display_order: 3,
     benefits: [
@@ -308,6 +308,9 @@ class ServicePackagesService {
 
         return {
           ...pkg,
+          image_url: (pkg.slug === 'ai-social-media-content-pack' || (pkg.image_url && pkg.image_url.includes('1611162617474')))
+            ? '/images/packages/nt-text-logo.png'
+            : pkg.image_url,
           badge: (pkg.badge || '').replace('₹499', '₹999'),
           benefits: pkg.benefits || [],
           tiers: sanitizedTiers

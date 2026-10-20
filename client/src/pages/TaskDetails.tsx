@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Container, Typography, Button, Chip, Paper, Grid,
-  CircularProgress, Alert, Divider, Avatar, Card, CardContent, Stack
+  CircularProgress, Alert, Divider, Avatar, Card, CardContent, Stack, IconButton
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -353,21 +353,25 @@ const TaskDetails = () => {
         </Grid>
 
         {/* Task Assets Modal */}
-        <TaskAssetsModal
-          open={assetsModalOpen}
-          onClose={() => setAssetsModalOpen(false)}
-          task={task}
-          onTaskUpdated={(updatedTask) => setTask((prev: any) => ({ ...prev, ...updatedTask }))}
-          isOwner={isOwner}
-        />
+        {task && (
+          <TaskAssetsModal
+            open={assetsModalOpen}
+            onClose={() => setAssetsModalOpen(false)}
+            task={task}
+            onTaskUpdated={(updatedTask) => setTask((prev: any) => ({ ...prev, ...updatedTask }))}
+            isOwner={isOwner}
+          />
+        )}
 
         {/* Task Discussion Channel Modal */}
-        <CaseDiscussionModal
-          open={discussionModalOpen}
-          onClose={() => setDiscussionModalOpen(false)}
-          task={task}
-          currentUser={user}
-        />
+        {task && (
+          <CaseDiscussionModal
+            open={discussionModalOpen}
+            onClose={() => setDiscussionModalOpen(false)}
+            task={task}
+            currentUser={user}
+          />
+        )}
       </Container>
     </Box>
   );

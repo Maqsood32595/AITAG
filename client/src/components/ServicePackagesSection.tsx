@@ -124,7 +124,7 @@ const FALLBACK_PACKAGES = [
     description: "We'll create a month of ready-to-post content for your Instagram, Facebook or WhatsApp Status. That includes eye-catching designs, catchy captions and the right hashtags, all matched to your business and festival dates. You just post, or we can give you a calendar telling you what to post and when.",
     category: 'Social & Marketing',
     badge: 'Popular',
-    image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
+    image_url: '/images/packages/nt-text-logo.png',
     benefits: [
       'You stay visible to customers every day without spending hours on content',
       'Your brand looks professional and consistent',
@@ -357,11 +357,15 @@ export const ServicePackagesSection: React.FC = () => {
                     }}
                   >
                     {/* Image Cover */}
-                    <Box sx={{ position: 'relative', height: 200, width: '100%', bgcolor: '#f1f5f9' }}>
+                    <Box sx={{ position: 'relative', height: 200, width: '100%', bgcolor: '#0f172a', overflow: 'hidden' }}>
                       <img
                         src={pkg.image_url}
                         alt={pkg.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
                       />
                       <Box
                         sx={{

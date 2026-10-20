@@ -53,7 +53,7 @@ router.get('/featured', cacheGuard({ ttlMs: 60000, tags: ['tasks'] }), async (re
 });
 
 // GET /api/tasks/my  — user's own tasks (protected, user-scoped cache)
-router.get('/my', auth, cacheGuard({ ttlMs: 30000, scope: 'user', tags: (req) => ['tasks', `user:${req.user?.email}`] }), async (req, res) => {
+router.get('/my', auth, cacheGuard({ ttlMs: 30000, scope: 'user', tags: (req) => ['tasks', `user:${(req.user?.email || '').toLowerCase().trim()}`] }), async (req, res) => {
   try {
     const tasks = await tasksService.getMyTasks(req.user.email);
     res.json(tasks);
@@ -109,7 +109,7 @@ router.post('/', auth, async (req, res) => {
       userName: req.user.name
     });
     cacheService.invalidateByTag('tasks');
-    cacheService.invalidateByTag(`user:${req.user.email}`);
+    cacheService.invalidateByTag(`user:${(req.user.email || '').toLowerCase().trim()}`);
     res.status(201).json(task);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -134,9 +134,9 @@ router.post('/:id/attachments', auth, upload.array('files', 10), async (req, res
       uploaded_at: new Date().toISOString()
     }));
 
-    const updated = await tasksService.addAttachments(req.params.id, req.user.email, newAttachments);
+    const updated = await tasksService.addAttachments(req.params.id, req.user.email, newAttachments, req.user.role);
     cacheService.invalidateByTag('tasks');
-    cacheService.invalidateByTag(`user:${req.user.email}`);
+    cacheService.invalidateByTag(`user:${(req.user.email || '').toLowerCase().trim()}`);
     res.status(201).json({ success: true, task: updated, attachments: newAttachments });
   } catch (err) {
     const code = err.message.includes('Unauthorized') ? 403 : 500;
@@ -147,9 +147,9 @@ router.post('/:id/attachments', auth, upload.array('files', 10), async (req, res
 // DELETE /api/tasks/:id/attachments/:assetId — remove an attachment (protected, owner only)
 router.delete('/:id/attachments/:assetId', auth, async (req, res) => {
   try {
-    const updated = await tasksService.removeAttachment(req.params.id, req.user.email, req.params.assetId);
+    const updated = await tasksService.removeAttachment(req.params.id, req.user.email, req.params.assetId, req.user.role);
     cacheService.invalidateByTag('tasks');
-    cacheService.invalidateByTag(`user:${req.user.email}`);
+    cacheService.invalidateByTag(`user:${(req.user.email || '').toLowerCase().trim()}`);
     res.json({ success: true, task: updated });
   } catch (err) {
     const code = err.message.includes('Unauthorized') ? 403 : 500;
@@ -170,9 +170,9 @@ router.put('/:id', auth, async (req, res) => {
       ...(image && { image }),
       ...(attachments && { attachments }),
       ...(status && { status })
-    });
+    }, req.user.role);
     cacheService.invalidateByTag('tasks');
-    cacheService.invalidateByTag(`user:${req.user.email}`);
+    cacheService.invalidateByTag(`user:${(req.user.email || '').toLowerCase().trim()}`);
     res.json(task);
   } catch (err) {
     const code = err.message.includes('Unauthorized') ? 403 : 500;
@@ -185,11 +185,46 @@ router.delete('/:id', auth, async (req, res) => {
   try {
     const result = await tasksService.deleteTask(req.params.id, req.user.email);
     cacheService.invalidateByTag('tasks');
-    cacheService.invalidateByTag(`user:${req.user.email}`);
+    cacheService.invalidateByTag(`user:${(req.user.email || '').toLowerCase().trim()}`);
     res.json(result);
   } catch (err) {
     const code = err.message.includes('Unauthorized') ? 403 : 500;
     res.status(code).json({ error: err.message });
+  }
+});
+
+// POST /api/tasks/:id/assign — assign vetted specialist to task (protected, admin only)
+router.post('/:id/assign', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only administrators can match vetted specialists to tasks' });
+    }
+    const { expertEmail, expertName } = req.body;
+    if (!expertEmail) {
+      return res.status(400).json({ error: 'expertEmail is required' });
+    }
+    const task = await tasksService.assignTask(req.params.id, { expertEmail, expertName });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${(task.user_email || '').toLowerCase().trim()}`);
+    cacheService.invalidateByTag(`user:${(expertEmail || '').toLowerCase().trim()}`);
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/tasks/:id/reset — reset task assignment back to open bidding pool (protected, admin only)
+router.post('/:id/reset', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only administrators can reset task assignments' });
+    }
+    const task = await tasksService.resetTaskAssignment(req.params.id);
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${(task.user_email || '').toLowerCase().trim()}`);
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

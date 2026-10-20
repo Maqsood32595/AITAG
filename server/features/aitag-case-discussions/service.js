@@ -4,12 +4,37 @@
  * Resilient Supabase-backed persistent communication stream with In-RAM Ephemeral Twin.
  */
 
+const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
 const supabase = require('../../supabase');
 const cacheService = require('../aitag-cache/service');
 
-// In-RAM Ephemeral Twin: order_id -> Array<MessageRecord>
-const inMemoryDiscussions = new Map();
+const DISCUSSIONS_STORE_PATH = path.join(__dirname, 'case_discussions_store.json');
+
+function readDiscussionsStore() {
+  try {
+    if (fs.existsSync(DISCUSSIONS_STORE_PATH)) {
+      const data = JSON.parse(fs.readFileSync(DISCUSSIONS_STORE_PATH, 'utf-8'));
+      return data && typeof data === 'object' ? data : {};
+    }
+  } catch (e) {
+    console.warn('[CaseDiscussions] Failed to read case_discussions_store.json:', e.message);
+  }
+  return {};
+}
+
+function writeDiscussionsStore(store) {
+  try {
+    fs.writeFileSync(DISCUSSIONS_STORE_PATH, JSON.stringify(store, null, 2), 'utf-8');
+  } catch (e) {
+    console.warn('[CaseDiscussions] Failed to write case_discussions_store.json:', e.message);
+  }
+}
+
+const initialDiscussions = readDiscussionsStore();
+// In-RAM and durable store: order_id -> Array<MessageRecord>
+const inMemoryDiscussions = new Map(Object.entries(initialDiscussions));
 
 class CaseDiscussionsService {
   /**
@@ -109,11 +134,12 @@ class CaseDiscussionsService {
       console.warn('⚠️ [CaseDiscussions] Supabase insert exception:', e.message);
     }
 
-    // 2. Fallback write to In-RAM Ephemeral Twin
+    // 2. Fallback write to durable In-RAM and disk store
     if (!inMemoryDiscussions.has(orderId)) {
       inMemoryDiscussions.set(orderId, []);
     }
     inMemoryDiscussions.get(orderId).push(record);
+    this._persistStore();
     this._invalidateCache(orderId);
 
     return record;
@@ -125,6 +151,7 @@ class CaseDiscussionsService {
   async purgeByOrderId(orderId) {
     if (!orderId) return;
     inMemoryDiscussions.delete(orderId);
+    this._persistStore();
 
     try {
       if (supabase && typeof supabase.from === 'function') {
@@ -159,10 +186,17 @@ class CaseDiscussionsService {
           .eq('sender_email', cleanEmail);
       }
     } catch {}
+
+    this._persistStore();
   }
 
   clearMemory() {
     inMemoryDiscussions.clear();
+    this._persistStore();
+  }
+
+  _persistStore() {
+    writeDiscussionsStore(Object.fromEntries(inMemoryDiscussions));
   }
 
   _invalidateCache(orderId) {

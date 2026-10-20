@@ -177,12 +177,12 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
   if (!target) return null;
 
   const itemTag = isTask
-    ? `Task #${String(task.id).replace('task-', '').slice(-6)}`
-    : `Order ${order.order_number}`;
-  const statusLabel = isTask ? (task.status || 'open') : order.status;
+    ? `Task #${String(task?.id || '').replace('task-', '').slice(-6)}`
+    : `Order ${order?.order_number || ''}`;
+  const statusLabel = isTask ? (task?.status || 'open') : (order?.status || 'REQUESTED');
   const subtitle = isTask
-    ? `${task.category} • Budget: ₹${Number(task.budget).toLocaleString()}`
-    : `${order.package_title} • ${order.tier_name?.startsWith('package_') ? order.tier_name.replace('package_', 'Package ').toUpperCase() : order.tier_name?.toUpperCase()} Tier`;
+    ? `${task?.category || 'Custom Task'} • Budget: ₹${Number(task?.budget || 0).toLocaleString()}`
+    : `${order?.package_title || 'Service Package'} • ${order?.tier_name?.startsWith('package_') ? order?.tier_name.replace('package_', 'Package ').toUpperCase() : order?.tier_name?.toUpperCase() || ''} Tier`;
 
   return (
     <Dialog
@@ -261,10 +261,10 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
               <PersonIcon sx={{ fontSize: 18, color: '#475569' }} />
               <Box>
                 <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
-                  Client: {task.user_name}
+                  Client: {task?.user_name || 'Client'}
                 </Typography>
                 <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
-                  {task.user_email}
+                  {task?.user_email || ''}
                 </Typography>
               </Box>
             </Stack>
@@ -301,10 +301,10 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
               <PersonIcon sx={{ fontSize: 18, color: '#475569' }} />
               <Box>
                 <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
-                  Customer: {order.customer_name}
+                  Customer: {order?.customer_name || 'Customer'}
                 </Typography>
                 <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
-                  {order.customer_email}
+                  {order?.customer_email || ''}
                 </Typography>
               </Box>
             </Stack>
@@ -315,10 +315,10 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
               <PsychologyIcon sx={{ fontSize: 18, color: '#059669' }} />
               <Box>
                 <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#065f46' }}>
-                  Matched Expert: {order.assigned_expert_name || 'AI Specialist'}
+                  Matched Expert: {order?.assigned_expert_name || 'AI Specialist'}
                 </Typography>
                 <Typography sx={{ fontSize: '0.7rem', color: '#047857' }}>
-                  {order.assigned_expert_email || 'Pending assignment'}
+                  {order?.assigned_expert_email || 'Pending assignment'}
                 </Typography>
               </Box>
             </Stack>
@@ -375,7 +375,9 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
                 Case Discussion Channel Open
               </Typography>
               <Typography variant="body2" sx={{ maxWidth: 440, mt: 0.5 }}>
-                Direct communication stream between Admin and Assigned Specialist for Order #{order.order_number}. Send directives, asset attachments, or project clarifications below.
+                {isTask
+                  ? `Direct communication stream with Admin for Task "${task?.title || 'Custom Task'}". Send messages, asset attachments, or project clarifications below.`
+                  : `Direct communication stream between Admin and Assigned Specialist for Order #${order?.order_number || ''}. Send directives, asset attachments, or project clarifications below.`}
               </Typography>
             </Box>
           ) : (

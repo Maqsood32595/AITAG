@@ -4,7 +4,7 @@ import {
   Box, Container, Typography, Grid, Paper, Chip, CircularProgress,
   Button, Divider, Stack, Alert, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, MenuItem, Select, FormControl, InputLabel,
-  Rating, Tooltip
+  Rating, Tooltip, Table, TableBody, TableCell, TableHead, TableRow
 } from '@mui/material';
 import TaskIcon from '@mui/icons-material/Assignment';
 import BidIcon from '@mui/icons-material/Gavel';
@@ -21,11 +21,14 @@ import StarIcon from '@mui/icons-material/Star';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import ForumIcon from '@mui/icons-material/Forum';
 import PersonIcon from '@mui/icons-material/Person';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { tasksApi, bidsApi, invitationsApi, serviceOrdersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedAvatar } from '../components/AnimatedAvatar';
 import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
+import { TaskAssetsModal } from '../components/TaskAssetsModal';
 
 const VETTED_SPECIALISTS = [
   { name: 'Expert 1', email: 'expert1@aitag.com', role: 'Vetted AI Specialist' },
@@ -45,6 +48,13 @@ const ORDER_STEPS = [
   { key: 'COMPLETED', label: '5. Approved & Complete' },
 ];
 
+const TASK_STEPS = [
+  { key: 'POSTED', label: '1. Task Posted' },
+  { key: 'BIDDING', label: '2. Bidding Active' },
+  { key: 'IN_PROGRESS', label: '3. Matched & In Progress' },
+  { key: 'COMPLETED', label: '4. Approved & Complete' },
+];
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [myTasks, setMyTasks] = useState<any[]>([]);
@@ -60,8 +70,10 @@ const Dashboard = () => {
   // Modals state
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
   
-  // Assign Expert Modal
+  // Assign Expert Modal (Dual-mode: Pilot Orders & Marketplace Tasks)
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [assignTargetType, setAssignTargetType] = useState<'order' | 'task'>('order');
+  const [activeAssignTask, setActiveAssignTask] = useState<any | null>(null);
   const [selectedExpertPreset, setSelectedExpertPreset] = useState(VETTED_SPECIALISTS[0].email);
   const [customExpertName, setCustomExpertName] = useState('');
   const [customExpertEmail, setCustomExpertEmail] = useState('');
@@ -85,10 +97,33 @@ const Dashboard = () => {
   // Case Discussion Modal
   const [discussionModalOpen, setDiscussionModalOpen] = useState(false);
   const [activeDiscussionOrder, setActiveDiscussionOrder] = useState<any | null>(null);
+  const [activeDiscussionTask, setActiveDiscussionTask] = useState<any | null>(null);
+
+  // Platform Oversight (Marketplace Tasks & Assets)
+  const [allMarketplaceTasks, setAllMarketplaceTasks] = useState<any[]>([]);
+  const [activeAssetTask, setActiveAssetTask] = useState<any | null>(null);
+  const [assetsModalOpen, setAssetsModalOpen] = useState(false);
 
   const openDiscussionModal = (order: any) => {
     setActiveDiscussionOrder(order);
+    setActiveDiscussionTask(null);
     setDiscussionModalOpen(true);
+  };
+
+  const openTaskDiscussionModal = (task: any) => {
+    setActiveDiscussionTask(task);
+    setActiveDiscussionOrder(null);
+    setDiscussionModalOpen(true);
+  };
+
+  const openAssetsModal = (task: any) => {
+    setActiveAssetTask(task);
+    setAssetsModalOpen(true);
+  };
+
+  const handleTaskUpdated = (updatedTask: any) => {
+    setAllMarketplaceTasks(prev => prev.map(t => t.id === updatedTask.id ? { ...t, ...updatedTask } : t));
+    setActiveAssetTask(updatedTask);
   };
 
   const fetchDashboardData = () => {
@@ -98,7 +133,11 @@ const Dashboard = () => {
 
     Promise.all([
       tasksApi.getMy().then(r => setMyTasks(r.data || [])),
-      tasksApi.getAll().then(r => setAllCount((r.data || []).length)),
+      tasksApi.getAll().then(r => {
+        const list = r.data || [];
+        setAllCount(list.length);
+        setAllMarketplaceTasks(list);
+      }),
       bidsApi.getMy().then(r => setMyBids(r.data.bids || [])),
       invitationsApi.getMy().then(r => setInvitations(r.data || [])).catch(() => setInvitations([])),
       ordersPromise.then(r => setServiceOrders(r.data?.orders || [])).catch(() => setServiceOrders([])),
@@ -146,46 +185,87 @@ const Dashboard = () => {
     }
   };
 
-  // --- Order Lifecycle Actions ---
+  // --- Order & Task Lifecycle Actions ---
 
-  // 1. Assign Expert
+  // 1. Assign Expert (Pilot Orders & Marketplace Tasks)
   const openAssignModal = (order: any) => {
+    setAssignTargetType('order');
     setActiveOrder(order);
+    setActiveAssignTask(null);
     setSelectedExpertPreset(VETTED_SPECIALISTS[0].email);
     setCustomExpertName('');
     setCustomExpertEmail('');
     setAssignDialogOpen(true);
   };
 
-  const handleConfirmAssign = async () => {
-    if (!activeOrder) return;
-    setActionLoading(`assign-${activeOrder.id}`);
+  const openTaskAssignModal = (task: any) => {
+    setAssignTargetType('task');
+    setActiveAssignTask(task);
+    setActiveOrder(null);
+    setSelectedExpertPreset(VETTED_SPECIALISTS[0].email);
+    setCustomExpertName('');
+    setCustomExpertEmail('');
+    setAssignDialogOpen(true);
+  };
+
+  const handleResetTaskAssignment = async (task: any) => {
+    if (!window.confirm(`Reset assignment for Task "${task.title}"? This will return the task to the open bidding pool.`)) return;
+    setActionLoading(`reset-task-${task.id}`);
     try {
-      let email = selectedExpertPreset;
-      let name = VETTED_SPECIALISTS.find(e => e.email === selectedExpertPreset)?.name || 'Vetted AI Specialist';
-
-      if (selectedExpertPreset === 'CUSTOM') {
-        if (!customExpertEmail.trim()) {
-          showErrorBanner('Please provide custom specialist email');
-          setActionLoading(null);
-          return;
-        }
-        email = customExpertEmail.trim();
-        name = customExpertName.trim() || 'AI Specialist';
-      }
-
-      await serviceOrdersApi.assign(activeOrder.id, {
-        expertEmail: email,
-        expertName: name
-      });
-
-      showSuccessBanner(`✅ Expert ${name} matched to Order ${activeOrder.order_number}!`);
-      setAssignDialogOpen(false);
+      await tasksApi.resetAssignment(task.id);
+      showSuccessBanner(`Task #${String(task.id).replace('task-', '').slice(-6)} returned to open bidding pool.`);
       fetchDashboardData();
     } catch (err: any) {
-      showErrorBanner(err.response?.data?.error || 'Failed to assign expert');
+      showErrorBanner(err.response?.data?.error || 'Failed to reset task assignment');
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleConfirmAssign = async () => {
+    let email = selectedExpertPreset;
+    let name = VETTED_SPECIALISTS.find(e => e.email === selectedExpertPreset)?.name || 'Vetted AI Specialist';
+
+    if (selectedExpertPreset === 'CUSTOM') {
+      if (!customExpertEmail.trim()) {
+        showErrorBanner('Please provide custom specialist email');
+        return;
+      }
+      email = customExpertEmail.trim();
+      name = customExpertName.trim() || 'AI Specialist';
+    }
+
+    if (assignTargetType === 'task' && activeAssignTask) {
+      setActionLoading(`assign-task-${activeAssignTask.id}`);
+      try {
+        await tasksApi.assign(activeAssignTask.id, {
+          expertEmail: email,
+          expertName: name
+        });
+        showSuccessBanner(`✅ Vetted Expert ${name} matched to Task #${String(activeAssignTask.id).replace('task-', '').slice(-6)}! Status updated to In Progress.`);
+        setAssignDialogOpen(false);
+        fetchDashboardData();
+      } catch (err: any) {
+        showErrorBanner(err.response?.data?.error || 'Failed to assign expert to task');
+      } finally {
+        setActionLoading(null);
+      }
+    } else if (activeOrder) {
+      setActionLoading(`assign-${activeOrder.id}`);
+      try {
+        await serviceOrdersApi.assign(activeOrder.id, {
+          expertEmail: email,
+          expertName: name
+        });
+
+        showSuccessBanner(`✅ Expert ${name} matched to Order ${activeOrder.order_number}!`);
+        setAssignDialogOpen(false);
+        fetchDashboardData();
+      } catch (err: any) {
+        showErrorBanner(err.response?.data?.error || 'Failed to assign expert');
+      } finally {
+        setActionLoading(null);
+      }
     }
   };
 
@@ -1055,6 +1135,305 @@ const Dashboard = () => {
           )}
         </Paper>
 
+        {/* All Marketplace Tasks & Bidding Pipeline (Platform Oversight for Admin - First Layout) */}
+        {isAdmin && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 4,
+              borderRadius: '20px',
+              border: '1px solid rgba(8,145,178,0.2)',
+              bgcolor: '#ffffff',
+              mb: 4,
+              boxShadow: '0 8px 30px rgba(8,145,178,0.05)',
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: 'rgba(8,145,178,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TaskIcon sx={{ color: '#0891b2', fontSize: 24 }} />
+                </Box>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
+                    All Marketplace Tasks & Bidding Pipeline (Platform Oversight)
+                  </Typography>
+                  <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
+                    Review customer briefs, assign vetted specialists, manage attached assets, and chat with clients
+                  </Typography>
+                </Box>
+              </Box>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Chip
+                  label={`${allMarketplaceTasks.length} Tasks`}
+                  sx={{
+                    bgcolor: 'rgba(8,145,178,0.08)',
+                    color: '#0891b2',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                  }}
+                />
+                <Button
+                  component={Link}
+                  to="/add_task"
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    background: 'linear-gradient(135deg, #0891b2, #4f46e5)',
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(8,145,178,0.25)',
+                  }}
+                >
+                  + Post New Task
+                </Button>
+              </Stack>
+            </Box>
+
+            <Divider sx={{ my: 2.5 }} />
+
+            {allMarketplaceTasks.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 6 }}>
+                <Typography sx={{ color: '#94a3b8', fontSize: '0.95rem' }}>
+                  No custom marketplace tasks posted on the platform yet.
+                </Typography>
+              </Box>
+            ) : (
+              <Stack spacing={2.5}>
+                {allMarketplaceTasks.map(task => {
+                  const isDone = task.status === 'completed';
+                  const isAssigned = !!task.assigned_expert_email || task.status === 'in-progress' || task.status === 'in_progress';
+                  const stepIndex = isDone ? 3 : isAssigned ? 2 : (task.total_bids || 0) > 0 ? 1 : 0;
+
+                  return (
+                    <Paper
+                      key={task.id}
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        borderRadius: '16px',
+                        border: '1px solid rgba(8,145,178,0.18)',
+                        bgcolor: '#ffffff',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          borderColor: '#0891b2',
+                          boxShadow: '0 4px 20px rgba(8,145,178,0.08)'
+                        }
+                      }}
+                    >
+                      {/* Top Header */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1.5, mb: 1.5 }}>
+                        <Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                            <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
+                              {task.title}
+                            </Typography>
+                            <Chip
+                              label={task.category || 'General'}
+                              size="small"
+                              sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 700, fontSize: '0.72rem' }}
+                            />
+                          </Box>
+                          <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mt: 0.5 }}>
+                            Task: <strong>#{String(task.id).replace('task-', '').slice(-6)}</strong> • Customer: <strong>{task.user_name || 'Client'}</strong> ({task.user_email || 'client@aitag.com'})
+                            {task.deadline && ` • Deadline: ${new Date(task.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`}
+                          </Typography>
+                        </Box>
+
+                        <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+                          <Typography sx={{ fontWeight: 900, fontSize: '1.3rem', color: '#0f172a', lineHeight: 1.1 }}>
+                            ₹{Number(task.budget || 0).toLocaleString()}
+                          </Typography>
+                          <Box sx={{ mt: 0.5 }}>
+                            {isDone ? (
+                              <Chip
+                                label="COMPLETED"
+                                size="small"
+                                sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 800, fontSize: '0.72rem', border: '1px solid #a7f3d0' }}
+                              />
+                            ) : isAssigned ? (
+                              <Chip
+                                label="IN PROGRESS"
+                                size="small"
+                                sx={{ bgcolor: '#eff6ff', color: '#1d4ed8', fontWeight: 800, fontSize: '0.72rem', border: '1px solid #bfdbfe' }}
+                              />
+                            ) : (
+                              <Chip
+                                label="OPEN FOR BIDS"
+                                size="small"
+                                sx={{ bgcolor: '#f0fdf4', color: '#15803d', fontWeight: 800, fontSize: '0.72rem', border: '1px solid #bbf7d0' }}
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                      </Box>
+
+                      {/* 4-Step Pipeline Indicator */}
+                      <Box sx={{ display: 'flex', gap: 1.5, my: 2, flexWrap: 'wrap' }}>
+                        {TASK_STEPS.map((step, sIdx) => {
+                          const isCurrent = sIdx === stepIndex;
+                          const isDoneStep = sIdx < stepIndex;
+                          return (
+                            <Chip
+                              key={step.key}
+                              label={step.label}
+                              size="small"
+                              sx={{
+                                fontWeight: isCurrent ? 800 : 600,
+                                fontSize: '0.72rem',
+                                bgcolor: isCurrent ? '#0891b2' : isDoneStep ? '#ecfdf5' : '#f8fafc',
+                                color: isCurrent ? '#ffffff' : isDoneStep ? '#047857' : '#94a3b8',
+                                border: isCurrent ? 'none' : isDoneStep ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                              }}
+                            />
+                          );
+                        })}
+                      </Box>
+
+                      {/* Brief Notes Box */}
+                      <Box sx={{ p: 1.8, bgcolor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', mb: 2 }}>
+                        <Typography sx={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.5 }}>
+                          <strong>Brief Notes:</strong> "{task.description || 'No additional brief notes provided.'}"
+                        </Typography>
+                      </Box>
+
+                      {/* Assigned Specialist Banner (if assigned) */}
+                      {task.assigned_expert_email && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.15)', mb: 2 }}>
+                          <AnimatedAvatar name={task.assigned_expert_name || task.assigned_expert_email} size={30} />
+                          <Box>
+                            <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
+                              Matched Specialist: <strong>{task.assigned_expert_name || 'Vetted AI Specialist'}</strong> ({task.assigned_expert_email})
+                            </Typography>
+                            <Typography sx={{ fontSize: '0.72rem', color: '#6366f1' }}>
+                              Assigned via Platform Oversight • Active in task workspace
+                            </Typography>
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* Action Footer */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, pt: 1, borderTop: '1px solid #f1f5f9' }}>
+                        <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          {task.created_at ? `Requested on ${new Date(task.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Recent Task'} • <strong>{task.total_bids || 0} Proposals</strong>
+                        </Typography>
+
+                        <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap">
+                          {/* Assign / Reassign Actions */}
+                          {!isAssigned ? (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<PersonAddIcon />}
+                              disabled={actionLoading === `assign-task-${task.id}`}
+                              onClick={() => openTaskAssignModal(task)}
+                              sx={{
+                                bgcolor: '#0891b2',
+                                '&:hover': { bgcolor: '#0e7490' },
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                borderRadius: '8px',
+                                px: 2,
+                                boxShadow: '0 2px 8px rgba(8,145,178,0.25)'
+                              }}
+                            >
+                              {actionLoading === `assign-task-${task.id}` ? 'Assigning...' : 'Assign Vetted Expert'}
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => openTaskAssignModal(task)}
+                                sx={{ textTransform: 'none', borderRadius: '8px', fontSize: '0.75rem', color: '#0891b2', borderColor: 'rgba(8,145,178,0.4)' }}
+                              >
+                                Change Expert
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                disabled={actionLoading === `reset-task-${task.id}`}
+                                onClick={() => handleResetTaskAssignment(task)}
+                                sx={{
+                                  textTransform: 'none',
+                                  borderRadius: '8px',
+                                  fontSize: '0.75rem',
+                                  borderColor: '#fca5a5',
+                                  color: '#dc2626',
+                                  '&:hover': { bgcolor: '#fef2f2', borderColor: '#ef4444' }
+                                }}
+                              >
+                                {actionLoading === `reset-task-${task.id}` ? 'Resetting...' : 'Reset Assignment'}
+                              </Button>
+                            </>
+                          )}
+
+                          {/* Chat Client */}
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<ForumIcon />}
+                            onClick={() => openTaskDiscussionModal(task)}
+                            sx={{
+                              borderColor: '#c7d2fe',
+                              color: '#4338ca',
+                              fontWeight: 700,
+                              textTransform: 'none',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              '&:hover': { bgcolor: '#f5f3ff', borderColor: '#818cf8' }
+                            }}
+                          >
+                            Case Discussion
+                          </Button>
+
+                          {/* Assets */}
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<AttachFileIcon sx={{ fontSize: 15 }} />}
+                            onClick={() => openAssetsModal(task)}
+                            sx={{
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              textTransform: 'none',
+                              borderColor: 'rgba(79, 70, 229, 0.3)',
+                              color: '#4f46e5',
+                              bgcolor: 'rgba(79, 70, 229, 0.04)',
+                              '&:hover': { bgcolor: 'rgba(79, 70, 229, 0.1)' }
+                            }}
+                          >
+                            Assets ({(task.attachments || []).length})
+                          </Button>
+
+                          {/* Details & Proposals */}
+                          <Button
+                            component={Link}
+                            to={`/task-details/${task.id}`}
+                            variant="text"
+                            size="small"
+                            startIcon={<VisibilityIcon sx={{ fontSize: 15 }} />}
+                            sx={{
+                              color: '#4f46e5',
+                              fontWeight: 700,
+                              fontSize: '0.75rem',
+                              textTransform: 'none'
+                            }}
+                          >
+                            Details
+                          </Button>
+                        </Stack>
+                      </Box>
+                    </Paper>
+                  );
+                })}
+              </Stack>
+            )}
+          </Paper>
+        )}
+
         {/* Recent Tasks */}
         <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid rgba(79,70,229,0.08)', mb: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -1082,15 +1461,18 @@ const Dashboard = () => {
 
         {/* --- MODAL DIALOGS --- */}
 
-        {/* 1. Assign Expert Modal */}
+        {/* 1. Assign Expert Modal (Dual-mode: Pilot Orders & Marketplace Tasks) */}
         <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
-            Assign Vetted AI Specialist
+            {assignTargetType === 'task' ? 'Assign Vetted AI Specialist to Task' : 'Assign Vetted AI Specialist'}
           </DialogTitle>
           <DialogContent dividers>
             <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 2.5 }}>
-              Matching order <strong>{activeOrder?.order_number}</strong> ({activeOrder?.package_title}).
-              Select one of our vetted AI specialists or input a custom expert.
+              {assignTargetType === 'task' ? (
+                <>Matching Task <strong>#{String(activeAssignTask?.id || '').replace('task-', '').slice(-6)}</strong> ({activeAssignTask?.title}). Select one of our vetted AI specialists or input a custom expert to start fulfillment immediately.</>
+              ) : (
+                <>Matching order <strong>{activeOrder?.order_number}</strong> ({activeOrder?.package_title}). Select one of our vetted AI specialists or input a custom expert.</>
+              )}
             </Typography>
 
             <FormControl fullWidth sx={{ mb: 2.5 }}>
@@ -1302,13 +1684,34 @@ const Dashboard = () => {
           </DialogActions>
         </Dialog>
 
-        {/* 5. Persistent Case Discussion Modal */}
-        <CaseDiscussionModal
-          open={discussionModalOpen}
-          onClose={() => setDiscussionModalOpen(false)}
-          order={activeDiscussionOrder}
-          currentUser={user}
-        />
+        {/* 5. Persistent Case Discussion Modal (Orders & Tasks) */}
+        {discussionModalOpen && (
+          <CaseDiscussionModal
+            open={discussionModalOpen}
+            onClose={() => {
+              setDiscussionModalOpen(false);
+              setActiveDiscussionOrder(null);
+              setActiveDiscussionTask(null);
+            }}
+            order={activeDiscussionOrder}
+            task={activeDiscussionTask}
+            currentUser={user}
+          />
+        )}
+
+        {/* 6. Task Assets Modal for Platform Oversight */}
+        {activeAssetTask && (
+          <TaskAssetsModal
+            open={assetsModalOpen}
+            onClose={() => {
+              setAssetsModalOpen(false);
+              setActiveAssetTask(null);
+            }}
+            task={activeAssetTask}
+            onTaskUpdated={handleTaskUpdated}
+            isOwner={true}
+          />
+        )}
       </Container>
     </DashboardLayout>
   );

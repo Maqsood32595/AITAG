@@ -742,9 +742,19 @@ async function runPietSuite() {
           ]
         })
       });
-
       eq(updateRes.status, 200, 'PUT /api/tasks/:id must return 200 OK');
       eq(updateRes.data.attachments.length, 2, 'Task attachments updated to 2 files');
+    });
+
+    await t('Client retrieves posted tasks via GET /api/tasks/my with persistent attachments', async () => {
+      const myTasksRes = await requestJson('/api/tasks/my', {
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
+      eq(myTasksRes.status, 200, 'GET /api/tasks/my must return 200 OK');
+      assert(Array.isArray(myTasksRes.data), 'my tasks must return array');
+      const foundTask = myTasksRes.data.find(t => t.id === ephemeralTaskId);
+      assert(foundTask, 'Newly created task must be found in my tasks');
+      eq(foundTask.attachments.length, 2, 'Task attachments must be preserved in my tasks');
     });
 
     await t('Client initiates persistent discussion with Admin on task with attached brief', async () => {
@@ -776,6 +786,75 @@ async function runPietSuite() {
       eq(listRes.status, 200, 'Admin GET /api/case-discussions/:taskId must return 200 OK');
       assert(listRes.data.messages.length >= 1, 'Must contain client message');
       eq(listRes.data.messages[0].order_id, ephemeralTaskId, 'Message tied to task');
+    });
+
+    await t('Admin platform oversight: discovers client tasks and communicates directly via task channel', async () => {
+      // 1. Admin/Global task list contains client-posted task with assets
+      const allTasksRes = await requestJson('/api/tasks');
+      eq(allTasksRes.status, 200, 'GET /api/tasks must return 200 OK');
+      assert(Array.isArray(allTasksRes.data), 'Tasks must be array');
+      const foundInGlobal = allTasksRes.data.find(t => t.id === ephemeralTaskId);
+      assert(foundInGlobal, 'Client task must be discoverable in global marketplace pool for admin oversight');
+      eq(foundInGlobal.user_email, NONCE_EMAIL, 'Client email preserved in task pool');
+      eq(foundInGlobal.attachments.length, 2, 'All client attached assets preserved');
+
+      // 2. Admin sends direct response to client in task discussion channel
+      const adminReply = await requestJson(`/api/case-discussions/${ephemeralTaskId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          message: 'Received your brand guidelines. Our vetted specialists have been notified to review.',
+          attachments: []
+        })
+      });
+      eq(adminReply.status, 201, 'Admin reply returns 201 Created');
+      eq(adminReply.data.message.sender_role, 'admin', 'Admin role preserved in message');
+      eq(adminReply.data.message.sender_email, 'user1@aitag.com', 'Admin email preserved');
+
+      // 3. Verify bidirectional conversation thread has both client and admin messages
+      const fullThread = await requestJson(`/api/case-discussions/${ephemeralTaskId}`, {
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
+      eq(fullThread.status, 200, 'Client GET /api/case-discussions/:taskId returns 200 OK');
+      eq(fullThread.data.messages.length, 2, 'Both client and admin messages present in chronological thread');
+    });
+
+    await t('Admin assigns vetted AI specialist to marketplace task and resets assignment', async () => {
+      // 1. Negative defense: non-admin cannot assign specialist to task
+      const nonAdminRes = await requestJson(`/api/tasks/${ephemeralTaskId}/assign`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` },
+        body: JSON.stringify({ expertEmail: 'expert1@aitag.com', expertName: 'Expert 1' })
+      });
+      eq(nonAdminRes.status, 403, 'Non-admin task assignment must return 403 Forbidden');
+
+      // 2. Negative defense: expertEmail is required
+      const emptyEmailRes = await requestJson(`/api/tasks/${ephemeralTaskId}/assign`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ expertEmail: '' })
+      });
+      eq(emptyEmailRes.status, 400, 'Empty expertEmail must return 400 Bad Request');
+
+      // 3. Admin matches vetted specialist to task
+      const assignRes = await requestJson(`/api/tasks/${ephemeralTaskId}/assign`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ expertEmail: 'expert1@aitag.com', expertName: 'Expert 1' })
+      });
+      eq(assignRes.status, 200, 'Admin task assignment returns 200 OK');
+      eq(assignRes.data.success, true, 'Assignment success must be true');
+      eq(assignRes.data.task.status, 'in-progress', 'Task status transitions to in-progress');
+      eq(assignRes.data.task.assigned_expert_email, 'expert1@aitag.com', 'Specialist email assigned');
+
+      // 4. Admin resets task assignment back to open bidding pool
+      const resetRes = await requestJson(`/api/tasks/${ephemeralTaskId}/reset`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      eq(resetRes.status, 200, 'Admin reset returns 200 OK');
+      eq(resetRes.data.success, true, 'Reset success must be true');
+      eq(resetRes.data.task.status, 'open', 'Task status reverts to open');
     });
 
     // --------------------------------------------------------------------------

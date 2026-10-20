@@ -6,7 +6,7 @@
 
 CREATE TABLE IF NOT EXISTS aitag_case_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES aitag_orders(id) ON DELETE CASCADE,
+  order_id TEXT NOT NULL,
   sender_email TEXT NOT NULL,
   sender_name TEXT NOT NULL,
   sender_role TEXT NOT NULL CHECK (sender_role IN ('admin', 'freelancer', 'client')),

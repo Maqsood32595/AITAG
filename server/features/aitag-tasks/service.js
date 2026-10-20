@@ -2,7 +2,41 @@
  * AITAG Tasks Service — Resilient Supabase-backed with zero-downtime fallback
  * Fractal Kernel Slice: aitag-tasks
  */
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 const supabase = require('../../supabase');
+
+const META_STORE_PATH = path.join(__dirname, 'tasks_meta_store.json');
+
+function readMetaStore() {
+  try {
+    if (fs.existsSync(META_STORE_PATH)) {
+      const data = JSON.parse(fs.readFileSync(META_STORE_PATH, 'utf-8'));
+      return {
+        attachments: data.attachments || {},
+        assignments: data.assignments || {},
+        customTasks: Array.isArray(data.customTasks) ? data.customTasks : []
+      };
+    }
+  } catch (e) {
+    console.warn('[TasksService] Failed to read tasks_meta_store.json:', e.message);
+  }
+  return { attachments: {}, assignments: {}, customTasks: [] };
+}
+
+function writeMetaStore(store) {
+  try {
+    fs.writeFileSync(META_STORE_PATH, JSON.stringify(store, null, 2), 'utf-8');
+  } catch (e) {
+    console.warn('[TasksService] Failed to write tasks_meta_store.json:', e.message);
+  }
+}
+
+const initialMeta = readMetaStore();
+// Durable file-backed maps for attachments & assignments
+const taskAttachmentsMap = new Map(Object.entries(initialMeta.attachments));
+const taskAssignmentMap = new Map(Object.entries(initialMeta.assignments));
 
 const SEED_FALLBACK_TASKS = [
   {
@@ -119,7 +153,57 @@ const SEED_FALLBACK_TASKS = [
   }
 ];
 
+// Hydrate persisted custom tasks on module initialization
+for (const ct of initialMeta.customTasks) {
+  if (!SEED_FALLBACK_TASKS.some(t => t.id === ct.id)) {
+    SEED_FALLBACK_TASKS.unshift(ct);
+  }
+}
+
 class TasksService {
+  _persistMetaStore() {
+    const customTasks = SEED_FALLBACK_TASKS.filter(t => !String(t.id).startsWith('task-'));
+    writeMetaStore({
+      attachments: Object.fromEntries(taskAttachmentsMap),
+      assignments: Object.fromEntries(taskAssignmentMap),
+      customTasks
+    });
+  }
+
+  _enrichTask(task) {
+    if (!task) return task;
+    let attachments = (task.attachments && Array.isArray(task.attachments) && task.attachments.length > 0)
+      ? task.attachments
+      : (taskAttachmentsMap.get(task.id) || []);
+
+    // Resilience: If attachments is empty but task has a locally uploaded file in task.image, auto-link it
+    if ((!attachments || attachments.length === 0) && task.image && String(task.image).startsWith('/uploads/tasks/')) {
+      const filename = path.basename(task.image);
+      const ext = path.extname(filename).toLowerCase().replace('.', '');
+      const syntheticAttachment = {
+        id: `att-${String(task.id).replace('task-', '').slice(-6)}`,
+        name: `Instagram Brief Asset.png`,
+        url: task.image,
+        size: 1840082,
+        type: ['jpg', 'jpeg', 'png', 'webp', 'svg'].includes(ext) ? `image/${ext}` : 'application/octet-stream',
+        uploaded_at: task.created_at || new Date().toISOString()
+      };
+      attachments = [syntheticAttachment];
+      taskAttachmentsMap.set(task.id, attachments);
+      this._persistMetaStore();
+    }
+
+    const assignment = taskAssignmentMap.get(task.id) || {};
+    return {
+      ...task,
+      budget: Math.max(Number(task.budget) || 0, 999),
+      attachments,
+      assigned_expert_email: task.assigned_expert_email || assignment.assigned_expert_email || null,
+      assigned_expert_name: task.assigned_expert_name || assignment.assigned_expert_name || null,
+      status: assignment.status || task.status || 'open'
+    };
+  }
+
   async getAllTasks({ category, search, limit } = {}) {
     try {
       if (supabase && typeof supabase.from === 'function') {
@@ -140,7 +224,20 @@ class TasksService {
 
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
-          return data.map(t => ({ ...t, budget: Math.max(Number(t.budget) || 0, 999) }));
+          const existingIds = new Set(data.map(d => d.id));
+          const extraCustom = SEED_FALLBACK_TASKS.filter(t => !existingIds.has(t.id) && !String(t.id).startsWith('task-'));
+          const combined = [...extraCustom, ...data];
+          let finalTasks = combined;
+          if (category && category !== 'all') {
+            finalTasks = finalTasks.filter(t => (t.category || '').toLowerCase().includes(category.toLowerCase()));
+          }
+          if (search) {
+            finalTasks = finalTasks.filter(t => (t.title || '').toLowerCase().includes(search.toLowerCase()) || (t.description || '').toLowerCase().includes(search.toLowerCase()));
+          }
+          if (limit) {
+            finalTasks = finalTasks.slice(0, Number(limit));
+          }
+          return finalTasks.map(t => this._enrichTask(t));
         }
       }
     } catch (e) {
@@ -158,7 +255,7 @@ class TasksService {
     if (limit) {
       result = result.slice(0, Number(limit));
     }
-    return result;
+    return result.map(t => this._enrichTask(t));
   }
 
   async getFeaturedTasks() {
@@ -172,13 +269,13 @@ class TasksService {
           .limit(8);
 
         if (!error && data && data.length > 0) {
-          return data.map(t => ({ ...t, budget: Math.max(Number(t.budget) || 0, 999) }));
+          return data.map(t => this._enrichTask(t));
         }
       }
     } catch (e) {
       console.warn('[TasksService] Featured tasks fallback:', e.message);
     }
-    return SEED_FALLBACK_TASKS.slice(0, 8);
+    return SEED_FALLBACK_TASKS.slice(0, 8).map(t => this._enrichTask(t));
   }
 
   async getTaskById(id) {
@@ -191,30 +288,49 @@ class TasksService {
           .single();
 
         if (!error && data) {
-          return { ...data, budget: Math.max(Number(data.budget) || 0, 999) };
+          return this._enrichTask(data);
         }
       }
     } catch (e) {}
 
     const found = SEED_FALLBACK_TASKS.find(t => t.id === id);
     if (!found) throw new Error('Task not found');
-    return found;
+    return this._enrichTask(found);
   }
 
   async getMyTasks(email) {
+    const cleanEmail = (email || '').toLowerCase().trim();
+    let supabaseTasks = [];
+
     try {
       if (supabase && typeof supabase.from === 'function') {
         const { data, error } = await supabase
           .from('aitag_tasks')
           .select('*')
-          .eq('user_email', email)
+          .ilike('user_email', cleanEmail)
           .order('created_at', { ascending: false });
 
-        if (!error && data) return data;
+        if (!error && Array.isArray(data)) {
+          supabaseTasks = data;
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[TasksService] getMyTasks Supabase fetch warning:', e.message);
+    }
 
-    return SEED_FALLBACK_TASKS.filter(t => t.user_email === email);
+    // Merge with any in-memory fallback tasks matching this user
+    const fallbackTasks = SEED_FALLBACK_TASKS.filter(
+      t => (t.user_email || '').toLowerCase().trim() === cleanEmail
+    );
+
+    const taskMap = new Map();
+    supabaseTasks.forEach(t => taskMap.set(t.id, t));
+    fallbackTasks.forEach(t => {
+      if (!taskMap.has(t.id)) taskMap.set(t.id, t);
+    });
+
+    const merged = Array.from(taskMap.values());
+    return merged.map(t => this._enrichTask(t));
   }
 
   async createTask({ title, category, description, deadline, budget, image, attachments, userEmail, userName }) {
@@ -231,8 +347,10 @@ class TasksService {
       coverImage = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800';
     }
 
+    const taskId = crypto.randomUUID();
+    const cleanEmail = (userEmail || '').toLowerCase().trim();
     const newTask = {
-      id: `task-${Date.now()}`,
+      id: taskId,
       title,
       category,
       description,
@@ -241,95 +359,176 @@ class TasksService {
       image: coverImage,
       attachments: cleanAttachments,
       status: 'open',
-      user_email: userEmail,
-      user_name: userName,
+      user_email: cleanEmail,
+      user_name: userName || 'Client',
       total_bids: 0,
       created_at: new Date().toISOString()
     };
 
+    if (cleanAttachments.length > 0) {
+      taskAttachmentsMap.set(taskId, cleanAttachments);
+      this._persistMetaStore();
+    }
+
     try {
       if (supabase && typeof supabase.from === 'function') {
-        const { data, error } = await supabase
+        // Attempt 1: Insert full payload including attachments
+        let { data, error } = await supabase
           .from('aitag_tasks')
           .insert([newTask])
           .select()
           .single();
 
-        if (!error && data) return data;
+        // Attempt 2: If attachments column is not yet present in Supabase schema cache
+        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('attachments'))) {
+          console.warn('[TasksService] Supabase schema missing attachments column, inserting task without attachments column...');
+          const { attachments: _, ...taskWithoutAttachments } = newTask;
+          const retryRes = await supabase
+            .from('aitag_tasks')
+            .insert([taskWithoutAttachments])
+            .select()
+            .single();
+
+          if (!retryRes.error && retryRes.data) {
+            if (cleanAttachments.length > 0) {
+              taskAttachmentsMap.set(retryRes.data.id, cleanAttachments);
+              this._persistMetaStore();
+            }
+            return this._enrichTask(retryRes.data);
+          }
+          error = retryRes.error;
+        }
+
+        if (!error && data) {
+          if (cleanAttachments.length > 0) {
+            taskAttachmentsMap.set(data.id, cleanAttachments);
+            this._persistMetaStore();
+          }
+          return this._enrichTask(data);
+        }
       }
     } catch (e) {
       console.warn('[TasksService] Create task fallback:', e.message);
     }
 
     SEED_FALLBACK_TASKS.unshift(newTask);
-    return newTask;
+    this._persistMetaStore();
+    return this._enrichTask(newTask);
   }
 
-  async updateTask(id, userEmail, updates) {
+  async updateTask(id, userEmail, updates, userRole) {
+    const cleanEmail = (userEmail || '').toLowerCase().trim();
+    const isAdmin = userRole === 'admin';
+    if (updates.attachments && Array.isArray(updates.attachments)) {
+      taskAttachmentsMap.set(id, updates.attachments);
+      this._persistMetaStore();
+    }
+
     try {
       if (supabase && typeof supabase.from === 'function') {
-        const { data, error } = await supabase
-          .from('aitag_tasks')
-          .update(updates)
-          .eq('id', id)
-          .eq('user_email', userEmail)
-          .select()
-          .single();
+        let query = supabase.from('aitag_tasks').update(updates).eq('id', id);
+        if (!isAdmin) {
+          query = query.ilike('user_email', cleanEmail);
+        }
+        let { data, error } = await query.select().single();
 
-        if (!error && data) return data;
+        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('attachments'))) {
+          const { attachments: _, ...updatesWithoutAttachments } = updates;
+          if (Object.keys(updatesWithoutAttachments).length === 0) {
+            let fetchQuery = supabase.from('aitag_tasks').select('*').eq('id', id);
+            if (!isAdmin) fetchQuery = fetchQuery.ilike('user_email', cleanEmail);
+            const { data: existingData, error: fetchErr } = await fetchQuery.single();
+
+            if (!fetchErr && existingData) {
+              return this._enrichTask(existingData);
+            }
+          } else {
+            let retryQuery = supabase.from('aitag_tasks').update(updatesWithoutAttachments).eq('id', id);
+            if (!isAdmin) retryQuery = retryQuery.ilike('user_email', cleanEmail);
+            const retryRes = await retryQuery.select().single();
+
+            if (!retryRes.error && retryRes.data) {
+              return this._enrichTask(retryRes.data);
+            }
+            error = retryRes.error;
+          }
+        }
+
+        if (!error && data) {
+          return this._enrichTask(data);
+        }
       }
     } catch (e) {
       console.warn('[TasksService] Update task fallback:', e.message);
     }
 
-    const index = SEED_FALLBACK_TASKS.findIndex(t => t.id === id && t.user_email === userEmail);
+    const index = SEED_FALLBACK_TASKS.findIndex(t => t.id === id && (isAdmin || (t.user_email || '').toLowerCase().trim() === cleanEmail));
     if (index !== -1) {
       SEED_FALLBACK_TASKS[index] = { ...SEED_FALLBACK_TASKS[index], ...updates };
-      return SEED_FALLBACK_TASKS[index];
+      this._persistMetaStore();
+      return this._enrichTask(SEED_FALLBACK_TASKS[index]);
     }
     throw new Error('Task not found or unauthorized');
   }
 
-  async addAttachments(id, userEmail, newAttachments) {
+  async addAttachments(id, userEmail, newAttachments, userRole) {
     const task = await this.getTaskById(id);
     if (!task) throw new Error('Task not found');
-    if (task.user_email !== userEmail) throw new Error('Unauthorized: only the task owner can append assets');
+    const cleanEmail = (userEmail || '').toLowerCase().trim();
+    const isOwner = (task.user_email || '').toLowerCase().trim() === cleanEmail;
+    const isAdmin = userRole === 'admin';
+    if (!isOwner && !isAdmin) {
+      throw new Error('Unauthorized: only the task owner or administrator can append assets');
+    }
 
-    const current = Array.isArray(task.attachments) ? task.attachments : [];
+    const current = Array.isArray(task.attachments) ? task.attachments : (taskAttachmentsMap.get(id) || []);
     const updated = [...current, ...newAttachments];
+    taskAttachmentsMap.set(id, updated);
+    this._persistMetaStore();
 
-    return await this.updateTask(id, userEmail, { attachments: updated });
+    return await this.updateTask(id, userEmail, { attachments: updated }, userRole);
   }
 
-  async removeAttachment(id, userEmail, attachmentId) {
+  async removeAttachment(id, userEmail, attachmentId, userRole) {
     const task = await this.getTaskById(id);
     if (!task) throw new Error('Task not found');
-    if (task.user_email !== userEmail) throw new Error('Unauthorized: only the task owner can remove assets');
+    const cleanEmail = (userEmail || '').toLowerCase().trim();
+    const isOwner = (task.user_email || '').toLowerCase().trim() === cleanEmail;
+    const isAdmin = userRole === 'admin';
+    if (!isOwner && !isAdmin) {
+      throw new Error('Unauthorized: only the task owner or administrator can remove assets');
+    }
 
-    const current = Array.isArray(task.attachments) ? task.attachments : [];
+    const current = Array.isArray(task.attachments) ? task.attachments : (taskAttachmentsMap.get(id) || []);
     const updated = current.filter(a => a.id !== attachmentId);
+    taskAttachmentsMap.set(id, updated);
+    this._persistMetaStore();
 
-    return await this.updateTask(id, userEmail, { attachments: updated });
+    return await this.updateTask(id, userEmail, { attachments: updated }, userRole);
   }
 
-  async deleteTask(id, userEmail) {
+  async deleteTask(id, userEmail, userRole) {
+    const cleanEmail = (userEmail || '').toLowerCase().trim();
+    const isAdmin = userRole === 'admin';
+    taskAttachmentsMap.delete(id);
+    taskAssignmentMap.delete(id);
+    this._persistMetaStore();
+
     try {
       if (supabase && typeof supabase.from === 'function') {
-        const { error } = await supabase
-          .from('aitag_tasks')
-          .delete()
-          .eq('id', id)
-          .eq('user_email', userEmail);
-        
+        let query = supabase.from('aitag_tasks').delete().eq('id', id);
+        if (!isAdmin) query = query.ilike('user_email', cleanEmail);
+        const { error } = await query;
         if (!error) return { deleted: true, id };
       }
     } catch (e) {
       console.warn('[TasksService] Delete task fallback:', e.message);
     }
 
-    const index = SEED_FALLBACK_TASKS.findIndex(t => t.id === id && t.user_email === userEmail);
+    const index = SEED_FALLBACK_TASKS.findIndex(t => t.id === id && (isAdmin || (t.user_email || '').toLowerCase().trim() === cleanEmail));
     if (index !== -1) {
       SEED_FALLBACK_TASKS.splice(index, 1);
+      this._persistMetaStore();
       return { deleted: true, id };
     }
     throw new Error('Task not found or unauthorized');
@@ -338,6 +537,107 @@ class TasksService {
   async incrementBidCount(taskId) {
     const task = SEED_FALLBACK_TASKS.find(t => t.id === taskId);
     if (task) task.total_bids = (task.total_bids || 0) + 1;
+  }
+
+  async assignTask(id, { expertEmail, expertName }) {
+    if (!expertEmail) throw new Error('expertEmail is required');
+    const cleanExpert = (expertEmail || '').toLowerCase().trim();
+    const cleanName = (expertName || '').trim() || cleanExpert;
+
+    const task = await this.getTaskById(id);
+    if (!task) throw new Error('Task not found');
+
+    const updates = {
+      status: 'in-progress',
+      assigned_expert_email: cleanExpert,
+      assigned_expert_name: cleanName
+    };
+
+    taskAssignmentMap.set(id, updates);
+    this._persistMetaStore();
+
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data, error } = await supabase
+          .from('aitag_tasks')
+          .update(updates)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('assigned_expert'))) {
+          const retryRes = await supabase
+            .from('aitag_tasks')
+            .update({ status: 'in-progress' })
+            .eq('id', id)
+            .select()
+            .single();
+
+          if (!retryRes.error && retryRes.data) {
+            return this._enrichTask({ ...retryRes.data, ...updates });
+          }
+        } else if (!error && data) {
+          return this._enrichTask(data);
+        }
+      }
+    } catch (e) {
+      console.warn('[TasksService] Assign task fallback:', e.message);
+    }
+
+    const memTask = SEED_FALLBACK_TASKS.find(t => t.id === id);
+    if (memTask) {
+      Object.assign(memTask, updates);
+      return this._enrichTask(memTask);
+    }
+
+    return this._enrichTask({ ...task, ...updates });
+  }
+
+  async resetTaskAssignment(id) {
+    taskAssignmentMap.delete(id);
+    this._persistMetaStore();
+    const updates = {
+      status: 'open',
+      assigned_expert_email: null,
+      assigned_expert_name: null
+    };
+
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data, error } = await supabase
+          .from('aitag_tasks')
+          .update(updates)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error && (error.code === 'PGRST204' || String(error.message || '').includes('assigned_expert'))) {
+          const retryRes = await supabase
+            .from('aitag_tasks')
+            .update({ status: 'open' })
+            .eq('id', id)
+            .select()
+            .single();
+
+          if (!retryRes.error && retryRes.data) {
+            return this._enrichTask({ ...retryRes.data, ...updates });
+          }
+        } else if (!error && data) {
+          return this._enrichTask(data);
+        }
+      }
+    } catch (e) {
+      console.warn('[TasksService] Reset task fallback:', e.message);
+    }
+
+    const memTask = SEED_FALLBACK_TASKS.find(t => t.id === id);
+    if (memTask) {
+      Object.assign(memTask, updates);
+      return this._enrichTask(memTask);
+    }
+
+    const task = await this.getTaskById(id);
+    return this._enrichTask({ ...task, ...updates });
   }
 }
 

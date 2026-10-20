@@ -158,21 +158,31 @@ const MyPostedTasks = () => {
         )}
 
         {/* Task Assets Modal */}
-        <TaskAssetsModal
-          open={assetsModalOpen}
-          onClose={() => setAssetsModalOpen(false)}
-          task={activeAssetTask}
-          onTaskUpdated={handleTaskUpdated}
-          isOwner={true}
-        />
+        {activeAssetTask && (
+          <TaskAssetsModal
+            open={assetsModalOpen}
+            onClose={() => {
+              setAssetsModalOpen(false);
+              setActiveAssetTask(null);
+            }}
+            task={activeAssetTask}
+            onTaskUpdated={handleTaskUpdated}
+            isOwner={true}
+          />
+        )}
 
         {/* Task Discussion Channel Modal */}
-        <CaseDiscussionModal
-          open={discussionModalOpen}
-          onClose={() => setDiscussionModalOpen(false)}
-          task={activeDiscussionTask}
-          currentUser={user}
-        />
+        {activeDiscussionTask && (
+          <CaseDiscussionModal
+            open={discussionModalOpen}
+            onClose={() => {
+              setDiscussionModalOpen(false);
+              setActiveDiscussionTask(null);
+            }}
+            task={activeDiscussionTask}
+            currentUser={user}
+          />
+        )}
       </Container>
     </DashboardLayout>
   );
