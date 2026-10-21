@@ -426,31 +426,33 @@ CREATE TRIGGER on_bid_inserted
 
 To guarantee immunity against autonomous AI scraping, PostgREST table dumping, and IDOR/BOLA attacks, Row-Level Security (RLS) is enforced across tables in the `public` schema.
 
-> [!NOTE]
-> **RLS Status & Service Role Guarantee:**  
-> RLS is enabled on `public.aitag_tasks` (Project: `byekbjxiowkrtwpsxevz`). When RLS is enabled, PostgREST blocks direct unauthenticated requests using the `anon` publishable key unless explicit policies are created.  
-> **Server-Side Exemption:** The AITAG Express backend utilizes `SUPABASE_SERVICE_ROLE_KEY` (`sb_secret_...`), which automatically bypasses Row-Level Security for all internal administrative, lifecycle, and query operations.
+> [!IMPORTANT]
+> **RLS Verified & Service Role Guarantee:**  
+> RLS is **actively enabled** on `public.aitag_tasks` in Production (`byekbjxiowkrtwpsxevz`).  
+> - **Direct PostgREST Traffic:** API requests from `anon` and `authenticated` client roles are strictly blocked by default until explicit policies are added. This prevents unauthorized scraping of task budgets and brief details via public keys.  
+> - **Server-Side Exemption:** The AITAG Express backend connects via `SUPABASE_SERVICE_ROLE_KEY` (`sb_secret_...`), which automatically bypasses PostgreSQL Row-Level Security for all internal administrative, marketplace, lifecycle, and query operations.
 
-| Table | RLS Enabled | Anon Read | Anon Write | Authenticated Access | Service Role |
+| Table | RLS Status | Anon Read (Direct PostgREST) | Anon Write (Direct PostgREST) | Express Backend Service Role | Authenticated Access (Direct) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `aitag_users` | **TRUE** | ❌ DENIED | ❌ DENIED | Self row only (`auth.uid() = id`) | Full Access |
-| `aitag_tasks` | **ACTIVE (TRUE)** | ✅ Via Policy (`true`) | ❌ DENIED | Own tasks (`user_email = email`) | Full Access |
-| `aitag_bids` | **TRUE** | ❌ DENIED | ❌ DENIED | Task owner or bidding freelancer | Full Access |
-| `aitag_invitations` | **TRUE** | ❌ DENIED | ❌ DENIED | Client or invited freelancer | Full Access |
-| `aitag_profiles` | **TRUE** | ✅ Public read | ❌ DENIED | Own profile only | Full Access |
-| `aitag_packages` | **TRUE** | ✅ Public read | ❌ DENIED | Read-only; Admin mutates | Full Access |
-| `aitag_package_tiers` | **TRUE** | ✅ Public read | ❌ DENIED | Read-only; Admin mutates | Full Access |
-| `aitag_orders` | **TRUE** | ❌ DENIED | ❌ DENIED | Customer, Assigned Expert, or Admin | Full Access |
-| `aitag_case_messages` | **TRUE** | ❌ DENIED | ❌ DENIED | Participants of discussion | Full Access |
+| `aitag_users` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Self row only (`auth.uid() = id`) |
+| `aitag_tasks` | **ENABLED (Verified)** | ❌ BLOCKED (Default)* | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
+| `aitag_bids` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Task owner / Freelancer |
+| `aitag_invitations` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Client / Freelancer |
+| `aitag_profiles` | **ENABLED** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Own profile only |
+| `aitag_packages` | **ENABLED** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Read-only |
+| `aitag_package_tiers` | **ENABLED** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Read-only |
+| `aitag_orders` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Customer / Assigned Expert / Admin |
+| `aitag_case_messages` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Discussion Participants |
 
-### Recommended Supabase RLS Public Read Policies (for Direct Anon PostgREST Access)
-If public users or client applications query Supabase directly via the `anon` publishable key, run these policies in the Supabase SQL Editor:
+*\*Note: Direct anon access to `aitag_tasks` is blocked by Postgres RLS defaults. Clients safely fetch tasks via the Express proxy `/api/tasks`.*
+
+### Optional Supabase RLS Public Read Policy (for Direct Anon PostgREST Access)
+If you ever want client-side JavaScript to query `aitag_tasks` directly using Supabase client library without passing through Express, run this in the Supabase SQL Editor:
 ```sql
--- Allow public viewing of active packages, tiers, tasks, and profiles
-CREATE POLICY "Public read packages" ON aitag_packages FOR SELECT USING (true);
-CREATE POLICY "Public read package tiers" ON aitag_package_tiers FOR SELECT USING (true);
-CREATE POLICY "Public read tasks" ON aitag_tasks FOR SELECT USING (true);
-CREATE POLICY "Public read profiles" ON aitag_profiles FOR SELECT USING (true);
+-- Allow public read access to marketplace tasks
+CREATE POLICY "Public read tasks" ON aitag_tasks 
+  FOR SELECT 
+  USING (true);
 ```
 
 ### Postgres Column-Level Security (Non-Negotiable)
@@ -550,3 +552,16 @@ If a column migration causes failures:
 ALTER TABLE <table_name> DROP COLUMN IF EXISTS <column_name>;
 ```
 Never drop active tables directly in production without a verified backup export from the Supabase dashboard.
+
+---
+
+## 9. Recent Database Changelog & Sync History
+
+| Date / Milestone | Entity Affected | Nature of Change | Impact & Architectural State |
+| :--- | :--- | :--- | :--- |
+| **Oct 2026 (Live)** | `public.aitag_tasks` | **Row-Level Security (RLS) Activated** | RLS enabled in Supabase Production (`byekbjxiowkrtwpsxevz`). PostgREST anon/authenticated direct scraping blocked. Server-side `service_role` operations continue with full permissions. |
+| **Oct 2026** | `aitag_tasks` | **Attachments JSONB Column** | Added `attachments JSONB NOT NULL DEFAULT '[]'::jsonb` to store client-uploaded task briefs and media assets durably across platform restarts. |
+| **Oct 2026** | `aitag_case_messages` | **Discussion Stream Persistence Migration** | Created flexible `order_id TEXT NOT NULL` schema supporting both pilot order IDs and marketplace task IDs, with JSONB deliverable attachments. |
+| **Oct 2026** | `aitag_packages` | **Package Asset Branding Sync** | Updated image URL for `ai-social-media-content-pack` from placeholder red `N` asset to Noir Theory text logo (`/images/packages/nt-text-logo.png`). |
+| **Oct 2026** | Dual Stores | **Durable JSON Metadata Stores** | Deployed `tasks_meta_store.json` and `case_discussions_store.json` to back up and instantly hydrate state on server restarts. |
+
