@@ -382,11 +382,11 @@ CREATE INDEX IF NOT EXISTS idx_aitag_orders_order_number ON aitag_orders(order_n
 
 ### Table 9: `aitag_case_messages`
 - **Feature Slice:** `server/features/aitag-case-discussions/`
-- **Purpose:** Persistent case communication stream between Admin and Expert (or Client) with asset attachments.
+- **Purpose:** Persistent case communication stream between Admin and Expert (or Client) with asset attachments. Supports both Pilot Orders (`ord.id` / `ord.order_number`) and Marketplace Tasks (`task.id`).
 ```sql
 CREATE TABLE IF NOT EXISTS aitag_case_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES aitag_orders(id) ON DELETE CASCADE,
+  order_id TEXT NOT NULL, -- Flexible target identifier (order UUID or task UUID)
   sender_email TEXT NOT NULL,
   sender_name TEXT NOT NULL,
   sender_role TEXT NOT NULL CHECK (sender_role IN ('admin', 'freelancer', 'client')),
@@ -424,18 +424,34 @@ CREATE TRIGGER on_bid_inserted
 
 ## 5. Security & Row-Level Security (RLS) Policy Matrix
 
-To guarantee immunity against autonomous AI scraping, PostgREST table dumping, and IDOR/BOLA attacks:
+To guarantee immunity against autonomous AI scraping, PostgREST table dumping, and IDOR/BOLA attacks, Row-Level Security (RLS) is enforced across tables in the `public` schema.
+
+> [!NOTE]
+> **RLS Status & Service Role Guarantee:**  
+> RLS is enabled on `public.aitag_tasks` (Project: `byekbjxiowkrtwpsxevz`). When RLS is enabled, PostgREST blocks direct unauthenticated requests using the `anon` publishable key unless explicit policies are created.  
+> **Server-Side Exemption:** The AITAG Express backend utilizes `SUPABASE_SERVICE_ROLE_KEY` (`sb_secret_...`), which automatically bypasses Row-Level Security for all internal administrative, lifecycle, and query operations.
 
 | Table | RLS Enabled | Anon Read | Anon Write | Authenticated Access | Service Role |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | `aitag_users` | **TRUE** | ❌ DENIED | ❌ DENIED | Self row only (`auth.uid() = id`) | Full Access |
-| `aitag_tasks` | **TRUE** | ✅ Public open tasks | ❌ DENIED | Own tasks (`user_email = email`) | Full Access |
+| `aitag_tasks` | **ACTIVE (TRUE)** | ✅ Via Policy (`true`) | ❌ DENIED | Own tasks (`user_email = email`) | Full Access |
 | `aitag_bids` | **TRUE** | ❌ DENIED | ❌ DENIED | Task owner or bidding freelancer | Full Access |
 | `aitag_invitations` | **TRUE** | ❌ DENIED | ❌ DENIED | Client or invited freelancer | Full Access |
 | `aitag_profiles` | **TRUE** | ✅ Public read | ❌ DENIED | Own profile only | Full Access |
 | `aitag_packages` | **TRUE** | ✅ Public read | ❌ DENIED | Read-only; Admin mutates | Full Access |
 | `aitag_package_tiers` | **TRUE** | ✅ Public read | ❌ DENIED | Read-only; Admin mutates | Full Access |
 | `aitag_orders` | **TRUE** | ❌ DENIED | ❌ DENIED | Customer, Assigned Expert, or Admin | Full Access |
+| `aitag_case_messages` | **TRUE** | ❌ DENIED | ❌ DENIED | Participants of discussion | Full Access |
+
+### Recommended Supabase RLS Public Read Policies (for Direct Anon PostgREST Access)
+If public users or client applications query Supabase directly via the `anon` publishable key, run these policies in the Supabase SQL Editor:
+```sql
+-- Allow public viewing of active packages, tiers, tasks, and profiles
+CREATE POLICY "Public read packages" ON aitag_packages FOR SELECT USING (true);
+CREATE POLICY "Public read package tiers" ON aitag_package_tiers FOR SELECT USING (true);
+CREATE POLICY "Public read tasks" ON aitag_tasks FOR SELECT USING (true);
+CREATE POLICY "Public read profiles" ON aitag_profiles FOR SELECT USING (true);
+```
 
 ### Postgres Column-Level Security (Non-Negotiable)
 Anonymous access to `password_hash` is explicitly revoked at the Postgres engine level:
@@ -445,18 +461,19 @@ REVOKE SELECT (password_hash) ON aitag_users FROM anon, authenticated;
 
 ---
 
-## 6. In-RAM Ephemeral Fallback Store Architecture
+## 6. Durable File-Backed & In-RAM Ephemeral Fallback Store Architecture
 
-When running in local sandboxes without live cloud internet, during automated test runs, or if Supabase experiences a network timeout, AITAG services employ resilient in-RAM fallback maps:
+When running in local sandboxes without live cloud internet, during automated test runs, or when Supabase schema migrations are pending, AITAG services employ a dual-layer zero-downtime architecture combining in-RAM caching with durable local JSON stores:
 
+- **Tasks & Asset Retention (`aitag-tasks`):**
+  - **Durable File Store:** [`server/features/aitag-tasks/tasks_meta_store.json`](file:///d:/Hayat/AITAG/server/features/aitag-tasks/tasks_meta_store.json)
+  - **Purpose:** Automatically hydrates and persists task attachments (e.g. uploaded brief reference files), administrative expert assignments, and custom fallback tasks so restarts or schema cache refreshes never reset asset counts or assignments.
+- **Case Discussions Stream (`aitag-case-discussions`):**
+  - **Durable File Store:** [`server/features/aitag-case-discussions/case_discussions_store.json`](file:///d:/Hayat/AITAG/server/features/aitag-case-discussions/case_discussions_store.json)
+  - **Purpose:** Persists all case communication messages and attached deliverables across reboots and local redeployments even before `aitag_case_messages` is migrated in Supabase.
 - **Orders (`aitag-service-orders`):** `inMemoryOrders = new Map()` stores full 8-stage orders with instant atomic lookup.
-- **Packages (`aitag-service-packages`):** Built-in hardcoded fallback catalog of the 3 pilot packages and 9 tiers ensures UI never renders empty.
-- **Tasks (`aitag-tasks`):** 8 featured AI service tasks persist in memory if DB connection is unavailable.
-- **Teardown Invariant:** The PIET test harness assigns unique run nonces (`piet-client-${RUN_ID}@aitag-test.local`) and explicitly executes:
-  ```javascript
-  await supabase.from('aitag_orders').delete().eq('id', ephemeralOrderId);
-  ```
-  guaranteeing **zero ghost test records** linger in the database.
+- **Packages (`aitag-service-packages`):** Built-in catalog of the 3 pilot packages and 9 tiers ensures UI never renders empty.
+- **Teardown Invariant:** The PIET test harness assigns unique run nonces (`piet-client-${RUN_ID}@aitag-test.local`) and explicitly executes teardown queries, guaranteeing **zero ghost test records** linger in the database.
 
 ---
 
