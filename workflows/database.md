@@ -428,23 +428,23 @@ To guarantee immunity against autonomous AI scraping, PostgREST table dumping, a
 
 > [!IMPORTANT]
 > **RLS Verified & Service Role Guarantee:**  
-> RLS is **actively enabled** on `public.aitag_tasks` in Production (`byekbjxiowkrtwpsxevz`).  
-> - **Direct PostgREST Traffic:** API requests from `anon` and `authenticated` client roles are strictly blocked by default until explicit policies are added. This prevents unauthorized scraping of task budgets and brief details via public keys.  
+> RLS is **actively enabled and verified across all 9 public tables** in both Production (`byekbjxiowkrtwpsxevz`) and Development (`trdwewugrqdpopzqhkuk`).  
+> - **Direct PostgREST Traffic:** API requests from `anon` and unauthenticated client roles are strictly blocked by default on sensitive tables (`aitag_users`, `aitag_orders`, `aitag_bids`, `aitag_invitations`, `aitag_case_messages`). This prevents unauthorized scraping of user identities, financial records, client briefs, and contractor proposals.  
+> - **Public Marketplace Catalogs:** Safe `SELECT` policies are enabled for `aitag_packages`, `aitag_package_tiers`, `aitag_profiles`, and `aitag_tasks` to power marketplace discovery.  
+> - **Column-Level Security:** Anonymous and authenticated access to `aitag_users.password_hash` is explicitly revoked at the PostgreSQL engine level (`REVOKE SELECT (password_hash)`).  
 > - **Server-Side Exemption:** The AITAG Express backend connects via `SUPABASE_SERVICE_ROLE_KEY` (`sb_secret_...`), which automatically bypasses PostgreSQL Row-Level Security for all internal administrative, marketplace, lifecycle, and query operations.
 
 | Table | RLS Status | Anon Read (Direct PostgREST) | Anon Write (Direct PostgREST) | Express Backend Service Role | Authenticated Access (Direct) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `aitag_users` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Self row only (`auth.uid() = id`) |
-| `aitag_tasks` | **ENABLED (Verified)** | ❌ BLOCKED (Default)* | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
-| `aitag_bids` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Task owner / Freelancer |
-| `aitag_invitations` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Client / Freelancer |
-| `aitag_profiles` | **ENABLED** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Own profile only |
-| `aitag_packages` | **ENABLED** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Read-only |
-| `aitag_package_tiers` | **ENABLED** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Read-only |
-| `aitag_orders` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Customer / Assigned Expert / Admin |
-| `aitag_case_messages` | **ENABLED** | ❌ BLOCKED | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Discussion Participants |
-
-*\*Note: Direct anon access to `aitag_tasks` is blocked by Postgres RLS defaults. Clients safely fetch tasks via the Express proxy `/api/tasks`.*
+| `aitag_users` | **ENABLED (Verified)** | ❌ BLOCKED (0 rows) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
+| `aitag_tasks` | **ENABLED (Verified)** | ✅ Allowed (Public browse) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
+| `aitag_bids` | **ENABLED (Verified)** | ❌ BLOCKED (0 rows) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
+| `aitag_invitations` | **ENABLED (Verified)** | ❌ BLOCKED (0 rows) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
+| `aitag_profiles` | **ENABLED (Verified)** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
+| `aitag_packages` | **ENABLED (Verified)** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Read-only |
+| `aitag_package_tiers` | **ENABLED (Verified)** | ✅ Allowed (Public view) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Read-only |
+| `aitag_orders` | **ENABLED (Verified)** | ❌ BLOCKED (0 rows) | ❌ BLOCKED (401 RLS Violation) | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
+| `aitag_case_messages` | **ENABLED (Verified)** | ❌ BLOCKED (0 rows) | ❌ BLOCKED | ✅ FULL ACCESS (Bypasses RLS) | Blocked (Managed via Express API) |
 
 ### Optional Supabase RLS Public Read Policy (for Direct Anon PostgREST Access)
 If you ever want client-side JavaScript to query `aitag_tasks` directly using Supabase client library without passing through Express, run this in the Supabase SQL Editor:
@@ -559,7 +559,7 @@ Never drop active tables directly in production without a verified backup export
 
 | Date / Milestone | Entity Affected | Nature of Change | Impact & Architectural State |
 | :--- | :--- | :--- | :--- |
-| **Oct 2026 (Live)** | `public.aitag_tasks` | **Row-Level Security (RLS) Activated** | RLS enabled in Supabase Production (`byekbjxiowkrtwpsxevz`). PostgREST anon/authenticated direct scraping blocked. Server-side `service_role` operations continue with full permissions. |
+| **Oct 2026 (Live)** | All 9 Tables (`aitag_*`) | **Full Suite Row-Level Security (RLS) & Hardening Migration** | RLS enabled across all 9 public tables in Production (`byekbjxiowkrtwpsxevz`) and Development (`trdwewugrqdpopzqhkuk`). Anon direct scraping of users, orders, bids, invitations, and case messages 100% blocked. Catalog public read enabled (`packages`, `tiers`, `profiles`, `tasks`). Column-level security revoked on `password_hash`. `aitag_case_messages` table created live. `aitag_tasks.attachments` JSONB column added live. Account lifecycle indexes deployed. |
 | **Oct 2026** | `aitag_tasks` | **Attachments JSONB Column** | Added `attachments JSONB NOT NULL DEFAULT '[]'::jsonb` to store client-uploaded task briefs and media assets durably across platform restarts. |
 | **Oct 2026** | `aitag_case_messages` | **Discussion Stream Persistence Migration** | Created flexible `order_id TEXT NOT NULL` schema supporting both pilot order IDs and marketplace task IDs, with JSONB deliverable attachments. |
 | **Oct 2026** | `aitag_packages` | **Package Asset Branding Sync** | Updated image URL for `ai-social-media-content-pack` from placeholder red `N` asset to Noir Theory text logo (`/images/packages/nt-text-logo.png`). |
