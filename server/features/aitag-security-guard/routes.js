@@ -1,21 +1,25 @@
 /**
- * AITAG Security Guard — Routes & Middleware Exporter
+ * AITAG Security Guard — Routes & Grandchild Architecture Exporter
  * Base Path: /api/security
+ * ==============================================================================
  */
 
 const express = require('express');
 const router = express.Router();
 const service = require('./service');
 
-// Import all middlewares
-const securityHeaders = require('./middleware/security-headers');
-const { authLimiter, apiLimiter, createRateLimiter } = require('./middleware/rate-limiter');
-const { xssSanitizer, sanitizeString, sanitizeObject } = require('./middleware/xss-sanitizer');
-const { validateSafeUrl, sanitizeStoragePath, isPrivateIp } = require('./middleware/ssrf-guard');
-const { requireAuth, requireRole, verifyResourceAccess } = require('./middleware/bola-guard');
-const { logScrubberMiddleware, scrubObject } = require('./middleware/log-scrubber');
+// Import all 9 Grandchild Security Modules
+const securityHeaders = require('./guards/headers-guard');
+const { authLimiter, apiLimiter, createRateLimiter } = require('./guards/rate-limiter');
+const { xssSanitizer, sanitizeString, sanitizeObject } = require('./guards/xss-sanitizer');
+const { validateSafeUrl, sanitizeStoragePath, isPrivateIp } = require('./guards/ssrf-guard');
+const { requireAuth, requireRole, verifyResourceAccess } = require('./guards/bola-guard');
+const { logScrubberMiddleware, scrubObject } = require('./guards/log-scrubber');
+const { validateUploadedFile, secureMulterFilter, ALLOWED_MIME_TYPES, ALLOWED_EXTENSIONS, BANNED_EXTENSIONS } = require('./guards/upload-guard');
+const { verifyHmacSignature, validatePasswordStrength, verifyJwtEntropy } = require('./guards/crypto-guard');
+const { authenticateWsConnection, joinRoom, leaveRoom, broadcastToRoom } = require('./guards/websocket-guard');
 
-// Export middlewares for use across Kernel slices
+// Export all grandchild guards on the router for clean cross-slice importing
 router.securityHeaders = securityHeaders;
 router.authLimiter = authLimiter;
 router.apiLimiter = apiLimiter;
@@ -31,6 +35,18 @@ router.requireRole = requireRole;
 router.verifyResourceAccess = verifyResourceAccess;
 router.logScrubberMiddleware = logScrubberMiddleware;
 router.scrubObject = scrubObject;
+router.validateUploadedFile = validateUploadedFile;
+router.secureMulterFilter = secureMulterFilter;
+router.ALLOWED_MIME_TYPES = ALLOWED_MIME_TYPES;
+router.ALLOWED_EXTENSIONS = ALLOWED_EXTENSIONS;
+router.BANNED_EXTENSIONS = BANNED_EXTENSIONS;
+router.verifyHmacSignature = verifyHmacSignature;
+router.validatePasswordStrength = validatePasswordStrength;
+router.verifyJwtEntropy = verifyJwtEntropy;
+router.authenticateWsConnection = authenticateWsConnection;
+router.joinRoom = joinRoom;
+router.leaveRoom = leaveRoom;
+router.broadcastToRoom = broadcastToRoom;
 
 // GET /api/security/audit — 20-Point Security Matrix Real-Time Audit
 router.get('/audit', (req, res) => {
@@ -47,6 +63,7 @@ router.get('/health', (req, res) => {
   res.json({
     status: 'ACTIVE',
     engine: 'AITAG Fractal Security Guard',
+    architecture: 'Grandchild Security Pattern',
     activeControls: 20,
     timestamp: new Date().toISOString()
   });
@@ -60,6 +77,16 @@ router.post('/validate-url', (req, res) => {
     return res.status(400).json({ success: false, error: result.reason });
   }
   res.json({ success: true, url: result.url });
+});
+
+// POST /api/security/validate-upload — Upload Integrity Guard Probe Tool
+router.post('/validate-upload', (req, res) => {
+  const { filename, mimetype } = req.body || {};
+  const result = validateUploadedFile({ originalname: filename, mimetype });
+  if (!result.valid) {
+    return res.status(400).json({ success: false, error: result.error });
+  }
+  res.json({ success: true, message: 'File format is valid and safe' });
 });
 
 module.exports = router;

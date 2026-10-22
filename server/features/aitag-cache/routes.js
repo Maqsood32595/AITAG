@@ -21,7 +21,24 @@ router.get('/stats', (req, res) => {
 });
 
 // POST /api/cache/purge — Programmatic or administrative cache invalidation
-router.post('/purge', (req, res) => {
+router.post('/purge', (req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, error: 'Admin authentication required to purge cache in production' });
+    }
+    try {
+      const authService = require('../aitag-auth/service');
+      const user = authService.verifyToken(authHeader.split(' ')[1]);
+      if (user.role !== 'admin') {
+        return res.status(403).json({ success: false, error: 'Forbidden: Only administrators can purge cache' });
+      }
+    } catch {
+      return res.status(401).json({ success: false, error: 'Invalid authentication token' });
+    }
+  }
+  next();
+}, (req, res) => {
   const { tag, pattern, clearAll } = req.body || {};
 
   if (clearAll) {

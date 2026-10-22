@@ -136,8 +136,31 @@ The zero-mock Persistent In-RAM Ephemeral Twin test suite confirms all invariant
   ✅ [Gate 8: Adaptive Cache Invariants] In-RAM LRU Capacity & Eviction invariant: capacity limits prevent memory leaks
   ✅ [Gate 8: Adaptive Cache Invariants] Cache Telemetry & Observability invariant: GET /api/cache/stats reports metrics
 ==============================================================================
-Summary: 51 Passed, 0 Failed out of 51 Assertions (100% Green).
+Summary: 68 Passed, 0 Failed out of 68 Assertions (100% Green).
 ==============================================================================
+```
+
+---
+
+## Grandchild Security Architecture (`aitag-security-guard/guards/`)
+
+In alignment with the Fractal Kernel Grandchild Architecture pattern (established in `aitag-analytics`), the `aitag-security-guard` slice delegates each specialized defensive layer into an isolated grandchild guard module under `server/features/aitag-security-guard/guards/`:
+
+```
+server/features/aitag-security-guard/
+├── feature.manifest.json         # Slice discovery manifest (Grandchild Pattern, 9 layers)
+├── routes.js                     # Public API endpoints & middleware exports
+├── service.js                    # Grandchild Coordinator orchestrating all 9 guards
+└── guards/                       # 9 Specialized Grandchild Security Modules:
+    ├── headers-guard.js          # Layer 1: OWASP Security Headers (nosniff, frame protection, CSP)
+    ├── rate-limiter.js           # Layer 2: Sliding-Window Auth (20/15m) & API (300/1m) limiters
+    ├── ssrf-guard.js             # Layer 3: SSRF IP validator & storage path traversal guard
+    ├── xss-sanitizer.js          # Layer 4: Multi-vector recursive XSS sanitizer (nested tag safe)
+    ├── bola-guard.js             # Layer 5: Broken Object Level Authorization & RBAC guards
+    ├── log-scrubber.js           # Layer 6: Sensitive credential & PII log redaction
+    ├── upload-guard.js           # Layer 7: Multipart upload validator (blocks .html, .svg, .exe)
+    ├── crypto-guard.js           # Layer 8: Timing-safe HMAC verification & password hygiene
+    └── websocket-guard.js        # Layer 9: WebSocket token validation & channel room isolation
 ```
 
 ---

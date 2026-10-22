@@ -1,8 +1,10 @@
 {
   "id": "aitag-security-guard",
   "name": "AITAG Security Guard & Hardening Engine",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "basePath": "/api/security",
   "enabled": true,
-  "description": "Enterprise security slice implementing OWASP headers, rate limiting, SSRF guard, BOLA/IDOR protection, XSS sanitization, and sensitive log scrubbing across the Fractal Kernel."
+  "architecture": "Grandchild Pattern",
+  "grandchildLayers": 9,
+  "description": "Enterprise security slice implementing 9 grandchild layers: headers, rate limiting, SSRF guard, XSS sanitization, BOLA/IDOR protection, sensitive log scrubbing, upload integrity guard, cryptographic verification, and WebSocket channel isolation."
 }

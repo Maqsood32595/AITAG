@@ -185,6 +185,25 @@ async function runPietSuite() {
       }
     });
 
+    await t('Verifies aitag-security-guard Grandchild Architecture module integrity', () => {
+      const guardsDir = resolve('server/features/aitag-security-guard/guards');
+      const expectedGrandchildren = [
+        'headers-guard.js',
+        'rate-limiter.js',
+        'ssrf-guard.js',
+        'xss-sanitizer.js',
+        'bola-guard.js',
+        'log-scrubber.js',
+        'upload-guard.js',
+        'crypto-guard.js',
+        'websocket-guard.js'
+      ];
+      for (const gc of expectedGrandchildren) {
+        const p = join(guardsDir, gc);
+        assert(existsSync(p), `Missing security grandchild guard: ${gc}`);
+      }
+    });
+
     await t('Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 17 slices', async () => {
       const res = await requestJson('/api/features');
       eq(res.status, 200, 'GET /api/features must return 200 OK');
@@ -974,6 +993,79 @@ async function runPietSuite() {
       assert(res.data.token, 'Must return signed JWT token');
       eq(res.data.user.password_hash, undefined, 'password_hash must NEVER be present in client API response');
       eq(res.data.user.role, 'client', 'Role must match allowed role');
+    });
+
+    await t('Upload Guard invariant: rejects dangerous executable and script uploads with HTTP 400', async () => {
+      // 1. Rejects HTML upload (Stored XSS vector)
+      const res1 = await requestJson('/api/security/validate-upload', {
+        method: 'POST',
+        body: JSON.stringify({ filename: 'exploit.html', mimetype: 'text/html' })
+      });
+      eq(res1.status, 400, 'HTML upload must be rejected with HTTP 400');
+      assert(res1.data.error.includes('strictly prohibited') || res1.data.error.includes('Stored XSS'), 'Must mention Stored XSS defense');
+
+      // 2. Rejects SVG upload (Stored XSS vector)
+      const res2 = await requestJson('/api/security/validate-upload', {
+        method: 'POST',
+        body: JSON.stringify({ filename: 'vector.svg', mimetype: 'image/svg+xml' })
+      });
+      eq(res2.status, 400, 'SVG upload must be rejected with HTTP 400');
+
+      // 3. Rejects executable upload
+      const res3 = await requestJson('/api/security/validate-upload', {
+        method: 'POST',
+        body: JSON.stringify({ filename: 'malware.exe', mimetype: 'application/x-msdownload' })
+      });
+      eq(res3.status, 400, 'EXE upload must be rejected with HTTP 400');
+
+      // 4. Accepts valid PNG upload
+      const res4 = await requestJson('/api/security/validate-upload', {
+        method: 'POST',
+        body: JSON.stringify({ filename: 'screenshot.png', mimetype: 'image/png' })
+      });
+      eq(res4.status, 200, 'Safe PNG upload must return 200 OK');
+    });
+
+    await t('Crypto Guard invariant: verifies timing-safe HMAC signature and password strength validation', async () => {
+      const { verifyHmacSignature, validatePasswordStrength } = await import('../../server/features/aitag-security-guard/guards/crypto-guard.js');
+      const secret = 'super-secret-hmac-key-2026';
+      const payload = { event: 'payment.captured', amount: 5000 };
+      const crypto = await import('crypto');
+      const validSig = crypto.createHmac('sha256', secret).update(JSON.stringify(payload)).digest('hex');
+
+      // 1. Valid signature passes
+      const result1 = verifyHmacSignature(payload, validSig, secret);
+      eq(result1.verified, true, 'Valid HMAC signature must verify');
+
+      // 2. Tampered signature fails
+      const tamperedSig = 'a' + validSig.slice(1);
+      const result2 = verifyHmacSignature(payload, tamperedSig, secret);
+      eq(result2.verified, false, 'Tampered HMAC signature must fail');
+
+      // 3. Password strength rejection
+      const weakCheck = validatePasswordStrength('123456');
+      eq(weakCheck.valid, false, 'Weak password must be rejected');
+      const strongCheck = validatePasswordStrength('AitagEnterprise2026!');
+      eq(strongCheck.valid, true, 'Strong password must be accepted');
+    });
+
+    await t('Multi-vector XSS Sanitizer invariant: disarms nested script tags and HTML5 event handlers', async () => {
+      const { sanitizeString } = await import('../../server/features/aitag-security-guard/guards/xss-sanitizer.js');
+
+      // 1. Nested tag bypass: <scr<script>ipt>alert(1)</script>
+      const nested = '<scr<script>ipt>alert(1)</script>';
+      const cleanedNested = sanitizeString(nested);
+      assert(!cleanedNested.includes('<script'), 'Nested script tags must be completely eliminated');
+
+      // 2. HTML5 onfocus autofocus vector
+      const autofocusPayload = '<img src=x onfocus=alert(1) autofocus>';
+      const cleanedAutofocus = sanitizeString(autofocusPayload);
+      assert(!cleanedAutofocus.includes('onfocus'), 'onfocus event handler must be removed');
+
+      // 3. ontoggle vector
+      const togglePayload = '<details open ontoggle=alert(1)>';
+      const cleanedToggle = sanitizeString(togglePayload);
+      assert(!cleanedToggle.includes('ontoggle'), 'ontoggle event handler must be removed');
     });
 
     // --------------------------------------------------------------------------

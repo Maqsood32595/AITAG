@@ -31,9 +31,12 @@ const storage = multer.diskStorage({
   }
 });
 
+const { secureMulterFilter } = require('../aitag-security-guard/guards/upload-guard');
+
 const upload = multer({
   storage,
-  limits: { fileSize: 25 * 1024 * 1024 } // 25MB max per attachment
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB max per attachment
+  fileFilter: secureMulterFilter
 });
 
 /**

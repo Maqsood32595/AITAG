@@ -67,9 +67,14 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+const { verifyResourceAccess } = require('../aitag-security-guard/guards/bola-guard');
+
 // POST /api/service-orders/:id/assign — Admin assigns expert
-router.post('/:id/assign', async (req, res) => {
+router.post('/:id/assign', extractUser, async (req, res) => {
   try {
+    if (req.user && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Forbidden: Only administrators can assign experts' });
+    }
     const { expertEmail, expertName } = req.body;
     if (!expertEmail) {
       return res.status(400).json({ success: false, error: 'expertEmail is required' });
@@ -82,8 +87,11 @@ router.post('/:id/assign', async (req, res) => {
 });
 
 // POST /api/service-orders/:id/reset — Admin resets expert assignment back to REQUESTED
-router.post('/:id/reset', async (req, res) => {
+router.post('/:id/reset', extractUser, async (req, res) => {
   try {
+    if (req.user && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Forbidden: Only administrators can reset order assignments' });
+    }
     const order = await service.resetAssignment(req.params.id);
     res.json({ success: true, order });
   } catch (err) {
@@ -92,8 +100,11 @@ router.post('/:id/reset', async (req, res) => {
 });
 
 // POST /api/service-orders/:id/activate — Admin marks payment received & activates project
-router.post('/:id/activate', async (req, res) => {
+router.post('/:id/activate', extractUser, async (req, res) => {
   try {
+    if (req.user && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Forbidden: Only administrators can activate orders' });
+    }
     const order = await service.activateProject(req.params.id);
     res.json({ success: true, order });
   } catch (err) {
