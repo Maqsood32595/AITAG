@@ -48,19 +48,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const res = await authApi.login({ email, password });
     localStorage.setItem('aitag_token', res.data.token);
     setUser(res.data.user);
+    return res.data.user;
   };
 
   const register = async (data: RegisterData) => {
     const res = await authApi.register(data);
     localStorage.setItem('aitag_token', res.data.token);
     setUser(res.data.user);
+    return res.data.user;
   };
 
   const loginWithGoogle = async (credential: string, role?: string) => {
     const res = await oauthApi.google({ credential, role });
     localStorage.setItem('aitag_token', res.data.token);
     setUser(res.data.user);
-    return { isNew: res.data.isNew };
+    return { isNew: res.data.isNew, user: res.data.user };
   };
 
   const logout = () => {

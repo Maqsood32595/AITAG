@@ -4,7 +4,40 @@
 
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const service = require('./service');
+
+// Configure multer storage for customer asset uploads
+const uploadDir = path.join(__dirname, '../../public/uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const safeBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    cb(null, `${Date.now()}-${safeBase}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB max
+  fileFilter: (req, file, cb) => {
+    const banned = ['.exe', '.bat', '.sh', '.php', '.js', '.vbs', '.py'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (banned.includes(ext)) {
+      return cb(new Error('Executable file types are not permitted.'));
+    }
+    cb(null, true);
+  }
+});
 
 // Optional/flexible auth extractor to enforce identity without breaking unauthenticated probes
 const extractUser = (req, res, next) => {
@@ -19,6 +52,23 @@ const extractUser = (req, res, next) => {
   }
   next();
 };
+
+// POST /api/service-orders/upload-assets — Upload customer images/documents
+router.post('/upload-assets', (req, res) => {
+  upload.array('files', 10)(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, error: err.message });
+    }
+    const uploaded = (req.files || []).map((f) => ({
+      originalName: f.originalname,
+      filename: f.filename,
+      size: f.size,
+      mimetype: f.mimetype,
+      url: `/uploads/${f.filename}`
+    }));
+    return res.status(200).json({ success: true, count: uploaded.length, files: uploaded });
+  });
+});
 
 // POST /api/service-orders — Submit customer brief & create order
 router.post('/', async (req, res) => {

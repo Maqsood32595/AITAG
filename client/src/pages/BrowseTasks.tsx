@@ -84,7 +84,7 @@ const BrowseTasks = () => {
               mb: 3
             }}
           >
-            “Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services — starting at just ₹999.”
+            “Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services — starting at just ₹1,499.”
           </Typography>
           <Button
             component={Link}

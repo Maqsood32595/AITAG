@@ -247,25 +247,25 @@ async function runPietSuite() {
       eq(res.status, 200, 'GET /api/service-packages must return 200 OK');
       eq(res.data.success, true, 'Response success must be true');
       assert(Array.isArray(res.data.packages), 'packages must be an array');
-      assert(res.data.packages.length >= 3, 'Must contain at least the 3 launch packages');
+      assert(res.data.packages.length >= 4, 'Must contain at least the 4 SMB productized packages');
       allPackages = res.data.packages;
     });
 
-    await t('Verifies the 3 pilot packages exist with their exact slugs', () => {
+    await t('Verifies the 4 productized SMB packages exist with their exact slugs', () => {
       const slugs = allPackages.map((p) => p.slug);
       assert(slugs.includes('ai-product-photo-makeover'), 'Missing ai-product-photo-makeover');
-      assert(slugs.includes('ai-social-media-content-pack'), 'Missing ai-social-media-content-pack');
+      assert(slugs.includes('ai-marketing-video-reels'), 'Missing ai-marketing-video-reels');
       assert(slugs.includes('ai-website-landing-page'), 'Missing ai-website-landing-page');
+      assert(slugs.includes('ai-logo-identity-kit'), 'Missing ai-logo-identity-kit');
     });
 
-    await t('Verifies each package has 3 tiers (package_1/beginner, package_2/medium, package_3/expert)', () => {
+    await t('Verifies each package has 2 binary tiers (starter and pro)', () => {
       for (const pkg of allPackages) {
         assert(Array.isArray(pkg.tiers), `Package ${pkg.slug} has no tiers array`);
-        eq(pkg.tiers.length, 3, `Package ${pkg.slug} must have exactly 3 tiers`);
+        eq(pkg.tiers.length, 2, `Package ${pkg.slug} must have exactly 2 tiers (starter and pro)`);
         const tierNames = pkg.tiers.map((t) => t.tier_name.toLowerCase());
-        assert(tierNames.includes('package_1') || tierNames.includes('beginner'), `${pkg.slug} missing tier 1`);
-        assert(tierNames.includes('package_2') || tierNames.includes('medium'), `${pkg.slug} missing tier 2`);
-        assert(tierNames.includes('package_3') || tierNames.includes('expert'), `${pkg.slug} missing tier 3`);
+        assert(tierNames.includes('starter'), `${pkg.slug} missing starter tier`);
+        assert(tierNames.includes('pro'), `${pkg.slug} missing pro tier`);
       }
     });
 
@@ -454,18 +454,18 @@ async function runPietSuite() {
     // --------------------------------------------------------------------------
     gate('Gate 5: Role Journeys');
 
-    await t('Customer submits brief for AI Product Listing & Description (REQUESTED)', async () => {
+    await t('Customer submits brief for AI Product Photo Makeover (Starter tier)', async () => {
       const res = await requestJson('/api/service-orders', {
         method: 'POST',
         body: JSON.stringify({
-          package_slug: 'ai-product-listing-description',
-          tier_name: 'package_1',
+          package_slug: 'ai-product-photo-makeover',
+          tier_name: 'starter',
           customer_name: 'PIET Test Client',
           customer_email: NONCE_EMAIL,
           customer_phone: '+91 98765 43210',
           business_name: 'Organic Honey Co.',
           business_type: 'Home Food Business',
-          brief_notes: 'Need marketplace bullet points and keyword tags for Meesho and Amazon',
+          brief_notes: 'Need 10 clean white background photos for Amazon & Flipkart listings',
           uploaded_assets: ['https://example.com/raw_jar.jpg']
         })
       });
@@ -477,9 +477,36 @@ async function runPietSuite() {
       ephemeralOrderId = order.id;
 
       eq(order.status, 'REQUESTED', 'Initial order status must be REQUESTED');
-      eq(Number(order.agreed_price), 999, 'Agreed price must match Package 1 min price (₹999)');
-      eq(Number(order.platform_fee), 50, 'Platform fee must be 5% (Math.round(999 * 0.05) = 50)');
-      eq(Number(order.expert_payout), 949, 'Expert payout must be 95% (999 - 50 = 949)');
+      eq(Number(order.agreed_price), 1499, 'Agreed price must match Starter min price (₹1499)');
+      eq(Number(order.platform_fee), 150, 'Platform fee must be 10% (Math.round(1499 * 0.10) = 150)');
+      eq(Number(order.expert_payout), 1349, 'Expert payout must be 90% (1499 - 150 = 1349)');
+    });
+
+    await t('Customer uploads project assets via POST /api/service-orders/upload-assets', async () => {
+      const formData = new FormData();
+      const blob = new Blob(['sample-image-binary-data'], { type: 'image/png' });
+      formData.append('files', blob, 'customer_product_raw.png');
+
+      const res = await fetch(`${BASE}/api/service-orders/upload-assets`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      eq(res.status, 200, 'Upload assets must return 200 OK');
+      eq(data.success, true, 'Upload must succeed');
+      assert(Array.isArray(data.files), 'data.files must be array');
+      eq(data.count, 1, 'Must upload 1 file');
+      assert(data.files[0].url.startsWith('/uploads/'), 'File URL must start with /uploads/');
+    });
+
+    await t('Binary tier resolver maps legacy package_1/2/3 to starter/pro', async () => {
+      const mod = await import('../../server/features/aitag-service-packages/service.js');
+      const pkgService = mod.default || mod;
+      assert(pkgService.resolveAlias('package_1') === 'starter', 'package_1 -> starter');
+      assert(pkgService.resolveAlias('beginner') === 'starter', 'beginner -> starter');
+      assert(pkgService.resolveAlias('package_2') === 'pro', 'package_2 -> pro');
+      assert(pkgService.resolveAlias('package_3') === 'pro', 'package_3 -> pro');
+      assert(pkgService.resolveAlias('expert') === 'pro', 'expert -> pro');
     });
 
     await t('Negative input defense: rejects assigning expert without expertEmail with HTTP 400', async () => {
@@ -616,15 +643,15 @@ async function runPietSuite() {
       assert(res.data.order.testimonial.includes('Meesho'), 'Testimonial must be saved');
     });
 
-    await t('Enforces finished order physical invariants and 5% platform commission accounting', async () => {
+    await t('Enforces finished order physical invariants and 10% platform commission accounting', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}`);
       eq(res.status, 200, 'Fetch order by ID must return 200 OK');
       const order = res.data.order;
       eq(order.status, 'COMPLETED', 'Order status must be COMPLETED');
       eq(order.rating, 5, 'Order rating must be 5');
-      eq(Number(order.agreed_price), 999, 'Agreed price must remain ₹999');
-      eq(Number(order.platform_fee), 50, 'Platform commission must be 5% (₹50)');
-      eq(Number(order.expert_payout), 949, 'Expert net payout must be 95% (₹949)');
+      eq(Number(order.agreed_price), 1499, 'Agreed price must remain ₹1,499');
+      eq(Number(order.platform_fee), 150, 'Platform commission must be 10% (₹150)');
+      eq(Number(order.expert_payout), 1349, 'Expert net payout must be 90% (₹1,349)');
       assert(order.assigned_expert_email === NONCE_EXPERT, 'Assigned expert email preserved');
     });
 

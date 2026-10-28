@@ -98,8 +98,9 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     setLoading(true);
     setErrorMsg('');
     try {
-      await loginWithGoogle(response.credential, role);
-      navigate('/dashboard');
+      const res = await loginWithGoogle(response.credential, role);
+      const userRole = res?.user?.role || role;
+      navigate(userRole === 'admin' || userRole === 'freelancer' ? '/dashboard' : '/');
     } catch (err: any) {
       const msg = err.response?.data?.error || err.message || 'Google authentication failed';
       setErrorMsg(msg);

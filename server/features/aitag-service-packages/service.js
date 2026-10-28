@@ -1,18 +1,66 @@
 /**
- * AITAG Service Packages — Data Service
- * Reads packages & tiers from Supabase, with resilient fallback.
- * Complies with D:\Hayat\Modifications (Edits to MVP & Pilot Catalogue)
+ * AITAG Service Packages — Fractal Kernel Child Module
+ * =====================================================
+ * Implements the Binary Pricing Architecture (Starter / Pro).
+ * 4 productized services for Indian SMBs with 24–48h delivery.
+ *
+ * Architecture: Fractal Kernel → Child (service-packages) → Grandchild (catalog-validator, tier-resolver)
+ * Ref: D:\Hayat\AITAG\new implementations\indian_smb_productized_services_and_pricing.md
  */
 
 const supabase = require('../../supabase');
 
-// Default fallback data matching AITAG updated MVP requirements
+// ─────────────────────────────────────────────────────────
+// GRANDCHILD: Binary Tier Resolver
+// Maps any legacy tier name to the new binary model
+// ─────────────────────────────────────────────────────────
+const TIER_ALIAS_MAP = {
+  package_1: 'starter',
+  beginner: 'starter',
+  starter: 'starter',
+  package_2: 'pro',
+  package_3: 'pro',
+  medium: 'pro',
+  expert: 'pro',
+  pro: 'pro',
+};
+
+function resolveTierAlias(tierName) {
+  const key = (tierName || '').toLowerCase().trim();
+  return TIER_ALIAS_MAP[key] || 'starter';
+}
+
+// ─────────────────────────────────────────────────────────
+// GRANDCHILD: Catalog Validator
+// Validates package structure before serving
+// ─────────────────────────────────────────────────────────
+function validatePackage(pkg) {
+  if (!pkg.slug || !pkg.title || !Array.isArray(pkg.tiers)) {
+    throw new Error(`Invalid package structure: ${pkg.slug}`);
+  }
+  pkg.tiers.forEach((tier) => {
+    if (!['starter', 'pro'].includes(tier.tier_name)) {
+      throw new Error(`Invalid tier name "${tier.tier_name}" in package "${pkg.slug}" — must be starter or pro`);
+    }
+    if (typeof tier.price_min !== 'number' || tier.price_min <= 0) {
+      throw new Error(`Invalid price_min in tier "${tier.tier_name}" of package "${pkg.slug}"`);
+    }
+  });
+  return true;
+}
+
+// ─────────────────────────────────────────────────────────
+// CHILD: Authoritative Binary Pricing Catalog
+// Binary Model: Starter (₹1,499) | Pro (₹3,499)
+// Delivery: 2–6 days (Starter: 2–4 days | Pro: 4–6 days). 0% ongoing maintenance.
+// ─────────────────────────────────────────────────────────
 const FALLBACK_PACKAGES = [
   {
     slug: 'ai-product-photo-makeover',
     title: 'AI Product Photo Makeover',
-    tagline: 'Transform phone photos into studio-grade e-commerce product listings',
-    description: 'Send us simple photos of your products taken on your phone. We\'ll use AI to remove messy backgrounds, fix the lighting and colours, and place your products in clean, professional settings. Your photos will be ready for Amazon, Flipkart, Meesho, Instagram or your WhatsApp catalogue. You don\'t need a studio or a photographer.',
+    tagline: 'Studio-grade marketplace photos from your phone in 2–4 days',
+    description:
+      'Send us simple phone photos of your products. We use AI to remove backgrounds, fix lighting, add professional settings, and make your photos marketplace-ready for Amazon, Flipkart, Meesho, Instagram or WhatsApp catalogue — no studio or photographer needed.',
     category: 'Product Visuals',
     icon: 'Camera',
     image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
@@ -20,311 +68,333 @@ const FALLBACK_PACKAGES = [
     display_order: 1,
     benefits: [
       'Better photos get more clicks and more sales online',
-      'Saves ₹5,000–₹20,000 compared with a studio photoshoot',
-      'Images meet marketplace rules (white background, correct size), so listings are less likely to be rejected'
+      'Saves ₹15,000+ compared with a physical studio photoshoot',
+      'Images meet marketplace rules (white background, correct size) — zero listing rejections',
+      '100% marketplace-compliant: Amazon, Flipkart, Meesho, Myntra'
     ],
+    pipeline: '📱 Phone photo → AI background removal → Ambient shadow → Lifestyle scenes → Marketplace-ready delivery',
     tiers: [
       {
-        tier_name: 'package_1',
-        price_min: 999,
-        price_max: 999,
+        tier_name: 'starter',
+        display_name: 'Starter',
+        price_min: 1499,
+        price_max: 1499,
+        delivery_hours_min: 48,
+        delivery_hours_max: 96,
         delivery_days_min: 2,
-        delivery_days_max: 3,
+        delivery_days_max: 4,
         revisions_included: 1,
-        deliverable_summary: '5 photos, white background, 1 platform size, 1 revision',
-        inclusions: ['5 clean product photos', 'Pure white background', '1 platform size optimized', 'Lighting and color fixes', '1 revision included', 'High-quality JPG/PNG format'],
+        deliverable_summary: '10 product photos, pure white background, 2000×2000px, 1 revision',
+        inclusions: [
+          '10 clean product photos',
+          'Pure white background RGB(255,255,255) — marketplace compliant',
+          'Realistic ambient contact shadow (no floating look)',
+          '2000×2000px high-resolution standard',
+          'Lighting and color correction',
+          '1 revision included',
+          'High-quality JPG/PNG delivery'
+        ],
         exclusions: ['Lifestyle background scenes', 'AI model placements']
       },
       {
-        tier_name: 'package_2',
-        price_min: 2999,
-        price_max: 2999,
-        delivery_days_min: 2,
-        delivery_days_max: 4,
-        revisions_included: 2,
-        deliverable_summary: '15 photos, white + lifestyle backgrounds, 2 platform sizes, 2 revisions',
-        inclusions: ['15 product photos (white & lifestyle)', 'Clean white + AI lifestyle scenes', '2 platform sizes optimized', 'Lighting & color fixes, blemish cleanup', '2 revisions included'],
-        exclusions: ['AI human model casting', '3D asset rendering']
-      },
-      {
-        tier_name: 'package_3',
-        price_min: 5999,
-        price_max: 7999,
-        delivery_days_min: 3,
+        tier_name: 'pro',
+        display_name: 'Pro',
+        price_min: 3499,
+        price_max: 3499,
+        delivery_hours_min: 96,
+        delivery_hours_max: 144,
+        delivery_days_min: 4,
         delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: '35 photos, AI model or lifestyle scenes, catalogue-ready set, 2 revisions',
-        inclusions: ['35 photos (full catalogue-ready set)', 'AI model or lifestyle scenes', 'Multi-angle scenes & closeups', 'Complete blemish & color correction', '2 revisions included'],
-        exclusions: ['Physical studio photoshoot']
+        deliverable_summary: '25 photos: 15 white-bg + 8 lifestyle scenes + 2 infographics, 2 revisions',
+        inclusions: [
+          '25 high-resolution product images',
+          '15x pure white background multi-angle shots',
+          '8x AI lifestyle scenes (kitchen, marble, festive/Diwali)',
+          '2x feature/dimension callout infographics (reduces return rates)',
+          'Full web-optimised WebP + original PNG archive',
+          '2 revisions included'
+        ],
+        exclusions: ['Physical studio photoshoot', '3D rendering']
       }
     ]
   },
   {
-    slug: 'ai-product-listing-description',
-    title: 'AI Product Listing & Description Writing',
-    tagline: 'High-ranking marketplace listings & descriptions that turn viewers into buyers',
-    description: 'Tell us about your product. We\'ll write clear, attractive titles, descriptions and key features that help customers find it and decide to buy. We can write in English, Hindi or your regional language, for Amazon, Flipkart, Meesho, your website or WhatsApp.',
-    category: 'E-Commerce & Copy',
-    icon: 'Edit3',
-    image_url: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800',
-    badge: 'Starts at ₹999',
+    slug: 'ai-marketing-video-reels',
+    title: 'Marketing Video & Promo Reels',
+    tagline: 'Viral-ready Instagram Reels, YouTube Shorts & WhatsApp Status in 2–6 days',
+    description:
+      'We create vertical 9:16 promo reels for your business using AI voiceover, dynamic captions and royalty-free music — ready to post on Instagram, YouTube Shorts or WhatsApp Status. No filming needed. You provide your product details and we deliver scroll-stopping videos.',
+    category: 'Social & Marketing',
+    icon: 'Video',
+    image_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800',
+    badge: 'High ROI',
     display_order: 2,
     benefits: [
-      'Your product shows up more often in marketplace searches',
-      'Clear descriptions mean fewer customer questions and fewer returns',
-      'One product can be listed across several platforms quickly'
+      'Reels get 3–5× more reach than static posts on Instagram and Facebook',
+      'Natural Indian AI voiceover builds instant trust with local audiences',
+      'No filming or video editing skills required — fully AI-automated pipeline',
+      'Alex Hormozi-style dynamic captions that stop the scroll'
     ],
+    pipeline: '✍️ LLM script → 🎙️ ElevenLabs Indian voiceover → 🎬 HeyGen avatar/slideshow → 📦 MP4 delivery',
     tiers: [
       {
-        tier_name: 'package_1',
-        price_min: 999,
-        price_max: 999,
-        delivery_days_min: 1,
-        delivery_days_max: 2,
-        revisions_included: 1,
-        deliverable_summary: '1 product, 1 language, 1 platform, 1 article, 1 revision',
-        inclusions: ['Product title with buyer keywords', '5 bullet-point features + full description', 'List of search keywords and tags', '1 language (English/Hindi/Regional)', 'Copy-paste ready file (Word/Excel)', '1 revision included'],
-        exclusions: ['Competitor keyword analysis', 'Multiple platform formatting']
-      },
-      {
-        tier_name: 'package_2',
+        tier_name: 'starter',
+        display_name: 'Starter',
         price_min: 1499,
-        price_max: 2499,
+        price_max: 1499,
+        delivery_hours_min: 48,
+        delivery_hours_max: 96,
         delivery_days_min: 2,
         delivery_days_max: 4,
-        revisions_included: 2,
-        deliverable_summary: '1 product, 1 language, 2 platforms, 2 articles, 2 revisions',
-        inclusions: ['Formatted for 2 platforms (e.g. Amazon & Meesho)', '2 articles / descriptions', 'Keyword tags & bullet features', 'Copy-paste ready file (Word/Excel)', '2 revisions included'],
-        exclusions: ['Direct seller account upload']
-      },
-      {
-        tier_name: 'package_3',
-        price_min: 4299,
-        price_max: 6999,
-        delivery_days_min: 4,
-        delivery_days_max: 7,
-        revisions_included: 2,
-        deliverable_summary: '2 to 3 products, 1-3 languages, 1-3 platforms, 3 articles, competitor keyword check, 2 revisions',
-        inclusions: ['Full coverage for 2 to 3 products', '1–3 languages (multilingual listing)', 'Formatted for up to 3 platforms', 'Competitor keyword gap check', '2 revisions included'],
-        exclusions: ['Paid ads setup']
-      }
-    ]
-  },
-  {
-    slug: 'ai-social-media-content-pack',
-    title: 'AI Social Media Content Pack',
-    tagline: 'A complete monthly social media calendar with branded graphics & copy',
-    description: 'We\'ll create a month of ready-to-post content for your Instagram, Facebook or WhatsApp Status. That includes eye-catching designs, catchy captions and the right hashtags, all matched to your business and festival dates. You just post, or we can give you a calendar telling you what to post and when.',
-    category: 'Social & Marketing',
-    icon: 'Share2',
-    image_url: '/images/packages/nt-text-logo.png',
-    badge: 'Popular',
-    display_order: 3,
-    benefits: [
-      'You stay visible to customers every day without spending hours on content',
-      'Your brand looks professional and consistent',
-      'Festival and offer posts help bring in more enquiries'
-    ],
-    tiers: [
-      {
-        tier_name: 'package_1',
-        price_min: 2499,
-        price_max: 2999,
-        delivery_days_min: 3,
-        delivery_days_max: 5,
         revisions_included: 1,
-        deliverable_summary: '8 posts per month, 1 platform, captions in 1 language, 1 revision',
-        inclusions: ['8 designed post images in brand colors', 'Captions & hashtags for every post', '1 platform (Instagram/FB/WhatsApp)', '1 revision included'],
-        exclusions: ['Story templates', 'Content calendar schedule']
+        deliverable_summary: '2x 15–30s vertical promo reels, Indian AI voiceover, animated captions, 1 revision',
+        inclusions: [
+          '2x 15–30s vertical promo reels (9:16)',
+          'Direct-response hook script (English or Hinglish)',
+          'Natural Indian AI voiceover via ElevenLabs',
+          'Alex Hormozi-style dynamic animated captions',
+          'Trending royalty-free background audio',
+          '1 revision included',
+          'HD MP4 file delivery'
+        ],
+        exclusions: ['Cover thumbnails', 'Multi-language versions']
       },
       {
-        tier_name: 'package_2',
-        price_min: 3999,
-        price_max: 4999,
+        tier_name: 'pro',
+        display_name: 'Pro',
+        price_min: 3499,
+        price_max: 3499,
+        delivery_hours_min: 96,
+        delivery_hours_max: 144,
         delivery_days_min: 4,
         delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: '15 posts + 4 stories, 2 platforms, 1 language, festival posts, 2 revisions',
-        inclusions: ['15 designed posts + 4 stories', 'Festival and special offer posts', 'Formatted for 2 platforms', 'Content calendar with posting schedule', '2 revisions included'],
-        exclusions: ['Animated carousel videos']
-      },
-      {
-        tier_name: 'package_3',
-        price_min: 7499,
-        price_max: 9299,
-        delivery_days_min: 5,
-        delivery_days_max: 7,
-        revisions_included: 2,
-        deliverable_summary: '25 posts + 6 stories, 1-2 languages, content calendar, carousel posts, 2 revisions',
-        inclusions: ['25 posts + 6 stories (full month coverage)', 'Carousel posts included', 'Captions in 1–2 languages', 'Complete monthly content calendar', '2 revisions included'],
-        exclusions: ['Daily manual posting/account login']
+        deliverable_summary: '5x reels (full week campaign), thumbnails, 1080p MP4, 2 revisions',
+        inclusions: [
+          '5x 15–30s vertical promo reels (full week campaign)',
+          'Mixed content: 2x Offer Promos, 2x Educational/Benefits, 1x Brand Story',
+          'Custom high-contrast video cover thumbnails for Instagram Grid',
+          'High-definition 1080p MP4 file delivery',
+          '2 revisions included'
+        ],
+        exclusions: ['Manual account posting', 'Paid ad setup']
       }
     ]
   },
   {
     slug: 'ai-website-landing-page',
-    title: 'AI Website Landing Page',
-    tagline: 'High-converting one-page website designed to turn visitors into enquiries',
-    description: 'Need a simple website for your business? We\'ll build a one-page website that tells customers who you are, what you sell, your prices or offers, and how to contact you. It works well on mobile phones and has a WhatsApp or call button, so customers can reach you in one tap. AI helps us write the text and design it quickly, so you get it faster and at a lower cost.',
-    category: 'Web & Funnels',
+    title: '5-Page Static Business Website',
+    tagline: 'Mobile-first website live in 2–6 days — zero ongoing maintenance, zero hosting fees',
+    description:
+      'We build a fast, mobile-friendly static website for your business using AI-generated content and modern design. Pure static HTML means it loads in under 1 second on 4G, cannot break from plugin updates, and requires zero monthly hosting fees when deployed on Cloudflare Pages or Netlify.',
+    category: 'Web & Digital Presence',
     icon: 'Globe',
     image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
-    badge: 'High ROI',
-    display_order: 4,
+    badge: 'Zero Maintenance',
+    display_order: 3,
     benefits: [
-      'Your business looks trustworthy and can be found on Google',
+      'Sub-second load times on mobile 4G/5G — no WordPress slowness',
       'One link to share on WhatsApp, Instagram, visiting cards and Google Maps',
-      'Turns visitors into enquiries with call, WhatsApp and enquiry-form buttons',
-      'Much cheaper and faster than a full multi-page website'
+      'Floating WhatsApp button converts visitors to enquiries instantly',
+      'Zero ongoing hosting cost when deployed to Cloudflare Pages or Netlify'
     ],
+    pipeline: '📝 5-question WhatsApp form → 🤖 LLM AST HTML generator → 🌐 Cloudflare Pages deployment in 15s',
     tiers: [
       {
-        tier_name: 'package_1',
-        price_min: 3499,
-        price_max: 4999,
-        delivery_days_min: 4,
-        delivery_days_max: 5,
+        tier_name: 'starter',
+        display_name: 'Starter',
+        price_min: 1999,
+        price_max: 1999,
+        delivery_hours_min: 48,
+        delivery_hours_max: 96,
+        delivery_days_min: 2,
+        delivery_days_max: 4,
         revisions_included: 1,
-        deliverable_summary: 'Ready-made template, up to 5 sections, WhatsApp/call button, mobile-friendly, 1 revision',
-        inclusions: ['1-page mobile-friendly website', 'Up to 5 custom sections', 'WhatsApp click-to-chat & Call buttons', 'AI-crafted business copywriting', '1 revision included'],
-        exclusions: ['Domain & hosting fees (customer-owned)', 'Custom enquiry backend']
+        deliverable_summary: '1-page express landing page, WhatsApp button, mobile-first, Cloudflare deployment, 1 revision',
+        inclusions: [
+          '1-page express mobile-first landing page',
+          'Hero Banner + About + Services Grid + Google Maps',
+          'Floating WhatsApp Chat button (wa.me direct link)',
+          'AI-crafted business copywriting',
+          'Free Cloudflare Pages deployment + ownership transfer',
+          '1 revision included'
+        ],
+        exclusions: ['Domain registration fees (customer-paid)', 'Multi-page site', 'Contact form backend']
       },
       {
-        tier_name: 'package_2',
-        price_min: 7999,
-        price_max: 9999,
-        delivery_days_min: 5,
-        delivery_days_max: 7,
+        tier_name: 'pro',
+        display_name: 'Pro',
+        price_min: 3499,
+        price_max: 3499,
+        delivery_hours_min: 96,
+        delivery_hours_max: 144,
+        delivery_days_min: 4,
+        delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: 'Custom design, up to 8 sections, enquiry form, Google Maps, basic Google search setup, domain connection, 2 revisions',
-        inclusions: ['Custom design with up to 8 sections', 'Lead capture enquiry form', 'Google Maps location embedding', 'Basic Google Search / SEO setup', 'Custom domain connection', '2 revisions included'],
-        exclusions: ['Domain registration fees', 'Multi-page e-commerce cart']
-      },
-      {
-        tier_name: 'package_3',
-        price_min: 18999,
-        price_max: 24999,
-        delivery_days_min: 7,
-        delivery_days_max: 10,
-        revisions_included: 2,
-        deliverable_summary: 'Premium design, booking or payment link, visitor tracking (Google Analytics), speed check, 30 days of support, 2 revisions',
-        inclusions: ['Premium bespoke conversion design', 'Payment link or booking integration', 'Visitor tracking (Google Analytics)', 'Mobile speed optimization', '30 days post-launch support', '2 revisions included'],
-        exclusions: ['Hosting/domain subscriptions (customer-owned)']
+        deliverable_summary: 'Full 5-page static site, lead form, SEO meta, Analytics, Netlify transfer, 2 revisions',
+        inclusions: [
+          'Full 5-page static website (index, about, services, portfolio, contact)',
+          'Responsive Vanilla CSS design — no frameworks to break',
+          'Serverless lead contact form (email notification via Formspree)',
+          'On-page local SEO meta tags & Google Analytics setup',
+          'Complete ZIP handover + Cloudflare/Netlify ownership transfer',
+          '2 revisions included'
+        ],
+        exclusions: ['Domain registration fees (customer-paid)', 'E-commerce cart', 'CMS / WordPress']
       }
     ]
   },
   {
-    slug: 'ai-promo-video-reels',
-    title: 'AI Promo Video & Reels Creation',
-    tagline: 'Engaging short videos for Reels, YouTube Shorts and WhatsApp with AI voiceover',
-    description: 'Give us your product photos, a few details and your offer. We\'ll turn them into short, engaging videos for Instagram Reels, YouTube Shorts or WhatsApp, complete with music, text and an AI voiceover in Hindi, English or your regional language. No camera or video editing skills needed.',
-    category: 'Video & Reels',
-    icon: 'Video',
-    image_url: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800',
-    badge: 'Trending',
-    display_order: 5,
+    slug: 'ai-logo-identity-kit',
+    title: 'Logo Design & Indian SMB Identity Kit',
+    tagline: 'Professional logo, visiting card & GST invoice template in 2–6 days',
+    description:
+      'We design a professional logo for your business using AI and deliver it in formats ready for digital use and physical print — visiting cards, GST invoices, WhatsApp DP, letterheads, shop banners and flex printing. Everything your new or growing Indian business needs to look credible from day one.',
+    category: 'Branding & Print',
+    icon: 'Palette',
+    image_url: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800',
+    badge: 'New Business Essential',
+    display_order: 4,
     benefits: [
-      'Short videos reach far more people than photos on social media',
-      'Explains your product quickly and builds trust',
-      'Costs a fraction of hiring a video agency'
+      'Looks professional and credible from day one — builds customer trust instantly',
+      'Print-ready for visiting cards, shop banners, flex printing and GST invoices',
+      'Full commercial copyright ownership — legally yours forever',
+      'Works for both digital (WhatsApp, Instagram) and physical print (Tally, Vyapar, Zoho Books)'
     ],
+    pipeline: '🎨 Recraft V3 logo generation → Vectorizer.ai SVG cleanup → 📄 Puppeteer PDF invoice/card render',
     tiers: [
       {
-        tier_name: 'package_1',
-        price_min: 999,
+        tier_name: 'starter',
+        display_name: 'Starter',
+        price_min: 1499,
         price_max: 1499,
+        delivery_hours_min: 48,
+        delivery_hours_max: 96,
         delivery_days_min: 2,
-        delivery_days_max: 2,
+        delivery_days_max: 4,
         revisions_included: 1,
-        deliverable_summary: '2 reels (up to 30 seconds), Subtitle + music, 1 revision',
-        inclusions: ['2 short vertical reels (up to 30s)', 'Subtitle & copyright-safe music', 'Your logo & offer overlay', 'Thumbnail cover image', '1 revision included'],
-        exclusions: ['AI voiceover', 'Custom video script']
+        deliverable_summary: 'Primary vector SVG logo, transparent PNG (light & dark), WhatsApp DP, full copyright transfer',
+        inclusions: [
+          'Primary logo in vector SVG (infinitely scalable for shop banners)',
+          'High-resolution transparent PNG — light & dark background versions',
+          'Circular-cropped WhatsApp DP & Social Media Profile Avatar',
+          'Full commercial copyright ownership transfer',
+          '1 revision included'
+        ],
+        exclusions: ['Visiting card print file', 'GST invoice template', 'Brand guide']
       },
       {
-        tier_name: 'package_2',
+        tier_name: 'pro',
+        display_name: 'Pro',
         price_min: 3499,
-        price_max: 4999,
-        delivery_days_min: 3,
-        delivery_days_max: 5,
+        price_max: 3499,
+        delivery_hours_min: 96,
+        delivery_hours_max: 144,
+        delivery_days_min: 4,
+        delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: '5 reels (up to 45 seconds), AI voiceover, 1 language, 2 revisions',
-        inclusions: ['5 reels (up to 45s)', 'AI voiceover in your chosen language', 'Background music & animations', 'Thumbnail cover for each', '2 revisions included'],
-        exclusions: ['AI human avatar presenter']
-      },
-      {
-        tier_name: 'package_3',
-        price_min: 6999,
-        price_max: 9999,
-        delivery_days_min: 5,
-        delivery_days_max: 7,
-        revisions_included: 2,
-        deliverable_summary: '10 reels or 1 brand video (up to 90 seconds), script writing, AI presenter, 2 revisions',
-        inclusions: ['10 reels or 1 brand video (up to 90s)', 'Script writing included', 'AI presenter or avatar', 'Full multi-platform formatting', '2 revisions included'],
-        exclusions: ['Physical camera shoot']
+        deliverable_summary: 'Full logo kit + print-ready visiting card (CMYK 300 DPI) + GST invoice + letterhead + brand guide',
+        inclusions: [
+          'Everything in Starter PLUS:',
+          'Print-ready Visiting Card (3.5" × 2" Indian standard, bleed, CMYK 300 DPI PDF)',
+          'A4 GST Tax Invoice & Bill Header template (Tally / Vyapar / Zoho Books ready)',
+          'Official Letterhead template (Word & PDF)',
+          'Mini Brand Guide (HEX color palette & font pairings)',
+          '2 revisions included'
+        ],
+        exclusions: ['Physical card printing costs (customer-paid)', 'Animation or motion graphics']
       }
     ]
   }
 ];
 
+// Validate catalog integrity on startup
+FALLBACK_PACKAGES.forEach((pkg) => {
+  try {
+    validatePackage(pkg);
+  } catch (e) {
+    console.error(`❌ [ServicePackages] Catalog validation failed: ${e.message}`);
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// CHILD: ServicePackagesService
+// ─────────────────────────────────────────────────────────
 class ServicePackagesService {
+  /**
+   * Normalise a raw package record (DB or fallback) so tiers always use
+   * the binary 'starter' | 'pro' naming convention.
+   */
+  normalisePackage(pkg) {
+    if (!pkg) return null;
+    return {
+      ...pkg,
+      tiers: (pkg.tiers || []).map((t) => ({
+        ...t,
+        tier_name: resolveTierAlias(t.tier_name),
+        display_name: t.display_name || (resolveTierAlias(t.tier_name) === 'starter' ? 'Starter' : 'Pro'),
+      }))
+    };
+  }
+
   async getAllPackages() {
     try {
-      const { data: pkgs, error: pErr } = await supabase
-        .from('aitag_packages')
-        .select('*')
+      const { data, error } = await supabase
+        .from('aitag_service_packages')
+        .select('*, tiers:aitag_service_tiers(*)')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
 
-      if (pErr || !pkgs || pkgs.length === 0) {
-        return FALLBACK_PACKAGES;
+      if (!error && data && data.length > 0) {
+        return data.map((p) => this.normalisePackage(p));
       }
-
-      const { data: tiers, error: tErr } = await supabase
-        .from('aitag_package_tiers')
-        .select('*');
-
-      if (tErr || !tiers) {
-        return FALLBACK_PACKAGES;
-      }
-
-      // Map tiers to their packages with dual-compatibility sorting
-      return pkgs.map((pkg) => {
-        const pkgTiers = tiers.filter((t) => t.package_id === pkg.id);
-        const sortedTiers = pkgTiers.sort((a, b) => {
-          const order = {
-            package_1: 1, beginner: 1,
-            package_2: 2, medium: 2,
-            package_3: 3, expert: 3
-          };
-          return (order[a.tier_name] || 0) - (order[b.tier_name] || 0);
-        });
-
-        const resolvedTiers = sortedTiers.length > 0 ? sortedTiers : (FALLBACK_PACKAGES.find(f => f.slug === pkg.slug)?.tiers || []);
-        const sanitizedTiers = resolvedTiers.map(tier => ({
-          ...tier,
-          price_min: Math.max(Number(tier.price_min) || 0, 999),
-          price_max: Math.max(Number(tier.price_max) || 0, 999)
-        }));
-
-        return {
-          ...pkg,
-          image_url: (pkg.slug === 'ai-social-media-content-pack' || (pkg.image_url && pkg.image_url.includes('1611162617474')))
-            ? '/images/packages/nt-text-logo.png'
-            : pkg.image_url,
-          badge: (pkg.badge || '').replace('₹499', '₹999'),
-          benefits: pkg.benefits || [],
-          tiers: sanitizedTiers
-        };
-      });
-    } catch (err) {
-      console.warn('⚠️ ServicePackages fallback invoked:', err.message);
-      return FALLBACK_PACKAGES;
+    } catch (e) {
+      console.warn('⚠️ [ServicePackages] Supabase getAllPackages fallback:', e.message);
     }
+
+    return FALLBACK_PACKAGES.map((p) => this.normalisePackage(p));
   }
 
   async getPackageBySlug(slug) {
-    const all = await this.getAllPackages();
-    return all.find((p) => p.slug === slug) || null;
+    try {
+      const { data, error } = await supabase
+        .from('aitag_service_packages')
+        .select('*, tiers:aitag_service_tiers(*)')
+        .eq('slug', slug)
+        .single();
+
+      if (!error && data) {
+        return this.normalisePackage(data);
+      }
+    } catch (e) {
+      console.warn(`⚠️ [ServicePackages] Supabase getPackageBySlug fallback for ${slug}:`, e.message);
+    }
+
+    const found = FALLBACK_PACKAGES.find((p) => p.slug === slug);
+    return found ? this.normalisePackage(found) : null;
+  }
+
+  /**
+   * Resolve tier details from a package + tier name (supports binary aliases)
+   */
+  resolveTier(pkg, requestedTierName) {
+    const canonical = resolveTierAlias(requestedTierName);
+    return (pkg.tiers || []).find((t) => t.tier_name === canonical) || pkg.tiers?.[0] || null;
+  }
+
+  /**
+   * Expose the tier alias resolver as a static util for other modules
+   */
+  resolveAlias(tierName) {
+    return resolveTierAlias(tierName);
+  }
+
+  /**
+   * Return the full catalog including pipeline blueprints and benefits
+   */
+  getCatalog() {
+    return FALLBACK_PACKAGES;
   }
 }
 

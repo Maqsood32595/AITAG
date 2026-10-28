@@ -29,13 +29,13 @@ const Footer: React.FC = () => {
                 AI Product Photo Makeover
               </Link>
               <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
-                AI Product Listing & Description Writing
+                Marketing Video & Promo Reels
               </Link>
               <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
-                AI Social Media Content Pack
+                5-Page Static Business Website
               </Link>
               <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
-                AI Website Landing Page
+                Logo Design & SMB Identity Kit
               </Link>
             </Stack>
           </Grid>

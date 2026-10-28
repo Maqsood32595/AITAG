@@ -152,7 +152,7 @@ const HeroSection = () => {
             fontFamily: 'Inter, sans-serif',
           }}
         >
-          A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹999</strong>.
+          A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹1,499</strong>.
         </Typography>
 
         {/* Who We Serve Tags */}
@@ -221,7 +221,7 @@ const HeroSection = () => {
               },
             }}
           >
-            ✨ Explore AI Packages (From ₹999) →
+            ✨ Explore AI Packages (From ₹1,499) →
           </Button>
           <Button
             variant="outlined"

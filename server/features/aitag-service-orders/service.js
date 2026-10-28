@@ -41,19 +41,12 @@ class ServiceOrdersService {
       throw new Error(`Package not found: ${package_slug}`);
     }
 
-    const targetTier = (tier_name || '').toLowerCase().trim();
-    const tier = (pkg.tiers || []).find((t) => {
-      const name = (t.tier_name || '').toLowerCase().trim();
-      return name === targetTier ||
-        (targetTier === 'beginner' && name === 'package_1') ||
-        (targetTier === 'medium' && name === 'package_2') ||
-        (targetTier === 'expert' && name === 'package_3') ||
-        (targetTier === 'package_1' && name === 'beginner') ||
-        (targetTier === 'package_2' && name === 'medium') ||
-        (targetTier === 'package_3' && name === 'expert');
-    });
-    const agreed_price = tier ? Number(tier.price_min) : 999;
-    const platform_fee = Math.round(agreed_price * 0.05); // 5% AITAG commission
+    // Resolve binary tier alias (starter / pro) — supports legacy package_1/2/3
+    const resolvedTierName = packagesService.resolveAlias ? packagesService.resolveAlias(tier_name) : (tier_name || 'starter');
+    const tier = packagesService.resolveTier ? packagesService.resolveTier(pkg, resolvedTierName)
+      : (pkg.tiers || []).find((t) => t.tier_name === resolvedTierName) || pkg.tiers?.[0];
+    const agreed_price = tier ? Number(tier.price_min) : 1499;
+    const platform_fee = Math.round(agreed_price * 0.10); // 10% AITAG commission
     const expert_payout = agreed_price - platform_fee;
 
     const orderRecord = {
@@ -113,6 +106,7 @@ class ServiceOrdersService {
 
   async listOrders(filters = {}) {
     const { role, email, status } = filters;
+    const targetEmail = (email || '').trim();
 
     try {
       let query = supabase.from('aitag_orders').select('*').order('created_at', { ascending: false });
@@ -121,12 +115,12 @@ class ServiceOrdersService {
         query = query.eq('status', status);
       }
 
-      if (role === 'client' && email) {
-        query = query.eq('customer_email', email);
-      } else if (role === 'freelancer' && email) {
-        query = query.eq('assigned_expert_email', email);
-      } else if (email) {
-        query = query.or(`customer_email.eq.${email},assigned_expert_email.eq.${email}`);
+      if (role === 'client' && targetEmail) {
+        query = query.ilike('customer_email', targetEmail);
+      } else if (role === 'freelancer' && targetEmail) {
+        query = query.ilike('assigned_expert_email', targetEmail);
+      } else if (targetEmail) {
+        query = query.or(`customer_email.ilike.${targetEmail},assigned_expert_email.ilike.${targetEmail}`);
       }
 
       const { data, error } = await query;
@@ -140,9 +134,14 @@ class ServiceOrdersService {
     // In-memory fallback filtering
     let list = Array.from(inMemoryOrders.values());
     if (status) list = list.filter((o) => o.status === status);
-    if (role === 'client' && email) list = list.filter((o) => o.customer_email === email);
-    else if (role === 'freelancer' && email) list = list.filter((o) => o.assigned_expert_email === email);
-    else if (email) list = list.filter((o) => o.customer_email === email || o.assigned_expert_email === email);
+    const lowerEmail = targetEmail.toLowerCase();
+    if (role === 'client' && lowerEmail) {
+      list = list.filter((o) => (o.customer_email || '').toLowerCase() === lowerEmail);
+    } else if (role === 'freelancer' && lowerEmail) {
+      list = list.filter((o) => (o.assigned_expert_email || '').toLowerCase() === lowerEmail);
+    } else if (lowerEmail) {
+      list = list.filter((o) => (o.customer_email || '').toLowerCase() === lowerEmail || (o.assigned_expert_email || '').toLowerCase() === lowerEmail);
+    }
     return list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 

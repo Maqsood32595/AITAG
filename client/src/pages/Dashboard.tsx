@@ -397,17 +397,17 @@ const Dashboard = () => {
   const isClient = user?.role === 'client';
 
   const stats = isAdmin ? [
-    { icon: <TaskIcon sx={{ color: '#4f46e5' }} />, label: 'All Platform Tasks', value: allCount, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)' },
-    { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'Total Service Requests', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)' },
-    { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'Active Platform Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
+    { icon: <TaskIcon sx={{ color: '#4f46e5' }} />, label: 'All Platform Tasks', value: allCount, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)', link: '/all_tasks' },
+    { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'Total Service Requests', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', scrollId: 'orders-section' },
+    { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'Active Platform Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)', link: '/all_tasks' },
   ] : isFreelancer ? [
-    { icon: <TaskIcon sx={{ color: '#4f46e5' }} />, label: 'Tasks Available to Bid', value: allCount, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)' },
-    { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'My Placed Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
-    { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'My Assigned Projects', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)' },
+    { icon: <TaskIcon sx={{ color: '#4f46e5' }} />, label: 'Tasks Available to Bid', value: allCount, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)', link: '/all_tasks' },
+    { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'My Placed Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)', link: '/my_tasks' },
+    { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'My Assigned Projects', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', scrollId: 'orders-section' },
   ] : [
-    { icon: <PostIcon sx={{ color: '#0891b2' }} />, label: 'My Posted Tasks', value: myTasks.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)' },
-    { icon: <ShoppingBagIcon sx={{ color: '#4f46e5' }} />, label: 'My Service Requests', value: serviceOrders.length, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)' },
-    { icon: <TaskIcon sx={{ color: '#10b981' }} />, label: 'Marketplace Tasks', value: allCount, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
+    { icon: <PostIcon sx={{ color: '#0891b2' }} />, label: 'My Posted Tasks', value: myTasks.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', link: '/my_tasks' },
+    { icon: <ShoppingBagIcon sx={{ color: '#4f46e5' }} />, label: 'My Service Requests', value: serviceOrders.length, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)', scrollId: 'orders-section' },
+    { icon: <TaskIcon sx={{ color: '#10b981' }} />, label: 'Marketplace Tasks', value: allCount, color: '#10b981', bg: 'rgba(16,185,129,0.08)', link: '/all_tasks' },
   ];
 
   const getStepIndex = (status: string) => {
@@ -462,7 +462,7 @@ const Dashboard = () => {
                 </Typography>
                 <Typography sx={{ color: '#64748b', fontSize: '0.9rem' }}>{user?.email}</Typography>
                 <Chip
-                  label={user?.role}
+                  label={user?.role === 'client' ? 'AI Services Customer' : user?.role}
                   size="small"
                   sx={{
                     mt: 0.5,
@@ -598,21 +598,57 @@ const Dashboard = () => {
 
         {/* Stats */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {stats.map(s => (
-            <Grid xs={12} md={4} key={s.label}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid rgba(79,70,229,0.08)', display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 48, height: 48, borderRadius: '12px', bgcolor: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s.icon}</Box>
-                <Box>
-                  <Typography sx={{ fontSize: '0.8rem', color: '#94a3b8' }}>{s.label}</Typography>
-                  <Typography sx={{ fontWeight: 900, fontSize: '1.8rem', color: s.color, lineHeight: 1.2, fontFamily: 'Inter, sans-serif' }}>{s.value}</Typography>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
+          {stats.map(s => {
+            const isClickable = Boolean(s.link || s.scrollId);
+            const handleClick = () => {
+              if (s.scrollId) {
+                const el = document.getElementById(s.scrollId);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }
+            };
+
+            return (
+              <Grid xs={12} md={4} key={s.label}>
+                <Paper
+                  elevation={0}
+                  component={s.link ? Link : 'div'}
+                  to={s.link}
+                  onClick={handleClick}
+                  sx={{
+                    p: 3,
+                    borderRadius: '16px',
+                    border: '1px solid rgba(79,70,229,0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    textDecoration: 'none',
+                    cursor: isClickable ? 'pointer' : 'default',
+                    transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                    '&:hover': isClickable ? {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 24px rgba(79,70,229,0.12)',
+                      borderColor: 'rgba(79,70,229,0.3)',
+                    } : {}
+                  }}
+                >
+                  <Box sx={{ width: 48, height: 48, borderRadius: '12px', bgcolor: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {s.icon}
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: '0.8rem', color: '#94a3b8' }}>{s.label}</Typography>
+                    <Typography sx={{ fontWeight: 900, fontSize: '1.8rem', color: s.color, lineHeight: 1.2, fontFamily: 'Inter, sans-serif' }}>
+                      {s.value}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+            );
+          })}
         </Grid>
 
         {/* AI Service Package Orders (Pilot Packages & Outcomes) */}
         <Paper
+          id="orders-section"
           elevation={0}
           sx={{
             p: 4,

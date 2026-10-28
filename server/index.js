@@ -54,6 +54,8 @@ app.use(express.static(staticPath));
 if (staticPath !== serverPublicPath && fs.existsSync(serverPublicPath)) {
   app.use(express.static(serverPublicPath));
 }
+// Explicitly serve /uploads
+app.use('/uploads', express.static(path.join(serverPublicPath, 'uploads')));
 
 // Missing /assets requests must return 404 with plain text, NEVER HTML!
 app.use('/assets', (req, res) => {

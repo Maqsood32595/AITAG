@@ -31,8 +31,9 @@ const SignIn = () => {
     setError('');
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      navigate('/dashboard');
+      const loggedUser = await login(form.email, form.password);
+      const role = loggedUser?.role;
+      navigate(role === 'admin' || role === 'freelancer' ? '/dashboard' : '/');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
     } finally {

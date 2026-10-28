@@ -286,23 +286,26 @@ class PaymentsService {
     let itemTier = 'Custom';
     let amount = 1499;
 
+    let found = false;
     try {
-      const tasksService = require('../aitag-tasks/service');
-      const task = await tasksService.getById(identifier);
-      if (task) {
-        itemTitle = task.title || 'Task Escrow';
-        itemTier = task.category || 'Freelance Task';
-        amount = Number(task.agreed_price || task.budget) || 1499;
+      const ordersService = require('../aitag-service-orders/service');
+      const order = await ordersService.getOrderById(identifier);
+      if (order) {
+        itemTitle = order.package_title || 'AITAG Service Package';
+        itemTier = order.tier_name ? (order.tier_name.charAt(0).toUpperCase() + order.tier_name.slice(1)) : 'Starter';
+        amount = Number(order.agreed_price) || 1499;
+        found = true;
       }
-    } catch {
-      // not a task, try service order
+    } catch {}
+
+    if (!found) {
       try {
-        const ordersService = require('../aitag-service-orders/service');
-        const order = await ordersService.getOrderById(identifier);
-        if (order) {
-          itemTitle = order.package_title || 'AITAG Service Package';
-          itemTier = order.tier_name || 'Standard';
-          amount = Number(order.agreed_price) || 1499;
+        const tasksService = require('../aitag-tasks/service');
+        const task = await tasksService.getById(identifier);
+        if (task) {
+          itemTitle = task.title || 'Task Escrow';
+          itemTier = task.category || 'Freelance Task';
+          amount = Number(task.agreed_price || task.budget) || 1499;
         }
       } catch {}
     }

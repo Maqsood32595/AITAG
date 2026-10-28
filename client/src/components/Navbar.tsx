@@ -133,6 +133,10 @@ const Navbar = () => {
                   handlePackagesClick(e);
                   return;
                 }
+                if (link.to === '/add_task' && user?.role === 'client') {
+                  handlePackagesClick(e);
+                  return;
+                }
                 if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
                   e.preventDefault();
                   navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
@@ -186,6 +190,10 @@ const Navbar = () => {
                     handlePackagesClick(e);
                     return;
                   }
+                  if (link.to === '/add_task' && user?.role === 'client') {
+                    handlePackagesClick(e);
+                    return;
+                  }
                   if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
                     e.preventDefault();
                     navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
@@ -231,7 +239,7 @@ const Navbar = () => {
                     {user.email}
                   </Typography>
                   <Chip
-                    label={user.role}
+                    label={user.role === 'client' ? 'AI Services Customer' : user.role}
                     size="small"
                     sx={{
                       mt: 0.5,
