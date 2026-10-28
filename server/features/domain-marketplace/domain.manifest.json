@@ -1,0 +1,42 @@
+{
+  "id": "domain-marketplace",
+  "name": "AITAG Marketplace & Talent Bidding Domain",
+  "type": "domain",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Enterprise marketplace domain coordinating custom freelance tasks, bidding proposals, talent invitations, and marketplace discovery.",
+  "children": [
+    {
+      "id": "aitag-tasks",
+      "name": "AITAG Tasks — Post, Browse & Manage AI Tasks",
+      "basePath": "/api/tasks",
+      "folder": "children/tasks",
+      "routes": "children/tasks/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-bids",
+      "name": "AITAG Bids — AI Talent Bidding Engine",
+      "basePath": "/api/bids",
+      "folder": "children/bids",
+      "routes": "children/bids/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-invitations",
+      "name": "AITAG Talent Invitations Engine",
+      "basePath": "/api/invitations",
+      "folder": "children/invitations",
+      "routes": "children/invitations/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-marketplace",
+      "name": "AITAG Marketplace Core & Role-Based Management",
+      "basePath": "/api/marketplace",
+      "folder": "children/catalog",
+      "routes": "children/catalog/routes.js",
+      "enabled": true
+    }
+  ]
+}

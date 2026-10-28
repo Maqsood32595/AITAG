@@ -1,0 +1,34 @@
+{
+  "id": "domain-services",
+  "name": "AITAG Productized AI Services & Workflow Domain",
+  "type": "domain",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Enterprise productized services domain coordinating catalog, binary pricing, 8-stage order delivery state machine, and case discussions.",
+  "children": [
+    {
+      "id": "aitag-service-packages",
+      "name": "AITAG Pilot AI Service Packages & Tiers",
+      "basePath": "/api/service-packages",
+      "folder": "children/packages",
+      "routes": "children/packages/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-service-orders",
+      "name": "AITAG 8-Stage Service Orders Workflow & State Machine",
+      "basePath": "/api/service-orders",
+      "folder": "children/orders",
+      "routes": "children/orders/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-case-discussions",
+      "name": "AITAG Case Discussions & Communications Slice",
+      "basePath": "/api/case-discussions",
+      "folder": "children/discussions",
+      "routes": "children/discussions/routes.js",
+      "enabled": true
+    }
+  ]
+}

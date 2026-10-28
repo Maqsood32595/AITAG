@@ -1,0 +1,8 @@
+{
+  "id": "aitag-service-orders",
+  "name": "AITAG 8-Stage Service Orders Workflow & State Machine",
+  "version": "1.0.0",
+  "basePath": "/api/service-orders",
+  "enabled": true,
+  "routes": "./routes.js"
+}
