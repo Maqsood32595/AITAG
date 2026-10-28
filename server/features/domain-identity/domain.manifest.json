@@ -1,0 +1,42 @@
+{
+  "id": "domain-identity",
+  "name": "AITAG Identity, Authentication & Profile Domain",
+  "type": "domain",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Enterprise identity domain coordinating JWT authentication, Google OAuth2, GDPR account lifecycle, and freelancer profiles.",
+  "children": [
+    {
+      "id": "aitag-auth",
+      "name": "AITAG Auth — JWT Registration & Login",
+      "basePath": "/api/auth",
+      "folder": "children/auth",
+      "routes": "children/auth/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-oauth",
+      "name": "AITAG Google OAuth & Social Auth Engine",
+      "basePath": "/api/oauth",
+      "folder": "children/oauth",
+      "routes": "children/oauth/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-account-lifecycle",
+      "name": "AITAG Account Lifecycle & GDPR Data Erasure Slice",
+      "basePath": "/api/account",
+      "folder": "children/account",
+      "routes": "children/account/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-profile",
+      "name": "AITAG Delivered Workflows & Profile Showcase Engine",
+      "basePath": "/api/profile",
+      "folder": "children/profile",
+      "routes": "children/profile/routes.js",
+      "enabled": true
+    }
+  ]
+}

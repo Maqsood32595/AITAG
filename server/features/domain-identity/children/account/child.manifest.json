@@ -1,0 +1,8 @@
+{
+  "id": "aitag-account-lifecycle",
+  "name": "AITAG Account Lifecycle & GDPR Data Erasure Slice",
+  "version": "1.0.0",
+  "basePath": "/api/account",
+  "enabled": true,
+  "routes": "./routes.js"
+}

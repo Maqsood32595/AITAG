@@ -1,0 +1,8 @@
+{
+  "id": "aitag-oauth",
+  "name": "AITAG Google OAuth & Social Auth Engine",
+  "version": "1.0.0",
+  "basePath": "/api/oauth",
+  "enabled": true,
+  "routes": "./routes.js"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "aitag-analytics",
+  "name": "AITAG Role-Aware Analytics & User Dossier Engine",
+  "version": "1.0.0",
+  "basePath": "/api/analytics",
+  "enabled": true,
+  "routes": "./routes.js"
+}

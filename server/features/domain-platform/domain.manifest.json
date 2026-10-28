@@ -1,0 +1,42 @@
+{
+  "id": "domain-platform",
+  "name": "AITAG Platform Infrastructure, Caching & Observability Domain",
+  "type": "domain",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Enterprise platform domain coordinating role-aware analytics, in-RAM adaptive caching, blog content, and AST sandbox.",
+  "children": [
+    {
+      "id": "aitag-analytics",
+      "name": "AITAG Role-Aware Analytics & User Dossier Engine",
+      "basePath": "/api/analytics",
+      "folder": "children/analytics",
+      "routes": "children/analytics/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-cache",
+      "name": "AITAG Fractal Kernel Adaptive Cache Engine",
+      "basePath": "/api/cache",
+      "folder": "children/cache",
+      "routes": "children/cache/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "aitag-blog",
+      "name": "AITAG Blog Engine",
+      "basePath": "/api/blog",
+      "folder": "children/blog",
+      "routes": "children/blog/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "sandwich-refactor-sandbox",
+      "name": "Browser-Based AI Sandbox & Sandwich AST Engine",
+      "basePath": "/api/sandbox",
+      "folder": "children/sandbox",
+      "routes": "children/sandbox/routes.js",
+      "enabled": true
+    }
+  ]
+}

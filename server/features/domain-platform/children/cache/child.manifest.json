@@ -1,0 +1,8 @@
+{
+  "id": "aitag-cache",
+  "name": "AITAG Fractal Kernel Adaptive Cache Engine",
+  "version": "1.0.0",
+  "basePath": "/api/cache",
+  "enabled": true,
+  "routes": "./routes.js"
+}
