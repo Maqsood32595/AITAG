@@ -26,6 +26,7 @@ const BlogPost = lazy(() => import('./pages/BlogPost'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Workflows = lazy(() => import('./pages/Workflows'));
 const Analytics = lazy(() => import('./pages/Analytics'));
+const PaymentCheckout = lazy(() => import('./pages/PaymentCheckout'));
 
 const Loader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -68,6 +69,9 @@ function App() {
               <Route path="/blog" element={<BlogList />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/task-details/:id" element={<TaskDetails />} />
+              <Route path="/pay" element={<PaymentCheckout />} />
+              <Route path="/tasks/:id/pay" element={<PaymentCheckout />} />
+              <Route path="/checkout/:orderId" element={<PaymentCheckout />} />
 
               {/* Protected / App Routes */}
               <Route path="/add_task" element={<PrivateRoute><AddTask /></PrivateRoute>} />

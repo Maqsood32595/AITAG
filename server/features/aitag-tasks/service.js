@@ -639,6 +639,76 @@ class TasksService {
     const task = await this.getTaskById(id);
     return this._enrichTask({ ...task, ...updates });
   }
+
+  /**
+   * Submit deliverable files / links for a task
+   * Accessible by assigned specialist or accepted bidder
+   */
+  async submitDeliverables(id, { files = [], completionNotes = '', specialistEmail } = {}) {
+    const task = await this.getTaskById(id);
+    if (!task) throw new Error('Task not found');
+
+    const deliverables = Array.isArray(files) ? files : [files];
+    const updates = {
+      status: 'draft-submitted',
+      draft_deliverables: deliverables,
+      deliverable_notes: completionNotes,
+      deliverable_submitted_at: new Date().toISOString(),
+      ...(specialistEmail && { delivered_by: specialistEmail })
+    };
+
+    return this.updateTask(id, task.user_email, updates, 'admin');
+  }
+
+  /**
+   * Request revisions on deliverables
+   * Accessible by task owner
+   */
+  async requestRevision(id, revisionNotes, requestingEmail) {
+    const task = await this.getTaskById(id);
+    if (!task) throw new Error('Task not found');
+    if (requestingEmail && task.user_email !== requestingEmail) {
+      throw new Error('Unauthorized: Only task owner can request revisions');
+    }
+
+    const updates = {
+      status: 'revision',
+      revision_notes: revisionNotes,
+      revision_requested_at: new Date().toISOString()
+    };
+
+    return this.updateTask(id, task.user_email, updates, 'admin');
+  }
+
+  /**
+   * Approve deliverables, release escrow, and leave feedback
+   * Disburses 89% net payout to specialist under Section 194-O compliance
+   */
+  async approveAndComplete(id, { rating = 5, feedback = '', requestingEmail } = {}) {
+    const task = await this.getTaskById(id);
+    if (!task) throw new Error('Task not found');
+    if (requestingEmail && task.user_email !== requestingEmail) {
+      throw new Error('Unauthorized: Only task owner can approve task deliverables');
+    }
+
+    const escrowSettlementEngine = require('./payouts/escrow-settlement-engine');
+    const payout = escrowSettlementEngine.settlePayout(task.budget);
+
+    const updates = {
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+      client_rating: Math.max(1, Math.min(5, Number(rating))),
+      client_feedback: feedback,
+      escrow_settlement: payout,
+      escrow_status: 'RELEASED'
+    };
+
+    return {
+      success: true,
+      task: await this.updateTask(id, task.user_email, updates, 'admin'),
+      payout
+    };
+  }
 }
 
 module.exports = new TasksService();

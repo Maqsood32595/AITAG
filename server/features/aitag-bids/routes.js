@@ -40,16 +40,19 @@ router.get('/task/:taskId', auth, async (req, res) => {
   }
 });
 
-// POST /api/bids  — place a bid (protected)
+// POST /api/bids  — place or update a bid (protected)
 router.post('/', auth, async (req, res) => {
   try {
-    const { taskId } = req.body;
+    const { taskId, bid_amount, delivery_days, proposal_pitch } = req.body;
     if (!taskId) return res.status(400).json({ error: 'taskId is required' });
 
     const result = await bidsService.placeBid({
       taskId,
       userEmail: req.user.email,
-      userName: req.user.name
+      userName: req.user.name,
+      bid_amount,
+      delivery_days,
+      proposal_pitch
     });
     res.status(201).json(result);
   } catch (err) {

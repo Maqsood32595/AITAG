@@ -76,7 +76,13 @@ export const tasksApi = {
   assign: (id: string, data: { expertEmail: string; expertName?: string }) =>
     api.post(`/tasks/${id}/assign`, data),
   resetAssignment: (id: string) =>
-    api.post(`/tasks/${id}/reset`)
+    api.post(`/tasks/${id}/reset`),
+  submitDeliverables: (id: string, data: { files?: any[]; completionNotes?: string }) =>
+    api.post(`/tasks/${id}/deliverables`, data),
+  requestRevision: (id: string, data: { revisionNotes: string }) =>
+    api.post(`/tasks/${id}/revision`, data),
+  approve: (id: string, data: { rating?: number; feedback?: string }) =>
+    api.post(`/tasks/${id}/approve`, data),
 };
 
 // Bids
@@ -84,7 +90,8 @@ export const bidsApi = {
   getMy: () => api.get('/bids/my'),
   checkBid: (taskId: string) => api.get(`/bids/check/${taskId}`),
   getForTask: (taskId: string) => api.get(`/bids/task/${taskId}`),
-  place: (taskId: string) => api.post('/bids', { taskId }),
+  place: (taskId: string, payload?: { bid_amount?: number; delivery_days?: number; proposal_pitch?: string }) =>
+    api.post('/bids', { taskId, ...payload }),
   accept: (bidId: string) => api.patch(`/bids/${bidId}/accept`),
 };
 

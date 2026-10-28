@@ -1,0 +1,8 @@
+{
+  "id": "aitag-payments",
+  "name": "UPI Payment & Order Activation Engine",
+  "version": "1.0.0",
+  "basePath": "/api/payments",
+  "enabled": true,
+  "dependencies": ["aitag-service-orders"]
+}

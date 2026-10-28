@@ -152,7 +152,7 @@ async function runPietSuite() {
         'aitag-service-packages', 'aitag-tasks', 'escrow-payment',
         'leakage-shield', 'sandwich-refactor-sandbox', 'aitag-analytics',
         'aitag-security-guard', 'aitag-cache', 'aitag-oauth', 'aitag-account-lifecycle',
-        'aitag-case-discussions'
+        'aitag-case-discussions', 'aitag-payments'
       ];
 
       for (const slice of expectedSlices) {
@@ -204,11 +204,11 @@ async function runPietSuite() {
       }
     });
 
-    await t('Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 17 slices', async () => {
+    await t('Verifies Fractal Kernel runtime discovery endpoint /api/features mounts 19 slices', async () => {
       const res = await requestJson('/api/features');
       eq(res.status, 200, 'GET /api/features must return 200 OK');
       assert(Array.isArray(res.data), '/api/features must return array');
-      assert(res.data.length >= 17, 'Kernel must mount at least 17 feature slices');
+      assert(res.data.length >= 19, 'Kernel must mount at least 19 feature slices');
       const ids = res.data.map((f) => f.id);
       assert(ids.includes('aitag-service-orders'), 'Kernel missing aitag-service-orders slice');
       assert(ids.includes('aitag-service-packages'), 'Kernel missing aitag-service-packages slice');
@@ -1238,6 +1238,103 @@ async function runPietSuite() {
       });
       eq(loginRes.status, 401, 'Login must fail with 401 for deleted user');
     });
+
+    // --------------------------------------------------------------------------
+    // GATE 9: Payment Feature Invariants
+    // --------------------------------------------------------------------------
+    gate('Gate 9: Payment Feature Invariants');
+
+    await t('GET /api/payments/merchant-config returns configurable merchant details', async () => {
+      const res = await requestJson('/api/payments/merchant-config');
+      eq(res.status, 200, 'GET /api/payments/merchant-config must return 200 OK');
+      eq(res.data.success, true, 'Response must indicate success');
+      assert(res.data.merchant.vpa, 'Merchant VPA must be defined');
+      assert(res.data.merchant.name, 'Merchant name must be defined');
+      assert(res.data.merchant.qrImage, 'Merchant QR image path must be defined');
+    });
+
+    await t('Negative input defense: rejects payment submission with missing order_id', async () => {
+      const res = await requestJson('/api/payments', {
+        method: 'POST',
+        body: JSON.stringify({ customer_email: 'test@test.com', amount: 1499 })
+      });
+      eq(res.status, 400, 'Missing order_id must return 400 Bad Request');
+    });
+
+    await t('Negative input defense: rejects payment with zero amount', async () => {
+      const res = await requestJson('/api/payments', {
+        method: 'POST',
+        body: JSON.stringify({ order_id: 'test-order', customer_email: 'test@test.com', amount: 0 })
+      });
+      eq(res.status, 400, 'Zero amount must return 400 Bad Request');
+    });
+
+    let ephemeralPaymentId = null;
+    await t('Customer submits UPI payment with UTR reference (SUBMITTED)', async () => {
+      const res = await requestJson('/api/payments', {
+        method: 'POST',
+        body: JSON.stringify({
+          order_id: ephemeralOrderId || 'piet-test-order',
+          customer_email: NONCE_EMAIL,
+          customer_name: 'PIET Test Client',
+          amount: 1499,
+          payment_method: 'upi',
+          utr_reference: `PIET-UTR-${RUN_ID}`
+        })
+      });
+      eq(res.status, 201, 'POST /api/payments must return 201 Created');
+      eq(res.data.success, true, 'Payment submission must succeed');
+      const payment = res.data.payment;
+      assert(payment.id, 'Payment ID must exist');
+      ephemeralPaymentId = payment.id;
+      eq(payment.status, 'SUBMITTED', 'Initial payment status must be SUBMITTED');
+      eq(payment.verified, false, 'Payment must not be verified initially');
+      eq(payment.utr_reference, `PIET-UTR-${RUN_ID}`, 'UTR reference must be preserved');
+      eq(Number(payment.amount), 1499, 'Payment amount must match');
+    });
+
+    await t('Fetches payment by ID with complete attributes', async () => {
+      const res = await requestJson(`/api/payments/${ephemeralPaymentId}`);
+      eq(res.status, 200, 'GET /api/payments/:id must return 200 OK');
+      eq(res.data.payment.id, ephemeralPaymentId, 'Payment ID must match');
+      eq(res.data.payment.customer_email, NONCE_EMAIL, 'Customer email must match');
+    });
+
+    await t('Fetches payments by order ID', async () => {
+      const testOrderId = ephemeralOrderId || 'piet-test-order';
+      const res = await requestJson(`/api/payments/order/${testOrderId}`);
+      eq(res.status, 200, 'GET /api/payments/order/:orderId must return 200 OK');
+      assert(Array.isArray(res.data.payments), 'Payments must be an array');
+    });
+
+    await t('Negative defense: non-admin cannot verify payment', async () => {
+      const res = await requestJson(`/api/payments/${ephemeralPaymentId}/verify`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
+      eq(res.status, 403, 'Non-admin payment verification must return 403 Forbidden');
+    });
+
+    await t('Admin verifies payment and transitions to VERIFIED', async () => {
+      const res = await requestJson(`/api/payments/${ephemeralPaymentId}/verify`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      eq(res.status, 200, 'Admin payment verification must return 200 OK');
+      eq(res.data.payment.status, 'VERIFIED', 'Payment status must transition to VERIFIED');
+      eq(res.data.payment.verified, true, 'Payment verified flag must be true');
+      assert(res.data.payment.verified_at, 'verified_at timestamp must be set');
+    });
+
+    // Cleanup ephemeral payment
+    if (ephemeralPaymentId) {
+      try {
+        const rawSupabase = await import('../../server/supabase.js');
+        const supabaseClient = rawSupabase.default || rawSupabase;
+        await supabaseClient.from('aitag_payments').delete().eq('id', ephemeralPaymentId);
+        console.log(`🧹 Ephemeral Teardown: Deleted test payment ${ephemeralPaymentId}.`);
+      } catch {}
+    }
 
   } finally {
     // Teardown: Clean up ephemeral test order

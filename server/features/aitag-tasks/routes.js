@@ -231,4 +231,56 @@ router.post('/:id/reset', auth, async (req, res) => {
   }
 });
 
+// POST /api/tasks/:id/deliverables — Specialist submits completed work (protected)
+router.post('/:id/deliverables', auth, async (req, res) => {
+  try {
+    const { files, completionNotes } = req.body;
+    const task = await tasksService.submitDeliverables(req.params.id, {
+      files,
+      completionNotes,
+      specialistEmail: req.user.email
+    });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${(task.user_email || '').toLowerCase().trim()}`);
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/tasks/:id/revision — Client requests revisions on task deliverables (protected, owner only)
+router.post('/:id/revision', auth, async (req, res) => {
+  try {
+    const { revisionNotes } = req.body;
+    if (!revisionNotes) {
+      return res.status(400).json({ success: false, error: 'revisionNotes is required' });
+    }
+    const task = await tasksService.requestRevision(req.params.id, revisionNotes, req.user.email);
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${(task.user_email || '').toLowerCase().trim()}`);
+    res.json({ success: true, task });
+  } catch (err) {
+    const code = err.message.includes('Unauthorized') ? 403 : 400;
+    res.status(code).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/tasks/:id/approve — Client approves deliverables, releases escrow, leaves review (protected, owner only)
+router.post('/:id/approve', auth, async (req, res) => {
+  try {
+    const { rating, feedback } = req.body;
+    const result = await tasksService.approveAndComplete(req.params.id, {
+      rating,
+      feedback,
+      requestingEmail: req.user.email
+    });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${(result.task?.user_email || '').toLowerCase().trim()}`);
+    res.json(result);
+  } catch (err) {
+    const code = err.message.includes('Unauthorized') ? 403 : 400;
+    res.status(code).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;

@@ -88,7 +88,34 @@ const MyPostedTasks = () => {
                     <TableCell><Chip label={task.category} size="small" sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 600, fontSize: '0.72rem' }} /></TableCell>
                     <TableCell sx={{ color: '#64748b', fontSize: '0.85rem' }}>{new Date(task.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: '#10b981' }}>₹{Number(task.budget).toLocaleString()}</TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0891b2' }}>{task.total_bids || 0}</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      {(task.total_bids || 0) > 0 ? (
+                        <Tooltip title="View proposals & hire specialist">
+                          <Chip
+                            component={Link}
+                            to={`/task-details/${task.id}`}
+                            label={`${task.total_bids} ${task.total_bids === 1 ? 'Bid' : 'Bids'} →`}
+                            size="small"
+                            clickable
+                            sx={{
+                              bgcolor: 'rgba(79, 70, 229, 0.12)',
+                              color: '#4f46e5',
+                              fontWeight: 800,
+                              fontSize: '0.75rem',
+                              border: '1px solid rgba(79, 70, 229, 0.3)',
+                              cursor: 'pointer',
+                              '&:hover': {
+                                bgcolor: '#4f46e5',
+                                color: '#ffffff',
+                                boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)'
+                              }
+                            }}
+                          />
+                        </Tooltip>
+                      ) : (
+                        <Typography sx={{ color: '#94a3b8', fontSize: '0.85rem' }}>0</Typography>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Chip label={task.status || 'open'} size="small"
                         sx={{ bgcolor: task.status === 'completed' ? 'rgba(16,185,129,0.1)' : task.status === 'in-progress' ? 'rgba(79,70,229,0.1)' : 'rgba(100,116,139,0.1)', color: task.status === 'completed' ? '#10b981' : task.status === 'in-progress' ? '#4f46e5' : '#64748b', fontWeight: 600, textTransform: 'capitalize' }} />

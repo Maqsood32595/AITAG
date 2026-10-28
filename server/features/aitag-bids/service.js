@@ -1,10 +1,15 @@
 /**
  * AITAG Bids Service — Zero-Downtime Resilient Implementation
  * Fractal Kernel Slice: aitag-bids
+ * Child: aitag-bids/service.js
+ * Grandchildren:
+ *   - validators/proposal-validator.js
+ *   - calculators/bid-escrow-modeler.js
  */
 const supabase = require('../../supabase');
 const tasksService = require('../aitag-tasks/service');
-const escrowPaymentService = require('../escrow-payment/service');
+const proposalValidator = require('./validators/proposal-validator');
+const bidEscrowModeler = require('./calculators/bid-escrow-modeler');
 
 const IN_MEMORY_BIDS = [];
 
@@ -31,45 +36,91 @@ class BidsService {
   }
 
   async checkUserBid(taskId, email) {
+    const cleanEmail = (email || '').trim().toLowerCase();
     try {
       if (supabase && typeof supabase.from === 'function') {
         const { data } = await supabase
           .from('aitag_bids')
-          .select('id')
+          .select('*')
           .eq('task_id', taskId)
-          .eq('user_email', (email || '').trim().toLowerCase())
+          .eq('user_email', cleanEmail)
           .single();
 
-        if (data) return { hasBid: true };
+        if (data) return { hasBid: true, bid: data };
       }
     } catch (e) {}
 
-    const found = IN_MEMORY_BIDS.some(b => b.task_id === taskId && b.user_email === (email || '').trim().toLowerCase());
-    return { hasBid: found };
+    const found = IN_MEMORY_BIDS.find(b => b.task_id === taskId && b.user_email === cleanEmail);
+    return { hasBid: !!found, bid: found || null };
   }
 
-  async placeBid({ taskId, userEmail, userName }) {
+  async placeBid({ taskId, userEmail, userName, bid_amount, delivery_days, proposal_pitch }) {
     const task = await tasksService.getTaskById(taskId);
     if (!task) throw new Error('Task not found');
     if (task.user_email === userEmail) throw new Error('You cannot bid on your own task');
 
-    const { hasBid } = await this.checkUserBid(taskId, userEmail);
-    if (hasBid) throw new Error('You have already placed a bid on this task');
-
     const cleanEmail = (userEmail || '').trim().toLowerCase();
+    const existing = await this.checkUserBid(taskId, cleanEmail);
+
+    // Validate with grandchild proposalValidator
+    const validated = proposalValidator.validate(
+      { bid_amount, delivery_days, proposal_pitch },
+      task
+    );
+    const escrow = bidEscrowModeler.modelPayout(validated.bid_amount);
+
+    // If already placed, allow updating proposal price and details (Phase 1 Edit)
+    if (existing.hasBid && existing.bid) {
+      const updatedBid = {
+        ...existing.bid,
+        bid_amount: validated.bid_amount,
+        delivery_days: validated.delivery_days,
+        proposal_pitch: validated.proposal_pitch,
+        escrow_splits: escrow,
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        if (supabase && typeof supabase.from === 'function') {
+          const { data, error } = await supabase
+            .from('aitag_bids')
+            .update(updatedBid)
+            .eq('id', existing.bid.id)
+            .select()
+            .single();
+
+          if (!error && data) {
+            return { success: true, bid: data, updated: true };
+          }
+        }
+      } catch (e) {}
+
+      const idx = IN_MEMORY_BIDS.findIndex(b => b.id === existing.bid.id);
+      if (idx !== -1) {
+        IN_MEMORY_BIDS[idx] = updatedBid;
+      }
+      return { success: true, bid: updatedBid, updated: true };
+    }
+
+    // New bid creation
+    const newBidPayload = {
+      task_id: taskId,
+      task_title: task.title,
+      user_email: cleanEmail,
+      user_name: userName,
+      task_owner_email: task.user_email,
+      bid_amount: validated.bid_amount,
+      delivery_days: validated.delivery_days,
+      proposal_pitch: validated.proposal_pitch,
+      escrow_splits: escrow,
+      status: 'pending'
+    };
 
     try {
       if (supabase && typeof supabase.from === 'function') {
         const { data, error } = await supabase
           .from('aitag_bids')
-          .insert([{
-            task_id: taskId,
-            task_title: task.title,
-            user_email: cleanEmail,
-            user_name: userName,
-            task_owner_email: task.user_email,
-            status: 'pending'
-          }])
+          .insert([newBidPayload])
           .select()
           .single();
 
@@ -80,20 +131,15 @@ class BidsService {
       }
     } catch (e) {}
 
-    const newBid = {
+    const memoryBid = {
       id: `bid-${Date.now()}`,
-      task_id: taskId,
-      task_title: task.title,
-      user_email: cleanEmail,
-      user_name: userName,
-      task_owner_email: task.user_email,
-      status: 'pending',
+      ...newBidPayload,
       created_at: new Date().toISOString()
     };
-    IN_MEMORY_BIDS.push(newBid);
+    IN_MEMORY_BIDS.push(memoryBid);
     await tasksService.incrementBidCount(taskId);
 
-    return { success: true, bid: newBid };
+    return { success: true, bid: memoryBid };
   }
 
   async getTaskBids(taskId, requestingEmail) {
@@ -144,21 +190,31 @@ class BidsService {
 
     if (!bid) throw new Error('Bid not found');
 
-    const task = await tasksService.getTaskById(bid.task_id);
+    const agreedPrice = Number(bid.bid_amount || task.budget);
+    const escrow = bidEscrowModeler.modelPayout(agreedPrice);
+
     if (task) {
-      await tasksService.updateTask(task.id, task.user_email, { status: 'in-progress' }).catch(() => {});
+      await tasksService.updateTask(task.id, task.user_email, {
+        status: 'in-progress',
+        agreed_price: agreedPrice,
+        accepted_bid_id: bid.id,
+        accepted_specialist_email: bid.user_email,
+        accepted_specialist_name: bid.user_name,
+        escrow_splits: escrow
+      }, 'admin').catch(() => {});
       task.status = 'in-progress';
+      task.agreed_price = agreedPrice;
+      task.accepted_bid_id = bid.id;
     }
-    const escrow = escrowPaymentService.calculateSplits(task.budget);
 
     return {
       success: true,
       bid,
       escrow: {
         grossAmount: escrow.grossAmount,
-        platformFee: escrow.splits.platformCommissionFee,
-        section194OTDS: escrow.splits.section194OTDSWithholding,
-        freelancerNetPayout: escrow.splits.freelancerNetPayout,
+        platformFee: escrow.platformFee,
+        section194OTDS: escrow.section194OTDS,
+        freelancerNetPayout: escrow.freelancerNetPayout,
         status: 'HELD_IN_ESCROW'
       }
     };
