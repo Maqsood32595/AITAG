@@ -1,0 +1,26 @@
+{
+  "id": "domain-finance",
+  "name": "AITAG Finance & Payments Domain",
+  "type": "domain",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Enterprise finance domain coordinating UPI payments, QR generation, RBI escrow, and Section 194-O TDS compliance.",
+  "children": [
+    {
+      "id": "aitag-payments",
+      "name": "UPI Payment & Order Activation Engine",
+      "basePath": "/api/payments",
+      "folder": "children/payments",
+      "routes": "children/payments/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "escrow-payment",
+      "name": "RBI Escrow & Section 194-O TDS Compliance Engine",
+      "basePath": "/api/escrow",
+      "folder": "children/escrow",
+      "routes": "children/escrow/routes.js",
+      "enabled": true
+    }
+  ]
+}

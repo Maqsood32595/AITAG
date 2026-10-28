@@ -157,6 +157,9 @@ class FractalKernel {
   }
 
   mountFeature(app, manifest) {
+    if (this.mountedRoutes.has(manifest.id) || Array.from(this.mountedRoutes.values()).includes(manifest.basePath)) {
+      return;
+    }
     const routesPath = path.join(manifest.folderPath, 'routes.js');
     const uiPath = path.join(manifest.folderPath, 'ui');
 

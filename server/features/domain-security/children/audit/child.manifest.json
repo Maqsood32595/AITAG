@@ -1,0 +1,8 @@
+{
+  "id": "aitag-security-guard",
+  "name": "AITAG Security Guard & Hardening Engine",
+  "version": "1.0.0",
+  "basePath": "/api/security",
+  "enabled": true,
+  "routes": "./routes.js"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "domain-security",
+  "name": "AITAG Security, Hardening & Privacy Domain",
+  "type": "domain",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Enterprise security domain coordinating 9 defense layers, OWASP headers, rate limiting, and real-time PII redaction shield.",
+  "children": [
+    {
+      "id": "aitag-security-guard",
+      "name": "AITAG Security Guard & Hardening Engine",
+      "basePath": "/api/security",
+      "folder": "children/audit",
+      "routes": "children/audit/routes.js",
+      "enabled": true
+    },
+    {
+      "id": "leakage-shield",
+      "name": "AITAG Real-Time PII & Contact Redaction Shield",
+      "basePath": "/api/shield",
+      "folder": "children/shield",
+      "routes": "children/shield/routes.js",
+      "enabled": true
+    }
+  ]
+}

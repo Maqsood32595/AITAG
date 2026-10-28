@@ -4,5 +4,6 @@
   "version": "1.0.0",
   "basePath": "/api/escrow",
   "enabled": true,
+  "domain": "domain-finance",
   "dependencies": []
 }
