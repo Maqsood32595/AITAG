@@ -25,7 +25,18 @@ const wss = new WebSocket.Server({ server });
 app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString(), env: process.env.NODE_ENV || 'production' }));
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://localhost:5005', 'http://localhost:8000', 'https://aitag.pages.dev', 'https://aitag.onrender.com', 'https://aitag-dev.onrender.com', 'https://shortshub.app'],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      origin.endsWith('.onrender.com') ||
+      origin.endsWith('.pages.dev') ||
+      origin.includes('localhost') ||
+      origin === 'https://shortshub.app'
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json());
