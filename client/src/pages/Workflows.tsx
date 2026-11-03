@@ -234,7 +234,7 @@ export const Workflows: React.FC = () => {
             </IconButton>
             <Box>
               <Typography variant="h4" fontWeight={800} color="#0f172a">
-                🎬 Delivered Workflows & Video Case Studies
+                🎬 Delivered Services & Work Samples
               </Typography>
               <Typography variant="body2" color="#64748b">
                 Showcase working AI automations with Google Cloud MP4 videos, YouTube demos, or Loom walkthroughs.

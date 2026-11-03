@@ -36,8 +36,9 @@ import {
   Timer as TimerIcon,
   AccountBalanceWallet as WalletIcon,
 } from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5005';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 interface MerchantConfig {
   vpa: string;
@@ -60,6 +61,7 @@ interface OrderConfig {
 const STEPS = ['Select Service', 'Make Payment', 'Confirm & Submit'];
 
 export default function PaymentCheckout() {
+  const { user } = useAuth();
   const { id: routeId, orderId: routeOrderId } = useParams<{ id?: string; orderId?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -75,15 +77,24 @@ export default function PaymentCheckout() {
   const [merchant, setMerchant] = useState<MerchantConfig | null>(null);
   const [orderConfig, setOrderConfig] = useState<OrderConfig | null>(null);
   const [utrReference, setUtrReference] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerName, setCustomerName] = useState(user?.name || '');
+  const [customerEmail, setCustomerEmail] = useState(user?.email || '');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [showContactEdit, setShowContactEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // Sync user credentials if loaded late
+  useEffect(() => {
+    if (user) {
+      if (!customerName && user.name) setCustomerName(user.name);
+      if (!customerEmail && user.email) setCustomerEmail(user.email);
+    }
+  }, [user]);
 
   // Fetch merchant config
   useEffect(() => {
@@ -154,11 +165,14 @@ export default function PaymentCheckout() {
 
   const handleSubmitPayment = async () => {
     if (!utrReference.trim()) {
-      setError('Please enter your UTR / Transaction Reference Number');
+      setError('Please enter your 12-digit UPI UTR / Transaction Reference Number');
       return;
     }
-    if (!customerName.trim() || !customerEmail.trim()) {
-      setError('Please enter your name and email');
+    const effectiveName = customerName.trim() || user?.name || 'Customer';
+    const effectiveEmail = customerEmail.trim() || user?.email || '';
+
+    if (!effectiveEmail) {
+      setError('Please provide an email address for your order confirmation');
       return;
     }
 
@@ -168,8 +182,9 @@ export default function PaymentCheckout() {
     try {
       const payload: Record<string, unknown> = {
         order_id: orderId || `WALK-IN-${Date.now()}`,
-        customer_email: customerEmail.trim(),
-        customer_name: customerName.trim(),
+        customer_email: effectiveEmail,
+        customer_name: effectiveName,
+        customer_phone: customerPhone.trim() || undefined,
         amount: displayAmount,
         payment_method: 'upi',
         utr_reference: utrReference.trim(),
@@ -720,53 +735,93 @@ export default function PaymentCheckout() {
                     </Alert>
                   )}
 
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                    {user ? (
+                      <Box
+                        sx={{
+                          p: 2,
+                          borderRadius: '12px',
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: 1.5,
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <VerifiedIcon sx={{ color: '#10b981', fontSize: 22 }} />
+                          <Box>
+                            <Typography sx={{ color: '#ffffff', fontSize: '0.9rem', fontWeight: 700 }}>
+                              {user.name || 'Account Customer'}
+                            </Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem' }}>
+                              Order confirmation will be sent to: <strong style={{ color: '#a5b4fc' }}>{user.email}</strong>
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Button
+                          size="small"
+                          onClick={() => setShowContactEdit(!showContactEdit)}
+                          sx={{
+                            color: '#a5b4fc',
+                            textTransform: 'none',
+                            fontSize: '0.78rem',
+                            border: '1px solid rgba(165,180,252,0.3)',
+                            borderRadius: '8px',
+                            px: 1.5,
+                            '&:hover': { bgcolor: 'rgba(165,180,252,0.1)' }
+                          }}
+                        >
+                          {showContactEdit ? 'Hide Edit' : 'Edit Info'}
+                        </Button>
+                      </Box>
+                    ) : null}
+
+                    {(!user || showContactEdit) && (
+                      <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                        <TextField
+                          id="customer-name-input"
+                          label="Your Name"
+                          placeholder="Mohammed Maqsood"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          fullWidth
+                          required
+                          sx={textFieldStyles}
+                        />
+                        <TextField
+                          id="customer-email-input"
+                          label="Email Address"
+                          placeholder="you@example.com"
+                          type="email"
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          fullWidth
+                          required
+                          sx={textFieldStyles}
+                        />
+                      </Box>
+                    )}
+
+                    <Box>
                       <TextField
-                        id="customer-name-input"
-                        label="Your Name"
-                        placeholder="Mohammed Maqsood"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
+                        id="utr-reference-input"
+                        label="12-Digit UPI UTR / Transaction Reference Number *"
+                        placeholder="e.g. 428901234567 or UPI-REF-XXXX"
+                        value={utrReference}
+                        onChange={(e) => setUtrReference(e.target.value)}
                         fullWidth
                         required
+                        autoFocus
                         sx={textFieldStyles}
-                      />
-                      <TextField
-                        id="customer-email-input"
-                        label="Email Address"
-                        placeholder="you@example.com"
-                        type="email"
-                        value={customerEmail}
-                        onChange={(e) => setCustomerEmail(e.target.value)}
-                        fullWidth
-                        required
-                        sx={textFieldStyles}
+                        helperText="Found directly on your UPI confirmation screen (GPay, PhonePe, Paytm, BHIM, Cred)"
+                        FormHelperTextProps={{
+                          sx: { color: 'rgba(255,255,255,0.7)', ml: 0.5, mt: 0.75, fontSize: '0.8rem', fontWeight: 500 },
+                        }}
                       />
                     </Box>
-                    <TextField
-                      id="customer-phone-input"
-                      label="Phone Number (Optional)"
-                      placeholder="+91 98765 43210"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      fullWidth
-                      sx={textFieldStyles}
-                    />
-                    <TextField
-                      id="utr-reference-input"
-                      label="UTR / Transaction Reference Number"
-                      placeholder="e.g. 123456789012 or AXXXXXXXXXXX"
-                      value={utrReference}
-                      onChange={(e) => setUtrReference(e.target.value)}
-                      fullWidth
-                      required
-                      sx={textFieldStyles}
-                      helperText="Find this in your UPI app's payment confirmation screen"
-                      FormHelperTextProps={{
-                        sx: { color: 'rgba(255,255,255,0.3)', ml: 0 },
-                      }}
-                    />
 
                     <Button
                       id="submit-payment-button"
@@ -775,7 +830,7 @@ export default function PaymentCheckout() {
                       size="large"
                       startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <VerifiedIcon />}
                       onClick={handleSubmitPayment}
-                      disabled={submitting || !utrReference.trim() || !customerName.trim() || !customerEmail.trim()}
+                      disabled={submitting || !utrReference.trim()}
                       sx={{
                         py: 1.8,
                         mt: 1,
@@ -793,13 +848,13 @@ export default function PaymentCheckout() {
                           transform: 'translateY(-1px)',
                         },
                         '&.Mui-disabled': {
-                          background: 'rgba(255,255,255,0.06)',
-                          color: 'rgba(255,255,255,0.25)',
+                          background: 'rgba(255,255,255,0.08)',
+                          color: 'rgba(255,255,255,0.35)',
                         },
                         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
                     >
-                      {submitting ? 'Submitting...' : 'Confirm Payment'}
+                      {submitting ? 'Submitting Reference...' : 'Confirm & Activate Order'}
                     </Button>
                   </Box>
                 </Box>
@@ -866,27 +921,48 @@ export default function PaymentCheckout() {
   );
 }
 
-// Shared TextField styles for dark theme
+// High-contrast clean input styles for payment checkout
 const textFieldStyles = {
   '& .MuiOutlinedInput-root': {
-    color: '#fff',
+    color: '#0f172a',
     borderRadius: '12px',
-    background: 'rgba(255,255,255,0.04)',
+    backgroundColor: '#ffffff',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+    '& input': {
+      color: '#0f172a',
+      fontWeight: 600,
+      fontSize: '0.95rem',
+      padding: '14px 16px',
+    },
     '& fieldset': {
-      borderColor: 'rgba(255,255,255,0.1)',
+      borderColor: 'rgba(255,255,255,0.4)',
+      borderWidth: '1.5px',
     },
     '&:hover fieldset': {
-      borderColor: 'rgba(79,70,229,0.4)',
+      borderColor: '#818cf8',
     },
     '&.Mui-focused fieldset': {
       borderColor: '#4f46e5',
+      borderWidth: '2px',
     },
   },
   '& .MuiInputLabel-root': {
-    color: 'rgba(255,255,255,0.4)',
-    '&.Mui-focused': { color: '#818cf8' },
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: 600,
+    fontSize: '0.9rem',
+    '&.Mui-focused': { color: '#a5b4fc' },
+    '&.MuiInputLabel-shrink': {
+      backgroundColor: '#ffffff',
+      color: '#1e293b',
+      fontWeight: 700,
+      padding: '1px 8px',
+      borderRadius: '4px',
+      border: '1px solid #cbd5e1',
+    },
   },
   '& .MuiInputBase-input::placeholder': {
-    color: 'rgba(255,255,255,0.2)',
+    color: '#64748b',
+    opacity: 1,
+    fontWeight: 400,
   },
 };

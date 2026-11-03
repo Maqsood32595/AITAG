@@ -405,9 +405,9 @@ const Dashboard = () => {
     { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'My Placed Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)', link: '/my_tasks' },
     { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'My Assigned Projects', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', scrollId: 'orders-section' },
   ] : [
-    { icon: <PostIcon sx={{ color: '#0891b2' }} />, label: 'My Posted Tasks', value: myTasks.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', link: '/my_tasks' },
-    { icon: <ShoppingBagIcon sx={{ color: '#4f46e5' }} />, label: 'My Service Requests', value: serviceOrders.length, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)', scrollId: 'orders-section' },
-    { icon: <TaskIcon sx={{ color: '#10b981' }} />, label: 'Marketplace Tasks', value: allCount, color: '#10b981', bg: 'rgba(16,185,129,0.08)', link: '/all_tasks' },
+    { icon: <ShoppingBagIcon sx={{ color: '#4f46e5' }} />, label: 'My AI Service Packages', value: serviceOrders.length, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)', scrollId: 'orders-section' },
+    { icon: <PostIcon sx={{ color: '#0891b2' }} />, label: 'My Custom Tasks', value: myTasks.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', link: '/my_tasks' },
+    { icon: <TaskIcon sx={{ color: '#10b981' }} />, label: 'Completed Deliverables', value: serviceOrders.filter(o => o.status === 'COMPLETED').length + myTasks.filter(t => t.status === 'completed').length, color: '#10b981', bg: 'rgba(16,185,129,0.08)', scrollId: 'orders-section' },
   ];
 
   const getStepIndex = (status: string) => {

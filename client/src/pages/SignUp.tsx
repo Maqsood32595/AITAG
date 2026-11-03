@@ -11,7 +11,7 @@ import { GoogleAuthButton } from '../components/GoogleAuthButton';
 const SignUp = () => {
   const { register, logout, user } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', password: '', photoURL: '', role: 'freelancer' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'client' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,8 +25,12 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (form.password.length < 6) return setError('Password must be at least 6 characters');
-    if (!/[A-Z]/.test(form.password)) return setError('Password must contain at least one uppercase letter');
+    if (form.password.length < 6) {
+      return setError('Password must be at least 6 characters');
+    }
+    if (!/[A-Z]/.test(form.password)) {
+      return setError('Password must contain at least one uppercase letter (e.g. A-Z)');
+    }
     setLoading(true);
     try {
       await register(form);
@@ -38,30 +42,41 @@ const SignUp = () => {
     }
   };
 
+  const isPasswordError = Boolean(error && error.toLowerCase().includes('password'));
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
       <Container maxWidth="sm" sx={{ pt: 14, pb: 6 }}>
-        <Paper elevation={0} sx={{ p: 5, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
+        <Paper elevation={0} sx={{ p: { xs: 3, sm: 5 }, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>
-            Create account
+            Create Account
           </Typography>
           <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>
-            Join AITAG — find or post AI tasks today
+            Join AITAG — connect with vetted AI specialists or request a guaranteed business package
           </Typography>
 
-          {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
+          {error && !isPasswordError && (
+            <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>
+              {error}
+            </Alert>
+          )}
 
           {/* Role Selection for Google & Email Registration */}
           <Box sx={{ mb: 3 }}>
-            <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', mb: 1 }}>
+            <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', mb: 1 }}>
               I want to join as:
             </Typography>
             <FormControl fullWidth sx={{ ...fieldStyle, mb: 2 }}>
-              <InputLabel>Account Role</InputLabel>
-              <Select value={form.role} label="Account Role" onChange={e => setForm({ ...form, role: e.target.value })}>
-                <MenuItem value="freelancer">AI Expert</MenuItem>
-                <MenuItem value="client">Client</MenuItem>
+              <InputLabel id="account-role-label">Account Role</InputLabel>
+              <Select
+                labelId="account-role-label"
+                value={form.role}
+                label="Account Role"
+                onChange={e => setForm({ ...form, role: e.target.value })}
+              >
+                <MenuItem value="client">AI Service Customer (Get Work Done)</MenuItem>
+                <MenuItem value="freelancer">AI Service Provider (Offer Vetted Services)</MenuItem>
               </Select>
             </FormControl>
 
@@ -73,22 +88,60 @@ const SignUp = () => {
           </Divider>
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <TextField label="Full Name" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-              sx={fieldStyle} />
-            <TextField label="Email" type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-              sx={fieldStyle} />
-            <TextField label="Password" type="password" required value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
-              helperText="Min 6 chars, at least one uppercase" sx={fieldStyle} />
-            <TextField label="Photo URL (optional)" value={form.photoURL} onChange={e => setForm({ ...form, photoURL: e.target.value })}
-              sx={fieldStyle} />
+            <TextField
+              label="Full Name"
+              required
+              placeholder="e.g. Rahul Verma"
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+              sx={fieldStyle}
+            />
+            <TextField
+              label="Email Address"
+              type="email"
+              required
+              placeholder="you@company.com"
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+              sx={fieldStyle}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              required
+              value={form.password}
+              onChange={e => {
+                setForm({ ...form, password: e.target.value });
+                if (error) setError('');
+              }}
+              error={isPasswordError}
+              helperText={
+                isPasswordError
+                  ? error
+                  : 'Min 6 characters with at least one uppercase letter (e.g. Pass123)'
+              }
+              FormHelperTextProps={{
+                sx: { color: isPasswordError ? '#ef4444' : '#64748b', fontWeight: isPasswordError ? 700 : 400 }
+              }}
+              sx={fieldStyle}
+            />
 
-            <Button type="submit" variant="contained" size="large" disabled={loading}
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={loading}
               sx={{
-                mt: 1, background: 'linear-gradient(135deg, #4f46e5, #0891b2)', fontWeight: 700,
-                borderRadius: '12px', py: 1.5, boxShadow: '0 6px 20px rgba(79,70,229,0.3)',
+                mt: 1,
+                background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
+                fontWeight: 700,
+                borderRadius: '12px',
+                py: 1.5,
+                boxShadow: '0 6px 20px rgba(79,70,229,0.3)',
                 '&:hover': { boxShadow: '0 8px 28px rgba(79,70,229,0.4)' }
-              }}>
-              {loading ? 'Creating account...' : 'Sign Up'}
+              }}
+            >
+              {loading ? 'Creating account...' : 'Create AITAG Account'}
             </Button>
           </Box>
 
@@ -106,6 +159,7 @@ const SignUp = () => {
 const fieldStyle = {
   '& .MuiOutlinedInput-root': {
     borderRadius: '10px',
+    backgroundColor: '#ffffff',
     '&:hover fieldset': { borderColor: '#4f46e5' },
     '&.Mui-focused fieldset': { borderColor: '#4f46e5' },
   },

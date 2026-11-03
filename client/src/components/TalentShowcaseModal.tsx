@@ -183,7 +183,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
           <Box sx={{ mb: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 1 }}>
-                🎬 Delivered Workflows & Video Case Studies {hasWorkflows ? `(${workflows.length})` : ''}
+                🎬 Delivered Services & Work Samples {hasWorkflows ? `(${workflows.length})` : ''}
               </Typography>
             </Box>
 

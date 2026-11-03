@@ -33,6 +33,19 @@ const Navbar = () => {
 
   const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
 
+  const currentNavLinks = NAV_LINKS.filter((link) => {
+    // Hide Browse Tasks for Clients (buyers don't bid on other people's tasks)
+    if (user?.role === 'client' && link.to === '/all_tasks') {
+      return false;
+    }
+    return true;
+  }).map((link) => {
+    if (link.to === '/my_tasks' && user?.role === 'client') {
+      return { ...link, label: 'My Orders & Tasks' };
+    }
+    return link;
+  });
+
   const handleLogout = () => {
     setAnchorEl(null);
     logout();
@@ -119,7 +132,7 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, flexGrow: 1 }}>
-          {NAV_LINKS.map((link) => (
+          {currentNavLinks.map((link) => (
             <Button
               key={link.to}
               component={Link}
@@ -175,7 +188,7 @@ const Navbar = () => {
             onClose={() => setMobileMenuAnchorEl(null)}
             sx={{ display: { xs: 'block', md: 'none' } }}
           >
-            {NAV_LINKS.map((link) => (
+            {currentNavLinks.map((link) => (
               <MenuItem
                 key={link.to}
                 component={Link}

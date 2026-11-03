@@ -98,10 +98,11 @@ const CURATED_TALENT: Talent[] = [
 
 const CATEGORIES = [
   'All',
+  'Branding & Print',
   'Product Visuals',
-  'E-Commerce & Copy',
   'Social & Marketing',
-  'Web & Funnels'
+  'Web & Funnels',
+  'E-Commerce & Copy'
 ];
 
 import InviteModal from '../components/InviteModal';
@@ -482,7 +483,7 @@ const AITalent = () => {
                           px: 1.5,
                         }}
                       >
-                        🎬 View Workflows
+                        🎬 View Work Samples
                       </Button>
                       <Button
                         variant="contained"

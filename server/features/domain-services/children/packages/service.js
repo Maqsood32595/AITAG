@@ -51,71 +51,69 @@ function validatePackage(pkg) {
 
 // ─────────────────────────────────────────────────────────
 // CHILD: Authoritative Binary Pricing Catalog
-// Binary Model: Starter (₹1,499) | Pro (₹3,499)
+// Binary Model: Starter (from ₹499) | Pro (from ₹999)
 // Delivery: 2–6 days (Starter: 2–4 days | Pro: 4–6 days). 0% ongoing maintenance.
 // ─────────────────────────────────────────────────────────
 const FALLBACK_PACKAGES = [
   {
-    slug: 'ai-product-photo-makeover',
-    title: 'AI Product Photo Makeover',
-    tagline: 'Studio-grade marketplace photos from your phone in 2–4 days',
+    slug: 'ai-logo-identity-kit',
+    title: 'Logo Design & Indian SMB Identity Kit',
+    tagline: 'Professional logo, visiting card & GST invoice template in 2–6 days',
     description:
-      'Send us simple phone photos of your products. We use AI to remove backgrounds, fix lighting, add professional settings, and make your photos marketplace-ready for Amazon, Flipkart, Meesho, Instagram or WhatsApp catalogue — no studio or photographer needed.',
-    category: 'Product Visuals',
-    icon: 'Camera',
-    image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
-    badge: 'Best Seller',
+      'We design a professional logo for your business using AI and deliver it in formats ready for digital use and physical print — visiting cards, GST invoices, WhatsApp DP, letterheads, shop banners and flex printing. Everything your new or growing Indian business needs to look credible from day one.',
+    category: 'Branding & Print',
+    icon: 'Palette',
+    image_url: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800',
+    badge: 'Most Popular',
     display_order: 1,
     benefits: [
-      'Better photos get more clicks and more sales online',
-      'Saves ₹15,000+ compared with a physical studio photoshoot',
-      'Images meet marketplace rules (white background, correct size) — zero listing rejections',
-      '100% marketplace-compliant: Amazon, Flipkart, Meesho, Myntra'
+      'Looks professional and credible from day one — builds customer trust instantly',
+      'Print-ready for visiting cards, shop banners, flex printing and GST invoices',
+      'Full commercial copyright ownership — legally yours forever',
+      'Works for both digital (WhatsApp, Instagram) and physical print (Tally, Vyapar, Zoho Books)'
     ],
-    pipeline: '📱 Phone photo → AI background removal → Ambient shadow → Lifestyle scenes → Marketplace-ready delivery',
+    pipeline: '🎨 Recraft V3 logo generation → Vectorizer.ai SVG cleanup → 📄 Puppeteer PDF invoice/card render',
     tiers: [
       {
         tier_name: 'starter',
         display_name: 'Starter',
-        price_min: 1499,
-        price_max: 1499,
+        price_min: 499,
+        price_max: 499,
         delivery_hours_min: 48,
         delivery_hours_max: 96,
         delivery_days_min: 2,
         delivery_days_max: 4,
         revisions_included: 1,
-        deliverable_summary: '10 product photos, pure white background, 2000×2000px, 1 revision',
+        deliverable_summary: 'Primary vector SVG logo, transparent PNG (light & dark), WhatsApp DP, full copyright transfer',
         inclusions: [
-          '10 clean product photos',
-          'Pure white background RGB(255,255,255) — marketplace compliant',
-          'Realistic ambient contact shadow (no floating look)',
-          '2000×2000px high-resolution standard',
-          'Lighting and color correction',
-          '1 revision included',
-          'High-quality JPG/PNG delivery'
+          'Primary logo in vector SVG (infinitely scalable for shop banners)',
+          'High-resolution transparent PNG — light & dark background versions',
+          'Circular-cropped WhatsApp DP & Social Media Profile Avatar',
+          'Full commercial copyright ownership transfer',
+          '1 revision included'
         ],
-        exclusions: ['Lifestyle background scenes', 'AI model placements']
+        exclusions: ['Visiting card print file', 'GST invoice template', 'Brand guide']
       },
       {
         tier_name: 'pro',
         display_name: 'Pro',
-        price_min: 3499,
-        price_max: 3499,
+        price_min: 999,
+        price_max: 999,
         delivery_hours_min: 96,
         delivery_hours_max: 144,
         delivery_days_min: 4,
         delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: '25 photos: 15 white-bg + 8 lifestyle scenes + 2 infographics, 2 revisions',
+        deliverable_summary: 'Full logo kit + print-ready visiting card (CMYK 300 DPI) + GST invoice + letterhead + brand guide',
         inclusions: [
-          '25 high-resolution product images',
-          '15x pure white background multi-angle shots',
-          '8x AI lifestyle scenes (kitchen, marble, festive/Diwali)',
-          '2x feature/dimension callout infographics (reduces return rates)',
-          'Full web-optimised WebP + original PNG archive',
+          'Everything in Starter PLUS:',
+          'Print-ready Visiting Card (3.5" × 2" Indian standard, bleed, CMYK 300 DPI PDF)',
+          'A4 GST Tax Invoice & Bill Header template (Tally / Vyapar / Zoho Books ready)',
+          'Official Letterhead template (Word & PDF)',
+          'Mini Brand Guide (HEX color palette & font pairings)',
           '2 revisions included'
         ],
-        exclusions: ['Physical studio photoshoot', '3D rendering']
+        exclusions: ['Physical card printing costs (customer-paid)', 'Animation or motion graphics']
       }
     ]
   },
@@ -246,23 +244,23 @@ const FALLBACK_PACKAGES = [
     ]
   },
   {
-    slug: 'ai-logo-identity-kit',
-    title: 'Logo Design & Indian SMB Identity Kit',
-    tagline: 'Professional logo, visiting card & GST invoice template in 2–6 days',
+    slug: 'ai-product-photo-makeover',
+    title: 'AI Product Photo Makeover',
+    tagline: 'Studio-grade marketplace photos from your phone in 2–4 days',
     description:
-      'We design a professional logo for your business using AI and deliver it in formats ready for digital use and physical print — visiting cards, GST invoices, WhatsApp DP, letterheads, shop banners and flex printing. Everything your new or growing Indian business needs to look credible from day one.',
-    category: 'Branding & Print',
-    icon: 'Palette',
-    image_url: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800',
-    badge: 'New Business Essential',
+      'Send us simple phone photos of your products. We use AI to remove backgrounds, fix lighting, add professional settings, and make your photos marketplace-ready for Amazon, Flipkart, Meesho, Instagram or WhatsApp catalogue — no studio or photographer needed.',
+    category: 'Product Visuals',
+    icon: 'Camera',
+    image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
+    badge: 'Best Seller',
     display_order: 4,
     benefits: [
-      'Looks professional and credible from day one — builds customer trust instantly',
-      'Print-ready for visiting cards, shop banners, flex printing and GST invoices',
-      'Full commercial copyright ownership — legally yours forever',
-      'Works for both digital (WhatsApp, Instagram) and physical print (Tally, Vyapar, Zoho Books)'
+      'Better photos get more clicks and more sales online',
+      'Saves ₹15,000+ compared with a physical studio photoshoot',
+      'Images meet marketplace rules (white background, correct size) — zero listing rejections',
+      '100% marketplace-compliant: Amazon, Flipkart, Meesho, Myntra'
     ],
-    pipeline: '🎨 Recraft V3 logo generation → Vectorizer.ai SVG cleanup → 📄 Puppeteer PDF invoice/card render',
+    pipeline: '📱 Phone photo → AI background removal → Ambient shadow → Lifestyle scenes → Marketplace-ready delivery',
     tiers: [
       {
         tier_name: 'starter',
@@ -274,15 +272,17 @@ const FALLBACK_PACKAGES = [
         delivery_days_min: 2,
         delivery_days_max: 4,
         revisions_included: 1,
-        deliverable_summary: 'Primary vector SVG logo, transparent PNG (light & dark), WhatsApp DP, full copyright transfer',
+        deliverable_summary: '10 product photos, pure white background, 2000×2000px, 1 revision',
         inclusions: [
-          'Primary logo in vector SVG (infinitely scalable for shop banners)',
-          'High-resolution transparent PNG — light & dark background versions',
-          'Circular-cropped WhatsApp DP & Social Media Profile Avatar',
-          'Full commercial copyright ownership transfer',
-          '1 revision included'
+          '10 clean product photos',
+          'Pure white background RGB(255,255,255) — marketplace compliant',
+          'Realistic ambient contact shadow (no floating look)',
+          '2000×2000px high-resolution standard',
+          'Lighting and color correction',
+          '1 revision included',
+          'High-quality JPG/PNG delivery'
         ],
-        exclusions: ['Visiting card print file', 'GST invoice template', 'Brand guide']
+        exclusions: ['Lifestyle background scenes', 'AI model placements']
       },
       {
         tier_name: 'pro',
@@ -294,16 +294,16 @@ const FALLBACK_PACKAGES = [
         delivery_days_min: 4,
         delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: 'Full logo kit + print-ready visiting card (CMYK 300 DPI) + GST invoice + letterhead + brand guide',
+        deliverable_summary: '25 photos: 15 white-bg + 8 lifestyle scenes + 2 infographics, 2 revisions',
         inclusions: [
-          'Everything in Starter PLUS:',
-          'Print-ready Visiting Card (3.5" × 2" Indian standard, bleed, CMYK 300 DPI PDF)',
-          'A4 GST Tax Invoice & Bill Header template (Tally / Vyapar / Zoho Books ready)',
-          'Official Letterhead template (Word & PDF)',
-          'Mini Brand Guide (HEX color palette & font pairings)',
+          '25 high-resolution product images',
+          '15x pure white background multi-angle shots',
+          '8x AI lifestyle scenes (kitchen, marble, festive/Diwali)',
+          '2x feature/dimension callout infographics (reduces return rates)',
+          'Full web-optimised WebP + original PNG archive',
           '2 revisions included'
         ],
-        exclusions: ['Physical card printing costs (customer-paid)', 'Animation or motion graphics']
+        exclusions: ['Physical studio photoshoot', '3D rendering']
       }
     ]
   }
