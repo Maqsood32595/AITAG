@@ -33,10 +33,12 @@ const Navbar = () => {
 
   const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
 
+  const isExpertOrAdmin = user?.role === 'freelancer' || user?.role === 'admin';
+
   const currentNavLinks = NAV_LINKS.filter((link) => {
-    // Hide Browse Tasks for Clients (buyers don't bid on other people's tasks)
-    if (user?.role === 'client' && link.to === '/all_tasks') {
-      return false;
+    // Browse Tasks is strictly reserved for vetted AI specialists and platform administrators
+    if (link.to === '/all_tasks') {
+      return isExpertOrAdmin;
     }
     return true;
   }).map((link) => {

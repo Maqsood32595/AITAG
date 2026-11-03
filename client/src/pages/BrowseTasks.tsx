@@ -3,7 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import {
   Box, Container, Typography, Card, CardContent,
   Button, TextField, MenuItem, Select, InputLabel,
-  FormControl, Chip, Skeleton, InputAdornment, Divider, Stack
+  FormControl, Chip, Skeleton, InputAdornment, Divider, Stack,
+  Paper, CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import PaletteIcon from '@mui/icons-material/Palette';
@@ -11,6 +12,8 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ShareIcon from '@mui/icons-material/Share';
 import LanguageIcon from '@mui/icons-material/Language';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 
@@ -30,6 +33,8 @@ const getCategoryIcon = (category: string) => {
 };
 
 const BrowseTasks = () => {
+  const { user, loading: authLoading } = useAuth();
+  const isExpertOrAdmin = user?.role === 'freelancer' || user?.role === 'admin';
   const [searchParams] = useSearchParams();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +42,15 @@ const BrowseTasks = () => {
   const [category, setCategory] = useState('all');
 
   useEffect(() => {
-    tasksApi.getAll().then(res => setTasks(res.data)).catch(console.error).finally(() => setLoading(false));
-  }, []);
+    if (isExpertOrAdmin) {
+      tasksApi.getAll()
+        .then(res => setTasks(res.data))
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [isExpertOrAdmin]);
 
   const filtered = tasks.filter(t => {
     const taskCat = CATEGORY_MAP[t.category] || t.category;
@@ -46,6 +58,164 @@ const BrowseTasks = () => {
     const matchCat = category === 'all' || taskCat === category || t.category === category;
     return matchSearch && matchCat;
   });
+
+  if (authLoading) {
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+        <Navbar />
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <CircularProgress sx={{ color: '#4f46e5' }} />
+        </Box>
+      </Box>
+    );
+  }
+
+  // Access restriction: Browse Tasks is reserved exclusively for experts and admins
+  if (!isExpertOrAdmin) {
+    const isClient = user?.role === 'client';
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+        <Navbar />
+        <Container maxWidth="md" sx={{ pt: 16, pb: 10 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3.5, sm: 5 },
+              textAlign: 'center',
+              borderRadius: '20px',
+              border: '1px solid #e2e8f0',
+              bgcolor: '#ffffff',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
+            }}
+          >
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                mx: 'auto',
+                mb: 2.5,
+                borderRadius: '16px',
+                bgcolor: 'rgba(79,70,229,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#4f46e5'
+              }}
+            >
+              <LockOutlinedIcon sx={{ fontSize: 32 }} />
+            </Box>
+
+            <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', mb: 1.5, fontFamily: 'Inter, sans-serif' }}>
+              Specialist & Administrator Task Pool
+            </Typography>
+
+            <Typography sx={{ color: '#64748b', fontSize: '0.95rem', maxWidth: 540, mx: 'auto', mb: 3.5, lineHeight: 1.6 }}>
+              {isClient
+                ? 'The open task board is reserved exclusively for vetted AITAG AI specialists and platform administrators to review client briefs and submit bids. As a valued business client, you can manage your own orders and custom tasks in your client portal.'
+                : 'The open task board is reserved exclusively for vetted AITAG AI specialists and platform administrators. Please sign in with an authorized specialist or administrator account to review and bid on tasks.'}
+            </Typography>
+
+            <Divider sx={{ mb: 3.5 }} />
+
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center">
+              {isClient ? (
+                <>
+                  <Button
+                    component={Link}
+                    to="/#packages"
+                    variant="contained"
+                    sx={{
+                      bgcolor: '#4f46e5',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      px: 3,
+                      py: 1.1,
+                      boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
+                      '&:hover': { bgcolor: '#4338ca' }
+                    }}
+                  >
+                    Explore AI Packages →
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/my_tasks"
+                    variant="outlined"
+                    sx={{
+                      borderColor: '#cbd5e1',
+                      color: '#334155',
+                      borderRadius: '10px',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      px: 3,
+                      py: 1.1,
+                      '&:hover': { bgcolor: '#f8fafc', borderColor: '#94a3b8' }
+                    }}
+                  >
+                    My Orders & Tasks
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/add_task"
+                    variant="outlined"
+                    sx={{
+                      borderColor: '#cbd5e1',
+                      color: '#334155',
+                      borderRadius: '10px',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      px: 3,
+                      py: 1.1,
+                      '&:hover': { bgcolor: '#f8fafc', borderColor: '#94a3b8' }
+                    }}
+                  >
+                    Post a Custom Task
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    component={Link}
+                    to="/signin"
+                    variant="contained"
+                    sx={{
+                      bgcolor: '#4f46e5',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      px: 3.5,
+                      py: 1.1,
+                      boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
+                      '&:hover': { bgcolor: '#4338ca' }
+                    }}
+                  >
+                    Sign In as Specialist / Admin →
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/#packages"
+                    variant="outlined"
+                    sx={{
+                      borderColor: '#cbd5e1',
+                      color: '#334155',
+                      borderRadius: '10px',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      px: 3,
+                      py: 1.1,
+                      '&:hover': { bgcolor: '#f8fafc', borderColor: '#94a3b8' }
+                    }}
+                  >
+                    Explore AI Packages
+                  </Button>
+                </>
+              )}
+            </Stack>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>

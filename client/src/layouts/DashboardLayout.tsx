@@ -459,19 +459,21 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             >
               Platform Analytics
             </Typography>
-            <Typography
-              component="span"
-              variant="caption"
-              onClick={() => navigate('/all_tasks')}
-              sx={{
-                color: '#64748b',
-                cursor: 'pointer !important',
-                fontWeight: 600,
-                '&:hover': { color: '#4f46e5' },
-              }}
-            >
-              Browse Tasks
-            </Typography>
+            {(user?.role === 'freelancer' || user?.role === 'admin') && (
+              <Typography
+                component="span"
+                variant="caption"
+                onClick={() => navigate('/all_tasks')}
+                sx={{
+                  color: '#64748b',
+                  cursor: 'pointer !important',
+                  fontWeight: 600,
+                  '&:hover': { color: '#4f46e5' },
+                }}
+              >
+                Browse Tasks
+              </Typography>
+            )}
             <Typography
               component="span"
               variant="caption"
