@@ -494,7 +494,7 @@ const ServicePackagesSection: React.FC = () => {
                 : (isPro ? '4–6 Days Delivery' : '2–4 Days Delivery');
 
               return (
-                <Grid item xs={12} md={6} size={{ xs: 12, md: 6 }} key={pkg.slug} id={`package-${pkg.slug}`} sx={{ display: 'flex', scrollMarginTop: '100px' }}>
+                <Grid item xs={12} size={{ xs: 12 }} key={pkg.slug} id={`package-${pkg.slug}`} sx={{ display: 'flex', width: '100%', scrollMarginTop: '100px' }}>
                   <Paper
                     elevation={0}
                     onClick={() => handleOpenModal(pkg)}
