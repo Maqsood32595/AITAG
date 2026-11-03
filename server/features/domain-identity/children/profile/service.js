@@ -15,70 +15,112 @@ const USER1_ID = '6e36f593-b9e6-4ead-8266-31ac91cf44c5';
 
 const EXACT_4_MAQS_WORKFLOWS = [
   {
-    id: 'wf-1',
-    title: 'Automated Cold Email Sending & DNS Deliverability Pipeline',
-    category: 'Email Automation & Growth',
-    businessImpact: 'Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability.',
-    demoVideoUrl: '/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4',
-    techStack: ['Python', 'SendGrid API', 'DNS Automation', 'FastAPI', 'PostgreSQL'],
-    liveUrl: 'https://aitag.onrender.com'
+    "id": "wf-1",
+    "title": "AI Vector Logo & Complete Indian SMB Identity Kit",
+    "category": "Branding & Print",
+    "businessImpact": "Generated scalable vector SVG brand logo, visiting cards (CMYK 300 DPI), and WhatsApp DP for an ethnic retail boutique in 48 hours.",
+    "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4",
+    "techStack": [
+      "Recraft V3",
+      "Vectorizer.ai",
+      "Figma",
+      "Print CMYK PDF",
+      "WhatsApp DP"
+    ],
+    "liveUrl": "https://aitag.in/#packages"
   },
   {
-    id: 'wf-2',
-    title: 'Facebook & Meta Ads AI Optimization Engine',
-    category: 'Growth & Ads',
-    businessImpact: 'Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.',
-    demoVideoUrl: '/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4',
-    techStack: ['Meta Graph API', 'OpenAI GPT-4o', 'Zapier', 'Supabase'],
-    liveUrl: 'https://user1.ai/meta-ads'
+    "id": "wf-2",
+    "title": "Viral 9:16 Promotional Video Reels with Indian AI Voiceover",
+    "category": "Social & Marketing",
+    "businessImpact": "Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5\u00d7.",
+    "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
+    "techStack": [
+      "ElevenLabs Indian AI",
+      "CapCut AI",
+      "HeyGen",
+      "Dynamic Captions",
+      "HD MP4"
+    ],
+    "liveUrl": "https://aitag.in/#packages"
   },
   {
-    id: 'wf-3',
-    title: 'Meta Ads Dynamic Multi-Variant AI Engine',
-    category: 'Growth & Ads',
-    businessImpact: 'Scaled ROAS by 34% across 500 campaigns with real-time budget re-allocation and dynamic creative optimization.',
-    demoVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    techStack: ['Python', 'Meta Marketing API', 'FastAPI', 'Redis'],
-    liveUrl: 'https://aitag.in'
+    "id": "wf-3",
+    "title": "High-Converting 5-Page Mobile Business Website with WhatsApp CTA",
+    "category": "Web & Digital Presence",
+    "businessImpact": "Built mobile-first static business website deployed to Cloudflare Pages in <1s load time with instant WhatsApp click-to-chat, generating 24 customer enquiries in week 1.",
+    "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "techStack": [
+      "Mobile-First HTML5",
+      "Cloudflare Pages",
+      "WhatsApp API",
+      "Local SEO",
+      "Zero Hosting Fees"
+    ],
+    "liveUrl": "https://aitag.in/#packages"
   },
   {
-    id: 'wf-4',
-    title: 'FractalSwarm (AetherSRE V2) — Autonomous Hierarchical SRE Control Plane',
-    category: 'Agentic Systems & SRE',
-    businessImpact: 'Automated cluster failure triage with sub-100ms self-healing actions across distributed Kubernetes pods.',
-    demoVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    techStack: ['Zig', 'Rust', 'Kubernetes', 'TypeScript', 'eBPF'],
-    liveUrl: 'https://github.com/Maqsood32595'
+    "id": "wf-4",
+    "title": "Studio-Grade AI Photo Transformation for Amazon & Meesho",
+    "category": "Product Visuals",
+    "businessImpact": "Converted 20 smartphone cosmetic photos into studio-lit catalogue listings with pure RGB(255,255,255) backgrounds and ambient contact shadows with 100% marketplace approval.",
+    "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "techStack": [
+      "Photoroom AI",
+      "FLUX.1",
+      "Photoshop Generative Fill",
+      "Amazon 2000px",
+      "Clean Cutouts"
+    ],
+    "liveUrl": "https://aitag.in/#packages"
   }
 ];
 
 const EXACT_3_USER1_WORKFLOWS = [
   {
-    id: 'wf-user1-1',
-    title: 'FractalSwarm (AetherSRE V2) — Autonomous Hierarchical SRE Control Plane',
-    category: 'Agentic Systems & SRE',
-    businessImpact: 'Automated cluster failure triage with sub-100ms self-healing actions across distributed Kubernetes pods.',
-    demoVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    techStack: ['Zig', 'Rust', 'Kubernetes', 'TypeScript', 'eBPF'],
-    liveUrl: 'https://aitag.onrender.com'
+    "id": "wf-1",
+    "title": "AI Vector Logo & Complete Indian SMB Identity Kit",
+    "category": "Branding & Print",
+    "businessImpact": "Generated scalable vector SVG brand logo, visiting cards (CMYK 300 DPI), and WhatsApp DP for an ethnic retail boutique in 48 hours.",
+    "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4",
+    "techStack": [
+      "Recraft V3",
+      "Vectorizer.ai",
+      "Figma",
+      "Print CMYK PDF",
+      "WhatsApp DP"
+    ],
+    "liveUrl": "https://aitag.in/#packages"
   },
   {
-    id: 'wf-user1-2',
-    title: 'AITAG Video Showcase & Automated AI Pipeline',
-    category: 'AI Video & Automation',
-    businessImpact: 'Built zero-latency streaming proxy and video case study showcase with sub-second playback.',
-    demoVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    techStack: ['Node.js', 'Google Cloud Storage', 'React', 'TypeScript'],
-    liveUrl: 'https://aitag.onrender.com'
+    "id": "wf-2",
+    "title": "Viral 9:16 Promotional Video Reels with Indian AI Voiceover",
+    "category": "Social & Marketing",
+    "businessImpact": "Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5\u00d7.",
+    "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
+    "techStack": [
+      "ElevenLabs Indian AI",
+      "CapCut AI",
+      "HeyGen",
+      "Dynamic Captions",
+      "HD MP4"
+    ],
+    "liveUrl": "https://aitag.in/#packages"
   },
   {
-    id: 'wf-user1-3',
-    title: 'Facebook & Meta Ads AI Optimization Engine',
-    category: 'Growth & Ads',
-    businessImpact: 'Automated dynamic ad copy variation testing and ROAS tracking, increasing campaign conversion by 34%.',
-    demoVideoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    techStack: ['Meta Graph API', 'OpenAI GPT-4o', 'Zapier', 'Supabase'],
-    liveUrl: 'https://user1.ai'
+    "id": "wf-3",
+    "title": "High-Converting 5-Page Mobile Business Website with WhatsApp CTA",
+    "category": "Web & Digital Presence",
+    "businessImpact": "Built mobile-first static business website deployed to Cloudflare Pages in <1s load time with instant WhatsApp click-to-chat, generating 24 customer enquiries in week 1.",
+    "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "techStack": [
+      "Mobile-First HTML5",
+      "Cloudflare Pages",
+      "WhatsApp API",
+      "Local SEO",
+      "Zero Hosting Fees"
+    ],
+    "liveUrl": "https://aitag.in/#packages"
   }
 ];
 

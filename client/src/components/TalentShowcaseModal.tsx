@@ -1,3 +1,6 @@
+import PaletteIcon from '@mui/icons-material/Palette';
+import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
@@ -35,42 +38,59 @@ interface TalentShowcaseModalProps {
   onInvite: (talent: any) => void;
 }
 
+const CATEGORY_MAP: Record<string, string> = {
+  'Email Automation & Growth': 'Social & Marketing',
+  'Growth & Ads': 'Social & Marketing',
+  'Agentic Systems & SRE': 'Web & Digital Presence',
+  'AI Video & Automation': 'Social & Marketing',
+  'E-Commerce & Copy': 'Branding & Print',
+  'Web & Funnels': 'Web & Digital Presence',
+};
+
+const getServiceCategoryIcon = (category: string) => {
+  const norm = CATEGORY_MAP[category] || category;
+  if (norm?.includes('Visual')) return <CameraAltIcon sx={{ fontSize: '13px !important', color: '#0891b2' }} />;
+  if (norm?.includes('Branding') || norm?.includes('Print')) return <PaletteIcon sx={{ fontSize: '13px !important', color: '#7c3aed' }} />;
+  if (norm?.includes('Social') || norm?.includes('Marketing') || norm?.includes('Video')) return <VideoCameraBackIcon sx={{ fontSize: '13px !important', color: '#e11d48' }} />;
+  return <LanguageIcon sx={{ fontSize: '13px !important', color: '#10b981' }} />;
+};
+
 const DEFAULT_WORKFLOWS = [
   {
     id: 'wf-1',
-    title: 'AI Product Photo Makeover for Amazon & Meesho Store',
-    category: 'Product Visuals',
-    businessImpact: 'Converted 50+ raw smartphone camera photos into studio-grade marketplace listings with 100% white backgrounds and Amazon approval in 24 hours.',
+    title: 'AI Vector Logo & Complete Indian SMB Identity Kit',
+    category: 'Branding & Print',
+    businessImpact: 'Generated scalable vector SVG brand logo, visiting cards (CMYK 300 DPI), and WhatsApp DP for an ethnic retail boutique in 48 hours.',
     demoVideoUrl: '',
-    techStack: ['AI Photo Studio', 'White Background Clean', 'Marketplace Compliance', 'Photoshop AI'],
-    liveUrl: 'https://aitag-dev.onrender.com/#packages'
+    techStack: ['Recraft V3', 'Vectorizer.ai', 'Figma', 'Print CMYK PDF', 'WhatsApp DP'],
+    liveUrl: 'https://aitag.in/#packages'
   },
   {
     id: 'wf-2',
-    title: 'High-Converting One-Page Website with WhatsApp CTA',
-    category: 'Web & Digital Presence',
-    businessImpact: 'Built mobile-friendly landing page that doubled inbound WhatsApp customer enquiries within the first week of launch.',
+    title: 'Viral 9:16 Promotional Video Reels with Indian AI Voiceover',
+    category: 'Social & Marketing',
+    businessImpact: 'Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5×.',
     demoVideoUrl: '',
-    techStack: ['AI Landing Builder', 'WhatsApp Click-to-Chat', 'Mobile Responsive', 'SEO Optimization'],
-    liveUrl: 'https://aitag-dev.onrender.com/#packages'
+    techStack: ['ElevenLabs Indian AI', 'CapCut AI', 'HeyGen', 'Dynamic Captions', 'HD MP4'],
+    liveUrl: 'https://aitag.in/#packages'
   },
   {
     id: 'wf-3',
-    title: 'AI Product Listing & Multilingual Copywriting',
-    category: 'E-Commerce & Copy',
-    businessImpact: 'Optimized 30+ product listings with buyer keywords in Hindi and English, cutting customer sizing returns by 35%.',
+    title: 'High-Converting 5-Page Mobile Business Website with WhatsApp CTA',
+    category: 'Web & Digital Presence',
+    businessImpact: 'Built mobile-first static business website deployed to Cloudflare Pages in <1s load time with instant WhatsApp click-to-chat, generating 24 customer enquiries in week 1.',
     demoVideoUrl: '',
-    techStack: ['Marketplace SEO', 'Multilingual Copy', 'Bullet Features', 'Catalogue Batch'],
-    liveUrl: 'https://aitag-dev.onrender.com/#packages'
+    techStack: ['Mobile-First HTML5', 'Cloudflare Pages', 'WhatsApp API', 'Local SEO', 'Zero Hosting Fees'],
+    liveUrl: 'https://aitag.in/#packages'
   },
   {
     id: 'wf-4',
-    title: '30-Day Festive Social Media Content Pack',
-    category: 'Social & Marketing',
-    businessImpact: 'Created 25 branded Instagram post designs, reels cover templates, and regional festive captions lifting profile engagement by 50%.',
+    title: 'Studio-Grade AI Photo Transformation for Amazon & Meesho',
+    category: 'Product Visuals',
+    businessImpact: 'Converted 20 smartphone cosmetic photos into studio-lit catalogue listings with pure RGB(255,255,255) backgrounds and ambient contact shadows with 100% marketplace approval.',
     demoVideoUrl: '',
-    techStack: ['Canva AI', 'Content Calendar', 'Festival Creatives', 'Hashtag Engine'],
-    liveUrl: 'https://aitag-dev.onrender.com/#packages'
+    techStack: ['Photoroom AI', 'FLUX.1', 'Photoshop Generative Fill', 'Amazon 2000px', 'Clean Cutouts'],
+    liveUrl: 'https://aitag.in/#packages'
   }
 ];
 
@@ -83,6 +103,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   useEffect(() => {
     if (open && talent) {
@@ -222,9 +243,37 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
               </Box>
             )}
 
+            {/* 4 Core Services Filter Chips */}
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2.5 }}>
+              {['All', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'].map((cat) => (
+                <Chip
+                  key={cat}
+                  label={cat}
+                  size="small"
+                  onClick={() => setSelectedCategory(cat)}
+                  sx={{
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '0.72rem',
+                    bgcolor: selectedCategory === cat ? '#4f46e5' : '#f1f5f9',
+                    color: selectedCategory === cat ? '#ffffff' : '#475569',
+                    '&:hover': {
+                      bgcolor: selectedCategory === cat ? '#4338ca' : '#e2e8f0',
+                    }
+                  }}
+                />
+              ))}
+            </Box>
+
             {/* Workflows Cards List */}
             <Stack spacing={2.5}>
-              {workflows.map((wf: any, idx: number) => {
+              {workflows
+                .map((wf: any) => ({
+                  ...wf,
+                  category: CATEGORY_MAP[wf.category] || wf.category || 'Product Visuals'
+                }))
+                .filter((wf: any) => selectedCategory === 'All' || wf.category === selectedCategory)
+                .map((wf: any, idx: number) => {
                 const isSelected = activeVideoUrl === wf.demoVideoUrl && !!wf.demoVideoUrl;
                 const parsedVideo = parseVideoSource(wf.demoVideoUrl);
 
@@ -320,6 +369,36 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                         )}
                       </Box>
                     )}
+
+                    {/* Direct Action to Order Service */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, pt: 1.5, borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: 1 }}>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                        Want this outcome for your business?
+                      </Typography>
+                      <Button
+                        component="a"
+                        href="/#packages"
+                        onClick={onClose}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderRadius: '8px',
+                          color: '#4f46e5',
+                          borderColor: 'rgba(79,70,229,0.3)',
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          textTransform: 'none',
+                          py: 0.4,
+                          px: 1.5,
+                          '&:hover': {
+                            borderColor: '#4f46e5',
+                            bgcolor: 'rgba(79,70,229,0.06)'
+                          }
+                        }}
+                      >
+                        Order Package (From ₹499) →
+                      </Button>
+                    </Box>
                   </Card>
                 );
               })}

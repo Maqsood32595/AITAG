@@ -92,10 +92,10 @@ export const Workflows: React.FC = () => {
     } else {
       setEditingWfId(null);
       setWfTitle('');
-      setWfCategory('Email Automation & Growth');
+      setWfCategory('Branding & Print');
       setWfImpact('');
       setWfVideoUrl('');
-      setWfTechInput('Python, FastAPI, SendGrid');
+      setWfTechInput('Recraft V3, Vectorizer.ai, Figma');
       setWfLiveUrl('');
       setVideoInputMode('upload');
     }
@@ -397,7 +397,7 @@ export const Workflows: React.FC = () => {
             <Stack spacing={2.5} sx={{ mt: 1 }}>
               <TextField
                 label="Workflow Title"
-                placeholder="e.g. Automated Cold Email Sending & DNS Deliverability Pipeline"
+                placeholder="e.g. AI Vector Logo & Complete Indian SMB Identity Kit"
                 value={wfTitle}
                 onChange={e => setWfTitle(e.target.value)}
                 fullWidth
@@ -405,16 +405,21 @@ export const Workflows: React.FC = () => {
               />
 
               <TextField
-                label="Category / Niche"
-                placeholder="e.g. Email Automation, Computer Vision, LLM & RAG, Meta Ads"
-                value={wfCategory}
+                select
+                label="Service Category"
+                value={wfCategory || 'Branding & Print'}
                 onChange={e => setWfCategory(e.target.value)}
                 fullWidth
-              />
+              >
+                <MenuItem value="Branding & Print">Branding & Print (Logo Design & SMB Kit)</MenuItem>
+                <MenuItem value="Social & Marketing">Social & Marketing (Promo Reels & Videos)</MenuItem>
+                <MenuItem value="Web & Digital Presence">Web & Digital Presence (5-Page Website)</MenuItem>
+                <MenuItem value="Product Visuals">Product Visuals (AI Photo Makeover)</MenuItem>
+              </TextField>
 
               <TextField
                 label="Business Impact Metrics"
-                placeholder="e.g. Scaled personalized outreach to 10,000 verified leads/day with automated SPF/DKIM rotation and 99.2% inbox deliverability."
+                placeholder="e.g. Generated scalable vector SVG logo and print-ready CMYK visiting cards in 48 hours, lifting brand credibility."
                 value={wfImpact}
                 onChange={e => setWfImpact(e.target.value)}
                 multiline
@@ -424,7 +429,7 @@ export const Workflows: React.FC = () => {
 
               <TextField
                 label="Tech Stack (comma separated)"
-                placeholder="Python, FastAPI, SendGrid API, PostgreSQL, Docker"
+                placeholder="Recraft V3, Vectorizer.ai, Figma, Print CMYK PDF, WhatsApp DP"
                 value={wfTechInput}
                 onChange={e => setWfTechInput(e.target.value)}
                 fullWidth
@@ -432,7 +437,7 @@ export const Workflows: React.FC = () => {
 
               <TextField
                 label="Live Project / GitHub Repository Link"
-                placeholder="https://github.com/username/project"
+                placeholder="https://aitag.in/#packages"
                 value={wfLiveUrl}
                 onChange={e => setWfLiveUrl(e.target.value)}
                 fullWidth
