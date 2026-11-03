@@ -48,7 +48,7 @@ const DEFAULT_WORKFLOWS = [
   {
     id: 'wf-2',
     title: 'High-Converting One-Page Website with WhatsApp CTA',
-    category: 'Web & Funnels',
+    category: 'Web & Digital Presence',
     businessImpact: 'Built mobile-friendly landing page that doubled inbound WhatsApp customer enquiries within the first week of launch.',
     demoVideoUrl: '',
     techStack: ['AI Landing Builder', 'WhatsApp Click-to-Chat', 'Mobile Responsive', 'SEO Optimization'],

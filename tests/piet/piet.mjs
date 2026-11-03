@@ -277,7 +277,7 @@ async function runPietSuite() {
       assert(res.data.length >= 8, 'Must return at least 8 featured tasks');
       allTasks = res.data;
 
-      const validCategories = new Set(['Product Visuals', 'E-Commerce & Copy', 'Social & Marketing', 'Web & Funnels']);
+      const validCategories = new Set(['Product Visuals', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'E-Commerce & Copy', 'Web & Funnels']);
       const legacyBanned = ['AI Engineering', 'Machine Learning', 'ML Ops', 'Data Science'];
 
       for (const task of allTasks) {
@@ -429,9 +429,9 @@ async function runPietSuite() {
     await t('Enforces category distribution: all 4 core MVP categories are active in tasks', () => {
       const categoriesFound = new Set(allTasks.map(t => t.category));
       assert(categoriesFound.has('Product Visuals'), 'Missing Product Visuals tasks');
-      assert(categoriesFound.has('E-Commerce & Copy'), 'Missing E-Commerce & Copy tasks');
+      assert(categoriesFound.has('Branding & Print') || categoriesFound.has('E-Commerce & Copy'), 'Missing Branding & Print tasks');
       assert(categoriesFound.has('Social & Marketing'), 'Missing Social & Marketing tasks');
-      assert(categoriesFound.has('Web & Funnels'), 'Missing Web & Funnels tasks');
+      assert(categoriesFound.has('Web & Digital Presence') || categoriesFound.has('Web & Funnels'), 'Missing Web & Digital Presence tasks');
     });
 
     await t('Enforces AI Service profile invariants: zero hourly rate & AI generative tooling', async () => {

@@ -6,7 +6,7 @@ import {
   FormControl, Chip, Skeleton, InputAdornment, Divider, Stack
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import PaletteIcon from '@mui/icons-material/Palette';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ShareIcon from '@mui/icons-material/Share';
@@ -14,12 +14,18 @@ import LanguageIcon from '@mui/icons-material/Language';
 import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 
-const CATEGORIES = ['all', 'Product Visuals', 'E-Commerce & Copy', 'Social & Marketing', 'Web & Funnels'];
+const CATEGORIES = ['all', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'];
+
+const CATEGORY_MAP: Record<string, string> = {
+  'Web & Funnels': 'Web & Digital Presence',
+  'E-Commerce & Copy': 'Branding & Print',
+};
 
 const getCategoryIcon = (category: string) => {
-  if (category?.includes('Visual')) return <CameraAltIcon sx={{ fontSize: 13, color: '#38bdf8' }} />;
-  if (category?.includes('Copy') || category?.includes('Commerce')) return <EditNoteIcon sx={{ fontSize: 13, color: '#fbbf24' }} />;
-  if (category?.includes('Social')) return <ShareIcon sx={{ fontSize: 13, color: '#a5b4fc' }} />;
+  const norm = CATEGORY_MAP[category] || category;
+  if (norm?.includes('Visual')) return <CameraAltIcon sx={{ fontSize: 13, color: '#38bdf8' }} />;
+  if (norm?.includes('Branding') || norm?.includes('Print') || norm?.includes('Copy')) return <PaletteIcon sx={{ fontSize: 13, color: '#fbbf24' }} />;
+  if (norm?.includes('Social') || norm?.includes('Marketing')) return <ShareIcon sx={{ fontSize: 13, color: '#a5b4fc' }} />;
   return <LanguageIcon sx={{ fontSize: 13, color: '#34d399' }} />;
 };
 
@@ -35,8 +41,9 @@ const BrowseTasks = () => {
   }, []);
 
   const filtered = tasks.filter(t => {
+    const taskCat = CATEGORY_MAP[t.category] || t.category;
     const matchSearch = !search || t.title.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase());
-    const matchCat = category === 'all' || t.category === category;
+    const matchCat = category === 'all' || taskCat === category || t.category === category;
     return matchSearch && matchCat;
   });
 
@@ -46,19 +53,6 @@ const BrowseTasks = () => {
       <Container maxWidth="lg" sx={{ pt: 14, pb: 8 }}>
         {/* Section Header - Central Pattern */}
         <Box sx={{ textAlign: 'center', mb: 5 }}>
-          <Chip
-            icon={<AutoAwesomeIcon sx={{ fontSize: '15px !important', color: '#4f46e5' }} />}
-            label="PRACTICAL BUSINESS AI TASKS — PILOT CATALOGUE"
-            sx={{
-              bgcolor: '#eef2ff',
-              color: '#4338ca',
-              fontWeight: 700,
-              letterSpacing: '0.5px',
-              fontSize: '0.75rem',
-              mb: 2,
-              px: 1
-            }}
-          />
           <Typography
             variant="h3"
             fontWeight={800}
@@ -84,7 +78,7 @@ const BrowseTasks = () => {
               mb: 3
             }}
           >
-            “Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services — starting at just ₹1,499.”
+            “Discover practical AI projects posted by everyday entrepreneurs and small businesses across our 4 core services — starting at just ₹499.”
           </Typography>
           <Button
             component={Link}
@@ -181,7 +175,7 @@ const BrowseTasks = () => {
                       }}
                     >
                       {getCategoryIcon(task.category)}
-                      {task.category}
+                      {CATEGORY_MAP[task.category] || task.category}
                     </Box>
                     {/* Status Pill Top-Right */}
                     <Box

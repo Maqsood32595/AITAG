@@ -30,7 +30,7 @@ import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORIES = ['Product Visuals', 'E-Commerce & Copy', 'Social & Marketing', 'Web & Funnels'];
+const CATEGORIES = ['Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'];
 
 const UpdateTask = () => {
   const { id } = useParams<{ id: string }>();

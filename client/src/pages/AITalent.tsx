@@ -83,7 +83,7 @@ const CURATED_TALENT: Talent[] = [
     id: 'curated-4',
     name: 'Ananya Deshmukh',
     role: 'AI Website & High-Converting Landing Page Builder',
-    category: 'Web & Funnels',
+    category: 'Web & Digital Presence',
     avatar: '',
     rating: 4.99,
     reviewsCount: 36,
@@ -99,10 +99,9 @@ const CURATED_TALENT: Talent[] = [
 const CATEGORIES = [
   'All',
   'Branding & Print',
-  'Product Visuals',
   'Social & Marketing',
-  'Web & Funnels',
-  'E-Commerce & Copy'
+  'Web & Digital Presence',
+  'Product Visuals'
 ];
 
 import InviteModal from '../components/InviteModal';
@@ -175,7 +174,7 @@ const AITalent = () => {
               : isMaqsood
               ? 'AI Product Visuals & Catalogue Lead'
               : `${u.role === 'admin' ? 'Admin / ' : ''}AI Business Service Specialist`,
-            category: isUser1 ? 'Web & Funnels' : isMaqsood ? 'Product Visuals' : 'E-Commerce & Copy',
+            category: isUser1 ? 'Web & Digital Presence' : isMaqsood ? 'Product Visuals' : 'Branding & Print',
             avatar: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : '',
             rating: 5.0,
             reviewsCount: isUser1 ? 19 : isMaqsood ? 42 : 14,

@@ -55,8 +55,8 @@ const SEED_FALLBACK_TASKS = [
   },
   {
     id: 'task-2',
-    title: 'Amazon & Flipkart SEO Listing Copy for Ethnic Footwear Store',
-    category: 'E-Commerce & Copy',
+    title: 'Vector Logo & Visiting Card Design for Ethnic Footwear Store',
+    category: 'Branding & Print',
     description: 'Need high-converting marketplace titles, 5 benefit-driven bullet points, and high-search-volume backend keywords for 5 new sandal SKUs in English and Hindi.',
     deadline: '2026-11-10',
     budget: 999,
@@ -84,7 +84,7 @@ const SEED_FALLBACK_TASKS = [
   {
     id: 'task-4',
     title: 'One-Page Mobile Website with Instant WhatsApp Button for Boutique',
-    category: 'Web & Funnels',
+    category: 'Web & Digital Presence',
     description: 'Need a fast, mobile-friendly single-page business website featuring our clothing collections, Google Maps shop location, customer testimonials, and direct WhatsApp click-to-chat button.',
     deadline: '2026-11-25',
     budget: 3999,
@@ -111,8 +111,8 @@ const SEED_FALLBACK_TASKS = [
   },
   {
     id: 'task-6',
-    title: 'Multilingual Product Descriptions for Homemade Spices Brand',
-    category: 'E-Commerce & Copy',
+    title: 'Brand Logo & GST Invoice Design for Homemade Spices Brand',
+    category: 'Branding & Print',
     description: 'Craft compelling, appetizing product descriptions for 8 organic masala powders in English, Hindi, and Tamil to increase buyer trust and reduce customer sizing/usage queries.',
     deadline: '2026-11-08',
     budget: 999,
@@ -140,7 +140,7 @@ const SEED_FALLBACK_TASKS = [
   {
     id: 'task-8',
     title: 'High-Converting Landing Page with Lead Enquiry Form for CA Firm',
-    category: 'Web & Funnels',
+    category: 'Web & Digital Presence',
     description: 'Build a clean, trustworthy one-page website explaining our tax and accounting services with an instant lead capture enquiry form, Google Search indexing, and WhatsApp CTA.',
     deadline: '2026-11-30',
     budget: 4499,
@@ -196,7 +196,8 @@ class TasksService {
     const assignment = taskAssignmentMap.get(task.id) || {};
     return {
       ...task,
-      budget: Math.max(Number(task.budget) || 0, 999),
+      category: ({ 'Web & Funnels': 'Web & Digital Presence', 'E-Commerce & Copy': 'Branding & Print' })[task.category] || task.category,
+      budget: Math.max(Number(task.budget) || 0, 499),
       attachments,
       assigned_expert_email: task.assigned_expert_email || assignment.assigned_expert_email || null,
       assigned_expert_name: task.assigned_expert_name || assignment.assigned_expert_name || null,

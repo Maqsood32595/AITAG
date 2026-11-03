@@ -10,12 +10,12 @@ import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORIES = ['Product Visuals', 'E-Commerce & Copy', 'Social & Marketing', 'Web & Funnels'];
+const CATEGORIES = ['Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'];
 
 const AddTask = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: '', category: 'Product Visuals', description: '', deadline: '', budget: '', image: '' });
+  const [form, setForm] = useState({ title: '', category: 'Branding & Print', description: '', deadline: '', budget: '', image: '' });
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
