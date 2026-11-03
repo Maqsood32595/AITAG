@@ -21,7 +21,7 @@ import OrderBriefModal from './OrderBriefModal';
 const FALLBACK_PACKAGES = [
   {
     slug: 'ai-logo-identity-kit',
-    title: 'Logo Design & Indian SMB Identity Kit',
+    title: 'Logo Design',
     tagline: 'Professional logo, visiting card & GST invoice template in 2–6 days',
     description:
       'We design a professional logo for your business using AI and deliver it in formats ready for digital use and physical print — visiting cards, GST invoices, WhatsApp DP, letterheads, shop banners and flex printing. Everything your growing business needs to look credible from day one.',
@@ -257,7 +257,38 @@ const FALLBACK_PACKAGES = [
   }
 ];
 
-export const ServicePackagesSection: React.FC = () => {
+export const QUICK_SERVICES = [
+  {
+    slug: 'ai-logo-identity-kit',
+    title: 'Logo Design',
+    icon: <PaletteIcon sx={{ fontSize: 17 }} />,
+    iconBg: 'rgba(124, 58, 237, 0.1)',
+    iconColor: '#7c3aed',
+  },
+  {
+    slug: 'ai-marketing-video-reels',
+    title: 'Marketing Video & Promo Reels',
+    icon: <VideoCameraBackIcon sx={{ fontSize: 17 }} />,
+    iconBg: 'rgba(225, 29, 72, 0.1)',
+    iconColor: '#e11d48',
+  },
+  {
+    slug: 'ai-website-landing-page',
+    title: '5-Page Static Business Website',
+    icon: <LanguageIcon sx={{ fontSize: 17 }} />,
+    iconBg: 'rgba(16, 185, 129, 0.1)',
+    iconColor: '#10b981',
+  },
+  {
+    slug: 'ai-product-photo-makeover',
+    title: 'AI Product Photo Makeover',
+    icon: <CameraAltIcon sx={{ fontSize: 17 }} />,
+    iconBg: 'rgba(8, 145, 178, 0.1)',
+    iconColor: '#0891b2',
+  },
+];
+
+const ServicePackagesSection: React.FC = () => {
   const [packages, setPackages] = useState<any[]>(FALLBACK_PACKAGES);
   const [loading, setLoading] = useState(false);
   const [selectedTiers, setSelectedTiers] = useState<Record<string, string>>({
@@ -303,11 +334,24 @@ export const ServicePackagesSection: React.FC = () => {
     return <LanguageIcon sx={{ color: '#10b981' }} />;
   };
 
+  const scrollToPackage = (slug: string) => {
+    const el = document.getElementById(`package-${slug}`);
+    if (el) {
+      const navOffset = 85;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   return (
     <Box id="packages" sx={{ pt: 5, pb: 10, bgcolor: '#f8fafc', position: 'relative' }}>
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Chip
             icon={<AutoAwesomeIcon sx={{ fontSize: 16, color: '#4f46e5 !important' }} />}
             label="PRODUCTIZED AI SERVICES FOR INDIAN SMBS"
@@ -342,11 +386,94 @@ export const ServicePackagesSection: React.FC = () => {
               maxWidth: 720,
               mx: 'auto',
               fontSize: '1.05rem',
-              lineHeight: 1.6
+              lineHeight: 1.6,
+              mb: 3,
             }}
           >
             Simple curated AI packages for everyday businesses. Clear scope, verified specialists, and 100% money-back escrow protection.
           </Typography>
+
+          {/* Quick Service Jump Options (2x2 Grid) */}
+          <Box
+            sx={{
+              mt: 2,
+              maxWidth: 720,
+              mx: 'auto',
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+              gap: 1.5,
+            }}
+          >
+            {QUICK_SERVICES.map((s) => (
+              <Box
+                key={s.slug}
+                onClick={() => scrollToPackage(s.slug)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  px: 2,
+                  py: 1.25,
+                  bgcolor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(79, 70, 229, 0.2)',
+                  boxShadow: '0 2px 6px rgba(79, 70, 229, 0.04)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: '#4f46e5',
+                    bgcolor: 'rgba(79, 70, 229, 0.04)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 16px rgba(79, 70, 229, 0.12)',
+                    '& .jump-icon': {
+                      transform: 'translateY(2px)',
+                      color: '#4f46e5',
+                    },
+                  },
+                }}
+              >
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      bgcolor: s.iconBg,
+                      color: s.iconColor,
+                    }}
+                  >
+                    {s.icon}
+                  </Box>
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      color: '#0f172a',
+                      fontFamily: 'Inter, sans-serif',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {s.title}
+                  </Typography>
+                </Stack>
+                <Typography
+                  className="jump-icon"
+                  sx={{
+                    fontSize: '0.82rem',
+                    color: '#6366f1',
+                    fontWeight: 700,
+                    transition: 'transform 0.2s ease',
+                    pl: 1,
+                  }}
+                >
+                  ↓
+                </Typography>
+              </Box>
+            ))}
+          </Box>
         </Box>
 
         {loading ? (
@@ -367,7 +494,7 @@ export const ServicePackagesSection: React.FC = () => {
                 : (isPro ? '4–6 Days Delivery' : '2–4 Days Delivery');
 
               return (
-                <Grid item xs={12} md={6} key={pkg.slug} sx={{ display: 'flex' }}>
+                <Grid item xs={12} md={6} size={{ xs: 12, md: 6 }} key={pkg.slug} id={`package-${pkg.slug}`} sx={{ display: 'flex', scrollMarginTop: '100px' }}>
                   <Paper
                     elevation={0}
                     onClick={() => handleOpenModal(pkg)}

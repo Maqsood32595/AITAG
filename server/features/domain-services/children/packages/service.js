@@ -57,7 +57,7 @@ function validatePackage(pkg) {
 const FALLBACK_PACKAGES = [
   {
     slug: 'ai-logo-identity-kit',
-    title: 'Logo Design & Indian SMB Identity Kit',
+    title: 'Logo Design',
     tagline: 'Professional logo, visiting card & GST invoice template in 2–6 days',
     description:
       'We design a professional logo for your business using AI and deliver it in formats ready for digital use and physical print — visiting cards, GST invoices, WhatsApp DP, letterheads, shop banners and flex printing. Everything your new or growing Indian business needs to look credible from day one.',
