@@ -1,0 +1,9 @@
+node_modules/
+client/node_modules/
+.git/
+.github/
+.env
+.env.local
+.system_generated/
+*.log
+

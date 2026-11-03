@@ -1,0 +1,10 @@
+.gcloudignore
+.git/
+.github/
+node_modules/
+client/node_modules/
+.env
+.env.local
+.system_generated/
+*.log
+

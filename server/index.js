@@ -31,6 +31,9 @@ app.use(cors({
       origin.endsWith('.onrender.com') ||
       origin.endsWith('.pages.dev') ||
       origin.includes('localhost') ||
+      origin.endsWith('.run.app') ||
+      origin.endsWith('shortshub.app') ||
+      origin.endsWith('aitag.in') ||
       origin === 'https://shortshub.app'
     ) {
       return callback(null, true);
