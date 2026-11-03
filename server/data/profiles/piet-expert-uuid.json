@@ -8,14 +8,7 @@
   "headline": "Senior AI Product Visuals & E-Commerce Media Specialist",
   "bio": "Specialist delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance.",
   "hourlyRate": 0,
-  "skills": [
-    "FLUX.1-dev",
-    "Midjourney v6",
-    "ComfyUI",
-    "Photoshop Generative Fill",
-    "Photoroom API",
-    "Stable Diffusion XL"
-  ],
+  "skills": [],
   "payoutUpi": "expert1@okaxis",
   "links": {
     "github": "https://github.com/Maqsood32595",
@@ -42,7 +35,7 @@
       "id": "wf-2",
       "title": "Viral 9:16 Promotional Video Reels with Indian AI Voiceover",
       "category": "Social & Marketing",
-      "businessImpact": "Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5\u00d7.",
+      "businessImpact": "Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5×.",
       "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
       "techStack": [
         "ElevenLabs Indian AI",

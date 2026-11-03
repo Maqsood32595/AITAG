@@ -87,7 +87,7 @@ export const Profile: React.FC = () => {
   const [skillsInput, setSkillsInput] = useState(
     isAdmin
       ? 'Platform Operations, Product Visuals Oversight, Listings & Copy Dispatch, Escrow Governance'
-      : 'FLUX.1-dev, Midjourney v6, ComfyUI, Photoshop Generative Fill, Photoroom API, Stable Diffusion XL'
+      : ''
   );
   const [githubUrl, setGithubUrl] = useState('https://github.com/Maqsood32595');
   const [linkedinUrl, setLinkedinUrl] = useState('https://linkedin.com/in/maqsood');
@@ -784,15 +784,15 @@ export const Profile: React.FC = () => {
 
                     <Box>
                       <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                        AI Generative Models & Production Stack
+                        Specialist Skills & Production Tools
                       </Typography>
                       <TextField
                         size="small"
                         fullWidth
                         value={skillsInput}
                         onChange={(e) => setSkillsInput(e.target.value)}
-                        placeholder="FLUX.1-dev, Midjourney v6, ComfyUI, Photoshop Generative Fill, Photoroom API"
-                        helperText="List the AI models & production tools you use for service execution"
+                        placeholder="e.g. AI Product Photos, Logo Design, Video Editing (optional)"
+                        helperText="Add your specialized skills or tools (comma-separated). Leave empty or update anytime."
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' }, '& .MuiFormHelperText-root': { fontSize: '0.68rem' } }}
                       />
                     </Box>

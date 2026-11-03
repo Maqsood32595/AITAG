@@ -462,16 +462,18 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
           </Box>
 
           {/* Skills Tags */}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
-            {(profileData?.skills || talent.skills || []).map((skill: string) => (
-              <Chip
-                key={skill}
-                label={skill}
-                size="small"
-                sx={{ bgcolor: 'rgba(79,70,229,0.06)', color: '#4f46e5', fontWeight: 600, borderRadius: '8px' }}
-              />
-            ))}
-          </Box>
+          {((profileData?.skills && profileData.skills.length > 0) || (!profileData && talent?.skills && talent.skills.length > 0)) && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 1.5 }}>
+              {(profileData?.skills && profileData.skills.length > 0 ? profileData.skills : (talent.skills || [])).map((skill: string) => (
+                <Chip
+                  key={skill}
+                  label={skill}
+                  size="small"
+                  sx={{ bgcolor: 'rgba(79,70,229,0.06)', color: '#4f46e5', fontWeight: 600, borderRadius: '8px' }}
+                />
+              ))}
+            </Box>
+          )}
         </Box>
       </DialogContent>
 

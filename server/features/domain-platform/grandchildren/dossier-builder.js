@@ -40,7 +40,7 @@ function buildUserDossier({ user, profile = {}, orders = [], tasks = [], bids = 
       headline: profile.headline || 'Vetted AI Automation & Prompt Specialist',
       bio: profile.bio || 'AI specialist focusing on generative visual production, LLM copy, and automated e-commerce workflows.',
       hourly_rate: Number(profile.hourly_rate || profile.hourlyRate || 2800),
-      skills: profile.skills || ['AI Product Photography', 'Midjourney', 'FLUX', 'E-Commerce Copywriting', 'Catalogue Design'],
+      skills: profile.skills || [],
       links: profile.links || { github: '', linkedin: '', website: '' },
       delivered_workflows_count: workflows.length
     };

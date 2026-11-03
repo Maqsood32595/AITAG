@@ -251,7 +251,7 @@ class ProfileService {
       hourlyRate: 0,
       skills: isUser1
         ? ['Platform Oversight', 'Brief Matching', 'Escrow Management', 'Dispute Resolution']
-        : ['FLUX', 'Midjourney v6', 'ComfyUI', 'Photoshop Generative Fill', 'AI Background Replacement', 'E-Commerce Retouching'],
+        : [],
       payoutUpi: 'expert1@okaxis',
       links: {
         github: 'https://github.com/Maqsood32595',
