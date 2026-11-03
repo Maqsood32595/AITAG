@@ -91,10 +91,26 @@ const HeroSection = () => {
         }
       }} />
 
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, pt: { xs: 12, md: 15 }, pb: { xs: 6, md: 8 } }}>
-        <Grid container spacing={{ xs: 4, md: 5 }} alignItems="center">
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, pt: { xs: 12, md: 14 }, pb: { xs: 6, md: 8 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: { xs: 4, md: 4, lg: 5 },
+            width: '100%',
+          }}
+        >
           {/* Left Column: Headline, Hook, Tags & CTAs */}
-          <Grid item xs={12} md={7} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+          <Box
+            sx={{
+              flex: { xs: '1 1 100%', md: '0 0 56%', lg: '0 0 57%' },
+              maxWidth: { xs: '100%', md: '56%', lg: '57%' },
+              width: { xs: '100%', md: '56%', lg: '57%' },
+              textAlign: { xs: 'center', md: 'left' },
+            }}
+          >
             {/* Top Chip */}
             <Box sx={{ mb: 2, display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' } }}>
               <Chip
@@ -120,7 +136,7 @@ const HeroSection = () => {
               sx={{
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 900,
-                fontSize: { xs: '2.1rem', sm: '2.7rem', md: '3.1rem' },
+                fontSize: { xs: '2.1rem', sm: '2.6rem', md: '2.9rem' },
                 lineHeight: 1.15,
                 letterSpacing: '-1.5px',
                 color: '#0f172a',
@@ -134,7 +150,7 @@ const HeroSection = () => {
                   background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  display: { xs: 'block', sm: 'inline-block' }
+                  display: { xs: 'block', sm: 'inline-block' },
                 }}
               >
                 Connect with Vetted AI Experts.
@@ -144,7 +160,7 @@ const HeroSection = () => {
             {/* Sub-headline */}
             <Typography
               sx={{
-                fontSize: { xs: '1rem', md: '1.12rem' },
+                fontSize: { xs: '1rem', md: '1.08rem' },
                 color: '#475569',
                 mb: 3,
                 lineHeight: 1.65,
@@ -156,7 +172,17 @@ const HeroSection = () => {
 
             {/* Who We Serve Tags */}
             <Box sx={{ mb: 3.5 }}>
-              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.5px', display: 'block', mb: 1.2, textTransform: 'uppercase' }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#64748b',
+                  fontWeight: 700,
+                  letterSpacing: '0.5px',
+                  display: 'block',
+                  mb: 1.2,
+                  textTransform: 'uppercase',
+                }}
+              >
                 Who We Serve:
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: { xs: 'center', md: 'flex-start' } }}>
@@ -181,8 +207,8 @@ const HeroSection = () => {
                       '&:hover': {
                         bgcolor: 'rgba(79,70,229,0.15)',
                         borderColor: '#4f46e5',
-                        transform: 'translateY(-2px)'
-                      }
+                        transform: 'translateY(-2px)',
+                      },
                     }}
                   />
                 ))}
@@ -213,7 +239,7 @@ const HeroSection = () => {
                   boxShadow: '0 8px 24px rgba(79,70,229,0.35)',
                   '&:hover': {
                     boxShadow: '0 12px 32px rgba(79,70,229,0.45)',
-                    transform: 'translateY(-2px)'
+                    transform: 'translateY(-2px)',
                   },
                 }}
               >
@@ -235,17 +261,23 @@ const HeroSection = () => {
                   '&:hover': {
                     borderColor: '#4f46e5',
                     bgcolor: 'rgba(79,70,229,0.04)',
-                    transform: 'translateY(-2px)'
+                    transform: 'translateY(-2px)',
                   },
                 }}
               >
                 How It Works
               </Button>
             </Box>
-          </Grid>
+          </Box>
 
           {/* Right Column: The 3 Brand Pillars (The AITAG Difference) */}
-          <Grid item xs={12} md={5}>
+          <Box
+            sx={{
+              flex: { xs: '1 1 100%', md: '0 0 42%', lg: '0 0 41%' },
+              maxWidth: { xs: '100%', md: '42%', lg: '41%' },
+              width: '100%',
+            }}
+          >
             <Box
               sx={{
                 bgcolor: 'rgba(255,255,255,0.92)',
@@ -253,10 +285,10 @@ const HeroSection = () => {
                 borderRadius: '24px',
                 p: { xs: 2.5, sm: 3 },
                 border: '1px solid rgba(79,70,229,0.15)',
-                boxShadow: '0 20px 60px rgba(79,70,229,0.08)',
+                boxShadow: '0 20px 50px rgba(79,70,229,0.08)',
               }}
             >
-              <Box sx={{ textAlign: 'center', mb: 2.5 }}>
+              <Box sx={{ textAlign: 'center', mb: 2 }}>
                 <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} sx={{ mb: 0.5 }}>
                   <AutoAwesomeIcon sx={{ color: '#4f46e5', fontSize: 18 }} />
                   <Typography
@@ -274,7 +306,7 @@ const HeroSection = () => {
                   sx={{
                     fontSize: '0.82rem',
                     color: '#64748b',
-                    lineHeight: 1.5
+                    lineHeight: 1.5,
                   }}
                 >
                   Built for everyday businesses — clear packages, vetted specialists, and real outcomes.
@@ -364,8 +396,8 @@ const HeroSection = () => {
                 “Tell us what your business needs. AITAG experts deliver it.”
               </Typography>
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

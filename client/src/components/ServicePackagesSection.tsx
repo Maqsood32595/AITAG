@@ -27,7 +27,7 @@ const FALLBACK_PACKAGES = [
       'We design a professional logo for your business using AI and deliver it in formats ready for digital use and physical print — visiting cards, GST invoices, WhatsApp DP, letterheads, shop banners and flex printing. Everything your growing business needs to look credible from day one.',
     category: 'Branding & Print',
     badge: 'Most Popular',
-    image_url: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?w=800',
+    image_url: '/images/packages/nt-text-logo.png',
     benefits: [
       'Looks professional and credible from day one — builds customer trust instantly',
       'Print-ready for visiting cards, shop banners, flex printing and GST invoices',
