@@ -54,6 +54,78 @@ const getServiceCategoryIcon = (category: string) => {
   if (norm?.includes('Social') || norm?.includes('Marketing') || norm?.includes('Video')) return <VideoCameraBackIcon sx={{ fontSize: '13px !important', color: '#e11d48' }} />;
   return <LanguageIcon sx={{ fontSize: '13px !important', color: '#10b981' }} />;
 };
+export const getWorkflowPackageInfo = (category?: string, title?: string) => {
+  const normCategory = CATEGORY_MAP[category || ''] || category || '';
+  const c = normCategory.toLowerCase();
+  const t = (title || '').toLowerCase();
+
+  // 1. Branding & Print (Logo Design) -> from ₹499
+  if (
+    c.includes('brand') ||
+    c.includes('print') ||
+    t.includes('logo') ||
+    t.includes('identity') ||
+    t.includes('visiting card') ||
+    t.includes('invoice')
+  ) {
+    return {
+      price: 499,
+      formattedPrice: '₹499',
+      slug: 'ai-logo-identity-kit',
+      packageName: 'Logo Design',
+    };
+  }
+
+  // 2. Web & Digital Presence (5-Page Static Website) -> from ₹1,999
+  if (
+    c.includes('web') ||
+    c.includes('digital') ||
+    c.includes('presence') ||
+    c.includes('funnel') ||
+    t.includes('website') ||
+    t.includes('page') ||
+    t.includes('cloudflare') ||
+    t.includes('landing')
+  ) {
+    return {
+      price: 1999,
+      formattedPrice: '₹1,999',
+      slug: 'ai-website-landing-page',
+      packageName: '5-Page Static Business Website',
+    };
+  }
+
+  // 3. Social & Marketing (Marketing Video & Promo Reels) -> from ₹1,499
+  if (
+    c.includes('social') ||
+    c.includes('marketing') ||
+    c.includes('video') ||
+    c.includes('growth') ||
+    c.includes('ad') ||
+    t.includes('video') ||
+    t.includes('reel') ||
+    t.includes('promo') ||
+    t.includes('instagram') ||
+    t.includes('voiceover') ||
+    t.includes('content')
+  ) {
+    return {
+      price: 1499,
+      formattedPrice: '₹1,499',
+      slug: 'ai-marketing-video-reels',
+      packageName: 'Marketing Video & Promo Reels',
+    };
+  }
+
+  // 4. Product Visuals (AI Product Photo Makeover) -> from ₹1,499
+  return {
+    price: 1499,
+    formattedPrice: '₹1,499',
+    slug: 'ai-product-photo-makeover',
+    packageName: 'AI Product Photo Makeover',
+  };
+};
+
 
 const DEFAULT_WORKFLOWS = [
   {
@@ -63,7 +135,7 @@ const DEFAULT_WORKFLOWS = [
     businessImpact: 'Generated scalable vector SVG brand logo, visiting cards (CMYK 300 DPI), and WhatsApp DP for an ethnic retail boutique in 48 hours.',
     demoVideoUrl: '',
     techStack: ['Recraft V3', 'Vectorizer.ai', 'Figma', 'Print CMYK PDF', 'WhatsApp DP'],
-    liveUrl: 'https://aitag.in/#packages'
+    liveUrl: 'https://aitag.in/#package-ai-logo-identity-kit'
   },
   {
     id: 'wf-2',
@@ -72,7 +144,7 @@ const DEFAULT_WORKFLOWS = [
     businessImpact: 'Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5×.',
     demoVideoUrl: '',
     techStack: ['ElevenLabs Indian AI', 'CapCut AI', 'HeyGen', 'Dynamic Captions', 'HD MP4'],
-    liveUrl: 'https://aitag.in/#packages'
+    liveUrl: 'https://aitag.in/#package-ai-marketing-video-reels'
   },
   {
     id: 'wf-3',
@@ -81,7 +153,7 @@ const DEFAULT_WORKFLOWS = [
     businessImpact: 'Built mobile-first static business website deployed to Cloudflare Pages in <1s load time with instant WhatsApp click-to-chat, generating 24 customer enquiries in week 1.',
     demoVideoUrl: '',
     techStack: ['Mobile-First HTML5', 'Cloudflare Pages', 'WhatsApp API', 'Local SEO', 'Zero Hosting Fees'],
-    liveUrl: 'https://aitag.in/#packages'
+    liveUrl: 'https://aitag.in/#package-ai-website-landing-page'
   },
   {
     id: 'wf-4',
@@ -90,7 +162,7 @@ const DEFAULT_WORKFLOWS = [
     businessImpact: 'Converted 20 smartphone cosmetic photos into studio-lit catalogue listings with pure RGB(255,255,255) backgrounds and ambient contact shadows with 100% marketplace approval.',
     demoVideoUrl: '',
     techStack: ['Photoroom AI', 'FLUX.1', 'Photoshop Generative Fill', 'Amazon 2000px', 'Clean Cutouts'],
-    liveUrl: 'https://aitag.in/#packages'
+    liveUrl: 'https://aitag.in/#package-ai-product-photo-makeover'
   }
 ];
 
@@ -370,35 +442,54 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                       </Box>
                     )}
 
-                    {/* Direct Action to Order Service */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, pt: 1.5, borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: 1 }}>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
-                        Want this outcome for your business?
-                      </Typography>
-                      <Button
-                        component="a"
-                        href="/#packages"
-                        onClick={onClose}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          borderRadius: '8px',
-                          color: '#4f46e5',
-                          borderColor: 'rgba(79,70,229,0.3)',
-                          fontWeight: 700,
-                          fontSize: '0.75rem',
-                          textTransform: 'none',
-                          py: 0.4,
-                          px: 1.5,
-                          '&:hover': {
-                            borderColor: '#4f46e5',
-                            bgcolor: 'rgba(79,70,229,0.06)'
-                          }
-                        }}
-                      >
-                        Order Package (From ₹499) →
-                      </Button>
-                    </Box>
+                    {/* Direct Action to Order Service with dynamic package pricing */}
+                    {(() => {
+                      const pkgInfo = getWorkflowPackageInfo(wf.category, wf.title);
+                      return (
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, pt: 1.5, borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: 1 }}>
+                          <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                            Want this outcome for your business?
+                          </Typography>
+                          <Button
+                            component="a"
+                            href={`/#package-${pkgInfo.slug}`}
+                            onClick={() => {
+                              onClose();
+                              if (window.location.pathname === '/' || window.location.pathname === '') {
+                                const el = document.getElementById(`package-${pkgInfo.slug}`);
+                                if (el) {
+                                  const navOffset = 90;
+                                  const elementPosition = el.getBoundingClientRect().top;
+                                  const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+                                  window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth',
+                                  });
+                                }
+                              }
+                            }}
+                            size="small"
+                            variant="outlined"
+                            sx={{
+                              borderRadius: '8px',
+                              color: '#4f46e5',
+                              borderColor: 'rgba(79,70,229,0.3)',
+                              fontWeight: 700,
+                              fontSize: '0.75rem',
+                              textTransform: 'none',
+                              py: 0.4,
+                              px: 1.5,
+                              '&:hover': {
+                                borderColor: '#4f46e5',
+                                bgcolor: 'rgba(79,70,229,0.06)'
+                              }
+                            }}
+                          >
+                            Order Package (From {pkgInfo.formattedPrice}) →
+                          </Button>
+                        </Box>
+                      );
+                    })()}
                   </Card>
                 );
               })}

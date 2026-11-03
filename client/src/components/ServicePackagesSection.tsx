@@ -318,6 +318,30 @@ const ServicePackagesSection: React.FC = () => {
     fetchPackages();
   }, []);
 
+  useEffect(() => {
+    const handleHashScroll = () => {
+      if (window.location.hash) {
+        const hash = window.location.hash.replace('#', '');
+        const targetId = hash.startsWith('package-') ? hash : (hash === 'packages' ? 'packages' : `package-${hash}`);
+        setTimeout(() => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            const navOffset = 90;
+            const elementPosition = el.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth',
+            });
+          }
+        }, 120);
+      }
+    };
+    handleHashScroll();
+    window.addEventListener('hashchange', handleHashScroll);
+    return () => window.removeEventListener('hashchange', handleHashScroll);
+  }, [loading]);
+
   const handleTierChange = (slug: string, newTier: string) => {
     setSelectedTiers((prev) => ({ ...prev, [slug]: newTier }));
   };
