@@ -378,7 +378,7 @@ const ServicePackagesSection: React.FC = () => {
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Chip
             icon={<AutoAwesomeIcon sx={{ fontSize: 16, color: '#4f46e5 !important' }} />}
-            label="PRODUCTIZED AI SERVICES FOR INDIAN SMBS"
+            label="AFFORDABLE AI SERVICES FOR SHOPS & SMALL BUSINESSES"
             sx={{
               bgcolor: '#eef2ff',
               color: '#4338ca',
@@ -414,7 +414,7 @@ const ServicePackagesSection: React.FC = () => {
               mb: 3,
             }}
           >
-            Simple curated AI packages for everyday businesses. Clear scope, verified specialists, and 100% money-back escrow protection.
+            Simple curated AI packages for everyday businesses. Clear scope, verified specialists, and 100% Payment Safety (money held securely until you approve the work).
           </Typography>
 
           {/* Quick Service Jump Options (2x2 Grid) */}

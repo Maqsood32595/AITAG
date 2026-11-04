@@ -15,12 +15,12 @@ import AnimatedAvatar from './AnimatedAvatar';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
-  { label: 'AI Packages', to: '/#packages' },
+  { label: 'Services & Packages', to: '/#packages' },
   { label: 'Browse Tasks', to: '/all_tasks' },
-  { label: 'AI Talent', to: '/talent' },
+  { label: 'Verified Experts', to: '/talent' },
   { label: 'Blog', to: '/blog' },
-  { label: 'Post a Task', to: '/add_task' },
-  { label: 'My Tasks', to: '/my_tasks' },
+  { label: 'Post a Requirement', to: '/add_task' },
+  { label: 'My Orders', to: '/my_tasks' },
 ];
 
 const Navbar = () => {

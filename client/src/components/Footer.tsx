@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
                 5-Page Static Business Website
               </Link>
               <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
-                Logo Design & SMB Identity Kit
+                Logo Design & Business Branding Kit
               </Link>
             </Stack>
           </Grid>
@@ -43,17 +43,17 @@ const Footer: React.FC = () => {
           {/* Who We Serve & Brand Pillars */}
           <Grid item xs={12} sm={6} md={4}>
             <Typography sx={{ fontWeight: 800, mb: 2.5, color: '#f8fafc', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
-              Core Pillars
+              Our Promise
             </Typography>
             <Stack spacing={1.5}>
               <Typography sx={{ color: '#cbd5e1', fontSize: '0.875rem' }}>
                 <strong style={{ color: '#38bdf8' }}>SIMPLE:</strong> Clear packages and everyday language.
               </Typography>
               <Typography sx={{ color: '#cbd5e1', fontSize: '0.875rem' }}>
-                <strong style={{ color: '#818cf8' }}>TRUSTED:</strong> Vetted providers and quality review.
+                <strong style={{ color: '#818cf8' }}>TRUSTED:</strong> Verified specialists and quality review.
               </Typography>
               <Typography sx={{ color: '#cbd5e1', fontSize: '0.875rem' }}>
-                <strong style={{ color: '#34d399' }}>PRACTICAL:</strong> Ready-to-use business deliverables.
+                <strong style={{ color: '#34d399' }}>PRACTICAL:</strong> Ready-to-use business results.
               </Typography>
             </Stack>
           </Grid>

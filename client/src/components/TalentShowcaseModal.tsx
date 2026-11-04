@@ -130,9 +130,9 @@ export const getWorkflowPackageInfo = (category?: string, title?: string) => {
 const DEFAULT_WORKFLOWS = [
   {
     id: 'wf-1',
-    title: 'AI Vector Logo & Complete Indian SMB Identity Kit',
+    title: 'AI Vector Logo & Complete Business Branding Kit',
     category: 'Branding & Print',
-    businessImpact: 'Generated scalable vector SVG brand logo, visiting cards (CMYK 300 DPI), and WhatsApp DP for an ethnic retail boutique in 48 hours.',
+    businessImpact: 'Generated clean vector brand logo, visiting cards, and WhatsApp profile image for a retail shop.',
     demoVideoUrl: '',
     techStack: ['Recraft V3', 'Vectorizer.ai', 'Figma', 'Print CMYK PDF', 'WhatsApp DP'],
     liveUrl: 'https://aitag.in/#package-ai-logo-identity-kit'
@@ -141,7 +141,7 @@ const DEFAULT_WORKFLOWS = [
     id: 'wf-2',
     title: 'Viral 9:16 Promotional Video Reels with Indian AI Voiceover',
     category: 'Social & Marketing',
-    businessImpact: 'Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5×.',
+    businessImpact: 'Produced promotional video reels with clear voiceover and captions for social media campaigns.',
     demoVideoUrl: '',
     techStack: ['ElevenLabs Indian AI', 'CapCut AI', 'HeyGen', 'Dynamic Captions', 'HD MP4'],
     liveUrl: 'https://aitag.in/#package-ai-marketing-video-reels'
@@ -150,7 +150,7 @@ const DEFAULT_WORKFLOWS = [
     id: 'wf-3',
     title: 'High-Converting 5-Page Mobile Business Website with WhatsApp CTA',
     category: 'Web & Digital Presence',
-    businessImpact: 'Built mobile-first static business website deployed to Cloudflare Pages in <1s load time with instant WhatsApp click-to-chat, generating 24 customer enquiries in week 1.',
+    businessImpact: 'Built mobile-friendly business website with instant WhatsApp click-to-chat button.',
     demoVideoUrl: '',
     techStack: ['Mobile-First HTML5', 'Cloudflare Pages', 'WhatsApp API', 'Local SEO', 'Zero Hosting Fees'],
     liveUrl: 'https://aitag.in/#package-ai-website-landing-page'
@@ -159,7 +159,7 @@ const DEFAULT_WORKFLOWS = [
     id: 'wf-4',
     title: 'Studio-Grade AI Photo Transformation for Amazon & Meesho',
     category: 'Product Visuals',
-    businessImpact: 'Converted 20 smartphone cosmetic photos into studio-lit catalogue listings with pure RGB(255,255,255) backgrounds and ambient contact shadows with 100% marketplace approval.',
+    businessImpact: 'Converted product smartphone photos into clean, studio-lit catalogue listings for marketplace selling.',
     demoVideoUrl: '',
     techStack: ['Photoroom AI', 'FLUX.1', 'Photoshop Generative Fill', 'Amazon 2000px', 'Clean Cutouts'],
     liveUrl: 'https://aitag.in/#package-ai-product-photo-makeover'

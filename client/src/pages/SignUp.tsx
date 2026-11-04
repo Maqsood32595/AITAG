@@ -53,7 +53,7 @@ const SignUp = () => {
             Create Account
           </Typography>
           <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>
-            Join AITAG — connect with vetted AI specialists or request a guaranteed business package
+            Get affordable AI services for your products, website, logo, and marketing
           </Typography>
 
           {error && !isPasswordError && (
@@ -68,15 +68,15 @@ const SignUp = () => {
               I want to join as:
             </Typography>
             <FormControl fullWidth sx={{ ...fieldStyle, mb: 2 }}>
-              <InputLabel id="account-role-label">Account Role</InputLabel>
+              <InputLabel id="account-role-label">I am joining as</InputLabel>
               <Select
                 labelId="account-role-label"
                 value={form.role}
-                label="Account Role"
+                label="I am joining as"
                 onChange={e => setForm({ ...form, role: e.target.value })}
               >
-                <MenuItem value="client">AI Service Customer (Get Work Done)</MenuItem>
-                <MenuItem value="freelancer">AI Service Provider (Offer Vetted Services)</MenuItem>
+                <MenuItem value="client">Business Owner (I need work done for my business)</MenuItem>
+                <MenuItem value="freelancer">AI Specialist / Expert (I offer services)</MenuItem>
               </Select>
             </FormControl>
 
@@ -100,7 +100,7 @@ const SignUp = () => {
               label="Email Address"
               type="email"
               required
-              placeholder="you@company.com"
+              placeholder="e.g. rahul.verma@gmail.com"
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
               sx={fieldStyle}

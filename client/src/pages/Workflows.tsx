@@ -397,7 +397,7 @@ export const Workflows: React.FC = () => {
             <Stack spacing={2.5} sx={{ mt: 1 }}>
               <TextField
                 label="Workflow Title"
-                placeholder="e.g. AI Vector Logo & Complete Indian SMB Identity Kit"
+                placeholder="e.g. AI Vector Logo & Complete Business Branding Kit"
                 value={wfTitle}
                 onChange={e => setWfTitle(e.target.value)}
                 fullWidth
@@ -411,7 +411,7 @@ export const Workflows: React.FC = () => {
                 onChange={e => setWfCategory(e.target.value)}
                 fullWidth
               >
-                <MenuItem value="Branding & Print">Branding & Print (Logo Design & SMB Kit)</MenuItem>
+                <MenuItem value="Branding & Print">Branding & Print (Logo Design & Branding Kit)</MenuItem>
                 <MenuItem value="Social & Marketing">Social & Marketing (Promo Reels & Videos)</MenuItem>
                 <MenuItem value="Web & Digital Presence">Web & Digital Presence (5-Page Website)</MenuItem>
                 <MenuItem value="Product Visuals">Product Visuals (AI Photo Makeover)</MenuItem>

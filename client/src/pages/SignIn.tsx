@@ -50,7 +50,7 @@ const SignIn = () => {
             Welcome back
           </Typography>
           <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>
-            Sign in to your AITAG account
+            Sign in to track your orders, tasks, and messages
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
@@ -65,7 +65,7 @@ const SignIn = () => {
           </Divider>
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <TextField label="Email" type="email" required value={form.email}
+            <TextField label="Email" type="email" required placeholder="e.g. rahul.verma@gmail.com" value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })} sx={fieldStyle} />
             <TextField label="Password" type="password" required value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })} sx={fieldStyle} />

@@ -41,11 +41,11 @@ const VETTED_SPECIALISTS = [
 ];
 
 const ORDER_STEPS = [
-  { key: 'REQUESTED', label: '1. Brief Requested' },
-  { key: 'MATCHED', label: '2. Expert Matched' },
-  { key: 'ACTIVE', label: '3. Active & Paid' },
-  { key: 'DRAFT_SUBMITTED', label: '4. Draft Deliverables' },
-  { key: 'COMPLETED', label: '5. Approved & Complete' },
+  { key: 'REQUESTED', label: '1. Order Placed' },
+  { key: 'MATCHED', label: '2. Expert Assigned' },
+  { key: 'ACTIVE', label: '3. Work In Progress' },
+  { key: 'DRAFT_SUBMITTED', label: '4. Review Work Sample' },
+  { key: 'COMPLETED', label: '5. Approved & Completed' },
 ];
 
 const TASK_STEPS = [
@@ -405,9 +405,9 @@ const Dashboard = () => {
     { icon: <BidIcon sx={{ color: '#10b981' }} />, label: 'My Placed Bids', value: myBids.length, color: '#10b981', bg: 'rgba(16,185,129,0.08)', link: '/my_tasks' },
     { icon: <ShoppingBagIcon sx={{ color: '#0891b2' }} />, label: 'My Assigned Projects', value: serviceOrders.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', scrollId: 'orders-section' },
   ] : [
-    { icon: <ShoppingBagIcon sx={{ color: '#4f46e5' }} />, label: 'My AI Service Packages', value: serviceOrders.length, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)', scrollId: 'orders-section' },
-    { icon: <PostIcon sx={{ color: '#0891b2' }} />, label: 'My Custom Tasks', value: myTasks.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', link: '/my_tasks' },
-    { icon: <TaskIcon sx={{ color: '#10b981' }} />, label: 'Completed Deliverables', value: serviceOrders.filter(o => o.status === 'COMPLETED').length + myTasks.filter(t => t.status === 'completed').length, color: '#10b981', bg: 'rgba(16,185,129,0.08)', scrollId: 'orders-section' },
+    { icon: <ShoppingBagIcon sx={{ color: '#4f46e5' }} />, label: 'My Service Orders', value: serviceOrders.length, color: '#4f46e5', bg: 'rgba(79,70,229,0.08)', scrollId: 'orders-section' },
+    { icon: <PostIcon sx={{ color: '#0891b2' }} />, label: 'My Custom Requirements', value: myTasks.length, color: '#0891b2', bg: 'rgba(8,145,178,0.08)', link: '/my_tasks' },
+    { icon: <TaskIcon sx={{ color: '#10b981' }} />, label: 'Completed Work', value: serviceOrders.filter(o => o.status === 'COMPLETED').length + myTasks.filter(t => t.status === 'completed').length, color: '#10b981', bg: 'rgba(16,185,129,0.08)', scrollId: 'orders-section' },
   ];
 
   const getStepIndex = (status: string) => {
@@ -462,7 +462,7 @@ const Dashboard = () => {
                 </Typography>
                 <Typography sx={{ color: '#64748b', fontSize: '0.9rem' }}>{user?.email}</Typography>
                 <Chip
-                  label={user?.role === 'client' ? 'AI Services Customer' : user?.role}
+                  label={user?.role === 'client' ? 'Business Owner' : user?.role === 'freelancer' ? 'Verified Expert' : 'Admin'}
                   size="small"
                   sx={{
                     mt: 0.5,
@@ -511,7 +511,7 @@ const Dashboard = () => {
         )}
 
         {/* Pending Task Invitations Banner */}
-        {pendingInvites.length > 0 && (
+        {isFreelancer && pendingInvites.length > 0 && (
           <Paper
             elevation={0}
             sx={{
@@ -670,14 +670,14 @@ const Dashboard = () => {
                     ? 'All Pilot Service Package Requests (Admin Management)'
                     : isFreelancer
                     ? 'My Assigned Client Projects'
-                    : 'My AI Service Package Requests'}
+                    : 'My Service Orders'}
                 </Typography>
                 <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
                   {isAdmin
                     ? 'Review customer briefs, assign vetted specialists, manage payment escrow, and approve deliverables'
                     : isFreelancer
                     ? 'Manage project deliverables, submit drafts for client approval, and receive escrow payouts'
-                    : 'Track your requested outcome packages, status updates, and deliverables'}
+                    : 'Track your orders, progress updates, and finished files'}
                 </Typography>
               </Box>
             </Box>
@@ -696,7 +696,7 @@ const Dashboard = () => {
               <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', mb: 2 }}>
                 {isFreelancer
                   ? 'Once an Admin matches you with a client package brief, it will appear here.'
-                  : 'Browse our fixed-scope pilot packages and request an outcome today.'}
+                  : 'Browse our ready packages and get work done for your business.'}
               </Typography>
               {!isFreelancer && (
                 <Button component={Link} to="/" variant="contained" size="small" sx={{ bgcolor: '#4f46e5', textTransform: 'none', fontWeight: 700, borderRadius: 2 }}>

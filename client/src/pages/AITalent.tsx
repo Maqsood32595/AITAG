@@ -184,10 +184,10 @@ const AITalent = () => {
             name: u.name || u.email.split('@')[0],
             email: u.email,
             role: isUser1
-              ? 'AI Landing Page & Conversion Funnel Specialist'
+              ? 'AI Website & WhatsApp Specialist'
               : isMaqsood
               ? 'AI Product Visuals & Catalogue Lead'
-              : `${u.role === 'admin' ? 'Admin / ' : ''}AI Business Service Specialist`,
+              : 'AI Business Service Specialist',
             category: isUser1 ? 'Web & Digital Presence' : isMaqsood ? 'Product Visuals' : 'Branding & Print',
             avatar: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : '',
             rating: 5.0,
@@ -196,10 +196,10 @@ const AITalent = () => {
             completedTasks: isUser1 ? 19 : isMaqsood ? 42 : 8,
             location: 'India',
             bio: isUser1
-              ? 'Registered AITAG Platform Specialist (ADMIN). Vetted expert in rapid AI one-page website creation, mobile responsive design, and WhatsApp lead funnels.'
+              ? 'Verified specialist in fast mobile business website creation, responsive design, and WhatsApp click-to-chat setup.'
               : isMaqsood
-              ? 'Registered AITAG Platform Specialist (FREELANCER). Vetted expert in AI product photo makeovers, high-conversion catalogue visuals, and marketplace compliance.'
-              : `Registered AITAG Platform Specialist (${u.role.toUpperCase()}). Vetted provider for AI-powered business services and practical outcomes.`,
+              ? 'Verified expert in AI product photo makeovers, catalogue styling, and marketplace compliance for Amazon & Meesho.'
+              : 'Verified specialist for AI business services, social media content, and practical marketplace outcomes.',
             skills: isUser1
               ? ['AI Landing Pages', 'Mobile Web Funnels', 'WhatsApp Integration', 'Conversion Copy', 'Fast Deployment', 'SEO Setup']
               : isMaqsood

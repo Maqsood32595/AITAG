@@ -79,8 +79,8 @@ const AddTask = () => {
       <Navbar />
       <Container maxWidth="sm" sx={{ pt: 14, pb: 6 }}>
         <Paper elevation={0} sx={{ p: 5, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>Post a Task</Typography>
-          <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>Describe what you need — AI talent will bid on it</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>Post a Requirement</Typography>
+          <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>Describe what you need — verified AI specialists will respond with quotes</Typography>
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <TextField label="Task Title *" required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} sx={fieldStyle} />
@@ -124,7 +124,7 @@ const AddTask = () => {
             {/* Attach Assets & Reference Materials */}
             <Box>
               <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', mb: 1 }}>
-                Attach Assets & References (Optional)
+                Attach Sample Photos or Documents (Optional)
               </Typography>
               <Box
                 onDragOver={(e) => e.preventDefault()}
