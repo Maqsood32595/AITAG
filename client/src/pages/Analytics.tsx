@@ -87,14 +87,14 @@ export const Analytics: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <Container maxWidth="lg" sx={{ pb: 8 }}>
+      <Container maxWidth="lg" sx={{ pb: 4, px: { xs: 0.5, sm: 1.5 } }}>
         {/* Top Header Banner */}
         <Paper
           elevation={0}
           sx={{
-            p: { xs: 3, md: 4 },
-            borderRadius: '24px',
-            mb: 4,
+            p: { xs: 2, md: 2.5 },
+            borderRadius: '12px',
+            mb: 2.5,
             background: 'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(8,145,178,0.08) 100%)',
             border: '1px solid rgba(79,70,229,0.15)',
             boxShadow: '0 8px 32px rgba(79,70,229,0.04)',
@@ -112,7 +112,7 @@ export const Analytics: React.FC = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
               <AnimatedAvatar
                 name={user?.name || user?.email}
-                size={68}
+                size={44}
                 src={user?.photo_url}
               />
               <Box>

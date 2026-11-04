@@ -15,7 +15,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedAvatar } from '../components/AnimatedAvatar';
 
-const DRAWER_WIDTH = 260;
+const DRAWER_WIDTH = 220;
 
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -94,8 +94,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   ];
 
   const drawerContent = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', pt: 2, pb: 1, px: 2 }}>
-      <Toolbar />
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', pt: 1, pb: 1, px: 1.2 }}>
+      <Toolbar sx={{ minHeight: '52px !important', height: '52px' }} />
       <Box sx={{ overflowY: 'auto', flex: 1, mt: 1 }}>
         <List sx={{ p: 0 }}>
           {menuItems.map((item) => {
@@ -108,10 +108,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                   if (isMobile) setMobileOpen(false);
                 }}
                 sx={{
-                  borderRadius: '12px',
-                  mb: 1,
-                  py: 1.2,
-                  px: 2,
+                  borderRadius: '8px',
+                  mb: 0.5,
+                  py: 0.7,
+                  px: 1.2,
                   bgcolor: active ? 'primary.50' : 'transparent',
                   color: active ? 'primary.main' : 'text.primary',
                   cursor: 'pointer !important',
@@ -122,14 +122,14 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                   },
                 }}
               >
-                <ListItemIcon sx={{ color: 'inherit', minWidth: 40, fontSize: '1.2rem' }}>
+                <ListItemIcon sx={{ color: 'inherit', minWidth: 32, fontSize: '1rem' }}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText
                   primary={item.text}
                   primaryTypographyProps={{
                     fontWeight: active ? 700 : 500,
-                    fontSize: '14px',
+                    fontSize: '13px',
                   }}
                 />
               </ListItemButton>
@@ -193,7 +193,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           boxShadow: 'none',
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, sm: 3, md: 4 } }}>
+        <Toolbar sx={{ minHeight: '52px !important', height: '52px', justifyContent: 'space-between', px: { xs: 1.5, sm: 2.5 } }}>
           {/* Left: Sidebar Toggle + Brand Logo */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Tooltip title={isMobile ? "Open Navigation Menu" : collapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}>
@@ -227,8 +227,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             >
               <Box
                 sx={{
-                  width: 36,
-                  height: 36,
+                  width: 30,
+                  height: 30,
                   background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
                   borderRadius: '10px',
                   display: 'flex',
@@ -284,7 +284,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
               >
                 <AnimatedAvatar
                   name={user?.name || user?.email}
-                  size={38}
+                  size={32}
                   src={user?.photo_url}
                 />
                 <Box sx={{ display: { xs: 'none', md: 'block' }, textAlign: 'left' }}>
@@ -401,7 +401,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          p: { xs: 2.5, sm: 3.5, md: 4.5 },
+          p: { xs: 1.5, sm: 2, md: 2.5 },
           width: {
             xs: '100%',
             md: !collapsed ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
@@ -410,7 +410,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           overflowX: 'hidden',
         }}
       >
-        <Toolbar />
+        <Toolbar sx={{ minHeight: '52px !important', height: '52px' }} />
         <Box sx={{ flex: 1, width: '100%' }}>
           {children}
         </Box>
@@ -420,8 +420,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           component="footer"
           sx={{
             mt: 'auto',
-            pt: 6,
-            pb: 2,
+            pt: 3,
+            pb: 1.5,
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',

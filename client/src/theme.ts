@@ -28,12 +28,19 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    h5: { fontWeight: 800, letterSpacing: '-0.5px' },
-    h6: { fontWeight: 700, letterSpacing: '-0.25px' },
-    button: { textTransform: 'none', fontWeight: 700 },
+    fontSize: 13, // Refined compact SaaS typography scale
+    h4: { fontWeight: 800, fontSize: '1.35rem', letterSpacing: '-0.4px' },
+    h5: { fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.3px' },
+    h6: { fontWeight: 700, fontSize: '0.98rem', letterSpacing: '-0.2px' },
+    subtitle1: { fontSize: '0.88rem' },
+    subtitle2: { fontSize: '0.8rem' },
+    body1: { fontSize: '0.84rem' },
+    body2: { fontSize: '0.78rem' },
+    button: { textTransform: 'none', fontWeight: 700, fontSize: '0.8rem' },
+    caption: { fontSize: '0.7rem' },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 10,
   },
   components: {
     MuiButtonBase: {
@@ -47,10 +54,12 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           cursor: 'pointer !important',
-          borderRadius: '10px',
+          borderRadius: '8px',
           boxShadow: 'none',
+          padding: '6px 14px',
+          fontSize: '0.8rem',
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(79,70,229,0.2)',
+            boxShadow: '0 3px 10px rgba(79,70,229,0.18)',
             transform: 'translateY(-1px)',
           },
           transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -82,6 +91,8 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           cursor: 'pointer !important',
+          fontSize: '0.82rem',
+          padding: '6px 12px',
         }
       }
     },
@@ -89,12 +100,16 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           cursor: 'pointer !important',
+          fontSize: '0.82rem',
+          minHeight: '40px',
         }
       }
     },
     MuiChip: {
       styleOverrides: {
         root: {
+          fontSize: '0.72rem',
+          height: '24px',
           '&.MuiChip-clickable': {
             cursor: 'pointer !important',
           }
@@ -105,7 +120,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.03)',
           border: '1px solid #e2e8f0',
         }
       }

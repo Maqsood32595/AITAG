@@ -441,35 +441,36 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <Container maxWidth="lg" sx={{ pb: 6 }}>
+      <Container maxWidth="lg" sx={{ pb: 4, px: { xs: 0.5, sm: 1.5 } }}>
         {/* Welcome Banner */}
         <Paper
           elevation={0}
           sx={{
-            p: 4,
-            borderRadius: '20px',
-            mb: 4,
-            background: 'linear-gradient(135deg, rgba(79,70,229,0.08) 0%, rgba(8,145,178,0.06) 100%)',
+            p: { xs: 2, sm: 2.5 },
+            borderRadius: '12px',
+            mb: 2.5,
+            background: 'linear-gradient(135deg, rgba(79,70,229,0.06) 0%, rgba(8,145,178,0.04) 100%)',
             border: '1px solid rgba(79,70,229,0.1)',
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, flexDirection: { xs: 'column', md: 'row' }, gap: 2.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
-              <AnimatedAvatar name={user?.name || user?.email} size={64} src={user?.photo_url} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <AnimatedAvatar name={user?.name || user?.email} size={44} src={user?.photo_url} />
               <Box>
-                <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.5px' }}>
+                <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.3px' }}>
                   Welcome back, {user?.name || 'User'}!
                 </Typography>
-                <Typography sx={{ color: '#64748b', fontSize: '0.9rem' }}>{user?.email}</Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.8rem' }}>{user?.email}</Typography>
                 <Chip
                   label={user?.role === 'client' ? 'Business Owner' : user?.role === 'freelancer' ? 'Verified Expert' : 'Admin'}
                   size="small"
                   sx={{
-                    mt: 0.5,
-                    bgcolor: 'rgba(79,70,229,0.1)',
+                    mt: 0.3,
+                    bgcolor: 'rgba(79,70,229,0.08)',
                     color: '#4f46e5',
                     fontWeight: 700,
-                    fontSize: '0.72rem',
+                    fontSize: '0.68rem',
+                    height: 20,
                     textTransform: 'capitalize',
                   }}
                 />
@@ -597,7 +598,7 @@ const Dashboard = () => {
         )}
 
         {/* Stats */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
           {stats.map(s => {
             const isClickable = Boolean(s.link || s.scrollId);
             const handleClick = () => {
@@ -615,28 +616,28 @@ const Dashboard = () => {
                   to={s.link}
                   onClick={handleClick}
                   sx={{
-                    p: 3,
-                    borderRadius: '16px',
+                    p: 1.8,
+                    borderRadius: '10px',
                     border: '1px solid rgba(79,70,229,0.08)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 2,
+                    gap: 1.5,
                     textDecoration: 'none',
                     cursor: isClickable ? 'pointer' : 'default',
                     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                     '&:hover': isClickable ? {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 12px 24px rgba(79,70,229,0.12)',
-                      borderColor: 'rgba(79,70,229,0.3)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 16px rgba(79,70,229,0.08)',
+                      borderColor: 'rgba(79,70,229,0.25)',
                     } : {}
                   }}
                 >
-                  <Box sx={{ width: 48, height: 48, borderRadius: '12px', bgcolor: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {s.icon}
                   </Box>
                   <Box>
-                    <Typography sx={{ fontSize: '0.8rem', color: '#94a3b8' }}>{s.label}</Typography>
-                    <Typography sx={{ fontWeight: 900, fontSize: '1.8rem', color: s.color, lineHeight: 1.2, fontFamily: 'Inter, sans-serif' }}>
+                    <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>{s.label}</Typography>
+                    <Typography sx={{ fontWeight: 800, fontSize: '1.35rem', color: s.color, lineHeight: 1.1, fontFamily: 'Inter, sans-serif' }}>
                       {s.value}
                     </Typography>
                   </Box>
@@ -651,28 +652,28 @@ const Dashboard = () => {
           id="orders-section"
           elevation={0}
           sx={{
-            p: 4,
-            borderRadius: '20px',
-            border: '1px solid rgba(79,70,229,0.15)',
+            p: 2.5,
+            borderRadius: '12px',
+            border: '1px solid rgba(79,70,229,0.12)',
             bgcolor: '#ffffff',
-            mb: 4,
-            boxShadow: '0 8px 30px rgba(79,70,229,0.04)',
+            mb: 2.5,
+            boxShadow: '0 4px 16px rgba(79,70,229,0.03)',
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: 42, height: 42, borderRadius: '12px', bgcolor: 'rgba(79,70,229,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShoppingBagIcon sx={{ color: '#4f46e5', fontSize: 24 }} />
+              <Box sx={{ width: 34, height: 34, borderRadius: '8px', bgcolor: 'rgba(79,70,229,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShoppingBagIcon sx={{ color: '#4f46e5', fontSize: 18 }} />
               </Box>
               <Box>
-                <Typography sx={{ fontWeight: 800, fontSize: '1.2rem', color: '#0f172a' }}>
+                <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#0f172a' }}>
                   {isAdmin
                     ? 'All Pilot Service Package Requests (Admin Management)'
                     : isFreelancer
                     ? 'My Assigned Client Projects'
                     : 'My Service Orders'}
                 </Typography>
-                <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
+                <Typography sx={{ color: '#64748b', fontSize: '0.76rem' }}>
                   {isAdmin
                     ? 'Review customer briefs, assign verified specialists, manage payment escrow, and approve deliverables'
                     : isFreelancer
@@ -689,7 +690,7 @@ const Dashboard = () => {
           <Divider sx={{ mb: 3 }} />
 
           {serviceOrders.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 5, bgcolor: '#f8fafc', borderRadius: 3, border: '1px dashed #cbd5e1' }}>
+            <Box sx={{ textAlign: 'center', py: 3, px: 2, bgcolor: '#f8fafc', borderRadius: 2, border: '1px dashed #cbd5e1' }}>
               <Typography sx={{ color: '#64748b', fontWeight: 600, mb: 1, fontSize: '1.05rem' }}>
                 {isFreelancer ? 'No Projects Assigned Yet' : 'No Service Package Requests Yet'}
               </Typography>
@@ -1471,7 +1472,7 @@ const Dashboard = () => {
         )}
 
         {/* Recent Tasks */}
-        <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid rgba(79,70,229,0.08)', mb: 3 }}>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: '12px', border: '1px solid rgba(79,70,229,0.08)', mb: 2.5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>Recent Activity</Typography>
             <Button component={Link} to="/my_tasks" size="small" sx={{ color: '#4f46e5', fontWeight: 600 }}>View all →</Button>

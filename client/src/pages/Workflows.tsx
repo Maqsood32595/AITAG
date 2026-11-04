@@ -227,13 +227,13 @@ export const Workflows: React.FC = () => {
     <DashboardLayout>
       <Container maxWidth="lg">
         {/* Header Navigation */}
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2.5 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <IconButton onClick={() => navigate('/profile')} sx={{ bgcolor: '#fff', border: '1px solid #e2e8f0' }}>
               <ArrowBackIcon sx={{ color: '#0f172a' }} />
             </IconButton>
             <Box>
-              <Typography variant="h4" fontWeight={800} color="#0f172a">
+              <Typography variant="h5" fontWeight={800} color="#0f172a">
                 🎬 Delivered Services & Work Samples
               </Typography>
               <Typography variant="body2" color="#64748b">

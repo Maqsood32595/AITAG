@@ -233,11 +233,11 @@ export const Profile: React.FC = () => {
         <Paper
           elevation={0}
           sx={{
-            p: 4,
-            borderRadius: 3,
+            p: 2.5,
+            borderRadius: '12px',
             border: '1px solid #e2e8f0',
             bgcolor: '#ffffff',
-            mb: 4,
+            mb: 2.5,
             boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
             display: 'flex',
             alignItems: 'center',
@@ -249,7 +249,7 @@ export const Profile: React.FC = () => {
           <Stack direction="row" spacing={3} alignItems="center">
             <AnimatedAvatar
               name={user?.name || (isAdmin ? 'Admin Console' : isClient ? 'Client 1' : 'Expert 1')}
-              size={72}
+              size={48}
               src={user?.photo_url || user?.photoURL}
             />
             <Box>
