@@ -56,12 +56,6 @@ const SignUp = () => {
             Get affordable AI services for your products, website, logo, and marketing
           </Typography>
 
-          {error && !isPasswordError && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>
-              {error}
-            </Alert>
-          )}
-
           {/* Role Selection for Google & Email Registration */}
           <Box sx={{ mb: 3 }}>
             <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', mb: 1 }}>
@@ -114,17 +108,23 @@ const SignUp = () => {
                 setForm({ ...form, password: e.target.value });
                 if (error) setError('');
               }}
-              error={isPasswordError}
+              error={Boolean(error)}
               helperText={
-                isPasswordError
-                  ? error
-                  : 'Min 6 characters with at least one uppercase letter (e.g. Pass123)'
+                !error
+                  ? 'Min 6 characters with at least one uppercase letter (e.g. Pass123)'
+                  : undefined
               }
               FormHelperTextProps={{
-                sx: { color: isPasswordError ? '#ef4444' : '#64748b', fontWeight: isPasswordError ? 700 : 400 }
+                sx: { color: error ? '#ef4444' : '#64748b', fontWeight: error ? 700 : 400 }
               }}
               sx={fieldStyle}
             />
+
+            {error && (
+              <Alert severity="error" sx={{ borderRadius: '10px', py: 0.5, fontSize: '0.875rem' }}>
+                {error}
+              </Alert>
+            )}
 
             <Button
               type="submit"

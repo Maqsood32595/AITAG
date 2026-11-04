@@ -53,8 +53,6 @@ const SignIn = () => {
             Sign in to track your orders, tasks, and messages
           </Typography>
 
-          {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
-
           {/* Google 1-Click Sign In */}
           <Box sx={{ mb: 3 }}>
             <GoogleAuthButton mode="signin" onError={err => setError(err)} />
@@ -65,10 +63,36 @@ const SignIn = () => {
           </Divider>
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <TextField label="Email" type="email" required placeholder="e.g. rahul.verma@gmail.com" value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })} sx={fieldStyle} />
-            <TextField label="Password" type="password" required value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })} sx={fieldStyle} />
+            <TextField
+              label="Email"
+              type="email"
+              required
+              placeholder="e.g. rahul.verma@gmail.com"
+              value={form.email}
+              onChange={e => {
+                setForm({ ...form, email: e.target.value });
+                if (error) setError('');
+              }}
+              sx={fieldStyle}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              required
+              value={form.password}
+              onChange={e => {
+                setForm({ ...form, password: e.target.value });
+                if (error) setError('');
+              }}
+              error={Boolean(error)}
+              sx={fieldStyle}
+            />
+
+            {error && (
+              <Alert severity="error" sx={{ borderRadius: '10px', py: 0.5, fontSize: '0.875rem' }}>
+                {error}
+              </Alert>
+            )}
 
             <Button type="submit" variant="contained" size="large" disabled={loading}
               sx={{
