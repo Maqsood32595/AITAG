@@ -169,3 +169,4 @@ export const PaymentTrustSection: React.FC = () => {
 };
 
 export default PaymentTrustSection;
+

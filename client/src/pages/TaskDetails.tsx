@@ -270,7 +270,30 @@ const TaskDetails = () => {
   };
 
   if (loading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh"><CircularProgress sx={{ color: '#4f46e5' }} /></Box>;
-  if (!task) return <Box sx={{ pt: 14, textAlign: 'center' }}><Typography>Task not found.</Typography></Box>;
+  if (!task) {
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+        <Navbar />
+        <Container maxWidth="sm" sx={{ pt: 16, pb: 8, textAlign: 'center' }}>
+          <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid #e2e8f0', bgcolor: '#ffffff' }}>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', mb: 1 }}>
+              Task Not Found or Access Restricted
+            </Typography>
+            <Typography sx={{ color: '#64748b', fontSize: '0.9rem', mb: 3 }}>
+              This project brief may have been archived, removed, or requires specific role authorization to access.
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/dashboard')}
+              sx={{ bgcolor: '#2563eb', fontWeight: 700, borderRadius: '20px', textTransform: 'none', px: 3 }}
+            >
+              Return to Dashboard
+            </Button>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  }
 
   const isOwner = user?.email === task.user_email;
   const isAssignedOrAccepted = (myBid && myBid.status === 'accepted') || (user && task.assigned_expert_email === user.email);

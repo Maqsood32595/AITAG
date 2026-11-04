@@ -1,17 +1,26 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Box, CircularProgress } from '@mui/material';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   React.useEffect(() => {
     if (!loading && !user) {
-      navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
+      const currentPath = location.pathname + location.search;
+      const redirectUrl = `/signin?redirect=${encodeURIComponent(currentPath)}`;
+      navigate(redirectUrl, {
+        state: {
+          error: 'Please sign in to access this page.',
+          from: currentPath,
+        },
+        replace: true,
+      });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location]);
 
   if (loading || !user) {
     return (

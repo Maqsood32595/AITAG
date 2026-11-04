@@ -30,7 +30,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('aitag_token');
-      window.location.href = '/signin';
+      if (typeof window !== 'undefined') {
+        const current = window.location.pathname + window.location.search;
+        if (current !== '/signin' && current !== '/signup') {
+          window.location.href = `/signin?redirect=${encodeURIComponent(current)}`;
+        } else {
+          window.location.href = '/signin';
+        }
+      }
     }
     return Promise.reject(error);
   }

@@ -100,7 +100,11 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     try {
       const res = await loginWithGoogle(response.credential, role);
       const userRole = res?.user?.role || role;
-      navigate(userRole === 'admin' || userRole === 'freelancer' ? '/dashboard' : '/');
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTarget = searchParams.get('redirect');
+      const fallback = (userRole === 'admin' || userRole === 'freelancer') ? '/dashboard' : '/';
+      const destination = (redirectTarget && redirectTarget !== '/signin' && redirectTarget !== '/signup') ? redirectTarget : fallback;
+      navigate(destination, { replace: true });
     } catch (err: any) {
       const msg = err.response?.data?.error || err.message || 'Google authentication failed';
       setErrorMsg(msg);

@@ -6,19 +6,23 @@ import { useAuth } from '../context/AuthContext';
 import { GoogleAuthButton } from '../components/GoogleAuthButton';
 
 const SignIn = () => {
-  const { login, logout, user } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState(location.state?.error || '');
   const [loading, setLoading] = useState(false);
 
-  // If arriving on /signin, immediately clear any stale session so old avatars never persist
+  // If already logged in, seamlessly forward to requested destination or dashboard
   React.useEffect(() => {
-    if (user || localStorage.getItem('aitag_token')) {
-      logout();
+    if (user) {
+      const searchParams = new URLSearchParams(location.search);
+      const redirectTarget = searchParams.get('redirect') || location.state?.from;
+      const fallback = (user.role === 'admin' || user.role === 'freelancer') ? '/dashboard' : '/';
+      const destination = (redirectTarget && redirectTarget !== '/signin' && redirectTarget !== '/signup') ? redirectTarget : fallback;
+      navigate(destination, { replace: true });
     }
-  }, []);
+  }, [user, location, navigate]);
 
   React.useEffect(() => {
     if (location.state?.error) {
@@ -33,13 +37,21 @@ const SignIn = () => {
     try {
       const loggedUser = await login(form.email, form.password);
       const role = loggedUser?.role;
-      navigate(role === 'admin' || role === 'freelancer' ? '/dashboard' : '/');
+      const searchParams = new URLSearchParams(location.search);
+      const redirectTarget = searchParams.get('redirect') || location.state?.from;
+      const fallback = (role === 'admin' || role === 'freelancer') ? '/dashboard' : '/';
+      const destination = (redirectTarget && redirectTarget !== '/signin' && redirectTarget !== '/signup') ? redirectTarget : fallback;
+      navigate(destination, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  const searchParams = new URLSearchParams(location.search);
+  const redirectQuery = searchParams.get('redirect');
+  const signUpLink = redirectQuery ? `/signup?redirect=${encodeURIComponent(redirectQuery)}` : '/signup';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
@@ -107,7 +119,7 @@ const SignIn = () => {
           <Divider sx={{ my: 3 }} />
           <Typography sx={{ textAlign: 'center', fontSize: '0.9rem', color: '#64748b' }}>
             New to AITAG?{' '}
-            <Link to="/signup" style={{ color: '#4f46e5', fontWeight: 700, textDecoration: 'none' }}>Create account</Link>
+            <Link to={signUpLink} style={{ color: '#4f46e5', fontWeight: 700, textDecoration: 'none' }}>Create account</Link>
           </Typography>
         </Paper>
       </Container>

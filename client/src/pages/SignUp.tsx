@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   Box, Container, Paper, Typography, TextField, Button,
   Alert, Divider, MenuItem, Select, InputLabel, FormControl
@@ -9,18 +9,23 @@ import { useAuth } from '../context/AuthContext';
 import { GoogleAuthButton } from '../components/GoogleAuthButton';
 
 const SignUp = () => {
-  const { register, logout, user } = useAuth();
+  const { register, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'client' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // If arriving on /signup, immediately clear any stale session
+  // If already logged in, forward to requested destination or dashboard
   React.useEffect(() => {
-    if (user || localStorage.getItem('aitag_token')) {
-      logout();
+    if (user) {
+      const searchParams = new URLSearchParams(location.search);
+      const redirectTarget = searchParams.get('redirect') || location.state?.from;
+      const fallback = (user.role === 'admin' || user.role === 'freelancer') ? '/dashboard' : '/';
+      const destination = (redirectTarget && redirectTarget !== '/signin' && redirectTarget !== '/signup') ? redirectTarget : fallback;
+      navigate(destination, { replace: true });
     }
-  }, []);
+  }, [user, location, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +38,13 @@ const SignUp = () => {
     }
     setLoading(true);
     try {
-      await register(form);
-      navigate('/dashboard');
+      const loggedUser = await register(form);
+      const userRole = loggedUser?.role || form.role;
+      const searchParams = new URLSearchParams(location.search);
+      const redirectTarget = searchParams.get('redirect') || location.state?.from;
+      const fallback = (userRole === 'admin' || userRole === 'freelancer') ? '/dashboard' : '/';
+      const destination = (redirectTarget && redirectTarget !== '/signin' && redirectTarget !== '/signup') ? redirectTarget : fallback;
+      navigate(destination, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
     } finally {
@@ -43,6 +53,9 @@ const SignUp = () => {
   };
 
   const isPasswordError = Boolean(error && error.toLowerCase().includes('password'));
+  const searchParams = new URLSearchParams(location.search);
+  const redirectQuery = searchParams.get('redirect');
+  const signInLink = redirectQuery ? `/signin?redirect=${encodeURIComponent(redirectQuery)}` : '/signin';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
@@ -58,22 +71,23 @@ const SignUp = () => {
 
           {/* Role Selection for Google & Email Registration */}
           <Box sx={{ mb: 2 }}>
-            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', mb: 1 }}>
-              I want to join as:
-            </Typography>
-            <FormControl fullWidth sx={{ ...fieldStyle, mb: 2 }}>
-              <InputLabel id="account-role-label">Account Type</InputLabel>
+            <FormControl fullWidth size="small">
+              <InputLabel id="role-label" sx={{ fontSize: '0.875rem' }}>I want to</InputLabel>
               <Select
-                labelId="account-role-label"
+                labelId="role-label"
                 value={form.role}
-                label="Account Type"
+                label="I want to"
                 onChange={e => setForm({ ...form, role: e.target.value })}
+                sx={{ borderRadius: '10px', fontSize: '0.875rem', bgcolor: '#ffffff' }}
               >
-                <MenuItem value="client">Business Owner</MenuItem>
-                <MenuItem value="freelancer">AI Specialist</MenuItem>
+                <MenuItem value="client">Order AI Services (Customer / Small Business)</MenuItem>
+                <MenuItem value="freelancer">Offer AI Services (Verified AI Specialist)</MenuItem>
               </Select>
             </FormControl>
+          </Box>
 
+          {/* Google 1-Click Registration */}
+          <Box sx={{ mb: 2 }}>
             <GoogleAuthButton mode="signup" role={form.role} onError={err => setError(err)} />
           </Box>
 
@@ -83,24 +97,30 @@ const SignUp = () => {
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}>
             <TextField
-              label="Full Name"
+              label="Full Name or Business Name"
               required
-              placeholder="e.g. Rahul Verma"
+              placeholder="e.g. Sumanth Patel / Patel Bakery"
               value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
+              onChange={e => {
+                setForm({ ...form, name: e.target.value });
+                if (error) setError('');
+              }}
               sx={fieldStyle}
             />
             <TextField
-              label="Email Address"
+              label="Email"
               type="email"
               required
-              placeholder="e.g. rahul.verma@gmail.com"
+              placeholder="e.g. sumanth@gmail.com"
               value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })}
+              onChange={e => {
+                setForm({ ...form, email: e.target.value });
+                if (error) setError('');
+              }}
               sx={fieldStyle}
             />
             <TextField
-              label="Password"
+              label="Password (min 6 chars, 1 uppercase)"
               type="password"
               required
               value={form.password}
@@ -108,19 +128,12 @@ const SignUp = () => {
                 setForm({ ...form, password: e.target.value });
                 if (error) setError('');
               }}
-              error={Boolean(error)}
-              helperText={
-                !error
-                  ? 'Min 6 characters with at least one uppercase letter (e.g. Pass123)'
-                  : undefined
-              }
-              FormHelperTextProps={{
-                sx: { color: error ? '#ef4444' : '#64748b', fontWeight: error ? 700 : 400 }
-              }}
+              error={isPasswordError}
+              helperText={isPasswordError ? 'Password must be >= 6 characters and have at least 1 uppercase letter' : ''}
               sx={fieldStyle}
             />
 
-            {error && (
+            {error && !isPasswordError && (
               <Alert severity="error" sx={{ borderRadius: '10px', py: 0.5, fontSize: '0.875rem' }}>
                 {error}
               </Alert>
@@ -148,7 +161,7 @@ const SignUp = () => {
           <Divider sx={{ my: 3 }} />
           <Typography sx={{ textAlign: 'center', fontSize: '0.9rem', color: '#64748b' }}>
             Already have an account?{' '}
-            <Link to="/signin" style={{ color: '#4f46e5', fontWeight: 700, textDecoration: 'none' }}>Sign In</Link>
+            <Link to={signInLink} style={{ color: '#4f46e5', fontWeight: 700, textDecoration: 'none' }}>Sign In</Link>
           </Typography>
         </Paper>
       </Container>
