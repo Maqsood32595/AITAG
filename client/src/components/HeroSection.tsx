@@ -266,7 +266,7 @@ const HeroSection: React.FC = () => {
 
           {/* Right Column: "How it works — 3 simple steps" Card */}
           <Box
-            id="how-it-works"
+            id="hero-workflow-card"
             sx={{
               flex: { xs: '1 1 100%', md: '0 0 42%', lg: '0 0 41%' },
               maxWidth: { xs: '100%', md: '42%', lg: '41%' },

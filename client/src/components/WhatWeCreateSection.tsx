@@ -74,7 +74,7 @@ export const WhatWeCreateSection: React.FC<WhatWeCreateSectionProps> = ({ onSele
   };
 
   return (
-    <Box sx={{ pt: { xs: 6, md: 8 }, pb: { xs: 6, md: 8 }, bgcolor: '#ffffff' }}>
+    <Box id="services" sx={{ pt: { xs: 6, md: 8 }, pb: { xs: 6, md: 8 }, bgcolor: '#ffffff' }}>
       <Container maxWidth="lg">
         {/* Section Heading */}
         <Box sx={{ mb: { xs: 3, md: 4 } }}>

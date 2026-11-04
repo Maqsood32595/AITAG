@@ -39,40 +39,37 @@ const Navbar = () => {
 
   const handleHomeClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (window.location.pathname === '/') {
+    if (location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (window.location.hash) {
-        window.history.pushState(null, '', '/');
-      }
     } else {
       navigate('/');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const handlePackagesClick = (e: React.MouseEvent) => {
+  const handleServicesClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (window.location.pathname !== '/') {
-      navigate('/#packages');
-      setTimeout(() => {
-        const el = document.getElementById('packages');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    } else {
-      const el = document.getElementById('packages');
+    if (location.pathname === '/') {
+      const el = document.getElementById('services') || document.getElementById('packages');
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        window.history.pushState(null, '', '/#packages');
+        const navOffset = 80;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       }
+    } else {
+      navigate('/?scroll=services');
     }
   };
 
   const handleHowItWorksClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate('/how-it-works');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (location.pathname === '/how-it-works') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/how-it-works');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -124,42 +121,52 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, flexGrow: 1 }}>
-          {NAV_LINKS.map((link) => (
-            <Button
-              key={link.to}
-              component={Link}
-              to={link.to}
-              onClick={(e: React.MouseEvent) => {
-                if (link.to === '/') {
-                  handleHomeClick(e);
-                  return;
-                }
-                if (link.to === '/#packages') {
-                  handlePackagesClick(e);
-                  return;
-                }
-                if (link.to === '/how-it-works') {
-                  handleHowItWorksClick(e);
-                  return;
-                }
-              }}
-              sx={{
-                color: location.pathname === link.to ? '#2563eb' : '#475569',
-                fontWeight: location.pathname === link.to ? 700 : 600,
-                fontSize: '0.875rem',
-                px: 1.8,
-                borderRadius: '8px',
-                textTransform: 'none',
-                '&:hover': {
-                  color: '#2563eb',
-                  bgcolor: 'rgba(37,99,235,0.06)',
-                },
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              {link.label}
-            </Button>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const isActive =
+              link.to === '/'
+                ? location.pathname === '/' && !location.search.includes('scroll=services')
+                : link.to === '/#packages' || link.to === '/services'
+                ? location.search.includes('scroll=services')
+                : location.pathname === link.to;
+
+            return (
+              <Button
+                key={link.to}
+                component={Link}
+                to={link.to}
+                onClick={(e: React.MouseEvent) => {
+                  if (link.to === '/') {
+                    handleHomeClick(e);
+                    return;
+                  }
+                  if (link.to === '/#packages' || link.to === '/services') {
+                    handleServicesClick(e);
+                    return;
+                  }
+                  if (link.to === '/how-it-works') {
+                    handleHowItWorksClick(e);
+                    return;
+                  }
+                }}
+                sx={{
+                  color: isActive ? '#2563eb' : '#475569',
+                  fontWeight: isActive ? 700 : 600,
+                  fontSize: '0.875rem',
+                  px: 1.8,
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  bgcolor: isActive ? 'rgba(37,99,235,0.08)' : 'transparent',
+                  '&:hover': {
+                    color: '#2563eb',
+                    bgcolor: 'rgba(37,99,235,0.06)',
+                  },
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                {link.label}
+              </Button>
+            );
+          })}
         </Box>
 
         {/* Right CTA / Auth Controls */}
@@ -232,8 +239,8 @@ const Navbar = () => {
                     handleHomeClick(e);
                     return;
                   }
-                  if (link.to === '/#packages') {
-                    handlePackagesClick(e);
+                  if (link.to === '/#packages' || link.to === '/services') {
+                    handleServicesClick(e);
                     return;
                   }
                   if (link.to === '/how-it-works') {

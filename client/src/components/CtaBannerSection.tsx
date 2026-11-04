@@ -15,7 +15,7 @@ export const CtaBannerSection: React.FC<CtaBannerSectionProps> = ({ onGetStarted
       onGetStarted();
       return;
     }
-    const el = document.getElementById('packages');
+    const el = document.getElementById('services') || document.getElementById('packages');
     if (el) {
       const navOffset = 80;
       const elementPosition = el.getBoundingClientRect().top;
@@ -25,7 +25,7 @@ export const CtaBannerSection: React.FC<CtaBannerSectionProps> = ({ onGetStarted
         behavior: 'smooth',
       });
     } else {
-      navigate('/#packages');
+      navigate('/?scroll=services');
     }
   };
 

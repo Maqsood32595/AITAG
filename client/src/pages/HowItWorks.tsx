@@ -163,7 +163,7 @@ export const HowItWorks: React.FC = () => {
             <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap" sx={{ gap: 1.5 }}>
               <Button
                 variant="contained"
-                onClick={() => navigate('/#packages')}
+                onClick={() => navigate('/?scroll=services')}
                 endIcon={<ArrowForwardIcon />}
                 sx={{
                   bgcolor: '#2563eb',
@@ -451,7 +451,7 @@ export const HowItWorks: React.FC = () => {
             <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap" sx={{ gap: 1.5 }}>
               <Button
                 variant="contained"
-                onClick={() => navigate('/#packages')}
+                onClick={() => navigate('/?scroll=services')}
                 endIcon={<ArrowForwardIcon />}
                 sx={{
                   bgcolor: '#2563eb',
