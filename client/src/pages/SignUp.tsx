@@ -68,15 +68,15 @@ const SignUp = () => {
               I want to join as:
             </Typography>
             <FormControl fullWidth sx={{ ...fieldStyle, mb: 2 }}>
-              <InputLabel id="account-role-label">I am joining as</InputLabel>
+              <InputLabel id="account-role-label">Account Type</InputLabel>
               <Select
                 labelId="account-role-label"
                 value={form.role}
-                label="I am joining as"
+                label="Account Type"
                 onChange={e => setForm({ ...form, role: e.target.value })}
               >
-                <MenuItem value="client">Business Owner (I need work done for my business)</MenuItem>
-                <MenuItem value="freelancer">AI Specialist / Expert (I offer services)</MenuItem>
+                <MenuItem value="client">Business Owner</MenuItem>
+                <MenuItem value="freelancer">AI Specialist</MenuItem>
               </Select>
             </FormControl>
 
