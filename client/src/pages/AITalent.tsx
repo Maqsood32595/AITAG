@@ -158,7 +158,23 @@ const AITalent = () => {
           }
         });
 
-        const dedupedUsers = Array.from(uniqueUsersMap.values());
+        // Filter out client accounts and automated test accounts from the Talent Directory
+        const dedupedUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
+          if (u.role === 'client') return false;
+          const cleanEmail = (u.email || '').toLowerCase();
+          const cleanName = (u.name || '').toLowerCase();
+          if (
+            cleanEmail.includes('del-neg') ||
+            cleanEmail.includes('aitag-test.local') ||
+            cleanEmail.includes('aitag-piet.internal') ||
+            cleanEmail.includes('test') ||
+            cleanName.includes('delete neg') ||
+            cleanName.includes('legit client')
+          ) {
+            return false;
+          }
+          return true;
+        });
 
         // Transform registered users into Talent cards mapped to our 4 core service categories
         const registeredTalent: Talent[] = dedupedUsers.map((u: any) => {

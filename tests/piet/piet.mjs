@@ -1020,6 +1020,13 @@ async function runPietSuite() {
       assert(res.data.token, 'Must return signed JWT token');
       eq(res.data.user.password_hash, undefined, 'password_hash must NEVER be present in client API response');
       eq(res.data.user.role, 'client', 'Role must match allowed role');
+
+      // Teardown: purge ephemeral test user
+      await requestJson('/api/account', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${res.data.token}` },
+        body: JSON.stringify({ confirmation: 'DELETE' })
+      });
     });
 
     await t('Upload Guard invariant: rejects dangerous executable and script uploads with HTTP 400', async () => {
@@ -1230,6 +1237,13 @@ async function runPietSuite() {
         body: JSON.stringify({})
       });
       eq(emptyRes.status, 400, 'Empty confirmation must return 400 Bad Request');
+
+      // Teardown: purge ephemeral test user
+      await requestJson('/api/account', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ confirmation: 'DELETE' })
+      });
     });
 
     await t('Account Lifecycle purge contract: DELETE /api/account wipes user and prevents re-login', async () => {
