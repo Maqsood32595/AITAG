@@ -151,13 +151,13 @@ const UpdateTask = () => {
             </Typography>
             <Chip
               icon={form.escrow_funded ? <CheckCircleIcon sx={{ fontSize: 16 }} /> : <LockIcon sx={{ fontSize: 14 }} />}
-              label={form.escrow_funded ? 'Escrow Funded' : 'Escrow Pending'}
+              label={form.escrow_funded ? 'Payment Protected' : 'Payment Pending'}
               color={form.escrow_funded ? 'success' : 'warning'}
               size="small"
               sx={{ fontWeight: 700, borderRadius: '8px' }}
             />
           </Box>
-          <Typography sx={{ color: '#64748b', mb: 3, fontSize: '0.95rem' }}>Edit your task details & fund escrow protection below</Typography>
+          <Typography sx={{ color: '#64748b', mb: 3, fontSize: '0.95rem' }}>Edit your task details & safe payment protection below</Typography>
           
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
           
@@ -166,10 +166,10 @@ const UpdateTask = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Milestone Escrow Protection
+                  100% Payment Safety (AITAG Protected)
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
-                  Budget: ₹{form.budget || 0} • 100% money-back safe until review
+                  Budget: ₹{form.budget || 0} • Money held safely until you approve final work
                 </Typography>
               </Box>
               <Button
@@ -185,7 +185,7 @@ const UpdateTask = () => {
                   boxShadow: '0 4px 12px rgba(16,185,129,0.3)'
                 }}
               >
-                {form.escrow_funded ? 'View Payment' : 'Pay & Lock Escrow'}
+                {form.escrow_funded ? 'View Payment' : 'Deposit Safely'}
               </Button>
             </Box>
           </Paper>
@@ -245,7 +245,7 @@ const UpdateTask = () => {
         }}
       >
         <DialogTitle sx={{ fontWeight: 800, textAlign: 'center', pb: 1 }}>
-          🔒 Fund Task Escrow
+          🔒 Deposit Safely (100% Protected)
         </DialogTitle>
         <DialogContent>
           {paySuccess ? (
@@ -253,7 +253,7 @@ const UpdateTask = () => {
               <CheckCircleIcon sx={{ fontSize: 60, color: '#10b981', mb: 2 }} />
               <Typography variant="h6" sx={{ fontWeight: 800 }}>Payment Reference Submitted!</Typography>
               <Typography variant="body2" sx={{ color: '#64748b', mt: 1, mb: 2 }}>
-                Your payment reference has been recorded. Escrow is now processing for this task.
+                Your payment reference has been recorded. 100% Payment safety is now active for this task.
               </Typography>
               <Chip label={`Reference: ${utrInput}`} color="primary" sx={{ fontWeight: 600 }} />
             </Box>

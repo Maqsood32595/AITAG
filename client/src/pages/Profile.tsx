@@ -81,12 +81,12 @@ export const Profile: React.FC = () => {
   );
   const [bio, setBio] = useState(
     isAdmin
-      ? 'Supervising platform service delivery, verified specialist matching, escrow governance, and milestone compliance across all 4 AI service domains.'
+      ? 'Supervising platform service delivery, verified specialist matching, payment safety governance, and milestone compliance across all 4 AI service domains.'
       : 'Specialist delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance.'
   );
   const [skillsInput, setSkillsInput] = useState(
     isAdmin
-      ? 'Platform Operations, Product Visuals Oversight, Listings & Copy Dispatch, Escrow Governance'
+      ? 'Platform Operations, Product Visuals Oversight, Listings & Copy Dispatch, Payment Safety Governance'
       : ''
   );
   const [githubUrl, setGithubUrl] = useState('https://github.com/Maqsood32595');
@@ -188,7 +188,7 @@ export const Profile: React.FC = () => {
         } catch (e) {
           // resilient update
         }
-        setSuccessMessage('✅ AI Specialist Credentials & Escrow Payout Dossier saved successfully!');
+        setSuccessMessage('✅ AI Specialist Credentials & Payout Dossier saved successfully!');
       }
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
@@ -348,8 +348,8 @@ export const Profile: React.FC = () => {
               <Paper
                 elevation={0}
                 sx={{
-                  p: 4,
-                  borderRadius: '20px',
+                  p: 2.5,
+                  borderRadius: '12px',
                   border: '1px solid #e2e8f0',
                   bgcolor: '#ffffff',
                   height: '100%',
@@ -462,8 +462,8 @@ export const Profile: React.FC = () => {
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 4,
-                    borderRadius: '20px',
+                    p: 2.5,
+                    borderRadius: '12px',
                     border: '1px solid #e2e8f0',
                     bgcolor: '#ffffff',
                     height: '100%',
@@ -577,8 +577,8 @@ export const Profile: React.FC = () => {
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 4,
-                    borderRadius: '20px',
+                    p: 2.5,
+                    borderRadius: '12px',
                     border: '1px solid #e2e8f0',
                     bgcolor: '#ffffff',
                     height: '100%',
@@ -675,17 +675,17 @@ export const Profile: React.FC = () => {
                         fullWidth
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        placeholder="Supervising platform service delivery, specialist matching, escrow governance, and milestone compliance."
+                        placeholder="Supervising platform service delivery, specialist matching, payment safety governance, and milestone compliance."
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
                       />
                     </Box>
 
                     <Box sx={{ p: 1.8, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                       <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                        Escrow Settlement & Platform Governance
+                        Payment Settlement & Platform Governance
                       </Typography>
                       <Stack direction="row" spacing={1} sx={{ mt: 0.5, flexWrap: 'wrap', gap: 0.5 }}>
-                        <Chip label="Escrow Milestone Protected" size="small" sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 700, fontSize: '0.7rem' }} />
+                        <Chip label="100% Payment Protected" size="small" sx={{ bgcolor: '#ecfdf5', color: '#047857', fontWeight: 700, fontSize: '0.7rem' }} />
                         <Chip label="Zero-Fee Specialist Model" size="small" sx={{ bgcolor: '#eff6ff', color: '#1d4ed8', fontWeight: 700, fontSize: '0.7rem' }} />
                         <Chip label="Reset Assignment Enabled" size="small" sx={{ bgcolor: '#fef3c7', color: '#b45309', fontWeight: 700, fontSize: '0.7rem' }} />
                       </Stack>
@@ -724,8 +724,8 @@ export const Profile: React.FC = () => {
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 4,
-                    borderRadius: '20px',
+                    p: 2.5,
+                    borderRadius: '12px',
                     border: '1px solid #e2e8f0',
                     bgcolor: '#ffffff',
                     height: '100%',
@@ -740,7 +740,7 @@ export const Profile: React.FC = () => {
                     </Box>
                     <Box>
                       <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
-                        AI Service Specialization & Escrow Settlement
+                        AI Service Specialization & Payout Settlement
                       </Typography>
                       <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
                         Service domain, AI generative tooling stack, and direct milestone UPI settlement
@@ -826,7 +826,7 @@ export const Profile: React.FC = () => {
 
                     <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                       <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, mb: 0.5 }}>
-                        Settlement & Escrow Payout UPI ID
+                        Settlement & Direct Payout UPI ID
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <AccountBalanceWalletIcon sx={{ color: '#10b981', fontSize: 22 }} />
@@ -844,7 +844,7 @@ export const Profile: React.FC = () => {
                     <Box sx={{ p: 1.5, bgcolor: '#ecfdf5', borderRadius: '12px', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
                       <Box>
                         <Typography sx={{ fontSize: '0.75rem', color: '#065f46', fontWeight: 700 }}>
-                          Direct Milestone Escrow Release Active
+                          Direct Milestone Payout Release Active
                         </Typography>
                         <Typography sx={{ fontSize: '0.7rem', color: '#047857' }}>
                           Auto-credited upon client milestone sign-off (Section 194-J TDS Compliant)
@@ -954,12 +954,12 @@ export const Profile: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              mt: 3.5,
-              p: 3.5,
-              borderRadius: '20px',
+              mt: 2.5,
+              p: 2.2,
+              borderRadius: '12px',
               border: '1px solid #fecaca',
               bgcolor: '#fff5f5',
-              boxShadow: '0 4px 20px rgba(239, 68, 68, 0.04)',
+              boxShadow: '0 4px 18px rgba(239, 68, 68, 0.04)',
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>

@@ -86,7 +86,7 @@ export const FreelancerDashboard = () => {
               <Box>
                 <Typography fontWeight={700}>Enterprise Client</Typography>
                 <Typography variant="caption" color="success.main" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <span>🛡️</span> Secure Escrow Chat
+                  <span>🛡️</span> Secure Order Chat
                 </Typography>
               </Box>
             </Box>

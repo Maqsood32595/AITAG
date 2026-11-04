@@ -38,7 +38,7 @@ export const ClientDashboard = () => {
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <Box className="fade-in-up">
           <Typography variant="h5" sx={{ mb: 1, color: 'text.primary' }}>Client Dashboard</Typography>
-          <Typography variant="body2" color="text.secondary">Manage your job postings, proposals, and escrow payments.</Typography>
+          <Typography variant="body2" color="text.secondary">Manage your job postings, proposals, and secure payments.</Typography>
         </Box>
         <Button className="fade-in-up" variant="contained" color="primary" startIcon={<span style={{fontSize: '16px'}}>➕</span>} sx={{ px: 3 }}>Browse Talent</Button>
       </Box>

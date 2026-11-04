@@ -289,7 +289,7 @@ const Dashboard = () => {
     setActionLoading(`activate-${order.id}`);
     try {
       await serviceOrdersApi.activate(order.id);
-      showSuccessBanner(`🚀 Order ${order.order_number} is now ACTIVE! Escrow secured & specialist notified to begin work.`);
+      showSuccessBanner(`🚀 Order ${order.order_number} is now ACTIVE! Payment safely protected & specialist notified to begin work.`);
       fetchDashboardData();
     } catch (err: any) {
       showErrorBanner(err.response?.data?.error || 'Failed to activate order');
@@ -516,12 +516,12 @@ const Dashboard = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 3.5,
-              borderRadius: '16px',
+              p: 2,
+              borderRadius: '12px',
               border: '1px solid rgba(79,70,229,0.25)',
               bgcolor: '#ffffff',
-              mb: 4,
-              boxShadow: '0 8px 30px rgba(79,70,229,0.06)',
+              mb: 2.5,
+              boxShadow: '0 4px 18px rgba(79,70,229,0.04)',
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -675,9 +675,9 @@ const Dashboard = () => {
                 </Typography>
                 <Typography sx={{ color: '#64748b', fontSize: '0.76rem' }}>
                   {isAdmin
-                    ? 'Review customer briefs, assign verified specialists, manage payment escrow, and approve deliverables'
+                    ? 'Review customer briefs, assign verified specialists, manage safe payments, and approve deliverables'
                     : isFreelancer
-                    ? 'Manage project deliverables, submit drafts for client approval, and receive escrow payouts'
+                    ? 'Manage project deliverables, submit drafts for client approval, and receive safe payouts after approval'
                     : 'Track your orders, progress updates, and finished files'}
                 </Typography>
               </Box>
@@ -1026,7 +1026,7 @@ const Dashboard = () => {
                             </>
                           ) : (
                             <Chip
-                              label="Specialist Matched • Payment Escrow Processing"
+                              label="Specialist Matched • Payment Safely Protected"
                               size="small"
                               sx={{ bgcolor: '#e0e7ff', color: '#4338ca', fontWeight: 700, fontSize: '0.75rem', border: '1px solid #c7d2fe' }}
                             />
@@ -1177,12 +1177,12 @@ const Dashboard = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 4,
-              borderRadius: '20px',
+              p: 2.2,
+              borderRadius: '12px',
               border: '1px solid rgba(8,145,178,0.2)',
               bgcolor: '#ffffff',
-              mb: 4,
-              boxShadow: '0 8px 30px rgba(8,145,178,0.05)',
+              mb: 2.5,
+              boxShadow: '0 4px 18px rgba(8,145,178,0.04)',
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
@@ -1666,7 +1666,7 @@ const Dashboard = () => {
           <DialogContent dividers>
             <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 2.5 }}>
               Confirm satisfaction and complete Order <strong>{activeOrder?.order_number}</strong>.
-              Funds will be released from escrow to the specialist.
+              Payment will be safely released to the specialist.
             </Typography>
 
             <Box sx={{ mb: 2.5 }}>

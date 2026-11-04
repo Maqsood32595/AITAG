@@ -283,7 +283,7 @@ export const Analytics: React.FC = () => {
                         Real-time status tracking through our 5 milestone verification stages
                       </Typography>
                     </Box>
-                    <Chip label="Milestone Escrow" size="small" sx={{ bgcolor: '#ecfeff', color: '#0891b2', fontWeight: 700, fontSize: '0.7rem' }} />
+                    <Chip label="100% Payment Safe" size="small" sx={{ bgcolor: '#ecfeff', color: '#0891b2', fontWeight: 700, fontSize: '0.7rem' }} />
                   </Box>
                   <Divider sx={{ mb: 3 }} />
 

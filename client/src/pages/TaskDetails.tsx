@@ -404,11 +404,11 @@ const TaskDetails = () => {
               <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #10b981', bgcolor: 'rgba(16,185,129,0.02)', mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>
-                    📦 Deliverables & Escrow Handover
+                    📦 Deliverables & Payment Handover
                   </Typography>
                   <Chip
                     icon={<SecurityIcon sx={{ fontSize: '14px !important' }} />}
-                    label={normalizedStatus === 'completed' ? 'Escrow Disbursed' : 'Escrow Secured'}
+                    label={normalizedStatus === 'completed' ? 'Payment Released' : '100% Payment Safe'}
                     size="small"
                     sx={{ bgcolor: 'rgba(16,185,129,0.1)', color: '#10b981', fontWeight: 700 }}
                   />
@@ -462,7 +462,7 @@ const TaskDetails = () => {
                           Contract Accepted • Agreed Rate: ₹{contractAmount.toLocaleString()}
                         </Typography>
                         <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
-                          Fund the milestone escrow so the specialist has the verified green light to execute.
+                          Deposit safely so the specialist has the verified green light to execute. (100% Payment Safety — held safely until you approve).
                         </Typography>
                       </Box>
                       <Button
@@ -477,7 +477,7 @@ const TaskDetails = () => {
                           boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)'
                         }}
                       >
-                        Fund Escrow (₹{contractAmount.toLocaleString()})
+                        Deposit Safely (₹{contractAmount.toLocaleString()})
                       </Button>
                     </Paper>
                   )}
@@ -537,7 +537,7 @@ const TaskDetails = () => {
                   {normalizedStatus === 'completed' && (
                     <Box sx={{ p: 2, bgcolor: '#ffffff', borderRadius: '12px', border: '1px solid #10b981', width: '100%' }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#10b981' }}>
-                        ✅ Contract Completed & Escrow Released
+                        ✅ Contract Completed & Payment Released
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.5 }}>
                         Platform Fee: 10% • Sec 194-O TDS: 1% Withheld • Net Specialist Disbursal: 89%
@@ -563,7 +563,7 @@ const TaskDetails = () => {
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>
                     Proposals & Bids ({bids.length})
                   </Typography>
-                  <Chip icon={<SecurityIcon sx={{ fontSize: '14px !important' }} />} label="Escrow Protected" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.08)', color: '#10b981', fontWeight: 600 }} />
+                  <Chip icon={<SecurityIcon sx={{ fontSize: '14px !important' }} />} label="100% Payment Safe" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.08)', color: '#10b981', fontWeight: 600 }} />
                 </Box>
                 <Divider sx={{ mb: 2.5 }} />
 
@@ -735,10 +735,10 @@ const TaskDetails = () => {
               {/* Escrow Breakdown Card */}
               <Box sx={{ mt: 3, p: 2, borderRadius: '12px', bgcolor: 'rgba(79,70,229,0.04)', border: '1px dashed rgba(79,70,229,0.2)' }}>
                 <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#4f46e5', mb: 1 }}>
-                  🛡️ Section 194-O Escrow Breakdown
+                  🛡️ 100% Payment Safety Breakdown
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', mb: 0.5 }}>
-                  <span>Gross Escrow:</span>
+                  <span>Total Amount:</span>
                   <strong>₹{Number(task.budget).toLocaleString()}</strong>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', mb: 0.5 }}>
@@ -958,7 +958,7 @@ const TaskDetails = () => {
           </DialogTitle>
           <DialogContent>
             <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>
-              By approving, you sign off on the deliverables. Escrow will disburse net payment to the specialist under Section 194-O statutory compliance.
+              By approving, you sign off on the deliverables. Payment will be released to the specialist under Section 194-O statutory compliance.
             </Typography>
 
             <Box sx={{ my: 2 }}>
@@ -1002,12 +1002,15 @@ const TaskDetails = () => {
           fullWidth
           PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
         >
-          <DialogTitle sx={{ fontWeight: 800, textAlign: 'center', pb: 1, color: '#0f172a' }}>
-            🔒 Fund Milestone Escrow
+          <DialogTitle sx={{ fontWeight: 800, textAlign: 'center', pb: 0.5, color: '#0f172a' }}>
+            🔒 100% Payment Safety Deposit
           </DialogTitle>
           <DialogContent>
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>
+              <Typography variant="body2" sx={{ color: '#4f46e5', fontWeight: 600, mb: 1 }}>
+                Your money is held safely by AITAG and only released after you approve the final work.
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748b', mb: 2, display: 'block' }}>
                 Scan with any UPI App (GPay, PhonePe, Paytm, BHIM)
               </Typography>
 

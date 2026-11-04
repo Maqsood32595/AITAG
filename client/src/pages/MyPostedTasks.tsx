@@ -261,7 +261,7 @@ const MyPostedTasks = () => {
                 <ShoppingBagIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 1.5 }} />
                 <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700 }}>No service package orders yet</Typography>
                 <Typography sx={{ color: '#64748b', fontSize: '0.9rem', maxWidth: 440, mx: 'auto', mt: 0.5, mb: 3 }}>
-                  Browse our curated AI packages starting at just ₹499. Outcome delivered in 2–6 days with 100% money-back escrow protection.
+                  Browse our curated AI packages starting at just ₹499. Outcome delivered in 2–6 days with 100% payment safety.
                 </Typography>
                 <Button component={Link} to="/#packages" variant="contained"
                   sx={{ background: 'linear-gradient(135deg, #4f46e5, #0891b2)', fontWeight: 700, borderRadius: '10px' }}>
