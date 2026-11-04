@@ -16,10 +16,10 @@ import AnimatedAvatar from './AnimatedAvatar';
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
   { label: 'Services & Packages', to: '/#packages' },
+  { label: 'How it Works', to: '/#how-it-works' },
   { label: 'Browse Tasks', to: '/all_tasks' },
   { label: 'Verified Experts', to: '/talent' },
   { label: 'Blog', to: '/blog' },
-  { label: 'Post a Requirement', to: '/add_task' },
   { label: 'My Orders', to: '/my_tasks' },
 ];
 
@@ -86,6 +86,23 @@ const Navbar = () => {
     }
   };
 
+  const handleHowItWorksClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/') {
+      navigate('/#how-it-works');
+      setTimeout(() => {
+        const el = document.getElementById('how-it-works');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const el = document.getElementById('how-it-works');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        window.history.pushState(null, '', '/#how-it-works');
+      }
+    }
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -148,6 +165,10 @@ const Navbar = () => {
                   handlePackagesClick(e);
                   return;
                 }
+                if (link.to === '/#how-it-works') {
+                  handleHowItWorksClick(e);
+                  return;
+                }
                 if (link.to === '/add_task' && user?.role === 'client') {
                   handlePackagesClick(e);
                   return;
@@ -202,9 +223,13 @@ const Navbar = () => {
                     return;
                   }
                   if (link.to === '/#packages') {
-                    handlePackagesClick(e);
-                    return;
-                  }
+                  handlePackagesClick(e);
+                  return;
+                }
+                if (link.to === '/#how-it-works') {
+                  handleHowItWorksClick(e);
+                  return;
+                }
                   if (link.to === '/add_task' && user?.role === 'client') {
                     handlePackagesClick(e);
                     return;
@@ -299,10 +324,12 @@ const Navbar = () => {
                 to="/signup"
                 variant="contained"
                 sx={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)',
                   color: '#fff',
                   fontWeight: 700,
-                  borderRadius: '10px',
+                  borderRadius: '24px',
+                  textTransform: 'none',
+                  fontSize: '0.88rem',
                   px: 2.5,
                   cursor: 'pointer !important',
                   boxShadow: '0 4px 14px rgba(79,70,229,0.35)',
@@ -356,10 +383,12 @@ const Navbar = () => {
                 to="/signup"
                 variant="contained"
                 sx={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)',
                   color: '#fff',
                   fontWeight: 700,
-                  borderRadius: '10px',
+                  borderRadius: '24px',
+                  textTransform: 'none',
+                  fontSize: '0.88rem',
                   px: 2.5,
                   cursor: 'pointer !important',
                   boxShadow: '0 4px 14px rgba(79,70,229,0.35)',
@@ -369,7 +398,7 @@ const Navbar = () => {
                   },
                 }}
               >
-                Get Started
+                Tell Us Your Need
               </Button>
             </>
           )}

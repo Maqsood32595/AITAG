@@ -371,17 +371,17 @@ const ServicePackagesSection: React.FC = () => {
     <Box id="packages" sx={{ pt: 5, pb: 10, bgcolor: '#f8fafc', position: 'relative' }}>
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Box sx={{ textAlign: 'center', mb: 5 }}>
           <Chip
             icon={<AutoAwesomeIcon sx={{ fontSize: 16, color: '#4f46e5 !important' }} />}
-            label="AFFORDABLE AI SERVICES FOR SHOPS & SMALL BUSINESSES"
+            label="DETAILED PACKAGES & DELIVERABLES"
             sx={{
               bgcolor: '#eef2ff',
               color: '#4338ca',
               fontWeight: 700,
               letterSpacing: '0.5px',
               fontSize: '0.75rem',
-              mb: 2,
+              mb: 1.5,
               px: 1
             }}
           />
@@ -391,109 +391,26 @@ const ServicePackagesSection: React.FC = () => {
             color="#0f172a"
             sx={{
               letterSpacing: '-1px',
-              fontSize: { xs: '2rem', md: '2.5rem' },
-              mb: 1.5,
+              fontSize: { xs: '1.8rem', md: '2.2rem' },
+              mb: 1.2,
               fontFamily: 'Inter, sans-serif'
             }}
           >
-            Affordable AI Services for Everyday Entrepreneurs
+            Choose a Package Tier or Customize
           </Typography>
           <Typography
             variant="body1"
             fontWeight={500}
             color="#64748b"
             sx={{
-              maxWidth: 720,
+              maxWidth: 700,
               mx: 'auto',
-              fontSize: '1.05rem',
+              fontSize: '1rem',
               lineHeight: 1.6,
-              mb: 3,
             }}
           >
-            Simple curated AI packages for everyday businesses. Clear scope, verified specialists, and 100% Payment Safety (money held securely until you approve the work).
+            Review Starter vs. Pro deliverables, turnarounds, and inclusions. Every order includes verified expert matching and 100% Payment Safety.
           </Typography>
-
-          {/* Quick Service Jump Options (2x2 Grid) */}
-          <Box
-            sx={{
-              mt: 2,
-              maxWidth: 720,
-              mx: 'auto',
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              gap: 1.5,
-            }}
-          >
-            {QUICK_SERVICES.map((s) => (
-              <Box
-                key={s.slug}
-                onClick={() => scrollToPackage(s.slug)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  px: 2,
-                  py: 1.25,
-                  bgcolor: '#ffffff',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(79, 70, 229, 0.2)',
-                  boxShadow: '0 2px 6px rgba(79, 70, 229, 0.04)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    borderColor: '#4f46e5',
-                    bgcolor: 'rgba(79, 70, 229, 0.04)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 16px rgba(79, 70, 229, 0.12)',
-                    '& .jump-icon': {
-                      transform: 'translateY(2px)',
-                      color: '#4f46e5',
-                    },
-                  },
-                }}
-              >
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 32,
-                      height: 32,
-                      borderRadius: '8px',
-                      bgcolor: s.iconBg,
-                      color: s.iconColor,
-                    }}
-                  >
-                    {s.icon}
-                  </Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                      color: '#0f172a',
-                      fontFamily: 'Inter, sans-serif',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {s.title}
-                  </Typography>
-                </Stack>
-                <Typography
-                  className="jump-icon"
-                  sx={{
-                    fontSize: '0.82rem',
-                    color: '#6366f1',
-                    fontWeight: 700,
-                    transition: 'transform 0.2s ease',
-                    pl: 1,
-                  }}
-                >
-                  ↓
-                </Typography>
-              </Box>
-            ))}
-          </Box>
         </Box>
 
         {loading ? (
