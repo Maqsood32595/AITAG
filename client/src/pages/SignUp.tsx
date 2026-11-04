@@ -47,18 +47,18 @@ const SignUp = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
-      <Container maxWidth="sm" sx={{ pt: 14, pb: 6 }}>
-        <Paper elevation={0} sx={{ p: { xs: 3, sm: 5 }, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>
+      <Container maxWidth="xs" sx={{ pt: { xs: 9, sm: 11 }, pb: 4 }}>
+        <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 3.5 }, borderRadius: '14px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 4px 24px rgba(79,70,229,0.06)' }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', mb: 0.5, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.4px' }}>
             Create Account
           </Typography>
-          <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>
+          <Typography sx={{ color: '#64748b', mb: 2.5, fontSize: '0.85rem' }}>
             Get affordable AI services for your products, website, logo, and marketing
           </Typography>
 
           {/* Role Selection for Google & Email Registration */}
-          <Box sx={{ mb: 3 }}>
-            <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', mb: 1 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', mb: 1 }}>
               I want to join as:
             </Typography>
             <FormControl fullWidth sx={{ ...fieldStyle, mb: 2 }}>
@@ -77,11 +77,11 @@ const SignUp = () => {
             <GoogleAuthButton mode="signup" role={form.role} onError={err => setError(err)} />
           </Box>
 
-          <Divider sx={{ mb: 3, color: '#94a3b8', fontSize: '0.85rem' }}>
+          <Divider sx={{ mb: 2, color: '#94a3b8', fontSize: '0.8rem' }}>
             or register with email
           </Divider>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}>
             <TextField
               label="Full Name"
               required

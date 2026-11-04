@@ -727,8 +727,8 @@ const Dashboard = () => {
                     key={ord.id}
                     elevation={0}
                     sx={{
-                      p: 3,
-                      borderRadius: '16px',
+                      p: 2,
+                      borderRadius: '10px',
                       bgcolor: '#ffffff',
                       border: '1px solid #e2e8f0',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
@@ -737,10 +737,10 @@ const Dashboard = () => {
                     }}
                   >
                     {/* Header Row */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1 }}>
                       <Box>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-                          <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
+                          <Typography sx={{ fontWeight: 800, fontSize: '0.98rem', color: '#0f172a' }}>
                             {ord.package_title}
                           </Typography>
                           <Chip
@@ -753,13 +753,13 @@ const Dashboard = () => {
                             sx={{ bgcolor: '#ede9fe', color: '#6d28d9', fontWeight: 800, fontSize: '0.7rem' }}
                           />
                         </Stack>
-                        <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
+                        <Typography sx={{ color: '#64748b', fontSize: '0.76rem' }}>
                           Order: <strong>{ord.order_number}</strong> • Customer: <strong>{ord.customer_name}</strong> ({ord.customer_email})
                           {ord.customer_phone ? ` • Tel: ${ord.customer_phone}` : ''}
                         </Typography>
                       </Box>
                       <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-                        <Typography sx={{ fontWeight: 900, fontSize: '1.3rem', color: '#4f46e5' }}>
+                        <Typography sx={{ fontWeight: 900, fontSize: '1.15rem', color: '#4f46e5' }}>
                           ₹{Number(ord.agreed_price || 0).toLocaleString('en-IN')}
                         </Typography>
                         <Chip
@@ -779,7 +779,7 @@ const Dashboard = () => {
                     </Box>
 
                     {/* 5-Stage Visual Workflow Stepper Bar */}
-                    <Box sx={{ mb: 2.5, p: 1.5, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <Box sx={{ mb: 1.2, p: 0.8, px: 1, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
                         {ORDER_STEPS.map((step, idx) => {
                           const isDone = idx < currentStepIdx || ord.status === 'COMPLETED';
@@ -820,14 +820,14 @@ const Dashboard = () => {
 
                     {/* Brief & Notes */}
                     {(ord.business_name || ord.brief_notes) && (
-                      <Box sx={{ mb: 2, p: 2, bgcolor: '#fafafa', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
+                      <Box sx={{ mb: 1.2, p: 1, px: 1.2, bgcolor: '#fafafa', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
                         {ord.business_name && (
-                          <Typography sx={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 700, mb: 0.5 }}>
+                          <Typography sx={{ fontSize: '0.78rem', color: '#1e293b', fontWeight: 700, mb: 0.2 }}>
                             Business: {ord.business_name} {ord.business_type ? `(${ord.business_type})` : ''}
                           </Typography>
                         )}
                         {ord.brief_notes && (
-                          <Typography sx={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5 }}>
+                          <Typography sx={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4 }}>
                             <strong>Brief Notes:</strong> "{ord.brief_notes}"
                           </Typography>
                         )}
@@ -895,9 +895,9 @@ const Dashboard = () => {
                         justifyContent: 'space-between',
                         alignItems: { xs: 'flex-start', md: 'center' },
                         flexDirection: { xs: 'column', md: 'row' },
-                        gap: 2,
-                        mt: 2,
-                        pt: 2,
+                        gap: 1.2,
+                        mt: 1.2,
+                        pt: 1.2,
                         borderTop: '1px solid #f1f5f9'
                       }}
                     >
@@ -1247,8 +1247,8 @@ const Dashboard = () => {
                       key={task.id}
                       elevation={0}
                       sx={{
-                        p: 3,
-                        borderRadius: '16px',
+                        p: 2,
+                        borderRadius: '10px',
                         border: '1px solid rgba(8,145,178,0.18)',
                         bgcolor: '#ffffff',
                         transition: 'all 0.2s ease',
@@ -1262,7 +1262,7 @@ const Dashboard = () => {
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1.5, mb: 1.5 }}>
                         <Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-                            <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
+                            <Typography sx={{ fontWeight: 800, fontSize: '0.98rem', color: '#0f172a' }}>
                               {task.title}
                             </Typography>
                             <Chip
@@ -1271,14 +1271,14 @@ const Dashboard = () => {
                               sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 700, fontSize: '0.72rem' }}
                             />
                           </Box>
-                          <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mt: 0.5 }}>
+                          <Typography sx={{ fontSize: '0.76rem', color: '#64748b', mt: 0.3 }}>
                             Task: <strong>#{String(task.id).replace('task-', '').slice(-6)}</strong> • Customer: <strong>{task.user_name || 'Client'}</strong> ({task.user_email || 'client@aitag.com'})
                             {task.deadline && ` • Deadline: ${new Date(task.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`}
                           </Typography>
                         </Box>
 
                         <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-                          <Typography sx={{ fontWeight: 900, fontSize: '1.3rem', color: '#0f172a', lineHeight: 1.1 }}>
+                          <Typography sx={{ fontWeight: 900, fontSize: '1.15rem', color: '#0f172a', lineHeight: 1.1 }}>
                             ₹{Number(task.budget || 0).toLocaleString()}
                           </Typography>
                           <Box sx={{ mt: 0.5 }}>
@@ -1306,7 +1306,7 @@ const Dashboard = () => {
                       </Box>
 
                       {/* 4-Step Pipeline Indicator */}
-                      <Box sx={{ display: 'flex', gap: 1.5, my: 2, flexWrap: 'wrap' }}>
+                      <Box sx={{ display: 'flex', gap: 1, my: 1, flexWrap: 'wrap' }}>
                         {TASK_STEPS.map((step, sIdx) => {
                           const isCurrent = sIdx === stepIndex;
                           const isDoneStep = sIdx < stepIndex;
