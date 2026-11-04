@@ -31,7 +31,7 @@ import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
 import { TaskAssetsModal } from '../components/TaskAssetsModal';
 
 const VETTED_SPECIALISTS = [
-  { name: 'Expert 1', email: 'expert1@aitag.com', role: 'Vetted AI Specialist' },
+  { name: 'Expert 1', email: 'expert1@aitag.com', role: 'Verified AI Specialist' },
   { name: 'Dr. Aarav Sharma', email: 'dr.aarav@aitag.com', role: 'AI Product Photo Makeover Specialist' },
   { name: 'Priya Mukherjee', email: 'priya@aitag.com', role: 'AI E-Commerce Listing & Copy Specialist' },
   { name: 'Vikramaditya Iyer', email: 'vikram@aitag.com', role: 'AI Social Media Content Creator' },
@@ -224,7 +224,7 @@ const Dashboard = () => {
 
   const handleConfirmAssign = async () => {
     let email = selectedExpertPreset;
-    let name = VETTED_SPECIALISTS.find(e => e.email === selectedExpertPreset)?.name || 'Vetted AI Specialist';
+    let name = VETTED_SPECIALISTS.find(e => e.email === selectedExpertPreset)?.name || 'Verified AI Specialist';
 
     if (selectedExpertPreset === 'CUSTOM') {
       if (!customExpertEmail.trim()) {
@@ -242,7 +242,7 @@ const Dashboard = () => {
           expertEmail: email,
           expertName: name
         });
-        showSuccessBanner(`✅ Vetted Expert ${name} matched to Task #${String(activeAssignTask.id).replace('task-', '').slice(-6)}! Status updated to In Progress.`);
+        showSuccessBanner(`✅ Verified Expert ${name} matched to Task #${String(activeAssignTask.id).replace('task-', '').slice(-6)}! Status updated to In Progress.`);
         setAssignDialogOpen(false);
         fetchDashboardData();
       } catch (err: any) {
@@ -674,7 +674,7 @@ const Dashboard = () => {
                 </Typography>
                 <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
                   {isAdmin
-                    ? 'Review customer briefs, assign vetted specialists, manage payment escrow, and approve deliverables'
+                    ? 'Review customer briefs, assign verified specialists, manage payment escrow, and approve deliverables'
                     : isFreelancer
                     ? 'Manage project deliverables, submit drafts for client approval, and receive escrow payouts'
                     : 'Track your orders, progress updates, and finished files'}
@@ -964,11 +964,11 @@ const Dashboard = () => {
                                 px: 2
                               }}
                             >
-                              Assign Vetted Expert
+                              Assign Verified Expert
                             </Button>
                           ) : (
                             <Chip
-                              label="Matching with Vetted Specialist..."
+                              label="Matching with Verified Specialist..."
                               size="small"
                               sx={{ bgcolor: '#fef3c7', color: '#b45309', fontWeight: 700, fontSize: '0.75rem', border: '1px solid #fde68a' }}
                             />
@@ -1194,7 +1194,7 @@ const Dashboard = () => {
                     All Marketplace Tasks & Bidding Pipeline (Platform Oversight)
                   </Typography>
                   <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
-                    Review customer briefs, assign vetted specialists, manage attached assets, and chat with clients
+                    Review customer briefs, assign verified specialists, manage attached assets, and chat with clients
                   </Typography>
                 </Box>
               </Box>
@@ -1339,7 +1339,7 @@ const Dashboard = () => {
                           <AnimatedAvatar name={task.assigned_expert_name || task.assigned_expert_email} size={30} />
                           <Box>
                             <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
-                              Matched Specialist: <strong>{task.assigned_expert_name || 'Vetted AI Specialist'}</strong> ({task.assigned_expert_email})
+                              Matched Specialist: <strong>{task.assigned_expert_name || 'Verified AI Specialist'}</strong> ({task.assigned_expert_email})
                             </Typography>
                             <Typography sx={{ fontSize: '0.72rem', color: '#6366f1' }}>
                               Assigned via Platform Oversight • Active in task workspace
@@ -1373,7 +1373,7 @@ const Dashboard = () => {
                                 boxShadow: '0 2px 8px rgba(8,145,178,0.25)'
                               }}
                             >
-                              {actionLoading === `assign-task-${task.id}` ? 'Assigning...' : 'Assign Vetted Expert'}
+                              {actionLoading === `assign-task-${task.id}` ? 'Assigning...' : 'Assign Verified Expert'}
                             </Button>
                           ) : (
                             <>
@@ -1500,23 +1500,23 @@ const Dashboard = () => {
         {/* 1. Assign Expert Modal (Dual-mode: Pilot Orders & Marketplace Tasks) */}
         <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
-            {assignTargetType === 'task' ? 'Assign Vetted AI Specialist to Task' : 'Assign Vetted AI Specialist'}
+            {assignTargetType === 'task' ? 'Assign Verified AI Specialist to Task' : 'Assign Verified AI Specialist'}
           </DialogTitle>
           <DialogContent dividers>
             <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 2.5 }}>
               {assignTargetType === 'task' ? (
-                <>Matching Task <strong>#{String(activeAssignTask?.id || '').replace('task-', '').slice(-6)}</strong> ({activeAssignTask?.title}). Select one of our vetted AI specialists or input a custom expert to start fulfillment immediately.</>
+                <>Matching Task <strong>#{String(activeAssignTask?.id || '').replace('task-', '').slice(-6)}</strong> ({activeAssignTask?.title}). Select one of our verified AI specialists or input a custom expert to start fulfillment immediately.</>
               ) : (
-                <>Matching order <strong>{activeOrder?.order_number}</strong> ({activeOrder?.package_title}). Select one of our vetted AI specialists or input a custom expert.</>
+                <>Matching order <strong>{activeOrder?.order_number}</strong> ({activeOrder?.package_title}). Select one of our verified AI specialists or input a custom expert.</>
               )}
             </Typography>
 
             <FormControl fullWidth sx={{ mb: 2.5 }}>
-              <InputLabel id="specialist-select-label">Select Vetted Specialist</InputLabel>
+              <InputLabel id="specialist-select-label">Select Verified Specialist</InputLabel>
               <Select
                 labelId="specialist-select-label"
                 value={selectedExpertPreset}
-                label="Select Vetted Specialist"
+                label="Select Verified Specialist"
                 onChange={(e) => setSelectedExpertPreset(e.target.value)}
               >
                 {VETTED_SPECIALISTS.map(spec => (

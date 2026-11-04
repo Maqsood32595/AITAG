@@ -111,8 +111,8 @@ const BrowseTasks = () => {
 
             <Typography sx={{ color: '#64748b', fontSize: '0.95rem', maxWidth: 540, mx: 'auto', mb: 3.5, lineHeight: 1.6 }}>
               {isClient
-                ? 'The open task board is reserved exclusively for vetted AITAG AI specialists and platform administrators to review client briefs and submit bids. As a valued business client, you can manage your own orders and custom tasks in your client portal.'
-                : 'The open task board is reserved exclusively for vetted AITAG AI specialists and platform administrators. Please sign in with an authorized specialist or administrator account to review and bid on tasks.'}
+                ? 'The open task board is reserved exclusively for verified AITAG AI specialists and platform administrators to review client briefs and submit bids. As a valued business client, you can manage your own orders and custom tasks in your client portal.'
+                : 'The open task board is reserved exclusively for verified AITAG AI specialists and platform administrators. Please sign in with an authorized specialist or administrator account to review and bid on tasks.'}
             </Typography>
 
             <Divider sx={{ mb: 3.5 }} />

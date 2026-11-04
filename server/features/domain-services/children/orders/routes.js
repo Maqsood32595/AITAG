@@ -129,7 +129,7 @@ router.post('/:id/assign', extractUser, async (req, res) => {
     if (!expertEmail) {
       return res.status(400).json({ success: false, error: 'expertEmail is required' });
     }
-    const order = await service.assignExpert(req.params.id, expertEmail, expertName || 'Vetted AI Expert');
+    const order = await service.assignExpert(req.params.id, expertEmail, expertName || 'Verified AI Expert');
     res.json({ success: true, order });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });

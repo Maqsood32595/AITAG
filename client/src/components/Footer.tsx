@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
               <img src="/logo.png" alt="AITAG Logo" style={{ height: 160, objectFit: 'contain' }} />
             </Box>
             <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.7, maxWidth: 380, mb: 2 }}>
-              Affordable AI-powered business services for everyday entrepreneurs. A trusted marketplace connecting small businesses with vetted experts who deliver practical business outcomes.
+              Affordable AI-powered business services for everyday entrepreneurs. A trusted marketplace connecting small businesses with verified experts who deliver practical business outcomes.
             </Typography>
             <Typography sx={{ color: '#818cf8', fontSize: '0.85rem', fontWeight: 600 }}>
               “You do not need to learn AI. Tell us what your business needs, and AITAG will connect you with experts who can deliver it.”

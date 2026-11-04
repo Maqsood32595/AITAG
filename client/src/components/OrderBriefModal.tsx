@@ -217,7 +217,7 @@ export const OrderBriefModal: React.FC<OrderBriefModalProps> = ({
                 <strong>Delivery Turnaround:</strong> <span style={{ color: '#4f46e5', fontWeight: 700 }}>{deliverySla} (from asset receipt)</span>
               </Typography>
               <Typography variant="body2" color="#64748b">
-                <strong>Current Status:</strong> <span style={{ color: '#d97706', fontWeight: 700 }}>REQUESTED</span> (Matching Vetted Expert)
+                <strong>Current Status:</strong> <span style={{ color: '#d97706', fontWeight: 700 }}>REQUESTED</span> (Matching Verified Expert)
               </Typography>
             </Paper>
 

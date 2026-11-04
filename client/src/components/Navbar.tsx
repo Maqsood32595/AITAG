@@ -36,7 +36,7 @@ const Navbar = () => {
   const isExpertOrAdmin = user?.role === 'freelancer' || user?.role === 'admin';
 
   const currentNavLinks = NAV_LINKS.filter((link) => {
-    // Browse Tasks is strictly reserved for vetted AI specialists and platform administrators
+    // Browse Tasks is strictly reserved for verified AI specialists and platform administrators
     if (link.to === '/all_tasks') {
       return isExpertOrAdmin;
     }

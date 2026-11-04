@@ -131,7 +131,7 @@ const BlogList = () => {
               mb: 4
             }}
           >
-            “Practical guides, tutorials, and field insights for hiring vetted AI specialists to scale operations and business revenue.”
+            “Practical guides, tutorials, and field insights for hiring verified AI specialists to scale operations and business revenue.”
           </Typography>
         </Box>
 

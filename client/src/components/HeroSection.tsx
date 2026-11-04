@@ -27,7 +27,7 @@ const BRAND_PILLARS = [
   {
     icon: <VerifiedIcon />,
     title: 'TRUSTED',
-    desc: 'Pre-vetted specialists, human quality check before handover, and safe milestone payment protection.',
+    desc: 'Pre-verified specialists, human quality check before handover, and safe milestone payment protection.',
     color: '#4f46e5'
   },
   {
@@ -153,7 +153,7 @@ const HeroSection = () => {
                   display: { xs: 'block', sm: 'inline-block' },
                 }}
               >
-                Connect with Vetted AI Experts.
+                Connect with Verified AI Experts.
               </Box>
             </Typography>
 
@@ -167,7 +167,7 @@ const HeroSection = () => {
                 fontFamily: 'Inter, sans-serif',
               }}
             >
-              A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with vetted AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
+              A trusted AI services marketplace connecting everyday entrepreneurs and small businesses with verified AI experts who deliver practical, reliable and affordable business outcomes — starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
             </Typography>
 
             {/* Who We Serve Tags */}
@@ -309,7 +309,7 @@ const HeroSection = () => {
                     lineHeight: 1.5,
                   }}
                 >
-                  Built for everyday businesses — clear packages, vetted specialists, and real outcomes.
+                  Built for everyday businesses — clear packages, verified specialists, and real outcomes.
                 </Typography>
               </Box>
 

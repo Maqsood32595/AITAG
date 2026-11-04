@@ -196,11 +196,11 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// POST /api/tasks/:id/assign — assign vetted specialist to task (protected, admin only)
+// POST /api/tasks/:id/assign — assign verified specialist to task (protected, admin only)
 router.post('/:id/assign', auth, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Only administrators can match vetted specialists to tasks' });
+      return res.status(403).json({ error: 'Only administrators can match verified specialists to tasks' });
     }
     const { expertEmail, expertName } = req.body;
     if (!expertEmail) {

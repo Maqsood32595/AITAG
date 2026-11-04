@@ -246,7 +246,7 @@ class ProfileService {
         ? 'AITAG Platform Operations & Master Dispatcher'
         : 'Senior AI Product Visuals & E-Commerce Media Specialist',
       bio: isUser1
-        ? 'Supervising platform service delivery, vetted specialist matching, and escrow compliance.'
+        ? 'Supervising platform service delivery, verified specialist matching, and escrow compliance.'
         : 'Delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance.',
       hourlyRate: 0,
       skills: isUser1

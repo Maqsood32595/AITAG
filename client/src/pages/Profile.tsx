@@ -62,7 +62,7 @@ export const Profile: React.FC = () => {
   const [contactPhone, setContactPhone] = useState('+91 98860 31643');
   const [memberSince, setMemberSince] = useState('10 October 2026');
   const [kycStatus, setKycStatus] = useState(
-    isAdmin ? 'Active & Verified Platform Admin' : isClient ? 'Active & KYC Verified (Client Enterprise)' : 'Active & KYC Verified (Vetted AI Specialist)'
+    isAdmin ? 'Active & Verified Platform Admin' : isClient ? 'Active & KYC Verified (Client Enterprise)' : 'Active & KYC Verified (Verified AI Specialist)'
   );
   const [copiedId, setCopiedId] = useState(false);
 
@@ -81,7 +81,7 @@ export const Profile: React.FC = () => {
   );
   const [bio, setBio] = useState(
     isAdmin
-      ? 'Supervising platform service delivery, vetted specialist matching, escrow governance, and milestone compliance across all 4 AI service domains.'
+      ? 'Supervising platform service delivery, verified specialist matching, escrow governance, and milestone compliance across all 4 AI service domains.'
       : 'Specialist delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance.'
   );
   const [skillsInput, setSkillsInput] = useState(

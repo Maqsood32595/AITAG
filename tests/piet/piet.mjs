@@ -332,7 +332,7 @@ async function runPietSuite() {
 
     const freelancerToken = authService.signToken({
       id: 'piet-expert-uuid',
-      name: 'Vetted AI Specialist',
+      name: 'Verified AI Specialist',
       email: NONCE_EXPERT,
       role: 'freelancer'
     });
@@ -522,7 +522,7 @@ async function runPietSuite() {
         method: 'POST',
         body: JSON.stringify({
           expertEmail: NONCE_EXPERT,
-          expertName: 'Vetted AI Visual Specialist'
+          expertName: 'Verified AI Visual Specialist'
         })
       });
 
@@ -545,7 +545,7 @@ async function runPietSuite() {
         method: 'POST',
         body: JSON.stringify({
           expertEmail: NONCE_EXPERT,
-          expertName: 'Vetted AI Visual Specialist'
+          expertName: 'Verified AI Visual Specialist'
         })
       });
       eq(reassignRes.status, 200, 'Re-assigning expert must succeed');
@@ -849,7 +849,7 @@ async function runPietSuite() {
         method: 'POST',
         headers: { Authorization: `Bearer ${adminToken}` },
         body: JSON.stringify({
-          message: 'Received your brand guidelines. Our vetted specialists have been notified to review.',
+          message: 'Received your brand guidelines. Our verified specialists have been notified to review.',
           attachments: []
         })
       });
@@ -865,7 +865,7 @@ async function runPietSuite() {
       eq(fullThread.data.messages.length, 2, 'Both client and admin messages present in chronological thread');
     });
 
-    await t('Admin assigns vetted AI specialist to marketplace task and resets assignment', async () => {
+    await t('Admin assigns verified AI specialist to marketplace task and resets assignment', async () => {
       // 1. Negative defense: non-admin cannot assign specialist to task
       const nonAdminRes = await requestJson(`/api/tasks/${ephemeralTaskId}/assign`, {
         method: 'POST',
@@ -882,7 +882,7 @@ async function runPietSuite() {
       });
       eq(emptyEmailRes.status, 400, 'Empty expertEmail must return 400 Bad Request');
 
-      // 3. Admin matches vetted specialist to task
+      // 3. Admin matches verified specialist to task
       const assignRes = await requestJson(`/api/tasks/${ephemeralTaskId}/assign`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${adminToken}` },

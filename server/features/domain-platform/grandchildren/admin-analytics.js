@@ -90,7 +90,7 @@ function computeAdminAnalytics({ orders = [], tasks = [], users = [], bids = [] 
         label: 'Total Platform Users',
         value: Math.max(users.length, clientCount + freelancerCount + adminCount),
         numeric: users.length,
-        subtitle: `${clientCount} Clients • ${freelancerCount} Vetted Specialists`,
+        subtitle: `${clientCount} Clients • ${freelancerCount} Verified Specialists`,
         color: '#8b5cf6',
         bg: 'rgba(139,92,246,0.08)',
         trend: `${freelancerCount} Talent Active`

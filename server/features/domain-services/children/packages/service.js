@@ -84,12 +84,10 @@ const FALLBACK_PACKAGES = [
         delivery_days_min: 2,
         delivery_days_max: 4,
         revisions_included: 1,
-        deliverable_summary: 'Primary vector SVG logo, transparent PNG (light & dark), WhatsApp DP, full copyright transfer',
+        deliverable_summary: 'Primary logo for your business, WhatsApp DP & Social Avatar',
         inclusions: [
-          'Primary logo in vector SVG (infinitely scalable for shop banners)',
-          'High-resolution transparent PNG — light & dark background versions',
+          'Primary logo for your business',
           'Circular-cropped WhatsApp DP & Social Media Profile Avatar',
-          'Full commercial copyright ownership transfer',
           '1 revision included'
         ],
         exclusions: ['Visiting card print file', 'GST invoice template', 'Brand guide']
@@ -104,13 +102,11 @@ const FALLBACK_PACKAGES = [
         delivery_days_min: 4,
         delivery_days_max: 6,
         revisions_included: 2,
-        deliverable_summary: 'Full logo kit + print-ready visiting card (CMYK 300 DPI) + GST invoice + letterhead + brand guide',
+        deliverable_summary: 'Full logo kit + print-ready visiting card + official letterhead',
         inclusions: [
           'Everything in Starter PLUS:',
           'Print-ready Visiting Card (3.5" × 2" Indian standard, bleed, CMYK 300 DPI PDF)',
-          'A4 GST Tax Invoice & Bill Header template (Tally / Vyapar / Zoho Books ready)',
           'Official Letterhead template (Word & PDF)',
-          'Mini Brand Guide (HEX color palette & font pairings)',
           '2 revisions included'
         ],
         exclusions: ['Physical card printing costs (customer-paid)', 'Animation or motion graphics']

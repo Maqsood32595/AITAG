@@ -259,7 +259,7 @@ const AITalent = () => {
         <Container maxWidth="md">
           <Chip
             icon={<AutoAwesomeIcon sx={{ fontSize: '16px !important', color: '#4f46e5' }} />}
-            label="Verified AITAG AI Specialists & Vetted Providers"
+            label="Verified AITAG AI Specialists & Providers"
             sx={{
               bgcolor: 'rgba(79,70,229,0.08)',
               color: '#4f46e5',
@@ -279,7 +279,7 @@ const AITalent = () => {
               fontSize: { xs: '2rem', md: '3rem' },
             }}
           >
-            Hire Vetted{' '}
+            Hire Verified{' '}
             <Box
               component="span"
               sx={{
@@ -292,7 +292,7 @@ const AITalent = () => {
             </Box>
           </Typography>
           <Typography sx={{ color: '#64748b', fontSize: '1.1rem', maxWidth: 650, mx: 'auto', mb: 4 }}>
-            Pre-vetted specialists ready to deliver product photo makeovers, high-ranking e-commerce listings, monthly social media packs, and high-converting landing pages.
+            Pre-verified specialists ready to deliver product photo makeovers, high-ranking e-commerce listings, monthly social media packs, and high-converting landing pages.
           </Typography>
 
           {/* Search Bar */}

@@ -1,6 +1,6 @@
 /**
  * Grandchild: Task Lifecycle Engine
- * Unifies state transitions for both Vetted Experts and Open Marketplace Freelancers
+ * Unifies state transitions for both Verified Experts and Open Marketplace Freelancers
  * Valid states: OPEN -> IN_PROGRESS -> DRAFT_SUBMITTED -> REVISION -> COMPLETED
  */
 

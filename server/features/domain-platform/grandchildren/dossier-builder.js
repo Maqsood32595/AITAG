@@ -37,7 +37,7 @@ function buildUserDossier({ user, profile = {}, orders = [], tasks = [], bids = 
   } else if (user.role === 'freelancer') {
     const workflows = profile.deliveredWorkflows || profile.delivered_workflows || [];
     roleDossier = {
-      headline: profile.headline || 'Vetted AI Automation & Prompt Specialist',
+      headline: profile.headline || 'Verified AI Automation & Prompt Specialist',
       bio: profile.bio || 'AI specialist focusing on generative visual production, LLM copy, and automated e-commerce workflows.',
       hourly_rate: Number(profile.hourly_rate || profile.hourlyRate || 2800),
       skills: profile.skills || [],
@@ -50,7 +50,7 @@ function buildUserDossier({ user, profile = {}, orders = [], tasks = [], bids = 
       admin_tier: 'Platform Superuser & Master Coordinator',
       permissions: [
         'Full Order Lifecycle Management (Assign, Activate, Review, Complete)',
-        'Vetted Talent Onboarding & KYC Approval',
+        'Verified Talent Onboarding & KYC Approval',
         'Milestone Escrow Payout Authority',
         'Fractal Kernel Slices & PIET Engine Inspection'
       ],

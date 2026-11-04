@@ -360,7 +360,7 @@ const BlogPost = () => {
               Ready to Hire Top AI Talent for Your Project?
             </Typography>
             <Typography sx={{ color: '#64748b', mb: 3, maxWidth: 500, mx: 'auto' }}>
-              Explore pre-vetted AI specialists or post your first task with milestone escrow protection on aitag.in.
+              Explore pre-verified AI specialists or post your first task with milestone escrow protection on aitag.in.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
               <Button
