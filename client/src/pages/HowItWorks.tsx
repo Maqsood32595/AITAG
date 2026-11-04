@@ -92,7 +92,7 @@ const FAQS = [
 export const HowItWorks: React.FC = () => {
   const navigate = useNavigate();
   // Default video url can be YouTube demo, loom, or mp4
-  const [videoUrl] = useState<string>('https://www.youtube.com/watch?v=dQw4w9WgXcQ'); // Placeholder walkthrough video
+  const [videoUrl] = useState<string>('/workflow-demo.mp4');
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
