@@ -29,9 +29,12 @@ export const theme = createTheme({
   typography: {
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     fontSize: 13, // Refined compact SaaS typography scale
-    h4: { fontWeight: 800, fontSize: '1.35rem', letterSpacing: '-0.4px' },
-    h5: { fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.3px' },
-    h6: { fontWeight: 700, fontSize: '0.98rem', letterSpacing: '-0.2px' },
+    h1: { fontWeight: 900, fontSize: '2.5rem', letterSpacing: '-0.03em', lineHeight: 1.15 },
+    h2: { fontWeight: 800, fontSize: '1.8rem', letterSpacing: '-0.025em', lineHeight: 1.25 },
+    h3: { fontWeight: 800, fontSize: '1.4rem', letterSpacing: '-0.02em', lineHeight: 1.3 },
+    h4: { fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em' },
+    h5: { fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.015em' },
+    h6: { fontWeight: 700, fontSize: '0.94rem', letterSpacing: '-0.01em' },
     subtitle1: { fontSize: '0.88rem' },
     subtitle2: { fontSize: '0.8rem' },
     body1: { fontSize: '0.84rem' },

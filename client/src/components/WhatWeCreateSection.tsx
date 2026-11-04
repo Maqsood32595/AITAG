@@ -14,15 +14,6 @@ interface CreateItem {
 
 const CREATE_ITEMS: CreateItem[] = [
   {
-    id: 'social-media-posts',
-    badge: '#',
-    badgeBg: '#4f46e5',
-    title: 'Social Media Posts',
-    description: 'Ready-to-post Instagram & WhatsApp designs, captions and reel ideas.',
-    price: 'From ₹1,499',
-    targetSlug: 'ai-marketing-video-reels',
-  },
-  {
     id: 'logo-branding',
     badge: 'Aa',
     badgeBg: '#4f46e5',
@@ -30,6 +21,15 @@ const CREATE_ITEMS: CreateItem[] = [
     description: 'A professional logo, colours and look that makes your business stand out.',
     price: 'From ₹499',
     targetSlug: 'ai-logo-identity-kit',
+  },
+  {
+    id: 'social-media-posts',
+    badge: '#',
+    badgeBg: '#4f46e5',
+    title: 'Social Media Posts',
+    description: 'Ready-to-post Instagram & WhatsApp designs, captions and reel ideas.',
+    price: 'From ₹1,499',
+    targetSlug: 'ai-marketing-video-reels',
   },
   {
     id: 'product-catalogue',
@@ -77,23 +77,23 @@ export const WhatWeCreateSection: React.FC<WhatWeCreateSectionProps> = ({ onSele
     <Box sx={{ pt: { xs: 6, md: 8 }, pb: { xs: 6, md: 8 }, bgcolor: '#ffffff' }}>
       <Container maxWidth="lg">
         {/* Section Heading */}
-        <Box sx={{ mb: { xs: 3.5, md: 5 } }}>
+        <Box sx={{ mb: { xs: 3, md: 4 } }}>
           <Typography
             variant="h2"
             sx={{
               fontWeight: 800,
-              fontSize: { xs: '1.65rem', sm: '2rem', md: '2.25rem' },
+              fontSize: { xs: '1.45rem', sm: '1.7rem', md: '1.9rem' },
               color: '#0f172a',
               fontFamily: 'Inter, sans-serif',
-              letterSpacing: '-0.8px',
-              mb: 0.8,
+              letterSpacing: '-0.6px',
+              mb: 0.6,
             }}
           >
             What we can create for your business
           </Typography>
           <Typography
             sx={{
-              fontSize: { xs: '0.92rem', md: '1.02rem' },
+              fontSize: { xs: '0.88rem', md: '0.96rem' },
               color: '#64748b',
               fontFamily: 'Inter, sans-serif',
             }}

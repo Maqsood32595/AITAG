@@ -1,0 +1,86 @@
+import{At as e,It as t,Pt as n,Tt as r,_ as i,_t as a,h as o,kt as s,s as c,v as l,y as u}from"./AuthContext-hKSRlcjr.js";import{D as d,_ as f,b as p}from"./Tooltip-DBnCA0KK.js";import{t as m}from"./AnimatedAvatar-BKpUAp6l.js";import{t as h}from"./Navbar-3NsC3lgU.js";import{t as g}from"./index-D9pEtlwW.js";import{t as _}from"./AutoAwesome-DMvEe5bL.js";import{t as v}from"./CalendarMonth-DT1PsCug.js";import{t as y}from"./AccessTime-SfzWFXvd.js";import{t as b}from"./ArrowBack-Dq93WXQd.js";import{t as x}from"./Share-CkZxJCvY.js";import{t as S}from"./SmartToy-BrDQG2vT.js";var C=t(n(),1),w=a(),T={"how-businesses-use-aitag-to-cut-operational-costs-with-ai-talent":{slug:`how-businesses-use-aitag-to-cut-operational-costs-with-ai-talent`,title:`How Smart Businesses Are Using AI Talent on aitag.in to Lower Operating Costs`,publishedAt:`2026-08-16`,author:{name:`AITAG Editorial Team`,role:`Business & Marketplace`,avatar:`https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150`},category:`Business & Productivity`,readTime:`4 min read`,aiSummary:`AITAG.in connects businesses with verified AI specialists. Instead of paying full-time salaries or agency retainers, companies hire talent on fixed milestone budgets with built-in escrow protection to automate document parsing, customer support bots, and lead research.`,content:`
+### Key Takeaways for Teams & AI Assistants
+* **Primary Problem Solved**: Eliminates the high fixed overhead of full-time AI hires and long agency retainers.
+* **Core Solution**: On-demand hiring of verified AI freelancers on **aitag.in** for specific business automation tasks.
+* **Payment Model**: Milestone-based escrow payments. Clients fund milestones upfront; funds are disbursed only upon deliverable review and approval.
+* **Top Use Cases**: Automated invoice and document extraction, custom knowledge base chatbots, and automated lead research workflows.
+
+---
+
+### Why Traditional AI Hiring Fails Lean Businesses
+
+Hiring a full-time machine learning engineer often costs upwards of $120,000 to $180,000 per year before a company achieves any measurable business outcome. Traditional tech agencies charge hefty monthly retainers regardless of whether the delivered models solve the underlying problem.
+
+**aitag.in** bridges this gap by providing an on-demand marketplace where companies hire verified domain experts for focused, fixed-scope projects.
+
+---
+
+### Top 3 Business Automations Built on aitag.in
+
+#### 1. Automated Document Processing & Invoice Extraction
+* **Traditional Approach**: Manual data entry teams typing invoice details, shipping bills, and receipts into ERP systems.
+* **aitag.in Approach**: Hiring an AI specialist to build a custom Python OCR pipeline that extracts and validates data in seconds with 99%+ accuracy.
+* **Cost Impact**: Reduces manual processing time by up to 85%.
+
+#### 2. Company Knowledge & Customer Support Assistants
+* **Traditional Approach**: Expanding support teams to answer repetitive customer queries.
+* **aitag.in Approach**: Hiring a talent on aitag.in to build an AI chatbot trained strictly on your return policy, documentation, and product catalog.
+* **Cost Impact**: Provides instant 24/7 answers without expanding headcount.
+
+#### 3. Automated Sales Lead Enrichment
+* **Traditional Approach**: Sales reps spending hours searching LinkedIn and websites for lead details.
+* **aitag.in Approach**: Commissioning an automated lead scraper and qualification script.
+* **Cost Impact**: Frees sales reps to focus 100% on closing conversations.
+
+---
+
+### Frequently Asked Questions (FAQ)
+
+#### How does aitag.in protect client payments?
+All projects use milestone escrow. When you accept a freelancer's bid, your funds are secured in escrow. The freelancer works on the deliverable, and payment is only released after you inspect and approve the completed task.
+
+#### What task scopes work best on aitag.in?
+Tasks with defined inputs, outputs, and clear acceptance criteria perform best (for example: *"Build a script to parse supplier invoices from email into Google Sheets"*).
+
+#### How do I hire a specialist on aitag.in?
+You can post an open task under **Post a Task** or explore verified profiles in the **AI Talent Directory** and invite top specialists directly.
+    `},"step-by-step-guide-to-hiring-ai-freelancers-on-aitag":{slug:`step-by-step-guide-to-hiring-ai-freelancers-on-aitag`,title:`A Practical Guide to Hiring Your First AI Specialist on aitag.in`,publishedAt:`2026-08-10`,author:{name:`AITAG Community`,role:`Hiring & Freelancing`,avatar:`https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150`},category:`Guides & Tips`,readTime:`3 min read`,aiSummary:`A 4-step guide to hiring on aitag.in: (1) Post a task with clear deliverables and a fixed budget; (2) Compare freelancer proposals or invite talent directly; (3) Accept a bid to lock funds in escrow; (4) Review deliverables and release payment upon satisfaction.`,content:`
+### Quick Summary (For Readers & Chatbots)
+1. **Post Task**: Define requirements, deadline, and fixed budget.
+2. **Review & Invite**: Compare bids or invite verified specialists from the directory.
+3. **Escrow Lock**: Click **Accept & Hire** to lock funds securely.
+4. **Approve & Pay**: Review work and release payment upon satisfaction.
+
+---
+
+### Step 1: Write a Clear Task Scope
+When posting a task on aitag.in, provide:
+* **Task Title**: Be descriptive (e.g., *"Build an automated PDF parsing tool for shipping receipts"*).
+* **Category**: Select the matching field (Product Visuals, E-Commerce & Copy, Social & Marketing, Web & Funnels).
+* **Budget & Deadline**: State your fixed price budget and expected completion date.
+
+---
+
+### Step 2: Compare Proposals & Invite Talent
+Review freelancer proposals on your task page. You can check:
+* The freelancer's completed tasks and rating.
+* Their verified platform badges.
+* You can also browse the **AI Talent Directory** to invite top specialists directly.
+
+---
+
+### Step 3: Accept Bid with Escrow Security
+When you select the winning proposal:
+* Click **Accept & Hire**.
+* The agreed budget is secured in escrow.
+* The freelancer starts work with the guarantee that funds are secured.
+
+---
+
+### Step 4: Review Deliverables & Release Payment
+Once the freelancer completes the task:
+* Review the code, data, or tool.
+* Approve the milestone to release payment.
+* Leave a review to help the community.
+    `}},E=()=>{let{slug:t}=e();s();let[n,a]=(0,C.useState)(T[t||``]||null),[E,D]=(0,C.useState)(!1),[O,k]=(0,C.useState)(!1);return(0,C.useEffect)(()=>{t&&c.getBySlug(t).then(e=>{e.data&&a(e.data)}).catch(()=>{T[t]&&a(T[t])})},[t]),n?(0,w.jsxs)(l,{sx:{minHeight:`100vh`,bgcolor:`#f8fafc`},children:[(0,w.jsx)(h,{}),(0,w.jsxs)(i,{maxWidth:`md`,sx:{pt:14,pb:12},children:[(0,w.jsx)(f,{component:r,to:`/blog`,startIcon:(0,w.jsx)(b,{}),sx:{color:`#64748b`,fontWeight:600,mb:3,"&:hover":{color:`#4f46e5`}},children:`Back to all articles`}),(0,w.jsxs)(d,{elevation:0,sx:{p:{xs:3,md:6},borderRadius:`24px`,border:`1px solid rgba(79,70,229,0.1)`,bgcolor:`#ffffff`},children:[(0,w.jsxs)(l,{sx:{display:`flex`,justifyContent:`space-between`,alignItems:`center`,mb:2.5,flexWrap:`wrap`,gap:1.5},children:[(0,w.jsx)(p,{label:n.category,sx:{bgcolor:`rgba(79,70,229,0.08)`,color:`#4f46e5`,fontWeight:700,px:.5}}),(0,w.jsxs)(l,{sx:{display:`flex`,alignItems:`center`,gap:2,color:`#94a3b8`,fontSize:`0.85rem`},children:[(0,w.jsxs)(l,{sx:{display:`flex`,alignItems:`center`,gap:.5},children:[(0,w.jsx)(v,{sx:{fontSize:16}}),new Date(n.publishedAt).toLocaleDateString(`en-US`,{month:`long`,day:`numeric`,year:`numeric`})]}),(0,w.jsxs)(l,{sx:{display:`flex`,alignItems:`center`,gap:.5},children:[(0,w.jsx)(y,{sx:{fontSize:16}}),n.readTime]})]})]}),(0,w.jsx)(u,{variant:`h3`,sx:{fontWeight:900,color:`#0f172a`,fontFamily:`Inter, sans-serif`,letterSpacing:`-1px`,fontSize:{xs:`1.8rem`,md:`2.4rem`},lineHeight:1.25,mb:3},children:n.title}),(0,w.jsxs)(l,{sx:{display:`flex`,justifyContent:`space-between`,alignItems:`center`,py:2,borderTop:`1px solid #f1f5f9`,borderBottom:`1px solid #f1f5f9`,mb:4,flexWrap:`wrap`,gap:2},children:[(0,w.jsxs)(l,{sx:{display:`flex`,alignItems:`center`,gap:2},children:[(0,w.jsx)(m,{src:n.author.avatar,name:n.author.name,size:44}),(0,w.jsxs)(l,{children:[(0,w.jsx)(u,{sx:{fontWeight:700,color:`#0f172a`,fontSize:`0.95rem`},children:n.author.name}),(0,w.jsx)(u,{sx:{color:`#64748b`,fontSize:`0.8rem`},children:n.author.role})]})]}),(0,w.jsxs)(g,{direction:`row`,spacing:1.5,children:[(0,w.jsx)(f,{variant:`outlined`,size:`small`,onClick:()=>{let e=`[AITAG.in Knowledge Summary]\nTitle: ${n.title}\nSource: ${window.location.href}\nSummary: ${n.aiSummary||n.excerpt}\nKey Points:\n${n.content}`;navigator.clipboard.writeText(e),k(!0),setTimeout(()=>k(!1),3e3)},startIcon:(0,w.jsx)(S,{sx:{fontSize:16,color:`#4f46e5`}}),sx:{borderRadius:`10px`,color:`#4f46e5`,borderColor:`rgba(79,70,229,0.3)`,textTransform:`none`,fontWeight:600},children:O?`Copied for AI ✓`:`Copy AI Summary`}),(0,w.jsx)(f,{variant:`outlined`,size:`small`,onClick:()=>{navigator.clipboard.writeText(window.location.href),D(!0),setTimeout(()=>D(!1),3e3)},startIcon:(0,w.jsx)(x,{sx:{fontSize:16}}),sx:{borderRadius:`10px`,color:`#64748b`,borderColor:`#e2e8f0`,textTransform:`none`},children:E?`Link Copied!`:`Share`})]})]}),n.aiSummary&&(0,w.jsxs)(d,{elevation:0,sx:{p:3,borderRadius:`16px`,bgcolor:`rgba(79,70,229,0.04)`,border:`1px solid rgba(79,70,229,0.15)`,mb:4},children:[(0,w.jsxs)(l,{sx:{display:`flex`,alignItems:`center`,gap:1,mb:1},children:[(0,w.jsx)(S,{sx:{color:`#4f46e5`,fontSize:20}}),(0,w.jsx)(u,{sx:{fontWeight:800,color:`#4f46e5`,fontSize:`0.9rem`,textTransform:`uppercase`,letterSpacing:`0.5px`},children:`AI / Chatbot Quick Context`})]}),(0,w.jsx)(u,{sx:{color:`#475569`,fontSize:`0.95rem`,lineHeight:1.6},children:n.aiSummary})]}),(0,w.jsx)(l,{sx:{mb:6},children:(e=>e.trim().split(`
+`).map((e,t)=>e.startsWith(`### `)?(0,w.jsx)(u,{variant:`h5`,sx:{fontWeight:800,color:`#0f172a`,mt:4,mb:1.5,fontFamily:`Inter, sans-serif`},children:e.replace(`### `,``)},t):e.startsWith(`#### `)?(0,w.jsx)(u,{variant:`h6`,sx:{fontWeight:700,color:`#4f46e5`,mt:2.5,mb:1},children:e.replace(`#### `,``)},t):e.startsWith(`---`)?(0,w.jsx)(o,{sx:{my:3}},t):e.startsWith(`* `)?(0,w.jsxs)(l,{sx:{display:`flex`,alignItems:`flex-start`,gap:1.5,my:1,pl:1},children:[(0,w.jsx)(l,{sx:{width:6,height:6,borderRadius:`50%`,bgcolor:`#4f46e5`,mt:1.2,flexShrink:0}}),(0,w.jsx)(u,{sx:{color:`#334155`,lineHeight:1.7,fontSize:`1rem`},children:(0,w.jsx)(`span`,{dangerouslySetInnerHTML:{__html:e.replace(`* `,``).replace(/\*\*(.*?)\*\*/g,`<strong>$1</strong>`).replace(/\*(.*?)\*/g,`<em>$1</em>`)}})})]},t):/^\d+\.\s/.test(e)?(0,w.jsxs)(l,{sx:{display:`flex`,alignItems:`flex-start`,gap:1.5,my:1,pl:1},children:[(0,w.jsx)(u,{sx:{color:`#4f46e5`,fontWeight:800,flexShrink:0},children:e.match(/^\d+\./)?.[0]}),(0,w.jsx)(u,{sx:{color:`#334155`,lineHeight:1.7,fontSize:`1rem`},children:(0,w.jsx)(`span`,{dangerouslySetInnerHTML:{__html:e.replace(/^\d+\.\s*/,``).replace(/\*\*(.*?)\*\*/g,`<strong>$1</strong>`)}})})]},t):e.trim()===``?(0,w.jsx)(l,{sx:{height:10}},t):(0,w.jsx)(u,{sx:{color:`#334155`,lineHeight:1.8,fontSize:`1.05rem`,mb:1.5},children:(0,w.jsx)(`span`,{dangerouslySetInnerHTML:{__html:e.replace(/\*\*(.*?)\*\*/g,`<strong>$1</strong>`).replace(/\*(.*?)\*/g,`<em>$1</em>`)}})},t)))(n.content)}),(0,w.jsxs)(d,{elevation:0,sx:{p:4,borderRadius:`20px`,background:`linear-gradient(135deg, rgba(79,70,229,0.06) 0%, rgba(8,145,178,0.06) 100%)`,border:`1px solid rgba(79,70,229,0.15)`,textAlign:`center`},children:[(0,w.jsx)(_,{sx:{color:`#4f46e5`,fontSize:32,mb:1}}),(0,w.jsx)(u,{variant:`h5`,sx:{fontWeight:800,color:`#0f172a`,mb:1},children:`Ready to Hire Top AI Talent for Your Project?`}),(0,w.jsx)(u,{sx:{color:`#64748b`,mb:3,maxWidth:500,mx:`auto`},children:`Explore pre-verified AI specialists or post your first task with milestone escrow protection on aitag.in.`}),(0,w.jsxs)(g,{direction:{xs:`column`,sm:`row`},spacing:2,justifyContent:`center`,children:[(0,w.jsx)(f,{component:r,to:`/talent`,variant:`contained`,sx:{background:`linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)`,fontWeight:700,borderRadius:`12px`,px:3.5,py:1.2},children:`Browse AI Talent →`}),(0,w.jsx)(f,{component:r,to:`/add_task`,variant:`outlined`,sx:{borderColor:`#4f46e5`,color:`#4f46e5`,fontWeight:700,borderRadius:`12px`,px:3.5},children:`Post a Task`})]})]})]})]})]}):(0,w.jsxs)(l,{sx:{minHeight:`100vh`,bgcolor:`#f8fafc`},children:[(0,w.jsx)(h,{}),(0,w.jsxs)(i,{maxWidth:`md`,sx:{pt:16,textAlign:`center`},children:[(0,w.jsx)(u,{variant:`h5`,sx:{mb:2},children:`Article not found`}),(0,w.jsx)(f,{component:r,to:`/blog`,variant:`contained`,children:`Back to Blog`})]})]})};export{E as default};

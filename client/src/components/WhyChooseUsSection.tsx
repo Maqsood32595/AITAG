@@ -35,23 +35,23 @@ export const WhyChooseUsSection: React.FC = () => {
     <Box sx={{ pt: { xs: 6, md: 8 }, pb: { xs: 6, md: 8 }, bgcolor: '#f8fafc' }}>
       <Container maxWidth="lg">
         {/* Section Heading */}
-        <Box sx={{ mb: { xs: 3.5, md: 5 } }}>
+        <Box sx={{ mb: { xs: 3, md: 4 } }}>
           <Typography
             variant="h2"
             sx={{
               fontWeight: 800,
-              fontSize: { xs: '1.65rem', sm: '2rem', md: '2.25rem' },
+              fontSize: { xs: '1.45rem', sm: '1.7rem', md: '1.9rem' },
               color: '#0f172a',
               fontFamily: 'Inter, sans-serif',
-              letterSpacing: '-0.8px',
-              mb: 0.8,
+              letterSpacing: '-0.6px',
+              mb: 0.6,
             }}
           >
             Why business owners choose AITAG
           </Typography>
           <Typography
             sx={{
-              fontSize: { xs: '0.92rem', md: '1.02rem' },
+              fontSize: { xs: '0.88rem', md: '0.96rem' },
               color: '#64748b',
               fontFamily: 'Inter, sans-serif',
             }}

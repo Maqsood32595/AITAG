@@ -104,11 +104,11 @@ const HeroSection: React.FC = () => {
               sx={{
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 900,
-                fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.2rem' },
-                lineHeight: 1.15,
-                letterSpacing: '-1.4px',
+                fontSize: { xs: '2rem', sm: '2.4rem', md: '2.75rem', lg: '2.9rem' },
+                lineHeight: 1.14,
+                letterSpacing: '-1px',
                 color: '#0f172a',
-                mb: 2.2,
+                mb: 2,
               }}
             >
               You Don't Need to
@@ -130,12 +130,12 @@ const HeroSection: React.FC = () => {
             {/* Sub-headline */}
             <Typography
               sx={{
-                fontSize: { xs: '0.98rem', md: '1.05rem' },
+                fontSize: { xs: '0.92rem', md: '0.98rem' },
                 color: '#475569',
-                mb: 3,
-                lineHeight: 1.65,
+                mb: 2.5,
+                lineHeight: 1.6,
                 fontFamily: 'Inter, sans-serif',
-                maxWidth: 560,
+                maxWidth: 540,
                 mx: { xs: 'auto', md: 0 },
               }}
             >

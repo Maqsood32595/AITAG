@@ -53,18 +53,18 @@ export const CtaBannerSection: React.FC<CtaBannerSectionProps> = ({ onGetStarted
               variant="h3"
               sx={{
                 fontWeight: 900,
-                fontSize: { xs: '1.6rem', sm: '1.9rem', md: '2.1rem' },
+                fontSize: { xs: '1.45rem', sm: '1.7rem', md: '1.9rem' },
                 color: '#ffffff',
                 fontFamily: 'Inter, sans-serif',
-                letterSpacing: '-0.5px',
-                mb: 1,
+                letterSpacing: '-0.4px',
+                mb: 0.8,
               }}
             >
               Ready to grow your business?
             </Typography>
             <Typography
               sx={{
-                fontSize: { xs: '0.95rem', md: '1.05rem' },
+                fontSize: { xs: '0.88rem', md: '0.96rem' },
                 color: 'rgba(255, 255, 255, 0.92)',
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 500,

@@ -71,11 +71,11 @@ export const PaymentTrustSection: React.FC = () => {
             variant="h2"
             sx={{
               fontWeight: 800,
-              fontSize: { xs: '1.45rem', sm: '1.75rem', md: '2rem' },
+              fontSize: { xs: '1.35rem', sm: '1.55rem', md: '1.75rem' },
               color: '#0f172a',
               fontFamily: 'Inter, sans-serif',
-              letterSpacing: '-0.6px',
-              mb: 1,
+              letterSpacing: '-0.5px',
+              mb: 0.8,
             }}
           >
             Pay with confidence. Your work is delivered first, then the expert gets paid.
@@ -83,11 +83,11 @@ export const PaymentTrustSection: React.FC = () => {
 
           <Typography
             sx={{
-              fontSize: { xs: '0.9rem', md: '0.98rem' },
+              fontSize: { xs: '0.86rem', md: '0.94rem' },
               color: '#64748b',
               fontFamily: 'Inter, sans-serif',
-              mb: 4,
-              maxWidth: 780,
+              mb: 3.5,
+              maxWidth: 760,
             }}
           >
             We hold your payment safely until the expert delivers the work you asked for. No risk of paying for work you never receive.
