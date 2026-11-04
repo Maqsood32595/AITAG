@@ -193,6 +193,18 @@ class AuthService {
   }
 
   async getAllUsers() {
+    const isTest = (u) => {
+      const email = (u.email || '').toLowerCase();
+      const name = (u.name || '').toLowerCase();
+      return (
+        email.includes('del-neg') ||
+        email.includes('aitag-test') ||
+        email.includes('aitag-piet') ||
+        name.includes('delete neg') ||
+        name.includes('legit client')
+      );
+    };
+
     try {
       if (supabase && typeof supabase.from === 'function') {
         const { data, error } = await supabase
@@ -200,11 +212,15 @@ class AuthService {
           .select('id, name, email, role, photo_url, created_at')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) return data;
+        if (!error && data && data.length > 0) {
+          return data.filter(u => !isTest(u));
+        }
       }
     } catch (e) {}
 
-    return SEED_USERS.map(({ password_hash, ...safeUser }) => safeUser);
+    return SEED_USERS
+      .filter(u => !isTest(u))
+      .map(({ password_hash, ...safeUser }) => safeUser);
   }
 
   deleteUserFromMemory(userId, email) {

@@ -158,16 +158,22 @@ const AITalent = () => {
           }
         });
 
-        // Filter out automated test accounts from the Talent Directory
+        // Filter out client accounts (business owners) and automated test accounts from the Talent Directory
         const dedupedUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
+          // AI Talent directory is strictly for specialists/freelancers ready for hire, never clients
+          if (u.role === 'client' || u.role === 'buyer' || u.role === 'business_owner') {
+            return false;
+          }
           const cleanEmail = (u.email || '').toLowerCase();
           const cleanName = (u.name || '').toLowerCase();
           if (
             cleanEmail.includes('del-neg') ||
-            cleanEmail.includes('aitag-test.local') ||
-            cleanEmail.includes('aitag-piet.internal') ||
+            cleanEmail.includes('aitag-test') ||
+            cleanEmail.includes('aitag-piet') ||
+            cleanEmail.includes('test') ||
             cleanName.includes('delete neg') ||
-            cleanName.includes('legit client')
+            cleanName.includes('legit client') ||
+            cleanName.includes('test')
           ) {
             return false;
           }
@@ -177,7 +183,11 @@ const AITalent = () => {
         // Transform registered users into Talent cards mapped to our 4 core service categories
         const registeredTalent: Talent[] = dedupedUsers.map((u: any) => {
           const isUser1 = u.email?.toLowerCase().includes('user1');
-          const isMaqsood = u.email?.toLowerCase().includes('maqsood') || u.name === 'Maqs';
+          const isMaqsood =
+            u.email?.toLowerCase().includes('maqsood') ||
+            u.email?.toLowerCase().includes('maxmaqs') ||
+            u.name === 'Maqs' ||
+            u.name === 'Moh Maq';
 
           return {
             id: u.id,
