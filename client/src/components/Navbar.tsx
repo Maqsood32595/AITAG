@@ -15,12 +15,10 @@ import AnimatedAvatar from './AnimatedAvatar';
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
+  { label: 'How It Works', to: '/how-it-works' },
   { label: 'Services & Packages', to: '/#packages' },
-  { label: 'How it Works', to: '/#how-it-works' },
-  { label: 'Browse Tasks', to: '/all_tasks' },
   { label: 'Verified Experts', to: '/talent' },
   { label: 'Blog', to: '/blog' },
-  { label: 'My Orders', to: '/my_tasks' },
 ];
 
 const Navbar = () => {
@@ -32,21 +30,6 @@ const Navbar = () => {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
 
   const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
-
-  const isExpertOrAdmin = user?.role === 'freelancer' || user?.role === 'admin';
-
-  const currentNavLinks = NAV_LINKS.filter((link) => {
-    // Browse Tasks is strictly reserved for verified AI specialists and platform administrators
-    if (link.to === '/all_tasks') {
-      return isExpertOrAdmin;
-    }
-    return true;
-  }).map((link) => {
-    if (link.to === '/my_tasks' && user?.role === 'client') {
-      return { ...link, label: 'My Orders & Tasks' };
-    }
-    return link;
-  });
 
   const handleLogout = () => {
     setAnchorEl(null);
@@ -88,19 +71,8 @@ const Navbar = () => {
 
   const handleHowItWorksClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (window.location.pathname !== '/') {
-      navigate('/#how-it-works');
-      setTimeout(() => {
-        const el = document.getElementById('how-it-works');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      const el = document.getElementById('how-it-works');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        window.history.pushState(null, '', '/#how-it-works');
-      }
-    }
+    navigate('/how-it-works');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -108,10 +80,10 @@ const Navbar = () => {
       position="fixed"
       elevation={trigger ? 4 : 0}
       sx={{
-        bgcolor: trigger ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.85)',
+        bgcolor: trigger ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.90)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid',
-        borderColor: trigger ? 'transparent' : 'rgba(79,70,229,0.1)',
+        borderColor: trigger ? 'transparent' : 'rgba(79,70,229,0.08)',
         color: '#0f172a',
         transition: 'all 0.3s ease',
       }}
@@ -126,11 +98,11 @@ const Navbar = () => {
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
-            mr: 4,
+            mr: 3.5,
             cursor: 'pointer',
           }}
         >
-          <img src="/small_logo.png" alt="AITAG Logo" style={{ height: 60, objectFit: 'contain' }} />
+          <img src="/small_logo.png" alt="AITAG Logo" style={{ height: 44, objectFit: 'contain' }} />
           <Typography
             variant="h5"
             sx={{
@@ -140,9 +112,10 @@ const Navbar = () => {
               background: 'linear-gradient(135deg, #0f172a 0%, #4f46e5 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              ml: 1.5,
+              ml: 1.2,
               display: 'flex',
               alignItems: 'center',
+              fontSize: '1.4rem',
             }}
           >
             AITAG
@@ -151,7 +124,7 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, flexGrow: 1 }}>
-          {currentNavLinks.map((link) => (
+          {NAV_LINKS.map((link) => (
             <Button
               key={link.to}
               component={Link}
@@ -165,28 +138,21 @@ const Navbar = () => {
                   handlePackagesClick(e);
                   return;
                 }
-                if (link.to === '/#how-it-works') {
+                if (link.to === '/how-it-works') {
                   handleHowItWorksClick(e);
                   return;
                 }
-                if (link.to === '/add_task' && user?.role === 'client') {
-                  handlePackagesClick(e);
-                  return;
-                }
-                if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
-                  e.preventDefault();
-                  navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
-                }
               }}
               sx={{
-                color: '#475569',
-                fontWeight: 600,
+                color: location.pathname === link.to ? '#2563eb' : '#475569',
+                fontWeight: location.pathname === link.to ? 700 : 600,
                 fontSize: '0.875rem',
-                px: 2,
+                px: 1.8,
                 borderRadius: '8px',
+                textTransform: 'none',
                 '&:hover': {
-                  color: '#4f46e5',
-                  bgcolor: 'rgba(79,70,229,0.06)',
+                  color: '#2563eb',
+                  bgcolor: 'rgba(37,99,235,0.06)',
                 },
                 fontFamily: 'Inter, sans-serif',
               }}
@@ -196,8 +162,52 @@ const Navbar = () => {
           ))}
         </Box>
 
-        {/* Auth Buttons & Mobile Menu Toggle */}
+        {/* Right CTA / Auth Controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          {/* + Post a Requirement Button */}
+          <Button
+            component={Link}
+            to={user ? '/add_task' : '/signin?redirect=/add_task'}
+            sx={{
+              display: { xs: 'none', sm: 'inline-flex' },
+              bgcolor: '#eff6ff',
+              color: '#2563eb',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+              borderRadius: '20px',
+              px: 2,
+              py: 0.7,
+              textTransform: 'none',
+              border: '1px solid #dbeafe',
+              '&:hover': {
+                bgcolor: '#dbeafe',
+              },
+            }}
+          >
+            + Post a Requirement
+          </Button>
+
+          {/* My Orders Text Link */}
+          <Button
+            component={Link}
+            to={user ? '/my_tasks' : '/signin?redirect=/my_tasks'}
+            sx={{
+              display: { xs: 'none', md: 'inline-flex' },
+              color: '#475569',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              textTransform: 'none',
+              px: 1.2,
+              '&:hover': {
+                color: '#0f172a',
+                bgcolor: 'transparent',
+              },
+            }}
+          >
+            My Orders
+          </Button>
+
+          {/* Mobile menu icon */}
           <IconButton
             sx={{ display: { xs: 'flex', md: 'none' }, color: '#0f172a' }}
             onClick={(e) => setMobileMenuAnchorEl(e.currentTarget)}
@@ -211,7 +221,7 @@ const Navbar = () => {
             onClose={() => setMobileMenuAnchorEl(null)}
             sx={{ display: { xs: 'block', md: 'none' } }}
           >
-            {currentNavLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <MenuItem
                 key={link.to}
                 component={Link}
@@ -223,29 +233,36 @@ const Navbar = () => {
                     return;
                   }
                   if (link.to === '/#packages') {
-                  handlePackagesClick(e);
-                  return;
-                }
-                if (link.to === '/#how-it-works') {
-                  handleHowItWorksClick(e);
-                  return;
-                }
-                  if (link.to === '/add_task' && user?.role === 'client') {
                     handlePackagesClick(e);
                     return;
                   }
-                  if (!user && (link.to === '/add_task' || link.to === '/my_tasks' || link.to === '/dashboard')) {
-                    e.preventDefault();
-                    navigate('/signin', { state: { error: 'You must be signed in to access this page.' }, replace: true });
+                  if (link.to === '/how-it-works') {
+                    handleHowItWorksClick(e);
+                    return;
                   }
                 }}
               >
                 {link.label}
               </MenuItem>
             ))}
+            <Divider />
+            <MenuItem
+              component={Link}
+              to={user ? '/add_task' : '/signin?redirect=/add_task'}
+              onClick={() => setMobileMenuAnchorEl(null)}
+            >
+              + Post a Requirement
+            </MenuItem>
+            <MenuItem
+              component={Link}
+              to={user ? '/my_tasks' : '/signin?redirect=/my_tasks'}
+              onClick={() => setMobileMenuAnchorEl(null)}
+            >
+              My Orders
+            </MenuItem>
           </Menu>
 
-          {/* User Menu / Auth Buttons */}
+          {/* User Profile or Register / Sign In Pill */}
           {user && !isAuthPage ? (
             <>
               <Tooltip title={user.name || user.email}>
@@ -304,6 +321,12 @@ const Navbar = () => {
                   <TrendingUpIcon fontSize="small" /> Analytics & Information
                 </MenuItem>
                 <MenuItem
+                  onClick={() => { navigate('/workflows'); setAnchorEl(null); }}
+                  sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
+                >
+                  <TrendingUpIcon fontSize="small" /> Workflows
+                </MenuItem>
+                <MenuItem
                   onClick={() => { navigate('/account'); setAnchorEl(null); }}
                   sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
                 >
@@ -347,60 +370,42 @@ const Navbar = () => {
                 to="/signin"
                 variant="outlined"
                 sx={{
-                  borderColor: 'rgba(79,70,229,0.3)',
-                  color: '#4f46e5',
-                  fontWeight: 600,
-                  borderRadius: '10px',
+                  borderColor: '#cbd5e1',
+                  color: '#0f172a',
+                  fontWeight: 700,
+                  borderRadius: '20px',
                   px: 2.5,
                   cursor: 'pointer !important',
-                  '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' },
+                  textTransform: 'none',
+                  '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' },
                 }}
               >
                 Sign In
               </Button>
             )
           ) : (
-            <>
-              <Button
-                component={Link}
-                to="/signin"
-                variant="outlined"
-                sx={{
-                  borderColor: 'rgba(79,70,229,0.3)',
-                  color: '#4f46e5',
-                  fontWeight: 600,
-                  borderRadius: '10px',
-                  px: 2.5,
-                  cursor: 'pointer !important',
-                  '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' },
-                  display: { xs: 'none', sm: 'flex' },
-                }}
-              >
-                Sign In
-              </Button>
-              <Button
-                component={Link}
-                to="/signup"
-                variant="contained"
-                sx={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)',
-                  color: '#fff',
-                  fontWeight: 700,
-                  borderRadius: '24px',
-                  textTransform: 'none',
-                  fontSize: '0.88rem',
-                  px: 2.5,
-                  cursor: 'pointer !important',
-                  boxShadow: '0 4px 14px rgba(79,70,229,0.35)',
-                  '&:hover': {
-                    boxShadow: '0 6px 20px rgba(79,70,229,0.45)',
-                    transform: 'translateY(-1px)',
-                  },
-                }}
-              >
-                Tell Us Your Need
-              </Button>
-            </>
+            <Button
+              component={Link}
+              to="/signin"
+              variant="outlined"
+              sx={{
+                borderColor: '#cbd5e1',
+                color: '#0f172a',
+                fontWeight: 700,
+                fontSize: '0.84rem',
+                borderRadius: '20px',
+                px: 2.2,
+                py: 0.6,
+                textTransform: 'none',
+                bgcolor: '#ffffff',
+                '&:hover': {
+                  borderColor: '#94a3b8',
+                  bgcolor: '#f8fafc',
+                },
+              }}
+            >
+              Register / Sign In
+            </Button>
           )}
         </Box>
       </Toolbar>

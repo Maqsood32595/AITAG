@@ -25,6 +25,7 @@ const AUDIENCE_TAGS = [
   'Bakeries & Cafés',
   'Independent Professionals',
   'Early-Stage Founders',
+  'Small and Medium Businesses',
 ];
 
 const HeroSection: React.FC = () => {
@@ -82,7 +83,7 @@ const HeroSection: React.FC = () => {
             <Box sx={{ mb: 2.2, display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' } }}>
               <Chip
                 icon={<AutoAwesomeIcon sx={{ fontSize: '14px !important', color: '#4f46e5 !important' }} />}
-                label="✦ AFFORDABLE AI-POWERED BUSINESS SERVICES"
+                label="✦ THE AI SERVICES MARKETPLACE FOR EVERYDAY ENTREPRENEURS"
                 sx={{
                   bgcolor: 'rgba(79,70,229,0.07)',
                   color: '#4f46e5',
@@ -131,52 +132,25 @@ const HeroSection: React.FC = () => {
               sx={{
                 fontSize: { xs: '0.98rem', md: '1.05rem' },
                 color: '#475569',
-                mb: 3.5,
+                mb: 3,
                 lineHeight: 1.65,
                 fontFamily: 'Inter, sans-serif',
                 maxWidth: 560,
                 mx: { xs: 'auto', md: 0 },
               }}
             >
-              Tell us what your business needs — a logo, Instagram posts, a product catalogue or a website. A verified AI expert creates it for you, faster and at a lower cost, and we check the quality before it reaches you. Starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
+              AITAG is an AI services marketplace. Tell us what you need — a logo, social media posts, a catalogue or a website. We tag you to a verified AI expert who delivers it using advanced AI tools: better quality, faster and at a lower cost. Starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
             </Typography>
 
-            {/* Dual Action Buttons */}
+            {/* Single WhatsApp Action Button */}
             <Box
               sx={{
                 display: 'flex',
                 justifyContent: { xs: 'center', md: 'flex-start' },
                 alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 1.5,
-                mb: 3.5,
+                mb: 2,
               }}
             >
-              <Button
-                variant="contained"
-                size="large"
-                onClick={scrollToPackages}
-                endIcon={<ArrowForwardIcon />}
-                sx={{
-                  bgcolor: '#4f46e5',
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
-                  fontWeight: 800,
-                  borderRadius: '24px',
-                  px: 3.2,
-                  py: 1.3,
-                  fontSize: '0.92rem',
-                  textTransform: 'none',
-                  boxShadow: '0 8px 24px rgba(79,70,229,0.3)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #4338ca 0%, #2563eb 100%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 10px 28px rgba(79,70,229,0.4)',
-                  },
-                }}
-              >
-                Tell Us What You Need
-              </Button>
-
               <Button
                 variant="contained"
                 size="large"
@@ -189,7 +163,7 @@ const HeroSection: React.FC = () => {
                   color: '#ffffff',
                   fontWeight: 700,
                   borderRadius: '24px',
-                  px: 3,
+                  px: 3.2,
                   py: 1.3,
                   fontSize: '0.92rem',
                   textTransform: 'none',
@@ -203,6 +177,43 @@ const HeroSection: React.FC = () => {
               >
                 Chat on WhatsApp
               </Button>
+            </Box>
+
+            {/* 100% Payment Protection Pill Banner */}
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1.2,
+                bgcolor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '100px',
+                px: 2,
+                py: 0.8,
+                mb: 3.5,
+                maxWidth: '100%',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  bgcolor: '#16a34a',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  fontWeight: 900,
+                  flexShrink: 0,
+                }}
+              >
+                ✓
+              </Box>
+              <Typography sx={{ color: '#166534', fontSize: '0.78rem', fontWeight: 600, textAlign: 'left', lineHeight: 1.35 }}>
+                <strong>100% Payment Protection:</strong> Your money stays safe with AITAG. The expert is paid only after your work is delivered to you.
+              </Typography>
             </Box>
 
             {/* Audience Tags: MADE FOR */}
@@ -463,10 +474,10 @@ const HeroSection: React.FC = () => {
                     }}
                   >
                     <Typography sx={{ fontWeight: 800, fontSize: '0.84rem', color: '#7c3aed', mb: 0.2 }}>
-                      Checked
+                      Safe payment
                     </Typography>
                     <Typography sx={{ fontSize: '0.66rem', color: '#64748b', lineHeight: 1.2 }}>
-                      before delivery
+                      released after delivery
                     </Typography>
                   </Box>
                 </Grid>

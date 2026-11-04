@@ -1,21 +1,18 @@
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, CssBaseline, CircularProgress, Box } from '@mui/material';
 import { theme } from './theme';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Footer from './components/Footer';
 
-// Pages
-import Home from './pages/Home';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-
-// Lazy Pages
-import { lazy, Suspense } from 'react';
-import { Box, CircularProgress } from '@mui/material';
-
-const BrowseTasks = lazy(() => import('./pages/BrowseTasks'));
+// Lazy-loaded pages
+const Home = lazy(() => import('./pages/Home'));
+const HowItWorks = lazy(() => import('./pages/HowItWorks'));
+const SignIn = lazy(() => import('./pages/SignIn'));
+const SignUp = lazy(() => import('./pages/SignUp'));
 const AddTask = lazy(() => import('./pages/AddTask'));
+const BrowseTasks = lazy(() => import('./pages/BrowseTasks'));
 const TaskDetails = lazy(() => import('./pages/TaskDetails'));
 const MyPostedTasks = lazy(() => import('./pages/MyPostedTasks'));
 const UpdateTask = lazy(() => import('./pages/UpdateTask'));
@@ -62,18 +59,19 @@ function App() {
             <Routes>
               {/* Public */}
               <Route path="/" element={<Home />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/all_tasks" element={<BrowseTasks />} />
               <Route path="/talent" element={<AITalent />} />
               <Route path="/blog" element={<BlogList />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/task-details/:id" element={<TaskDetails />} />
-              <Route path="/pay" element={<PaymentCheckout />} />
-              <Route path="/tasks/:id/pay" element={<PaymentCheckout />} />
-              <Route path="/checkout/:orderId" element={<PaymentCheckout />} />
 
-              {/* Protected / App Routes */}
+              {/* Protected / App Routes (Secured against unauthorized / incognito access) */}
+              <Route path="/all_tasks" element={<PrivateRoute><BrowseTasks /></PrivateRoute>} />
+              <Route path="/task-details/:id" element={<PrivateRoute><TaskDetails /></PrivateRoute>} />
+              <Route path="/pay" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
+              <Route path="/tasks/:id/pay" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
+              <Route path="/checkout/:orderId" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
               <Route path="/add_task" element={<PrivateRoute><AddTask /></PrivateRoute>} />
               <Route path="/my_tasks" element={<PrivateRoute><MyPostedTasks /></PrivateRoute>} />
               <Route path="/update-task/:id" element={<PrivateRoute><UpdateTask /></PrivateRoute>} />

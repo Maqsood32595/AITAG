@@ -19,7 +19,7 @@ const CREATE_ITEMS: CreateItem[] = [
     badgeBg: '#4f46e5',
     title: 'Social Media Posts',
     description: 'Ready-to-post Instagram & WhatsApp designs, captions and reel ideas.',
-    price: 'From ₹499',
+    price: 'From ₹1,499',
     targetSlug: 'ai-marketing-video-reels',
   },
   {
@@ -28,7 +28,7 @@ const CREATE_ITEMS: CreateItem[] = [
     badgeBg: '#4f46e5',
     title: 'Logo & Branding',
     description: 'A professional logo, colours and look that makes your business stand out.',
-    price: 'From ₹999',
+    price: 'From ₹499',
     targetSlug: 'ai-logo-identity-kit',
   },
   {
@@ -46,7 +46,7 @@ const CREATE_ITEMS: CreateItem[] = [
     badgeBg: '#4f46e5',
     title: 'Simple Website',
     description: 'A one-page website with your services, contact and WhatsApp button.',
-    price: 'From ₹2,999',
+    price: 'From ₹1,999',
     targetSlug: 'ai-website-landing-page',
   },
 ];
@@ -224,3 +224,4 @@ export const WhatWeCreateSection: React.FC<WhatWeCreateSectionProps> = ({ onSele
 };
 
 export default WhatWeCreateSection;
+

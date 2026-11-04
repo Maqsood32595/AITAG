@@ -107,3 +107,4 @@ export const CtaBannerSection: React.FC<CtaBannerSectionProps> = ({ onGetStarted
 };
 
 export default CtaBannerSection;
+

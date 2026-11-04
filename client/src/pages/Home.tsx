@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
 import WhatWeCreateSection from '../components/WhatWeCreateSection';
+import PaymentTrustSection from '../components/PaymentTrustSection';
 import WhyChooseUsSection from '../components/WhyChooseUsSection';
 import CtaBannerSection from '../components/CtaBannerSection';
 import ServicePackagesSection from '../components/ServicePackagesSection';
@@ -27,6 +28,7 @@ const Home: React.FC = () => {
       <Navbar />
       <HeroSection />
       <WhatWeCreateSection onSelectPackage={scrollToPackages} />
+      <PaymentTrustSection />
       <WhyChooseUsSection />
       <CtaBannerSection onGetStarted={() => scrollToPackages()} />
       <ServicePackagesSection />
