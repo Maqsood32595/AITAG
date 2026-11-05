@@ -91,8 +91,8 @@ const FAQS = [
 
 export const HowItWorks: React.FC = () => {
   const navigate = useNavigate();
-  // Default video url can be YouTube demo, loom, or mp4
-  const [videoUrl] = useState<string>('/workflow-demo.mp4');
+  const [activeVideo, setActiveVideo] = useState<'kinetic' | 'walkthrough'>('kinetic');
+  const videoUrl = activeVideo === 'kinetic' ? '/workflow-demo.mp4' : '/aitag-walkthrough.mp4';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
@@ -241,9 +241,51 @@ export const HowItWorks: React.FC = () => {
             >
               Watch How It Works (2-Minute Demo)
             </Typography>
-            <Typography sx={{ fontSize: '0.95rem', color: '#64748b', maxWidth: 620, mx: 'auto' }}>
+            <Typography sx={{ fontSize: '0.95rem', color: '#64748b', maxWidth: 620, mx: 'auto', mb: 3 }}>
               See how everyday entrepreneurs submit briefs, get tagged to vetted specialists, review samples, and approve final deliverables.
             </Typography>
+
+            {/* Video Mode Switcher */}
+            <Stack direction="row" spacing={1.5} justifyContent="center" sx={{ mb: 3.5 }}>
+              <Chip
+                label="⚡ 20-Sec Kinetic Overview"
+                clickable
+                onClick={() => setActiveVideo('kinetic')}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.88rem',
+                  py: 2.2,
+                  px: 1,
+                  borderRadius: '20px',
+                  bgcolor: activeVideo === 'kinetic' ? '#2563eb' : '#f1f5f9',
+                  color: activeVideo === 'kinetic' ? '#ffffff' : '#334155',
+                  border: activeVideo === 'kinetic' ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
+                  boxShadow: activeVideo === 'kinetic' ? '0 4px 14px rgba(37,99,235,0.3)' : 'none',
+                  '&:hover': {
+                    bgcolor: activeVideo === 'kinetic' ? '#1d4ed8' : '#e2e8f0',
+                  },
+                }}
+              />
+              <Chip
+                label="🖥️ Step-by-Step UI Walkthrough (5 Steps)"
+                clickable
+                onClick={() => setActiveVideo('walkthrough')}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.88rem',
+                  py: 2.2,
+                  px: 1,
+                  borderRadius: '20px',
+                  bgcolor: activeVideo === 'walkthrough' ? '#2563eb' : '#f1f5f9',
+                  color: activeVideo === 'walkthrough' ? '#ffffff' : '#334155',
+                  border: activeVideo === 'walkthrough' ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
+                  boxShadow: activeVideo === 'walkthrough' ? '0 4px 14px rgba(37,99,235,0.3)' : 'none',
+                  '&:hover': {
+                    bgcolor: activeVideo === 'walkthrough' ? '#1d4ed8' : '#e2e8f0',
+                  },
+                }}
+              />
+            </Stack>
           </Box>
 
           <Box

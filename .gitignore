@@ -36,3 +36,6 @@ tests/*
 .env.development
 .env.production
 *.env
+
+video-studio/
+server/public/uploads/
