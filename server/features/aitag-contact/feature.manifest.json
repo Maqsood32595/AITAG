@@ -1,0 +1,8 @@
+{
+  "id": "aitag-contact",
+  "name": "AITAG Contact & Customer Support Inquiry Engine",
+  "version": "1.0.0",
+  "basePath": "/api/contact",
+  "enabled": true
+}
+

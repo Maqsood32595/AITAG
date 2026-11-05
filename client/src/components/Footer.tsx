@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Container, Typography, Grid, Link, Divider, Stack } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -55,6 +56,25 @@ const Footer: React.FC = () => {
               <Typography sx={{ color: '#cbd5e1', fontSize: '0.875rem' }}>
                 <strong style={{ color: '#34d399' }}>PRACTICAL:</strong> Ready-to-use business results.
               </Typography>
+              <Box sx={{ pt: 1 }}>
+                <Link
+                  component={RouterLink}
+                  to="/contact"
+                  underline="none"
+                  sx={{
+                    color: '#818cf8',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    cursor: 'pointer !important',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    '&:hover': { color: '#a5b4fc', textDecoration: 'underline' }
+                  }}
+                >
+                  Have questions? Contact Support →
+                </Link>
+              </Box>
             </Stack>
           </Grid>
         </Grid>
@@ -66,6 +86,7 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} AITAG — Affordable AI Business Services. All rights reserved.
           </Typography>
           <Box sx={{ display: 'flex', gap: 3 }}>
+            <Link component={RouterLink} to="/contact" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>Contact Us</Link>
             <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#fff' } }}>Privacy</Link>
             <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#fff' } }}>Terms</Link>
           </Box>

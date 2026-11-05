@@ -39,3 +39,4 @@ tests/*
 
 video-studio/
 server/public/uploads/
+server/data/contact_inquiries.json
