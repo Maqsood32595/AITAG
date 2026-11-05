@@ -25,7 +25,7 @@ export const CtaBannerSection: React.FC<CtaBannerSectionProps> = ({ onGetStarted
         behavior: 'smooth',
       });
     } else {
-      navigate('/?scroll=services');
+      navigate('/services');
     }
   };
 

@@ -16,7 +16,7 @@ import AnimatedAvatar from './AnimatedAvatar';
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
   { label: 'How It Works', to: '/how-it-works' },
-  { label: 'Services & Packages', to: '/#packages' },
+  { label: 'Services & Packages', to: '/services' },
   { label: 'Verified Experts', to: '/talent' },
   { label: 'Blog', to: '/blog' },
 ];
@@ -38,36 +38,22 @@ const Navbar = () => {
   };
 
   const handleHomeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
     if (location.pathname === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      navigate('/');
+      e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleServicesClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (location.pathname === '/') {
-      const el = document.getElementById('services') || document.getElementById('packages');
-      if (el) {
-        const navOffset = 80;
-        const elementPosition = el.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-      }
-    } else {
-      navigate('/?scroll=services');
+    if (location.pathname === '/services') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleHowItWorksClick = (e: React.MouseEvent) => {
-    e.preventDefault();
     if (location.pathname === '/how-it-works') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      navigate('/how-it-works');
+      e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -124,9 +110,9 @@ const Navbar = () => {
           {NAV_LINKS.map((link) => {
             const isActive =
               link.to === '/'
-                ? location.pathname === '/' && !location.search.includes('scroll=services')
-                : link.to === '/#packages' || link.to === '/services'
-                ? location.search.includes('scroll=services')
+                ? location.pathname === '/'
+                : link.to === '/services'
+                ? location.pathname === '/services' || location.pathname === '/packages'
                 : location.pathname === link.to;
 
             return (
@@ -139,7 +125,7 @@ const Navbar = () => {
                     handleHomeClick(e);
                     return;
                   }
-                  if (link.to === '/#packages' || link.to === '/services') {
+                  if (link.to === '/services') {
                     handleServicesClick(e);
                     return;
                   }
@@ -239,7 +225,7 @@ const Navbar = () => {
                     handleHomeClick(e);
                     return;
                   }
-                  if (link.to === '/#packages' || link.to === '/services') {
+                  if (link.to === '/services') {
                     handleServicesClick(e);
                     return;
                   }

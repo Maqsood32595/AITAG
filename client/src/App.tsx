@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 // Lazy-loaded pages
 const Home = lazy(() => import('./pages/Home'));
 const HowItWorks = lazy(() => import('./pages/HowItWorks'));
+const Services = lazy(() => import('./pages/Services'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SignUp = lazy(() => import('./pages/SignUp'));
 const AddTask = lazy(() => import('./pages/AddTask'));
@@ -60,6 +61,8 @@ function App() {
               {/* Public */}
               <Route path="/" element={<Home />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/packages" element={<Services />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/talent" element={<AITalent />} />
