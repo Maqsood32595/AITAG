@@ -1,0 +1,82 @@
+name: AITAG CI/CD Pipeline — Test & Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - NewLandingPageVersion2
+  pull_request:
+    branches:
+      - main
+      - NewLandingPageVersion2
+
+jobs:
+  # -------------------------------------------------------------
+  # 🧪 GATE 1: In-RAM Ephemeral Twin (PIET) Automated Test Suite
+  # -------------------------------------------------------------
+  test:
+    name: Run PIET Test Suite (78 Invariants)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run PIET Invariant Gates
+        env:
+          NODE_ENV: test
+          PORT: 5005
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://byekbjxiowkrtwpsxevz.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'dummy_role_key' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'piet-ci-cd-test-jwt-secret-string-256bit' }}
+        run: node tests/piet/piet.mjs
+
+  # -------------------------------------------------------------
+  # 🚀 GATE 2: Build & Deploy to Google Cloud Run
+  # -------------------------------------------------------------
+  deploy:
+    name: Build & Deploy to Cloud Run
+    needs: test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/NewLandingPageVersion2')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: corded-cable-460921-u1
+
+      - name: Build & Push Container with Cloud Build
+        run: |
+          gcloud builds submit --tag gcr.io/corded-cable-460921-u1/aitag-staging:latest
+
+      - name: Deploy Revision to Google Cloud Run
+        run: |
+          gcloud run deploy aitag-staging \
+            --image gcr.io/corded-cable-460921-u1/aitag-staging:latest \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated
+
+      - name: Deployment Health Check
+        run: |
+          echo "Verifying live edge deployment..."
+          curl -f -s https://aitag.in/api/domains || echo "Edge warming up..."

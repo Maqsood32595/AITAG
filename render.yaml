@@ -1,6 +1,6 @@
 services:
   # -------------------------------------------------------------
-  # 🚀 Production Environment (main branch)
+  # 🚀 Production Environment (Google Cloud Run is Primary Host)
   # -------------------------------------------------------------
   - type: web
     name: aitag-platform
@@ -10,7 +10,7 @@ services:
     branch: main
     buildCommand: npm run build
     startCommand: npm start
-    autoDeploy: true
+    autoDeploy: false
     envVars:
       - key: NODE_ENV
         value: production
