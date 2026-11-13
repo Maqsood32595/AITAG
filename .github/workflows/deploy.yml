@@ -67,7 +67,11 @@ jobs:
 
       - name: Build & Push Container with Cloud Build
         run: |
-          gcloud builds submit --quiet --project corded-cable-460921-u1 --tag gcr.io/corded-cable-460921-u1/aitag-staging:latest
+          gcloud builds submit \
+            --quiet \
+            --suppress-logs \
+            --project corded-cable-460921-u1 \
+            --tag gcr.io/corded-cable-460921-u1/aitag-staging:latest
 
       - name: Deploy Revision to Google Cloud Run
         run: |
