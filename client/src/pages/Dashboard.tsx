@@ -36,7 +36,6 @@ const VETTED_SPECIALISTS = [
   { name: 'Priya Mukherjee', email: 'priya@aitag.com', role: 'AI E-Commerce Listing & Copy Specialist' },
   { name: 'Vikramaditya Iyer', email: 'vikram@aitag.com', role: 'AI Social Media Content Creator' },
   { name: 'Ananya Deshmukh', email: 'ananya@aitag.com', role: 'AI Website & Landing Page Builder' },
-  { name: 'Maqs', email: 'l.maqsood.m@gmail.com', role: 'AI Product Visuals Lead' },
   { name: 'User1 Admin', email: 'user1@aitag.com', role: 'Senior AI Automation Specialist' },
 ];
 

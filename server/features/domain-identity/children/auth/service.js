@@ -13,10 +13,19 @@ const JWT_EXPIRES = '7d';
 // Resilient in-memory seed users for zero-downtime logins
 const SEED_USERS = [
   {
-    id: 'f8dbf2cc-36a9-4228-bb50-13024787fd35',
-    name: 'Maqs',
+    id: 'd01195ee-2f6c-453b-a49a-71b6c5e17ebf',
+    name: 'Mohammed Maqsood',
     email: 'l.maqsood.m@gmail.com',
-    role: 'freelancer',
+    role: 'admin',
+    photo_url: '',
+    password_hash: bcrypt.hashSync('Password', 10),
+    created_at: new Date().toISOString()
+  },
+  {
+    id: '2c2a1ac3-12fb-4418-b418-9578fa1a726d',
+    name: 'Moh Maq',
+    email: 'maxmaqs@gmail.com',
+    role: 'client',
     photo_url: '',
     password_hash: bcrypt.hashSync('Password', 10),
     created_at: new Date().toISOString()

@@ -135,15 +135,19 @@ const AITalent = () => {
           }
         });
 
-        // Filter out client accounts (business owners), platform admins, and automated test accounts from the Talent Directory
+        // Filter out client accounts (business owners), platform admins, owner accounts, and automated test accounts from the Talent Directory
         const dedupedUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
-          // AI Talent directory is strictly for specialists/freelancers ready for hire, never clients or admins
+          // AI Talent directory is strictly for specialists/freelancers ready for hire, never clients, admins, or platform owners
           if (u.role === 'client' || u.role === 'buyer' || u.role === 'business_owner' || u.role === 'admin') {
             return false;
           }
-          const cleanEmail = (u.email || '').toLowerCase();
-          const cleanName = (u.name || '').toLowerCase();
+          const cleanEmail = (u.email || '').toLowerCase().trim();
+          const cleanName = (u.name || '').toLowerCase().trim();
           if (
+            cleanEmail.includes('maqsood') ||
+            cleanEmail.includes('maxmaqs') ||
+            cleanName === 'maqs' ||
+            cleanName.includes('maqsood') ||
             cleanEmail.includes('del-neg') ||
             cleanEmail.includes('aitag-test') ||
             cleanEmail.includes('aitag-piet') ||
@@ -160,7 +164,6 @@ const AITalent = () => {
         // Transform registered users into Talent cards mapped to our 4 core service categories
         const registeredTalent: Talent[] = dedupedUsers.map((u: any) => {
           const isUser1 = u.email?.toLowerCase().includes('user1');
-          const isMaqsood = u.name === 'Maqs';
 
           return {
             id: u.id,
@@ -168,25 +171,19 @@ const AITalent = () => {
             email: u.email,
             role: isUser1
               ? 'AI Website & WhatsApp Specialist'
-              : isMaqsood
-              ? 'AI Product Visuals & Catalogue Lead'
               : 'AI Business Service Specialist',
-            category: isUser1 ? 'Web & Digital Presence' : isMaqsood ? 'Product Visuals' : 'Branding & Print',
+            category: isUser1 ? 'Web & Digital Presence' : 'Branding & Print',
             avatar: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : '',
             rating: 5.0,
-            reviewsCount: isUser1 ? 19 : isMaqsood ? 42 : 14,
-            hourlyRate: isUser1 ? 1800 : isMaqsood ? 2500 : 1200,
-            completedTasks: isUser1 ? 19 : isMaqsood ? 42 : 8,
+            reviewsCount: isUser1 ? 19 : 14,
+            hourlyRate: isUser1 ? 1800 : 1200,
+            completedTasks: isUser1 ? 19 : 8,
             location: 'India',
             bio: isUser1
               ? 'Verified specialist in fast mobile business website creation, responsive design, and WhatsApp click-to-chat setup.'
-              : isMaqsood
-              ? 'Verified expert in AI product photo makeovers, catalogue styling, and marketplace compliance for Amazon & Meesho.'
               : 'Verified specialist for AI business services, social media content, and practical marketplace outcomes.',
             skills: isUser1
               ? ['AI Landing Pages', 'Mobile Web Funnels', 'WhatsApp Integration', 'Conversion Copy', 'Fast Deployment', 'SEO Setup']
-              : isMaqsood
-              ? ['AI Product Photos', 'White Backgrounds', 'Lifestyle Mockups', 'Amazon/Flipkart Optimizations', 'Catalogue Styling', 'Photoshop AI']
               : ['Product Copy', 'Social Media', 'Landing Pages', 'Marketplace SEO'],
             verified: true,
             isRegisteredUser: true

@@ -67,11 +67,13 @@ jobs:
 
       - name: Build & Push Container with Cloud Build
         run: |
-          gcloud builds submit --tag gcr.io/corded-cable-460921-u1/aitag-staging:latest
+          gcloud builds submit --quiet --project corded-cable-460921-u1 --tag gcr.io/corded-cable-460921-u1/aitag-staging:latest
 
       - name: Deploy Revision to Google Cloud Run
         run: |
           gcloud run deploy aitag-staging \
+            --quiet \
+            --project corded-cable-460921-u1 \
             --image gcr.io/corded-cable-460921-u1/aitag-staging:latest \
             --platform managed \
             --region us-central1 \
