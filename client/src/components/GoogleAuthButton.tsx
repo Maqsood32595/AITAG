@@ -30,6 +30,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   const [clientId, setClientId] = useState(DEFAULT_CLIENT_ID);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const lastInitRef = useRef<string>('');
 
   // 1. Fetch dynamic OAuth config if available
   useEffect(() => {
@@ -65,12 +66,16 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     if (!scriptLoaded || !window.google?.accounts?.id || !buttonRef.current) return;
 
     try {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleCredentialResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
+      const initKey = `${clientId}_${mode}_${role}`;
+      if (lastInitRef.current !== initKey) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        lastInitRef.current = initKey;
+      }
 
       buttonRef.current.innerHTML = '';
       window.google.accounts.id.renderButton(buttonRef.current, {

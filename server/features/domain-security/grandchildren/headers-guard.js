@@ -16,6 +16,9 @@ function securityHeaders(req, res, next) {
   // Strict Referrer Policy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
+  // Permit Google OAuth & Popup PostMessage Handshakes
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+
   // Disable Flash/PDF cross-domain embedding
   res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
 

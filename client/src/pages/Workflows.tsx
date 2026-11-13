@@ -334,12 +334,21 @@ export const Workflows: React.FC = () => {
                           size="small"
                           sx={{ bgcolor: '#e0e7ff', color: '#3730a3', fontWeight: 700, fontSize: '0.75rem' }}
                         />
-                        <Chip
-                          icon={videoParsed.type === 'youtube' ? <YouTubeIcon sx={{ fontSize: 16 }} /> : <VideoLibraryIcon sx={{ fontSize: 16 }} />}
-                          label={videoParsed.type === 'youtube' ? 'YouTube' : videoParsed.type === 'loom' ? 'Loom' : 'GCS MP4'}
-                          size="small"
-                          sx={{ bgcolor: '#f1f5f9', color: '#475569', fontWeight: 600, fontSize: '0.7rem' }}
-                        />
+                        {videoParsed.type !== 'none' ? (
+                          <Chip
+                            icon={videoParsed.type === 'youtube' ? <YouTubeIcon sx={{ fontSize: 16 }} /> : <VideoLibraryIcon sx={{ fontSize: 16 }} />}
+                            label={videoParsed.type === 'youtube' ? 'YouTube' : videoParsed.type === 'loom' ? 'Loom' : 'GCS MP4'}
+                            size="small"
+                            sx={{ bgcolor: '#f1f5f9', color: '#475569', fontWeight: 600, fontSize: '0.7rem' }}
+                          />
+                        ) : (
+                          <Chip
+                            label="No Video Demo"
+                            size="small"
+                            variant="outlined"
+                            sx={{ borderColor: '#e2e8f0', color: '#94a3b8', fontWeight: 500, fontSize: '0.7rem' }}
+                          />
+                        )}
                       </Stack>
 
                       <Typography variant="h6" fontWeight={800} color="#0f172a" sx={{ mb: 1.5, lineHeight: 1.3 }}>
