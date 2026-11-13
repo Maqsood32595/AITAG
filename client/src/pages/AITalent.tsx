@@ -130,38 +130,15 @@ const AITalent = () => {
 
         rawUsers.forEach((u: any) => {
           const cleanEmail = (u.email || '').trim().toLowerCase();
-          const cleanName = (u.name || '').trim();
-
-          // Consolidate legacy 'Mohammed Maqsood' into verified 'Maqs'
-          if (cleanEmail === 'l.maqsood.m@gmail.com' || cleanEmail === 'maqsood@gmail.com' || cleanName === 'Mohammed Maqsood' || cleanName === 'Maqs') {
-            if (!uniqueUsersMap.has('l.maqsood.m@gmail.com')) {
-              uniqueUsersMap.set('l.maqsood.m@gmail.com', {
-                id: 'f8dbf2cc-36a9-4228-bb50-13024787fd35',
-                name: 'Maqs',
-                email: 'l.maqsood.m@gmail.com',
-                role: 'freelancer',
-                photo_url: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : ''
-              });
-            }
-          } else if (cleanEmail === 'user1@aitag.com' || cleanName === 'User1 Admin' || cleanName === 'User1') {
-            if (!uniqueUsersMap.has('user1@aitag.com')) {
-              uniqueUsersMap.set('user1@aitag.com', {
-                id: '6e36f593-b9e6-4ead-8266-31ac91cf44c5',
-                name: 'User1',
-                email: 'user1@aitag.com',
-                role: 'admin',
-                photo_url: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : ''
-              });
-            }
-          } else if (cleanEmail && !uniqueUsersMap.has(cleanEmail)) {
+          if (cleanEmail && !uniqueUsersMap.has(cleanEmail)) {
             uniqueUsersMap.set(cleanEmail, u);
           }
         });
 
-        // Filter out client accounts (business owners) and automated test accounts from the Talent Directory
+        // Filter out client accounts (business owners), platform admins, and automated test accounts from the Talent Directory
         const dedupedUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
-          // AI Talent directory is strictly for specialists/freelancers ready for hire, never clients
-          if (u.role === 'client' || u.role === 'buyer' || u.role === 'business_owner') {
+          // AI Talent directory is strictly for specialists/freelancers ready for hire, never clients or admins
+          if (u.role === 'client' || u.role === 'buyer' || u.role === 'business_owner' || u.role === 'admin') {
             return false;
           }
           const cleanEmail = (u.email || '').toLowerCase();
