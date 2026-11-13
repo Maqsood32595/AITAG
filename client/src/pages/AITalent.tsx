@@ -160,11 +160,7 @@ const AITalent = () => {
         // Transform registered users into Talent cards mapped to our 4 core service categories
         const registeredTalent: Talent[] = dedupedUsers.map((u: any) => {
           const isUser1 = u.email?.toLowerCase().includes('user1');
-          const isMaqsood =
-            u.email?.toLowerCase().includes('maqsood') ||
-            u.email?.toLowerCase().includes('maxmaqs') ||
-            u.name === 'Maqs' ||
-            u.name === 'Moh Maq';
+          const isMaqsood = u.name === 'Maqs';
 
           return {
             id: u.id,
