@@ -15,7 +15,7 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
-const BASE = (process.env.TEST_BASE_URL || 'http://localhost:5005').replace(/\/$/, '');
+const BASE = (process.env.TEST_BASE_URL || 'http://127.0.0.1:5005').replace(/\/$/, '');
 const RUN_ID = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const NONCE_EMAIL = `piet-client-${RUN_ID}@aitag-test.local`;
 const NONCE_EXPERT = `piet-expert-${RUN_ID}@aitag-test.local`;
@@ -77,7 +77,7 @@ async function runPietSuite() {
     kernel.init(app);
     app.get('/healthz', (req, res) => res.json({ status: 'healthy' }));
     localServer = await new Promise((res) => {
-      const s = app.listen(5005, () => res(s));
+      const s = app.listen(5005, '127.0.0.1', () => res(s));
     });
     console.log(`✅ Ephemeral In-RAM server twin active on port 5005.\n`);
   }
