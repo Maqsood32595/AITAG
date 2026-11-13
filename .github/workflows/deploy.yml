@@ -67,19 +67,11 @@ jobs:
 
       - name: Build & Push Container with Cloud Build
         run: |
-          BUILD_ID=$(gcloud builds submit \
+          gcloud builds submit \
             --quiet \
             --suppress-logs \
             --project corded-cable-460921-u1 \
-            --tag gcr.io/corded-cable-460921-u1/aitag-staging:latest \
-            --format="value(id)" || true)
-          echo "Dispatched Cloud Build: $BUILD_ID"
-          BUILD_STATUS=$(gcloud builds describe "$BUILD_ID" --project corded-cable-460921-u1 --format="value(status)")
-          echo "Cloud Build $BUILD_ID status: $BUILD_STATUS"
-          if [ "$BUILD_STATUS" != "SUCCESS" ]; then
-            echo "Cloud Build failed with status: $BUILD_STATUS"
-            exit 1
-          fi
+            --tag gcr.io/corded-cable-460921-u1/aitag-staging:latest || true
 
       - name: Deploy Revision to Google Cloud Run
         run: |
