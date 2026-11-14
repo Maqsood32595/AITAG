@@ -116,11 +116,20 @@ const SignIn = () => {
             </Button>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 2.5 }} />
           <Typography sx={{ textAlign: 'center', fontSize: '0.9rem', color: '#64748b' }}>
             New to AITAG?{' '}
             <Link to={signUpLink} style={{ color: '#4f46e5', fontWeight: 700, textDecoration: 'none' }}>Create account</Link>
           </Typography>
+
+          <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px solid #f1f5f9', textAlign: 'center' }}>
+            <Typography sx={{ fontSize: '0.84rem', color: '#64748b' }}>
+              Want to deliver AI services on AITAG?{' '}
+              <Link to="/how-to-become-an-expert" style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none' }}>
+                How to Become an Expert →
+              </Link>
+            </Typography>
+          </Box>
         </Paper>
       </Container>
     </Box>

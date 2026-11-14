@@ -69,26 +69,9 @@ const SignUp = () => {
             Get affordable AI services for your products, website, logo, and marketing
           </Typography>
 
-          {/* Role Selection for Google & Email Registration */}
+          {/* Google 1-Click Registration (Clients & Businesses) */}
           <Box sx={{ mb: 2 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="role-label" sx={{ fontSize: '0.875rem' }}>I want to</InputLabel>
-              <Select
-                labelId="role-label"
-                value={form.role}
-                label="I want to"
-                onChange={e => setForm({ ...form, role: e.target.value })}
-                sx={{ borderRadius: '10px', fontSize: '0.875rem', bgcolor: '#ffffff' }}
-              >
-                <MenuItem value="client">Order AI Services (Customer / Small Business)</MenuItem>
-                <MenuItem value="freelancer">Offer AI Services (Verified AI Specialist)</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-
-          {/* Google 1-Click Registration */}
-          <Box sx={{ mb: 2 }}>
-            <GoogleAuthButton mode="signup" role={form.role} onError={err => setError(err)} />
+            <GoogleAuthButton mode="signup" role="client" onError={err => setError(err)} />
           </Box>
 
           <Divider sx={{ mb: 2, color: '#94a3b8', fontSize: '0.8rem' }}>
@@ -158,11 +141,20 @@ const SignUp = () => {
             </Button>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 2.5 }} />
           <Typography sx={{ textAlign: 'center', fontSize: '0.9rem', color: '#64748b' }}>
             Already have an account?{' '}
             <Link to={signInLink} style={{ color: '#4f46e5', fontWeight: 700, textDecoration: 'none' }}>Sign In</Link>
           </Typography>
+
+          <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px solid #f1f5f9', textAlign: 'center' }}>
+            <Typography sx={{ fontSize: '0.84rem', color: '#64748b' }}>
+              Want to deliver AI services on AITAG?{' '}
+              <Link to="/how-to-become-an-expert" style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none' }}>
+                How to Become an Expert →
+              </Link>
+            </Typography>
+          </Box>
         </Paper>
       </Container>
     </Box>

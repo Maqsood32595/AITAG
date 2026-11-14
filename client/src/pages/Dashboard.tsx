@@ -23,6 +23,7 @@ import ForumIcon from '@mui/icons-material/Forum';
 import PersonIcon from '@mui/icons-material/Person';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import SchoolIcon from '@mui/icons-material/School';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { tasksApi, bidsApi, invitationsApi, serviceOrdersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -62,6 +63,7 @@ const Dashboard = () => {
   const [serviceOrders, setServiceOrders] = useState<any[]>([]);
   const [allCount, setAllCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [expertApplications, setExpertApplications] = useState<any[]>([]);
   const [actionSuccess, setActionSuccess] = useState('');
   const [actionError, setActionError] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -140,6 +142,14 @@ const Dashboard = () => {
       bidsApi.getMy().then(r => setMyBids(r.data.bids || [])),
       invitationsApi.getMy().then(r => setInvitations(r.data || [])).catch(() => setInvitations([])),
       ordersPromise.then(r => setServiceOrders(r.data?.orders || [])).catch(() => setServiceOrders([])),
+      ...(user?.role === 'admin' ? [
+        fetch('/api/expert-applications', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+          .then(r => r.json())
+          .then(data => { if (Array.isArray(data)) setExpertApplications(data); })
+          .catch(() => {})
+      ] : [])
     ]).catch(console.error).finally(() => setLoading(false));
   };
 
@@ -157,6 +167,31 @@ const Dashboard = () => {
     setActionError(msg);
     setActionSuccess('');
     setTimeout(() => setActionError(''), 5000);
+  };
+
+  const handleEvaluateApplication = async (appId: string, status: 'approved' | 'rejected') => {
+    setActionLoading(`app_${appId}`);
+    try {
+      const res = await fetch(`/api/expert-applications/${appId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update application');
+      
+      setExpertApplications(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
+      showSuccessBanner(status === 'approved' 
+        ? '✅ Specialist approved! User has been granted the Verified Specialist role and listed in the AI Talent Directory.' 
+        : 'Application marked as rejected.');
+    } catch (err: any) {
+      showErrorBanner(err.message || 'Failed to evaluate application');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleAcceptInvite = async (inviteId: string) => {
@@ -1170,6 +1205,155 @@ const Dashboard = () => {
             </Stack>
           )}
         </Paper>
+
+        {/* Expert Applications Vetting Queue (Platform Oversight for Admin) */}
+        {isAdmin && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2.2,
+              borderRadius: '12px',
+              border: '1px solid rgba(79, 70, 229, 0.2)',
+              bgcolor: '#ffffff',
+              mb: 2.5,
+              boxShadow: '0 4px 18px rgba(79, 70, 229, 0.04)',
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: 'rgba(79, 70, 229, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <SchoolIcon sx={{ color: '#4f46e5', fontSize: 24 }} />
+                </Box>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
+                    Expert Applications & 1-Week Training Vetting Queue
+                  </Typography>
+                  <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
+                    Review specialist portfolio links, daily AI tools, and approve candidates for live client orders
+                  </Typography>
+                </Box>
+              </Box>
+              <Chip
+                label={`${expertApplications.filter(a => a.status === 'pending').length} Pending Review`}
+                sx={{
+                  bgcolor: expertApplications.some(a => a.status === 'pending') ? 'rgba(234, 88, 12, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                  color: expertApplications.some(a => a.status === 'pending') ? '#ea580c' : '#10b981',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                }}
+              />
+            </Box>
+
+            {expertApplications.length === 0 ? (
+              <Box sx={{ p: 3, textAlign: 'center', bgcolor: '#f8fafc', borderRadius: '10px', border: '1px dashed #e2e8f0' }}>
+                <Typography sx={{ color: '#64748b', fontSize: '0.9rem' }}>
+                  No specialist applications submitted yet. Applications from the <strong>/how-to-become-an-expert</strong> page will appear here.
+                </Typography>
+              </Box>
+            ) : (
+              <Stack spacing={1.8}>
+                {expertApplications.map((app) => (
+                  <Paper
+                    key={app.id}
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: '10px',
+                      bgcolor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      flexDirection: { xs: 'column', md: 'row' },
+                      justifyContent: 'space-between',
+                      alignItems: { xs: 'flex-start', md: 'center' },
+                      gap: 2
+                    }}
+                  >
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mb: 0.8 }}>
+                        <Typography sx={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>
+                          {app.name}
+                        </Typography>
+                        <Chip
+                          label={app.domain}
+                          size="small"
+                          sx={{ bgcolor: 'rgba(79, 70, 229, 0.08)', color: '#4f46e5', fontWeight: 700, fontSize: '0.75rem' }}
+                        />
+                        <Chip
+                          label={app.status.toUpperCase()}
+                          size="small"
+                          sx={{
+                            bgcolor: app.status === 'approved' ? '#ecfdf5' : app.status === 'rejected' ? '#fef2f2' : '#fffbeb',
+                            color: app.status === 'approved' ? '#047857' : app.status === 'rejected' ? '#b91c1c' : '#b45309',
+                            fontWeight: 700,
+                            fontSize: '0.72rem',
+                            border: `1px solid ${app.status === 'approved' ? '#a7f3d0' : app.status === 'rejected' ? '#fecaca' : '#fde68a'}`
+                          }}
+                        />
+                      </Box>
+                      <Typography sx={{ color: '#475569', fontSize: '0.85rem', mb: 0.5 }}>
+                        <strong>Email:</strong> {app.email} &bull; <strong>WhatsApp:</strong> {app.phone || 'N/A'}
+                      </Typography>
+                      <Typography sx={{ color: '#64748b', fontSize: '0.825rem', mb: 0.8 }}>
+                        <strong>Tools:</strong> {app.tools}
+                      </Typography>
+                      {app.portfolio_url && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <OpenInNewIcon sx={{ fontSize: 14, color: '#2563eb' }} />
+                          <Link
+                            href={app.portfolio_url.startsWith('http') ? app.portfolio_url : `https://${app.portfolio_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#2563eb', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none' }}
+                          >
+                            Inspect Portfolio / Work Samples &rarr;
+                          </Link>
+                        </Box>
+                      )}
+                    </Box>
+
+                    <Stack direction="row" spacing={1} sx={{ alignSelf: { xs: 'flex-start', md: 'center' } }}>
+                      {app.status !== 'approved' && (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={actionLoading === `app_${app.id}`}
+                          onClick={() => handleEvaluateApplication(app.id, 'approved')}
+                          sx={{
+                            bgcolor: '#10b981',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            borderRadius: '8px',
+                            '&:hover': { bgcolor: '#059669' }
+                          }}
+                        >
+                          Approve & Verify
+                        </Button>
+                      )}
+                      {app.status !== 'rejected' && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          disabled={actionLoading === `app_${app.id}`}
+                          onClick={() => handleEvaluateApplication(app.id, 'rejected')}
+                          sx={{
+                            color: '#64748b',
+                            borderColor: '#cbd5e1',
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            borderRadius: '8px',
+                            '&:hover': { borderColor: '#ef4444', color: '#ef4444', bgcolor: '#fef2f2' }
+                          }}
+                        >
+                          Reject
+                        </Button>
+                      )}
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+            )}
+          </Paper>
+        )}
 
         {/* All Marketplace Tasks & Bidding Pipeline (Platform Oversight for Admin - First Layout) */}
         {isAdmin && (

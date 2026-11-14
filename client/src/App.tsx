@@ -28,6 +28,7 @@ const Analytics = lazy(() => import('./pages/Analytics'));
 const PaymentCheckout = lazy(() => import('./pages/PaymentCheckout'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const HowToBecomeAnExpert = lazy(() => import('./pages/HowToBecomeAnExpert'));
 
 const Loader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -77,6 +78,9 @@ function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/how-to-become-an-expert" element={<HowToBecomeAnExpert />} />
+              <Route path="/become-expert" element={<HowToBecomeAnExpert />} />
+              <Route path="/become-an-expert" element={<HowToBecomeAnExpert />} />
 
               {/* Protected / App Routes (Secured against unauthorized / incognito access) */}
               <Route path="/all_tasks" element={<PrivateRoute><BrowseTasks /></PrivateRoute>} />

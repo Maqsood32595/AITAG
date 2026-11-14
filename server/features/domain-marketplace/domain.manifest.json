@@ -37,6 +37,14 @@
       "folder": "children/catalog",
       "routes": "children/catalog/routes.js",
       "enabled": true
+    },
+    {
+      "id": "aitag-expert-applications",
+      "name": "AITAG Expert Onboarding & Applications Engine",
+      "basePath": "/api/expert-applications",
+      "folder": "children/expert-applications",
+      "routes": "children/expert-applications/routes.js",
+      "enabled": true
     }
   ]
 }

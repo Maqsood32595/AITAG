@@ -73,11 +73,11 @@ class AuthService {
   }
 
   async register({ name, email, password, photoURL, role }) {
-    // Strict RBAC defense: public registration can only assign 'client' or 'freelancer'
+    // Strict RBAC defense: public registration defaults to 'client'
     const ALLOWED_ROLES = ['client', 'freelancer'];
     const safeRole = (role && ALLOWED_ROLES.includes(role.toLowerCase().trim()))
       ? role.toLowerCase().trim()
-      : 'freelancer';
+      : 'client';
 
     // Check if email already exists in Supabase
     try {

@@ -111,7 +111,8 @@ const Footer: React.FC = () => {
           <Typography sx={{ color: '#64748b', fontSize: '0.85rem' }}>
             © {new Date().getFullYear()} AITAG — Affordable AI Business Services. All rights reserved.
           </Typography>
-          <Box sx={{ display: 'flex', gap: 3 }}>
+          <Box sx={{ display: 'flex', gap: { xs: 2, sm: 3 }, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Link component={RouterLink} to="/how-to-become-an-expert" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>How to Become an Expert</Link>
             <Link component={RouterLink} to="/contact" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>Contact Us</Link>
             <Link component={RouterLink} to="/privacy" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>Privacy Policy</Link>
             <Link component={RouterLink} to="/terms" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>Terms of Service</Link>
