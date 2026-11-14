@@ -85,24 +85,16 @@ const Navbar = () => {
             cursor: 'pointer',
           }}
         >
-          <img src="/small_logo.png" alt="AITAG Logo" style={{ height: 44, objectFit: 'contain' }} />
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 900,
-              fontFamily: 'Inter, sans-serif',
-              letterSpacing: '-0.5px',
-              background: 'linear-gradient(135deg, #0f172a 0%, #4f46e5 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              ml: 1.2,
-              display: 'flex',
-              alignItems: 'center',
-              fontSize: '1.4rem',
+          <img
+            src="/images/aitag-logo.png?v=deepblack-down"
+            alt="AITAG — Find AI Skills, Get It Done"
+            style={{
+              height: 42,
+              width: 'auto',
+              objectFit: 'contain',
+              display: 'block',
             }}
-          >
-            AITAG
-          </Typography>
+          />
         </Box>
 
         {/* Desktop Nav Links */}

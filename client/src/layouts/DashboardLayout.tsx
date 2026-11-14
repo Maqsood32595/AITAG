@@ -219,32 +219,21 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1.5,
                 cursor: 'pointer !important',
                 userSelect: 'none',
               }}
               onClick={() => navigate('/')}
             >
-              <Box
-                sx={{
-                  width: 30,
-                  height: 30,
-                  background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '18px',
-                  boxShadow: '0 4px 12px rgba(79,70,229,0.3)',
+              <img
+                src="/images/aitag-logo.png?v=deepblack-down"
+                alt="AITAG"
+                style={{
+                  height: 34,
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block',
                 }}
-              >
-                🌟
-              </Box>
-              <Typography variant="h6" sx={{ letterSpacing: '-0.5px', fontWeight: 800 }}>
-                AITAG
-              </Typography>
+              />
             </Box>
           </Box>
 
