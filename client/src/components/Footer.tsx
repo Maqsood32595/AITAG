@@ -113,8 +113,8 @@ const Footer: React.FC = () => {
           </Typography>
           <Box sx={{ display: 'flex', gap: 3 }}>
             <Link component={RouterLink} to="/contact" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>Contact Us</Link>
-            <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#fff' } }}>Privacy</Link>
-            <Link href="#" underline="none" sx={{ color: '#64748b', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#fff' } }}>Terms</Link>
+            <Link component={RouterLink} to="/privacy" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>Privacy Policy</Link>
+            <Link component={RouterLink} to="/terms" underline="none" sx={{ color: '#94a3b8', fontSize: '0.85rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>Terms of Service</Link>
           </Box>
         </Box>
       </Container>

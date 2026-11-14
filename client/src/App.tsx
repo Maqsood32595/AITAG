@@ -26,6 +26,8 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Workflows = lazy(() => import('./pages/Workflows'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const PaymentCheckout = lazy(() => import('./pages/PaymentCheckout'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 
 const Loader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -71,6 +73,10 @@ function App() {
               <Route path="/talent" element={<AITalent />} />
               <Route path="/blog" element={<BlogList />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
 
               {/* Protected / App Routes (Secured against unauthorized / incognito access) */}
               <Route path="/all_tasks" element={<PrivateRoute><BrowseTasks /></PrivateRoute>} />
