@@ -9,8 +9,29 @@ const Footer: React.FC = () => {
         <Grid container spacing={4} sx={{ mb: 4 }}>
           {/* Brand Info */}
           <Grid item xs={12} md={5}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <img src="/logo.png" alt="AITAG Logo" style={{ height: 160, objectFit: 'contain' }} />
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: '#ffffff',
+                px: 2.5,
+                py: 1.5,
+                borderRadius: 2,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                mb: 2.5,
+              }}
+            >
+              <img
+                src="/images/aitag-logo.png?v=footer-card-v1"
+                alt="AITAG — Find AI Skills, Get It Done"
+                style={{
+                  height: 44,
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
             </Box>
             <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.7, maxWidth: 380, mb: 2 }}>
               Affordable AI-powered business services for everyday entrepreneurs. A trusted marketplace connecting small businesses with verified experts who deliver practical business outcomes.
