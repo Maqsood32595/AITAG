@@ -132,6 +132,7 @@ export const HowItWorks: React.FC = () => {
                 letterSpacing: '-1.2px',
                 fontFamily: 'Inter, sans-serif',
                 mb: 2,
+                textWrap: 'balance',
               }}
             >
               How AITAG Turns Your Ideas{' '}
@@ -155,12 +156,20 @@ export const HowItWorks: React.FC = () => {
                 maxWidth: 680,
                 mx: 'auto',
                 mb: 4,
+                textWrap: 'balance',
               }}
             >
               You don’t need to learn prompts or master AI tools. Tell us what your business needs, and our verified AI specialists craft high-quality deliverables with 100% payment protection.
             </Typography>
 
-            <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap" sx={{ gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
               <Button
                 variant="contained"
                 onClick={() => navigate('/services')}
@@ -170,8 +179,8 @@ export const HowItWorks: React.FC = () => {
                   fontWeight: 800,
                   fontSize: '0.95rem',
                   borderRadius: '24px',
-                  px: 3.5,
-                  py: 1.3,
+                  px: 4,
+                  py: 1.35,
                   textTransform: 'none',
                   boxShadow: '0 8px 20px rgba(37,99,235,0.25)',
                   '&:hover': {
@@ -181,30 +190,7 @@ export const HowItWorks: React.FC = () => {
               >
                 Explore Services & Packages
               </Button>
-              <Button
-                variant="outlined"
-                href="https://wa.me/919886031643?text=Hi%20AITAG%2C%20I%20want%20to%20learn%20how%20AITAG%20works"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  borderColor: '#cbd5e1',
-                  color: '#0f172a',
-                  fontWeight: 700,
-                  fontSize: '0.95rem',
-                  borderRadius: '24px',
-                  px: 3.5,
-                  py: 1.3,
-                  textTransform: 'none',
-                  bgcolor: '#ffffff',
-                  '&:hover': {
-                    bgcolor: '#f1f5f9',
-                    borderColor: '#94a3b8',
-                  },
-                }}
-              >
-                Chat on WhatsApp
-              </Button>
-            </Stack>
+            </Box>
           </Box>
         </Container>
       </Box>
@@ -236,17 +222,36 @@ export const HowItWorks: React.FC = () => {
                 color: '#0f172a',
                 fontFamily: 'Inter, sans-serif',
                 letterSpacing: '-0.6px',
-                mb: 1,
+                mb: 1.5,
+                textWrap: 'balance',
               }}
             >
               Watch How It Works (2-Minute Demo)
             </Typography>
-            <Typography sx={{ fontSize: '0.95rem', color: '#64748b', maxWidth: 620, mx: 'auto', mb: 3 }}>
+            <Typography
+              sx={{
+                fontSize: '0.95rem',
+                color: '#64748b',
+                maxWidth: 620,
+                mx: 'auto',
+                mb: 3.5,
+                textWrap: 'balance',
+              }}
+            >
               See how everyday entrepreneurs submit briefs, get tagged to vetted specialists, review samples, and approve final deliverables.
             </Typography>
 
             {/* Video Mode Switcher */}
-            <Stack direction="row" spacing={1.5} justifyContent="center" sx={{ mb: 3.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 1.5,
+                flexWrap: 'wrap',
+                mb: 3.5,
+              }}
+            >
               <Chip
                 label="⚡ 20-Sec Kinetic Overview"
                 clickable
@@ -285,7 +290,7 @@ export const HowItWorks: React.FC = () => {
                   },
                 }}
               />
-            </Stack>
+            </Box>
           </Box>
 
           <Box
@@ -314,12 +319,13 @@ export const HowItWorks: React.FC = () => {
               color: '#0f172a',
               fontFamily: 'Inter, sans-serif',
               letterSpacing: '-0.8px',
-              mb: 1,
+              mb: 1.5,
+              textWrap: 'balance',
             }}
           >
             The 4 Simple Stages of Every Project
           </Typography>
-          <Typography sx={{ fontSize: '1rem', color: '#64748b', maxWidth: 650, mx: 'auto' }}>
+          <Typography sx={{ fontSize: '1rem', color: '#64748b', maxWidth: 650, mx: 'auto', textWrap: 'balance' }}>
             Transparent milestone tracking with 100% payment escrow protection at every turn.
           </Typography>
         </Box>
@@ -415,12 +421,13 @@ export const HowItWorks: React.FC = () => {
                 color: '#0f172a',
                 fontFamily: 'Inter, sans-serif',
                 letterSpacing: '-0.6px',
-                mb: 1,
+                mb: 1.5,
+                textWrap: 'balance',
               }}
             >
               Frequently Asked Questions
             </Typography>
-            <Typography sx={{ fontSize: '0.95rem', color: '#64748b' }}>
+            <Typography sx={{ fontSize: '0.95rem', color: '#64748b', textWrap: 'balance' }}>
               Everything you need to know about working with AITAG.
             </Typography>
           </Box>
@@ -475,6 +482,7 @@ export const HowItWorks: React.FC = () => {
                 letterSpacing: '-0.8px',
                 fontFamily: 'Inter, sans-serif',
                 mb: 1.5,
+                textWrap: 'balance',
               }}
             >
               Ready to create something amazing for your business?
@@ -486,11 +494,20 @@ export const HowItWorks: React.FC = () => {
                 maxWidth: 620,
                 mx: 'auto',
                 mb: 3.5,
+                textWrap: 'balance',
               }}
             >
               Start for as low as ₹499 with 100% payment safety. No apps to learn.
             </Typography>
-            <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap" sx={{ gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 2,
+                flexWrap: 'wrap',
+              }}
+            >
               <Button
                 variant="contained"
                 onClick={() => navigate('/services')}
@@ -532,7 +549,7 @@ export const HowItWorks: React.FC = () => {
               >
                 Chat on WhatsApp
               </Button>
-            </Stack>
+            </Box>
           </Paper>
         </Container>
       </Box>

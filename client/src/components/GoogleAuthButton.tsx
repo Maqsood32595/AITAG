@@ -23,7 +23,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   mode = 'signin',
   onError
 }) => {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, logout } = useAuth();
   const navigate = useNavigate();
   const buttonRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
@@ -104,6 +104,13 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     setErrorMsg('');
     try {
       const res = await loginWithGoogle(response.credential, role);
+      if (mode === 'signup' && res && res.isNew === false) {
+        logout();
+        const msg = 'User already exists';
+        setErrorMsg(msg);
+        onError?.(msg);
+        return;
+      }
       const userRole = res?.user?.role || role;
       const searchParams = new URLSearchParams(window.location.search);
       const redirectTarget = searchParams.get('redirect');

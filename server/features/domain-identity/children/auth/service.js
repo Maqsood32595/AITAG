@@ -89,7 +89,7 @@ class AuthService {
           .single();
 
         if (existing) {
-          throw new Error('Email already registered');
+          throw new Error('User already exists');
         }
 
         const password_hash = await bcrypt.hash(password, 10);
@@ -112,16 +112,23 @@ class AuthService {
         }
       }
     } catch (e) {
-      if (e.message === 'Email already registered') throw e;
+      if (e.message === 'User already exists' || e.message === 'Email already registered') {
+        throw new Error('User already exists');
+      }
       console.warn('[AuthService] Supabase register fallback:', e.message);
     }
 
-    // In-memory registration fallback
+    // In-memory registration fallback (check for duplicate)
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (SEED_USERS.some(u => u.email === cleanEmail)) {
+      throw new Error('User already exists');
+    }
+
     const password_hash = await bcrypt.hash(password, 10);
     const newUser = {
       id: `user-${Date.now()}`,
       name,
-      email: (email || '').trim().toLowerCase(),
+      email: cleanEmail,
       role: safeRole,
       photo_url: photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
       password_hash,
