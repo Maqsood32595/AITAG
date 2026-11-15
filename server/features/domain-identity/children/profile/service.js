@@ -7,6 +7,7 @@ require('events').EventEmitter.defaultMaxListeners = 50;
 const fs = require('fs');
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');
+const supabase = require('../../../../supabase');
 
 const MAX_VIDEO_DURATION_SECONDS = 120; // 2 minutes strict policy
 
@@ -224,10 +225,121 @@ class ProfileService {
     return /^curated-/.test(userId);
   }
 
+  async syncProfileToSupabase(userId, profileData) {
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const payload = {
+          user_id: userId,
+          user_email: profileData.email || '',
+          headline: profileData.headline || '',
+          bio: profileData.bio || '',
+          hourly_rate: 0,
+          skills: Array.isArray(profileData.skills) ? profileData.skills : [],
+          links: profileData.links || {},
+          delivered_workflows: Array.isArray(profileData.deliveredWorkflows) ? profileData.deliveredWorkflows : [],
+          updated_at: new Date().toISOString()
+        };
+        await supabase
+          .from('aitag_profiles')
+          .upsert(payload, { onConflict: 'user_id' });
+      }
+    } catch (e) {
+      console.warn('[ProfileService] Supabase sync notice:', e.message);
+    }
+  }
+
   async getProfileByUserId(rawUserId) {
     const userId = this.normalizeUserId(rawUserId);
 
-    // 1. Check local disk persistence (if expert has customized / saved their profile)
+    // 1. Curated placeholder IDs have blank workflows until updated
+    if (this.isCuratedPlaceholder(userId)) {
+      return {
+        userId,
+        deliveredWorkflows: [],
+        skills: [],
+        links: {},
+        bio: ''
+      };
+    }
+
+    // 2. Check in-memory cache
+    const cached = PROFILES_CACHE.get(userId);
+    if (cached) return cached;
+
+    // 3. Query Supabase Database (aitag_profiles table) — Primary Persistent Source of Truth
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data: dbProfile, error: dbErr } = await supabase
+          .from('aitag_profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (dbProfile && !dbErr && Array.isArray(dbProfile.delivered_workflows) && dbProfile.delivered_workflows.length > 0) {
+          const profile = {
+            userId: dbProfile.user_id,
+            name: 'Specialist',
+            email: dbProfile.user_email || '',
+            role: 'freelancer',
+            photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+            serviceDomain: 'Product Visuals',
+            headline: dbProfile.headline || '',
+            bio: dbProfile.bio || '',
+            hourlyRate: 0,
+            skills: Array.isArray(dbProfile.skills) ? dbProfile.skills : [],
+            payoutUpi: 'expert1@okaxis',
+            links: dbProfile.links || {},
+            deliveredWorkflows: dbProfile.delivered_workflows,
+            updatedAt: dbProfile.updated_at
+          };
+
+          try {
+            const { data: uData } = await supabase
+              .from('aitag_users')
+              .select('name, role, photo_url')
+              .eq('id', userId)
+              .maybeSingle();
+
+            if (uData) {
+              if (uData.name) profile.name = uData.name;
+              if (uData.role) profile.role = uData.role;
+              if (uData.photo_url) profile.photoUrl = uData.photo_url;
+            }
+          } catch {}
+
+          PROFILES_CACHE.set(userId, profile);
+          try {
+            fs.writeFileSync(this.getLocalProfilePath(userId), JSON.stringify(profile, null, 2), 'utf8');
+          } catch {}
+          return profile;
+        }
+      }
+    } catch (e) {
+      console.warn('[ProfileService] Supabase read notice:', e.message);
+    }
+
+    // 4. Attempt to read from Google Cloud Storage
+    const bucket = this.getBucket();
+    if (bucket) {
+      try {
+        const gcsPath = `freelancers/${userId}/profile.json`;
+        const file = bucket.file(gcsPath);
+        const [exists] = await file.exists();
+        if (exists) {
+          const [content] = await file.download();
+          const parsed = JSON.parse(content.toString('utf8'));
+          PROFILES_CACHE.set(userId, parsed);
+          // Sync to Supabase in background
+          this.syncProfileToSupabase(userId, parsed).catch(() => {});
+          try {
+            fs.writeFileSync(this.getLocalProfilePath(userId), JSON.stringify(parsed, null, 2), 'utf8');
+          } catch {}
+          return parsed;
+        }
+      } catch (e) {}
+    }
+
+    // 5. Check local disk persistence (offline fallback only)
     try {
       const localFile = this.getLocalProfilePath(userId);
       if (fs.existsSync(localFile)) {
@@ -243,41 +355,7 @@ class ProfileService {
       }
     } catch (e) {}
 
-    // 2. Curated placeholder IDs have blank workflows until the expert updates their profile
-    if (this.isCuratedPlaceholder(userId)) {
-      return {
-        userId,
-        deliveredWorkflows: [],
-        skills: [],
-        links: {},
-        bio: ''
-      };
-    }
-
-    // 2. Check in-memory cache
-    const cached = PROFILES_CACHE.get(userId);
-    if (cached) return cached;
-
-    // 3. Attempt to read from Google Cloud Storage
-    const bucket = this.getBucket();
-    if (bucket) {
-      try {
-        const gcsPath = `freelancers/${userId}/profile.json`;
-        const file = bucket.file(gcsPath);
-        const [exists] = await file.exists();
-        if (exists) {
-          const [content] = await file.download();
-          const parsed = JSON.parse(content.toString('utf8'));
-          PROFILES_CACHE.set(userId, parsed);
-          try {
-            fs.writeFileSync(this.getLocalProfilePath(userId), JSON.stringify(parsed, null, 2), 'utf8');
-          } catch {}
-          return parsed;
-        }
-      } catch (e) {}
-    }
-
-    // 4. Clean Fallback Defaults
+    // 6. Clean Fallback Defaults
     const isUser1 = (userId === USER1_ID || userId === 'user1@aitag.com');
     const defaultProfile = {
       userId,
@@ -336,12 +414,15 @@ class ProfileService {
 
     PROFILES_CACHE.set(userId, updated);
 
-    // Save to local disk
+    // 1. Save to Supabase (aitag_profiles table)
+    await this.syncProfileToSupabase(userId, updated);
+
+    // 2. Save to local disk
     try {
       fs.writeFileSync(this.getLocalProfilePath(userId), JSON.stringify(updated, null, 2), 'utf8');
     } catch (e) {}
 
-    // Save to Google Cloud Storage
+    // 3. Save to Google Cloud Storage
     const bucket = this.getBucket();
     if (bucket) {
       try {

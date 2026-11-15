@@ -15,6 +15,9 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
+// Force PIET test harness to execute strictly against the isolated Dev / Standby Supabase replica
+process.env.USE_DEV_DB = 'true';
+
 const BASE = (process.env.TEST_BASE_URL || 'http://127.0.0.1:5005').replace(/\/$/, '');
 const RUN_ID = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const NONCE_EMAIL = `piet-client-${RUN_ID}@aitag-test.local`;

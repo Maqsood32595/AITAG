@@ -54,6 +54,41 @@ app.use((req, res, next) => {
 kernel.init(app);
 
 // -------------------------------------------------------------
+// Automated Database Backup Scheduler (Runs daily & persists to GCS)
+// -------------------------------------------------------------
+const { runDatabaseBackup } = require('./scripts/backup_database');
+
+// Non-blocking daily backup interval (every 24 hours)
+const BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const backupTimer = setInterval(() => {
+  runDatabaseBackup({ silent: true }).catch(err => {
+    console.warn('⚠️ [AutomatedBackup] Daily backup notice:', err.message);
+  });
+}, BACKUP_INTERVAL_MS);
+if (backupTimer.unref) backupTimer.unref();
+
+// Initial background snapshot after startup (delayed by 60s so boot is instantaneous)
+const initialBackupTimeout = setTimeout(() => {
+  const backupDir = path.join(__dirname, 'backups/database');
+  let recentBackupExists = false;
+  try {
+    if (fs.existsSync(backupDir)) {
+      const files = fs.readdirSync(backupDir).filter(f => f.startsWith('aitag_backup_') && f.endsWith('.json'));
+      const now = Date.now();
+      recentBackupExists = files.some(f => (now - fs.statSync(path.join(backupDir, f)).mtimeMs) < 12 * 60 * 60 * 1000);
+    }
+  } catch (e) {}
+
+  if (!recentBackupExists) {
+    console.log('📦 [AutomatedBackup] Taking scheduled unified database snapshot...');
+    runDatabaseBackup({ silent: true }).catch(err => {
+      console.warn('⚠️ [AutomatedBackup] Initial snapshot notice:', err.message);
+    });
+  }
+}, 60 * 1000);
+if (initialBackupTimeout.unref) initialBackupTimeout.unref();
+
+// -------------------------------------------------------------
 // Global Static Pipeline for Modern AITAG React Frontend (SPA)
 // -------------------------------------------------------------
 const clientDistPath = path.join(__dirname, '../client/dist');

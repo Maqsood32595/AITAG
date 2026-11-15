@@ -6,22 +6,23 @@
 > **Dashboard URL:** [Render Dashboard — aitag-dev](https://dashboard.render.com/web/srv-da3ibi3ncjis73cjo2t0)  
 > **Live Web App:** [https://aitag-dev.onrender.com](https://aitag-dev.onrender.com)  
 > **Git Branch:** `develop` (`Maqsood32595/AITAG`)  
-> **Supabase Project:** `trdwewugrqdpopzqhkuk` (`AITAG_DEV`)  
+> **Supabase Project:** `byekbjxiowkrtwpsxevz` (Unified Single Source of Truth)  
 
 ---
 
 ## 1. Overview & Architecture
 
-The `aitag-dev` service on Render serves as our live staging/development environment. It mirrors production infrastructure while isolating active development changes and testing new Fractal Kernel features against the dedicated Development Supabase database (`trdwewugrqdpopzqhkuk`).
+The `aitag-dev` service on Render serves as our live staging/development environment. It mirrors production infrastructure, utilizing the unified Supabase PostgreSQL cloud database (`byekbjxiowkrtwpsxevz`) across Local, Render, and Cloud Run to ensure zero data drift and instant visibility of all uploaded videos, profiles, tasks, and orders. Automated daily snapshots offload to Google Cloud Storage (`gs://shortshub_video_storage/backups/database/`).
 
 ```mermaid
 flowchart LR
-    A[Local Workstation\nPort 8000 / .env.development] -->|npm run test:piet| B(PIET 6-Gate Test)
+    A[Local Workstation\nPort 8000 / .env.development] -->|npm test| B(PIET 9-Gate Test)
     B -->|npm run build| C(Client Dist & Server Public Sync)
     C -->|git push origin develop| D[GitHub Repository\nBranch: develop]
     D -->|Webhook Trigger| E[Render Web Service\naitag-dev: srv-da3ibi3ncjis73cjo2t0]
     E -->|Express + Fractal Kernel| F[Live Dev Web App\nhttps://aitag-dev.onrender.com]
-    E -->|Database Queries| G[(Supabase Dev DB\ntrdwewugrqdpopzqhkuk)]
+    E -->|Database Queries| G[(Unified Supabase DB\nbyekbjxiowkrtwpsxevz)]
+    G -->|Automated Backups| H[Google Cloud Storage\ngs://shortshub_video_storage/backups/database/]
 ```
 
 ---
@@ -34,13 +35,13 @@ Configure these variables in the Render Dashboard under **aitag-dev** > **Settin
 | :--- | :--- | :--- |
 | `NODE_ENV` | `production` | Express production mode (or `development`) |
 | `PORT` | `10000` | Port assigned by Render router |
-| `SUPABASE_URL` | `https://trdwewugrqdpopzqhkuk.supabase.co` | Development Supabase endpoint |
-| `SUPABASE_ANON_KEY` | *(Dev Anon Public Key)* | Supabase Client-side SDK queries |
-| `SUPABASE_SERVICE_ROLE_KEY` | *(Dev Service Role Key)* | Server-side elevated DB operations |
-| `GCS_CREDENTIALS` | *(Base64 JSON)* | Google Cloud Storage for direct-to-bucket video uploads |
+| `SUPABASE_URL` | `https://byekbjxiowkrtwpsxevz.supabase.co` | Unified Supabase endpoint |
+| `SUPABASE_ANON_KEY` | *(Anon Public Key)* | Supabase Client-side SDK queries |
+| `SUPABASE_SERVICE_ROLE_KEY` | *(Service Role Key)* | Server-side elevated DB operations |
+| `GCS_CREDENTIALS` | *(Base64 JSON)* | Google Cloud Storage for direct-to-bucket video uploads & backups |
 
-> [!IMPORTANT]
-> Never mix Production Supabase keys (`byekbjxiowkrtwpsxevz`) into the `aitag-dev` Render environment. The Dev environment must strictly point to `trdwewugrqdpopzqhkuk`.
+> [!NOTE]
+> All environments now connect to the unified database (`byekbjxiowkrtwpsxevz`) as the single source of truth. Automated backups run on schedule and persist off-site to Google Cloud Storage.
 
 ---
 

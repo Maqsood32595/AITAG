@@ -7,6 +7,9 @@
     "build": "npm --prefix client install && npm --prefix client run build && node -e \"const fs=require('fs'); fs.cpSync('client/dist', 'server/public', {recursive: true});\"",
     "start": "node server/index.js",
     "dev": "node server/index.js",
+    "db:backup": "node server/scripts/backup_database.js",
+    "db:restore": "node server/scripts/restore_database.js",
+    "db:sync:prod-to-dev": "node server/scripts/sync_prod_to_dev.js",
     "test:piet": "node tests/piet/piet.mjs",
     "test": "node tests/piet/piet.mjs"
   },

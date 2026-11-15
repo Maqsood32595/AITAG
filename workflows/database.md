@@ -17,14 +17,22 @@
 
 ---
 
-## 1. Environments & Connection Registry
+## 1. Environments & Database Connection Registry
 
-The AITAG platform utilizes two segregated Supabase PostgreSQL cloud databases:
+The AITAG platform utilizes a **Production + Warm Standby Replica Architecture**:
 
-| Environment | Supabase Project Ref | Direct URL | Dashboard URL | Env File | Active Usage |
+| Environment | Supabase Project Ref | Direct URL | Dashboard URL | Env File / Source | Active Role |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Production** | `byekbjxiowkrtwpsxevz` | `https://byekbjxiowkrtwpsxevz.supabase.co` | [Supabase Prod Console](https://supabase.com/dashboard/project/byekbjxiowkrtwpsxevz) | `.env` | Live production traffic, hosted on Render (`https://aitag-dev.onrender.com/` / custom domain) |
-| **Development** | `trdwewugrqdpopzqhkuk` | `https://trdwewugrqdpopzqhkuk.supabase.co` | [Supabase Dev Console](https://supabase.com/dashboard/project/trdwewugrqdpopzqhkuk) | `.env.development` | Zero-Mock PIET test harness, local staging server, ephemeral integration testing |
+| **Production** | `byekbjxiowkrtwpsxevz` | `https://byekbjxiowkrtwpsxevz.supabase.co` | [Supabase Prod Console](https://supabase.com/dashboard/project/byekbjxiowkrtwpsxevz) | `.env` | **Primary Live Database:** Powers real user traffic on Render (`aitag-dev.onrender.com`) and Cloud Run (`shortshub.app` / `aitag.in`). |
+| **Development / Standby** | `trdwewugrqdpopzqhkuk` | `https://trdwewugrqdpopzqhkuk.supabase.co` | [Supabase Dev Console](https://supabase.com/dashboard/project/trdwewugrqdpopzqhkuk) | `.env.development` | **Living Replica & Testing Sandbox:** Powers local development (`localhost:8000`) and PIET automated test suites. Cloned from Production on demand or every 5 days via `npm run db:sync:prod-to-dev`. |
+
+> [!TIP]
+> **Production-to-Dev Synchronization:**  
+> To refresh the Local / Dev Standby database with the latest production users, profiles, workflow videos, and tasks:
+> ```powershell
+> npm run db:sync:prod-to-dev
+> ```
+> This takes ~6 seconds, performs a clean extraction and clone, and guarantees that local development is 100% aligned with live production while keeping real production customer data completely protected during local testing.
 
 ### IPv4 vs. IPv6 & Supabase Pooler Architecture
 Direct PostgreSQL connections (`db.<ref>.supabase.co:5432`) enforce IPv6. Many local ISP networks, Docker containers, and CI runners operate on IPv4.
@@ -564,4 +572,42 @@ Never drop active tables directly in production without a verified backup export
 | **Oct 2026** | `aitag_case_messages` | **Discussion Stream Persistence Migration** | Created flexible `order_id TEXT NOT NULL` schema supporting both pilot order IDs and marketplace task IDs, with JSONB deliverable attachments. |
 | **Oct 2026** | `aitag_packages` | **Package Asset Branding Sync** | Updated image URL for `ai-social-media-content-pack` from placeholder red `N` asset to Noir Theory text logo (`/images/packages/nt-text-logo.png`). |
 | **Oct 2026** | Dual Stores | **Durable JSON Metadata Stores** | Deployed `tasks_meta_store.json` and `case_discussions_store.json` to back up and instantly hydrate state on server restarts. |
+| **Nov 2026** | `aitag_profiles` | **Supabase Profiles Persistence Integration** | Integrated `ProfileService` with `aitag_profiles` table as primary source of truth, eliminating stale local JSON shadowing and restoring uploaded video visibility (`1794608454365_Gift_Wrapping_Video.mp4`). |
+| **Nov 2026** | Global Architecture | **Unified Database & Automated Cloud Storage Backups** | Unified all environments to `byekbjxiowkrtwpsxevz`. Deployed automated GCS database backup engine (`npm run db:backup`) to `gs://shortshub_video_storage/backups/database/` with 24h cron and dry-run restore capability. |
+
+---
+
+## 10. Automated Database Backup & Disaster Recovery Engine
+
+### Architecture
+To prevent any data loss or accidental overwrites across environments, an automated backup pipeline is deployed:
+
+```mermaid
+flowchart LR
+    A["Unified Supabase DB<br/>(byekbjxiowkrtwpsxevz)"] -->|Paginated Extract| B["Backup Engine<br/>server/scripts/backup_database.js"]
+    B -->|Serialize & GZIP| C["Local Backup<br/>server/backups/database/*.json.gz"]
+    B -->|Stream Upload| D["Google Cloud Storage<br/>gs://shortshub_video_storage/backups/database/"]
+    D -->|Update Pointer| E["latest.json Manifest"]
+```
+
+### Backup Capabilities & Commands
+- **On-Demand Full Backup:**
+  ```powershell
+  npm run db:backup
+  ```
+  Extracts all 9 tables (`aitag_users`, `aitag_profiles`, `aitag_tasks`, `aitag_bids`, `aitag_orders`, `aitag_packages`, `aitag_package_tiers`, `aitag_case_messages`, `aitag_invitations`) and local stores, serializes to JSON, gzips, saves to `server/backups/database/`, and uploads to `gs://shortshub_video_storage/backups/database/`.
+- **Automated Daily Trigger:**  
+  Integrated directly into `server/index.js` via an unref'd 24-hour background timer and a non-blocking initial startup snapshot check.
+- **Dry-Run Inspection & Restore:**
+  ```powershell
+  # Inspect latest local or cloud snapshot:
+  node server/scripts/restore_database.js --inspect
+
+  # Verify restore actions without altering data:
+  npm run db:restore -- --dry-run
+
+  # Execute live restore to Supabase:
+  npm run db:restore -- --execute --confirm=RESTORE_NOW
+  ```
+
 
