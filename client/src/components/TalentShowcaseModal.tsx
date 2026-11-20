@@ -174,13 +174,11 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
 }) => {
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   useEffect(() => {
     if (open && talent) {
       setLoading(true);
-      setActiveVideoUrl(null);
 
       // For curated placeholder IDs, start with empty workflows so we don't show fake data
       const isCuratedPlaceholder = /^curated-/.test(talent.id);
@@ -193,9 +191,6 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
         deliveredWorkflows: initialWorkflows,
         links: talent.links || {},
       });
-
-      const firstValidVideo = initialWorkflows.find((w: any) => w.demoVideoUrl)?.demoVideoUrl;
-      setActiveVideoUrl(firstValidVideo || null);
 
       // Fetch live profile — always use the server's data as source of truth
       profileApi.getById(talent.id)
@@ -210,9 +205,6 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                   ? res.data.deliveredWorkflows
                   : initialWorkflows,
             }));
-            const wfs = res.data.deliveredWorkflows || [];
-            const videoToPlay = wfs.find((w: any) => w.demoVideoUrl)?.demoVideoUrl;
-            if (videoToPlay) setActiveVideoUrl(videoToPlay);
           }
         })
         .catch(() => {})
@@ -308,13 +300,6 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
             ) : (
               <>
 
-            {/* Active Universal Video Player */}
-            {activeVideoUrl && (
-              <Box sx={{ mb: 3 }}>
-                <UniversalVideoPlayer url={activeVideoUrl} title="Delivered Workflow Video Walkthrough" />
-              </Box>
-            )}
-
             {/* 4 Core Services Filter Chips */}
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2.5 }}>
               {['All', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'].map((cat) => (
@@ -338,7 +323,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
             </Box>
 
             {/* Workflows Cards List */}
-            <Stack spacing={2.5}>
+            <Stack spacing={3}>
               {workflows
                 .map((wf: any) => ({
                   ...wf,
@@ -346,7 +331,6 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                 }))
                 .filter((wf: any) => selectedCategory === 'All' || wf.category === selectedCategory)
                 .map((wf: any, idx: number) => {
-                const isSelected = activeVideoUrl === wf.demoVideoUrl && !!wf.demoVideoUrl;
                 const parsedVideo = parseVideoSource(wf.demoVideoUrl);
 
                 return (
@@ -355,16 +339,19 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                     elevation={0}
                     sx={{
                       borderRadius: '16px',
-                      border: '1px solid',
-                      borderColor: isSelected ? '#4f46e5' : 'rgba(79,70,229,0.15)',
-                      bgcolor: isSelected ? 'rgba(79,70,229,0.03)' : '#ffffff',
-                      p: 2.5,
-                      transition: 'all 0.2s',
+                      border: '1px solid #e2e8f0',
+                      bgcolor: '#ffffff',
+                      p: { xs: 2, sm: 2.5 },
+                      transition: 'all 0.2s ease-in-out',
+                      '&:hover': {
+                        borderColor: 'rgba(79,70,229,0.3)',
+                        boxShadow: '0 8px 24px rgba(79,70,229,0.06)',
+                      }
                     }}
                   >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
                       <Box>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1, flexWrap: 'wrap', gap: 0.5 }}>
                           <Chip
                             label={wf.category || 'Workflow Automation'}
                             size="small"
@@ -387,23 +374,18 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                       </Box>
 
                       {wf.demoVideoUrl && (
-                        <Button
-                          variant={isSelected ? 'contained' : 'outlined'}
+                        <Chip
+                          icon={<PlayCircleFilledWhiteIcon sx={{ fontSize: '15px !important', color: '#4f46e5 !important' }} />}
+                          label="Video Walkthrough"
                           size="small"
-                          onClick={() => setActiveVideoUrl(wf.demoVideoUrl)}
-                          startIcon={<PlayCircleFilledWhiteIcon />}
                           sx={{
-                            borderRadius: '8px',
+                            bgcolor: 'rgba(79,70,229,0.08)',
+                            color: '#4f46e5',
                             fontWeight: 700,
-                            textTransform: 'none',
-                            fontSize: '0.8rem',
-                            ...(isSelected && {
-                              background: 'linear-gradient(135deg, #4f46e5, #0891b2)',
-                            }),
+                            fontSize: '0.72rem',
+                            borderRadius: '8px',
                           }}
-                        >
-                          {isSelected ? 'Playing Video' : 'Play Video Demo'}
-                        </Button>
+                        />
                       )}
                     </Box>
 
@@ -414,6 +396,22 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                         Impact: <span style={{ fontWeight: 400, color: '#334155' }}>{wf.businessImpact}</span>
                       </Typography>
                     </Box>
+
+                    {/* Directly Embedded Video Player in this Section */}
+                    {wf.demoVideoUrl && (
+                      <Box
+                        sx={{
+                          my: 2,
+                          borderRadius: '12px',
+                          overflow: 'hidden',
+                          border: '1px solid #e2e8f0',
+                          bgcolor: '#000000',
+                          boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
+                        }}
+                      >
+                        <UniversalVideoPlayer url={wf.demoVideoUrl} title={wf.title} />
+                      </Box>
+                    )}
 
                     {/* Tech Stack Chips */}
                     {wf.techStack && wf.techStack.length > 0 && (

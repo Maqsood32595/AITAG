@@ -42,7 +42,8 @@ export function parseVideoSource(rawUrl?: string) {
   let streamUrl = trimmed;
   if (streamUrl.startsWith('/api')) {
     const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const base = isLocal ? 'http://localhost:5005' : '';
+    const isPort8000 = typeof window !== 'undefined' && window.location.port === '8000';
+    const base = isLocal ? (isPort8000 ? '' : 'http://localhost:5005') : '';
     streamUrl = `${base}${streamUrl}`;
   }
 

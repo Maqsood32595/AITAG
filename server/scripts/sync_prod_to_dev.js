@@ -184,6 +184,22 @@ async function syncProdToDev() {
     }
   }
 
+  // Clear any local offline JSON caches so fresh Supabase data is served immediately
+  const localProfilesDir = path.resolve(__dirname, '../data/profiles');
+  if (fs.existsSync(localProfilesDir)) {
+    const files = fs.readdirSync(localProfilesDir);
+    let purgedCount = 0;
+    for (const f of files) {
+      if (f.endsWith('.json')) {
+        try {
+          fs.unlinkSync(path.join(localProfilesDir, f));
+          purgedCount++;
+        } catch {}
+      }
+    }
+    console.log(`   Local disk cache reset: purged ${purgedCount} stale offline profiles.`);
+  }
+
   const duration = ((Date.now() - startTime) / 1000).toFixed(2);
   console.log(`\n======================================================================`);
   console.log(`🎉 [AITAG Sync Engine] Sync completed in ${duration}s!`);
