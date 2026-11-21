@@ -285,7 +285,7 @@ class PaymentsService {
    */
   async getPaymentConfig(identifier, merchantConfig = {}) {
     const vpa = merchantConfig.vpa || process.env.MERCHANT_UPI_VPA || 'mohammedmaqsoodai@oksbi';
-    const displayName = merchantConfig.displayName || process.env.MERCHANT_NAME || 'Mohammed Maqsood';
+    const displayName = merchantConfig.displayName || process.env.MERCHANT_NAME || 'AITAG Escrow';
 
     // Check if identifier is a task
     let itemTitle = 'AITAG AI Service';

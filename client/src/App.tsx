@@ -42,7 +42,7 @@ import { useLocation } from 'react-router-dom';
 
 const ConditionalFooter = () => {
   const location = useLocation();
-  const dashboardRoutes = ['/dashboard', '/my_tasks', '/analytics', '/profile', '/account', '/workflows'];
+  const dashboardRoutes = ['/dashboard', '/my_tasks', '/analytics', '/profile', '/account', '/workflows', '/work-reels'];
   const isDashboardRoute = dashboardRoutes.some(
     (p) => location.pathname === p || location.pathname.startsWith(p + '/')
   );
@@ -96,6 +96,7 @@ function App() {
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/account" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/workflows" element={<PrivateRoute><Workflows /></PrivateRoute>} />
+              <Route path="/work-reels" element={<PrivateRoute><Workflows /></PrivateRoute>} />
             </Routes>
           </Suspense>
           <ConditionalFooter />

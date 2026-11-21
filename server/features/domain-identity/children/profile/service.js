@@ -50,7 +50,7 @@ const EXACT_4_MAQS_WORKFLOWS = [
     "title": "High-Converting 5-Page Mobile Business Website with WhatsApp CTA",
     "category": "Web & Digital Presence",
     "businessImpact": "Built mobile-friendly business website with instant WhatsApp click-to-chat button.",
-    "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-3%2F1795100852475_Website_Built_By_Gemma.mp4",
     "techStack": [
       "Mobile-First HTML5",
       "Cloudflare Pages",
@@ -65,7 +65,7 @@ const EXACT_4_MAQS_WORKFLOWS = [
     "title": "Studio-Grade AI Photo Transformation for Amazon & Meesho",
     "category": "Product Visuals",
     "businessImpact": "Converted product smartphone photos into clean, studio-lit catalogue listings for marketplace selling.",
-    "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-4%2F1795251034494_Mountview_Flowers_With_Voice_Loud.mp4",
     "techStack": [
       "Photoroom AI",
       "FLUX.1",
@@ -488,12 +488,15 @@ class ProfileService {
     }
   }
 
-  async uploadWorkflowVideoBuffer(userId, { workflowId, filename, buffer, mimeType, durationSeconds }) {
+  async uploadWorkflowVideoBuffer(userId, { workflowId, filename, buffer, mimeType, mediaType, durationSeconds }) {
     if (durationSeconds && Number(durationSeconds) > MAX_VIDEO_DURATION_SECONDS) {
       throw new Error(`Video exceeds maximum duration of ${MAX_VIDEO_DURATION_SECONDS}s`);
     }
 
-    const cleanFilename = (filename || 'demo.mp4').replace(/[^a-zA-Z0-9._-]/g, '_');
+    const isImage = (mimeType && mimeType.startsWith('image/')) || /\.(jpg|jpeg|png|webp|svg)$/i.test(filename || '');
+    const determinedType = mediaType || (isImage ? 'image' : 'video');
+    const defaultExt = isImage ? 'demo.png' : 'demo.mp4';
+    const cleanFilename = (filename || defaultExt).replace(/[^a-zA-Z0-9._-]/g, '_');
     const safeWfId = workflowId || 'wf-draft';
     const timestamp = Date.now();
     let streamUrl = '';
@@ -506,7 +509,7 @@ class ProfileService {
       try {
         const file = bucket.file(storagePath);
         await file.save(buffer, {
-          contentType: mimeType || 'video/mp4',
+          contentType: mimeType || (isImage ? 'image/png' : 'video/mp4'),
           resumable: false
         });
         streamUrl = `/api/profile/workflows/stream-video?path=${encodeURIComponent(storagePath)}`;
@@ -529,17 +532,21 @@ class ProfileService {
       storagePath = localFilePath;
     }
 
-    // Attach to profile workflow
+    // Attach to profile workflow / reel
     await this.attachVideoToWorkflow(userId, {
       workflowId: safeWfId,
       videoUrl: streamUrl,
-      durationSeconds
+      mediaUrl: streamUrl,
+      mediaType: determinedType,
+      durationSeconds: isImage ? undefined : durationSeconds
     });
 
     return {
       success: true,
       storagePath,
       videoUrl: streamUrl,
+      mediaUrl: streamUrl,
+      mediaType: determinedType,
       publicUrl: streamUrl
     };
   }
@@ -568,28 +575,37 @@ class ProfileService {
     return {
       signedUrl,
       storagePath,
-      videoUrl: streamUrl
+      videoUrl: streamUrl,
+      mediaUrl: streamUrl
     };
   }
 
-  async attachVideoToWorkflow(userId, { workflowId, videoUrl, durationSeconds }) {
+  async attachVideoToWorkflow(userId, { workflowId, videoUrl, mediaUrl, mediaType, durationSeconds }) {
     const profile = await this.getProfileByUserId(userId);
     const workflows = profile.deliveredWorkflows || [];
     const wfIndex = workflows.findIndex(w => w.id === workflowId);
 
+    const effectiveUrl = mediaUrl || videoUrl;
+    const isImage = mediaType === 'image' || /\.(jpg|jpeg|png|webp|svg)$/i.test(effectiveUrl || '');
+    const determinedType = mediaType || (isImage ? 'image' : 'video');
+
     if (wfIndex !== -1) {
-      workflows[wfIndex].demoVideoUrl = videoUrl;
+      workflows[wfIndex].demoVideoUrl = effectiveUrl;
+      workflows[wfIndex].mediaUrl = effectiveUrl;
+      workflows[wfIndex].mediaType = determinedType;
       if (durationSeconds) workflows[wfIndex].videoDurationSeconds = Number(durationSeconds);
       workflows[wfIndex].updatedAt = new Date().toISOString();
     } else {
       workflows.push({
         id: workflowId,
-        title: 'New Automated Workflow',
-        category: 'Automation & Growth',
-        businessImpact: 'Production-grade AI automation pipeline.',
-        demoVideoUrl: videoUrl,
+        title: 'New Work Reel',
+        category: 'Branding & Print',
+        businessImpact: 'Delivered client outcome.',
+        demoVideoUrl: effectiveUrl,
+        mediaUrl: effectiveUrl,
+        mediaType: determinedType,
         videoDurationSeconds: Number(durationSeconds || 0),
-        techStack: ['Python', 'FastAPI'],
+        techStack: ['AI Generative'],
         updatedAt: new Date().toISOString()
       });
     }

@@ -3,9 +3,9 @@ import {
   Box, Container, Typography, Paper, Grid, TextField, Button,
   Chip, Divider, Stack, Alert, Card, CardContent,
   Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress,
-  Tab, Tabs, IconButton, Tooltip
+  Tab, Tabs, IconButton, Tooltip, MenuItem, Select, FormControl, InputLabel,
+  Checkbox, FormControlLabel, ToggleButton, ToggleButtonGroup
 } from '@mui/material';
-import MenuItem from '@mui/material/MenuItem';
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddIcon from '@mui/icons-material/Add';
@@ -15,23 +15,61 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import UniversalVideoPlayer, { parseVideoSource } from '../components/UniversalVideoPlayer';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api';
 
-interface DeliveredWorkflow {
+export interface DeliveredWorkflow {
   id: string;
   title: string;
   category: string;
-  businessImpact: string;
+  description?: string;
+  displayHeadingOnVideo?: boolean;
   demoVideoUrl: string;
+  mediaUrl?: string;
+  mediaType?: 'video' | 'image';
   videoDurationSeconds?: number;
-  techStack: string[];
-  liveUrl: string;
+  businessImpact?: string;
+  techStack?: string[];
+  liveUrl?: string;
 }
+
+const WORKFLOW_DROPDOWN_OPTIONS = [
+  {
+    title: 'AI Vector Logo & Complete Business Branding Kit',
+    category: 'Branding & Print'
+  },
+  {
+    title: 'Viral 9:16 Promotional Video Reels with Indian AI Voiceover',
+    category: 'Social & Marketing'
+  },
+  {
+    title: 'High-Converting 5-Page Mobile Business Website with WhatsApp CTA',
+    category: 'Web & Digital Presence'
+  },
+  {
+    title: 'Studio-Grade AI Photo Transformation for Amazon & Meesho',
+    category: 'Product Visuals'
+  },
+  {
+    title: 'E-Commerce Product Listing Copy & A+ Content',
+    category: 'Branding & Print'
+  },
+  {
+    title: 'Automated Email Funnel & Customer Reactivation Sequence',
+    category: 'Social & Marketing'
+  }
+];
 
 export const Workflows: React.FC = () => {
   const navigate = useNavigate();
@@ -41,16 +79,23 @@ export const Workflows: React.FC = () => {
   const [workflows, setWorkflows] = useState<DeliveredWorkflow[]>([]);
   const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null);
 
-  // Modal State
+  // Modal State for Add / Edit
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWfId, setEditingWfId] = useState<string | null>(null);
-  const [wfTitle, setWfTitle] = useState('');
-  const [wfCategory, setWfCategory] = useState('');
-  const [wfImpact, setWfImpact] = useState('');
+  const [entryMode, setEntryMode] = useState<'catalog' | 'manual'>('catalog');
+  const [selectedDropdownWorkflow, setSelectedDropdownWorkflow] = useState<string>('');
+  const [wfCustomTitle, setWfCustomTitle] = useState('');
+  const [wfCategory, setWfCategory] = useState('Branding & Print');
+  const [wfDescription, setWfDescription] = useState('');
+  const [displayHeadingOnVideo, setDisplayHeadingOnVideo] = useState(true);
   const [wfVideoUrl, setWfVideoUrl] = useState('');
-  const [wfTechInput, setWfTechInput] = useState('');
-  const [wfLiveUrl, setWfLiveUrl] = useState('');
-  const [videoInputMode, setVideoInputMode] = useState<'upload' | 'youtube' | 'loom'>('upload');
+  const [wfMediaType, setWfMediaType] = useState<'video' | 'image'>('video');
+  const [mediaUploadTab, setMediaUploadTab] = useState<'upload' | 'youtube' | 'loom'>('upload');
+
+  // Preview Reel Modal State
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewReelIndex, setPreviewReelIndex] = useState(0);
+  const [previewMuted, setPreviewMuted] = useState(true);
 
   // Upload feedback
   const [uploading, setUploading] = useState(false);
@@ -71,7 +116,7 @@ export const Workflows: React.FC = () => {
         setActiveWorkflowId(list[0].id);
       }
     } catch (err: any) {
-      console.error('Failed to load workflows:', err);
+      console.error('Failed to load work reels:', err);
     } finally {
       setLoading(false);
     }
@@ -80,41 +125,57 @@ export const Workflows: React.FC = () => {
   const handleOpenModal = (wf?: DeliveredWorkflow) => {
     if (wf) {
       setEditingWfId(wf.id);
-      setWfTitle(wf.title);
+      const isPreset = WORKFLOW_DROPDOWN_OPTIONS.some(opt => opt.title === wf.title);
+      if (isPreset) {
+        setEntryMode('catalog');
+        setSelectedDropdownWorkflow(wf.title);
+        setWfCustomTitle('');
+      } else {
+        setEntryMode('manual');
+        setSelectedDropdownWorkflow(WORKFLOW_DROPDOWN_OPTIONS[0].title);
+        setWfCustomTitle(wf.title);
+      }
       setWfCategory(wf.category);
-      setWfImpact(wf.businessImpact);
-      setWfVideoUrl(wf.demoVideoUrl || '');
-      setWfTechInput(wf.techStack ? wf.techStack.join(', ') : '');
-      setWfLiveUrl(wf.liveUrl || '');
-      const parsed = parseVideoSource(wf.demoVideoUrl);
-      if (parsed.type === 'youtube') setVideoInputMode('youtube');
-      else if (parsed.type === 'loom') setVideoInputMode('loom');
-      else setVideoInputMode('upload');
+      setWfDescription(wf.description || '');
+      setDisplayHeadingOnVideo(wf.displayHeadingOnVideo !== false);
+      setWfVideoUrl(wf.demoVideoUrl || wf.mediaUrl || '');
+      setWfMediaType(wf.mediaType || (parseVideoSource(wf.demoVideoUrl || wf.mediaUrl).isImage ? 'image' : 'video'));
+      const parsed = parseVideoSource(wf.demoVideoUrl || wf.mediaUrl);
+      if (parsed.type === 'youtube') setMediaUploadTab('youtube');
+      else if (parsed.type === 'loom') setMediaUploadTab('loom');
+      else setMediaUploadTab('upload');
     } else {
       setEditingWfId(null);
-      setWfTitle('');
-      setWfCategory('Branding & Print');
-      setWfImpact('');
+      setEntryMode('catalog');
+      setSelectedDropdownWorkflow(WORKFLOW_DROPDOWN_OPTIONS[0].title);
+      setWfCategory(WORKFLOW_DROPDOWN_OPTIONS[0].category);
+      setWfCustomTitle('');
+      setWfDescription('');
+      setDisplayHeadingOnVideo(true);
       setWfVideoUrl('');
-      setWfTechInput('Recraft V3, Vectorizer.ai, Figma');
-      setWfLiveUrl('');
-      setVideoInputMode('upload');
+      setWfMediaType('video');
+      setMediaUploadTab('upload');
     }
     setErrorMsg(null);
     setUploadMsg(null);
     setIsModalOpen(true);
   };
 
+  // Dropdown template selection auto-populates category
+  const handleDropdownSelect = (templateTitle: string) => {
+    setSelectedDropdownWorkflow(templateTitle);
+    const found = WORKFLOW_DROPDOWN_OPTIONS.find(opt => opt.title === templateTitle);
+    if (found) {
+      setWfCategory(found.category);
+    }
+  };
+
   const handleSaveWorkflow = async () => {
-    if (!wfTitle.trim()) {
-      setErrorMsg('Please enter a workflow title');
+    const finalTitle = entryMode === 'catalog' ? selectedDropdownWorkflow : wfCustomTitle.trim();
+    if (!finalTitle) {
+      setErrorMsg(entryMode === 'catalog' ? 'Please select a workflow preset' : 'Please enter a heading for your Work Reel');
       return;
     }
-
-    const techStack = wfTechInput
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
 
     let updatedList: DeliveredWorkflow[] = [];
 
@@ -123,12 +184,13 @@ export const Workflows: React.FC = () => {
         if (w.id === editingWfId) {
           return {
             ...w,
-            title: wfTitle,
+            title: finalTitle,
             category: wfCategory,
-            businessImpact: wfImpact,
+            description: wfDescription.trim(),
+            displayHeadingOnVideo,
             demoVideoUrl: wfVideoUrl,
-            techStack,
-            liveUrl: wfLiveUrl
+            mediaUrl: wfVideoUrl,
+            mediaType: wfMediaType,
           };
         }
         return w;
@@ -136,12 +198,13 @@ export const Workflows: React.FC = () => {
     } else {
       const newWf: DeliveredWorkflow = {
         id: `wf-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-        title: wfTitle,
+        title: finalTitle,
         category: wfCategory,
-        businessImpact: wfImpact,
+        description: wfDescription.trim(),
+        displayHeadingOnVideo,
         demoVideoUrl: wfVideoUrl,
-        techStack,
-        liveUrl: wfLiveUrl
+        mediaUrl: wfVideoUrl,
+        mediaType: wfMediaType,
       };
       updatedList = [...workflows, newWf];
       setActiveWorkflowId(newWf.id);
@@ -153,14 +216,14 @@ export const Workflows: React.FC = () => {
       setWorkflows(updatedList);
       setIsModalOpen(false);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to save workflow');
+      setErrorMsg(err.message || 'Failed to save work reel');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteWorkflow = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this delivered workflow case study?')) return;
+    if (!window.confirm('Are you sure you want to delete this Work Reel?')) return;
     const updatedList = workflows.filter(w => w.id !== id);
     try {
       setSaving(true);
@@ -170,13 +233,14 @@ export const Workflows: React.FC = () => {
         setActiveWorkflowId(updatedList[0]?.id || null);
       }
     } catch (err: any) {
-      alert('Failed to delete workflow: ' + err.message);
+      alert('Failed to delete work reel: ' + err.message);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleGcsFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handles both video and picture uploads to cloud storage
+  const handleMediaFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -184,6 +248,30 @@ export const Workflows: React.FC = () => {
     setUploadMsg(null);
     setUploading(true);
 
+    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|svg|gif)$/i.test(file.name);
+
+    if (isImage) {
+      try {
+        setUploadMsg(`Uploading ${file.name} to Cloud Storage...`);
+        const formData = new FormData();
+        formData.append('media', file);
+        formData.append('workflowId', editingWfId || 'wf-draft');
+        formData.append('mediaType', 'image');
+
+        const res = await profileApi.uploadVideoDirect(formData);
+        const { publicUrl } = res.data;
+        setWfVideoUrl(publicUrl);
+        setWfMediaType('image');
+        setUploadMsg('✅ Photo / Picture Reel uploaded successfully!');
+      } catch (err: any) {
+        setErrorMsg(err?.response?.data?.error || err.message || 'Upload failed');
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
+
+    // Handle Video File
     const videoObj = document.createElement('video');
     videoObj.preload = 'metadata';
     videoObj.src = URL.createObjectURL(file);
@@ -193,7 +281,7 @@ export const Workflows: React.FC = () => {
       const durationSeconds = Math.round(videoObj.duration);
 
       if (durationSeconds > 120) {
-        setErrorMsg(`⚠️ Video is too long (${durationSeconds}s). Maximum allowed length is 2 minutes (120s).`);
+        setErrorMsg(`⚠️ Video is too long (${durationSeconds}s). Maximum allowed length for reels is 2 minutes (120s).`);
         setUploading(false);
         return;
       }
@@ -201,14 +289,16 @@ export const Workflows: React.FC = () => {
       try {
         setUploadMsg(`Uploading ${file.name} (${durationSeconds}s) to Google Cloud...`);
         const formData = new FormData();
-        formData.append('video', file);
+        formData.append('media', file);
         formData.append('workflowId', editingWfId || 'wf-draft');
+        formData.append('mediaType', 'video');
         formData.append('durationSeconds', String(durationSeconds));
 
         const res = await profileApi.uploadVideoDirect(formData);
         const { publicUrl } = res.data;
         setWfVideoUrl(publicUrl);
-        setUploadMsg('✅ Video uploaded successfully to Google Cloud Storage!');
+        setWfMediaType('video');
+        setUploadMsg('✅ Video Reel uploaded successfully to Cloud Storage!');
       } catch (err: any) {
         setErrorMsg(err?.response?.data?.error || err.message || 'Upload failed');
       } finally {
@@ -217,165 +307,192 @@ export const Workflows: React.FC = () => {
     };
 
     videoObj.onerror = () => {
-      setErrorMsg('Could not read video file. Please ensure it is a valid MP4/WebM video.');
+      setErrorMsg('Could not read media file. Please ensure it is a valid MP4/WebM video or PNG/JPG image.');
       setUploading(false);
     };
   };
 
+  const handleOpenPreview = (index: number) => {
+    setPreviewReelIndex(index);
+    setPreviewModalOpen(true);
+  };
+
+  // Keyboard Down/Up arrow listener for preview reel modal
+  useEffect(() => {
+    if (!previewModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        setPreviewReelIndex(prev => Math.min(prev + 1, workflows.length - 1));
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        setPreviewReelIndex(prev => Math.max(prev - 1, 0));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [previewModalOpen, workflows.length]);
+
   const activeWf = workflows.find(w => w.id === activeWorkflowId) || workflows[0];
+  const currentPreviewReel = workflows[previewReelIndex] || workflows[0];
 
   return (
     <DashboardLayout>
       <Container maxWidth="lg">
         {/* Header Navigation */}
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2.5 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3, flexWrap: 'wrap', gap: 1.5 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <IconButton onClick={() => navigate('/profile')} sx={{ bgcolor: '#fff', border: '1px solid #e2e8f0' }}>
               <ArrowBackIcon sx={{ color: '#0f172a' }} />
             </IconButton>
             <Box>
-              <Typography variant="h5" fontWeight={800} color="#0f172a">
-                🎬 Delivered Services & Work Samples
+              <Typography variant="h5" fontWeight={850} color="#0f172a" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                🎬 Work Reels Studio
               </Typography>
               <Typography variant="body2" color="#64748b">
-                Showcase working AI automations with Google Cloud MP4 videos, YouTube demos, or Loom walkthroughs.
+                Upload and manage delivered video reels and high-resolution picture deliverables. Visible in the public Work Reels feed.
               </Typography>
             </Box>
           </Stack>
 
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenModal()}
-            sx={{
-              bgcolor: '#2563eb',
-              textTransform: 'none',
-              fontWeight: 700,
-              px: 3,
-              py: 1.2,
-              borderRadius: 2.5,
-              '&:hover': { bgcolor: '#1d4ed8' }
-            }}
-          >
-            Add New Workflow
-          </Button>
+          <Stack direction="row" spacing={1.5}>
+            {workflows.length > 0 && (
+              <Button
+                variant="outlined"
+                startIcon={<VisibilityIcon />}
+                onClick={() => handleOpenPreview(0)}
+                sx={{
+                  borderRadius: 2.5,
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  borderColor: 'rgba(79,70,229,0.3)',
+                  color: '#4f46e5',
+                  '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' }
+                }}
+              >
+                Preview Reels Feed
+              </Button>
+            )}
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenModal()}
+              sx={{
+                background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                textTransform: 'none',
+                fontWeight: 700,
+                px: 3,
+                py: 1.1,
+                borderRadius: 2.5,
+                boxShadow: '0 4px 14px rgba(79,70,229,0.25)'
+              }}
+            >
+              + Upload Work Reel
+            </Button>
+          </Stack>
         </Stack>
 
         {loading ? (
           <Box sx={{ textAlign: 'center', py: 8 }}>
-            <CircularProgress />
+            <CircularProgress sx={{ color: '#4f46e5' }} />
           </Box>
         ) : workflows.length === 0 ? (
-          <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 3, bgcolor: '#fff', border: '1px dashed #cbd5e1' }}>
-            <VideoLibraryIcon sx={{ fontSize: 48, color: '#94a3b8', mb: 2 }} />
-            <Typography variant="h6" fontWeight={700} color="#1e293b" gutterBottom>
-              No Workflows Added Yet
+          <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 4, bgcolor: '#fff', border: '1px dashed #cbd5e1' }}>
+            <VideoLibraryIcon sx={{ fontSize: 52, color: '#94a3b8', mb: 2 }} />
+            <Typography variant="h6" fontWeight={800} color="#0f172a" gutterBottom>
+              No Work Reels Uploaded Yet
             </Typography>
-            <Typography variant="body2" color="#64748b" sx={{ mb: 3 }}>
-              Add your first Delivered Workflow case study with a video demo to show clients your real-world AI automations.
+            <Typography variant="body2" color="#64748b" sx={{ mb: 3, maxWidth: 460, mx: 'auto' }}>
+              Upload your first video reel or image case study. Potential clients browsing the Verified Experts directory can scroll down through your reels to see your quality.
             </Typography>
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenModal()} sx={{ bgcolor: '#2563eb', textTransform: 'none' }}>
-              Create Workflow
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenModal()}
+              sx={{
+                background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                textTransform: 'none',
+                fontWeight: 700,
+                borderRadius: 2.5,
+                px: 3
+              }}
+            >
+              Upload Your First Reel
             </Button>
           </Paper>
         ) : (
           <Grid container spacing={3}>
-            {/* Active Video Player Showcase */}
-            {activeWf && (
-              <Grid size={{ xs: 12 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, bgcolor: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', mb: 2 }}>
-                  <Typography variant="overline" color="#2563eb" fontWeight={800} letterSpacing={1}>
-                    ▶️ ACTIVE VIDEO DEMO
-                  </Typography>
-                  <Typography variant="h5" fontWeight={800} color="#0f172a" sx={{ mb: 2 }}>
-                    {activeWf.title}
-                  </Typography>
-
-                  <UniversalVideoPlayer url={activeWf.demoVideoUrl} title={activeWf.title} />
-
-                  <Box sx={{ mt: 3, p: 2.5, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0' }}>
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      <TrendingUpIcon sx={{ color: '#16a34a' }} />
-                      <Typography variant="subtitle2" fontWeight={700} color="#166534">
-                        Business Impact:
-                      </Typography>
-                      <Typography variant="body2" color="#166534">
-                        {activeWf.businessImpact}
-                      </Typography>
-                    </Stack>
-                  </Box>
-                </Paper>
-              </Grid>
-            )}
-
-            {/* Individual Workflow Cards */}
-            {workflows.map((wf) => {
-              const isSelected = activeWf?.id === wf.id;
-              const videoParsed = parseVideoSource(wf.demoVideoUrl);
+            {workflows.map((wf, idx) => {
+              const mediaParsed = parseVideoSource(wf.demoVideoUrl || wf.mediaUrl, wf.mediaType);
+              const isImage = wf.mediaType === 'image' || mediaParsed.isImage;
 
               return (
-                <Grid size={{ xs: 12, md: 6 }} key={wf.id}>
+                <Grid item xs={12} md={6} key={wf.id}>
                   <Card
                     sx={{
-                      borderRadius: 3,
-                      border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                      boxShadow: isSelected ? '0 8px 25px rgba(37,99,235,0.1)' : '0 2px 10px rgba(0,0,0,0.02)',
+                      borderRadius: 3.5,
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
                       transition: 'all 0.2s ease',
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      bgcolor: '#fff'
+                      bgcolor: '#fff',
+                      '&:hover': {
+                        borderColor: 'rgba(79,70,229,0.3)',
+                        boxShadow: '0 8px 24px rgba(79,70,229,0.08)'
+                      }
                     }}
                   >
                     <CardContent sx={{ p: 3, flexGrow: 1 }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
                         <Chip
-                          label={wf.category}
+                          label={`Reel #${idx + 1} • ${wf.category}`}
                           size="small"
-                          sx={{ bgcolor: '#e0e7ff', color: '#3730a3', fontWeight: 700, fontSize: '0.75rem' }}
+                          sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 800, fontSize: '0.72rem' }}
                         />
-                        {videoParsed.type !== 'none' ? (
-                          <Chip
-                            icon={videoParsed.type === 'youtube' ? <YouTubeIcon sx={{ fontSize: 16 }} /> : <VideoLibraryIcon sx={{ fontSize: 16 }} />}
-                            label={videoParsed.type === 'youtube' ? 'YouTube' : videoParsed.type === 'loom' ? 'Loom' : 'GCS MP4'}
-                            size="small"
-                            sx={{ bgcolor: '#f1f5f9', color: '#475569', fontWeight: 600, fontSize: '0.7rem' }}
-                          />
-                        ) : (
-                          <Chip
-                            label="No Video Demo"
-                            size="small"
-                            variant="outlined"
-                            sx={{ borderColor: '#e2e8f0', color: '#94a3b8', fontWeight: 500, fontSize: '0.7rem' }}
-                          />
-                        )}
+                        <Chip
+                          icon={isImage ? <PhotoCameraIcon sx={{ fontSize: '14px !important' }} /> : <VideoLibraryIcon sx={{ fontSize: '14px !important' }} />}
+                          label={isImage ? 'Photo Reel' : mediaParsed.type === 'youtube' ? 'YouTube' : mediaParsed.type === 'loom' ? 'Loom' : 'Cloud Video'}
+                          size="small"
+                          sx={{ bgcolor: '#f1f5f9', color: '#475569', fontWeight: 700, fontSize: '0.7rem' }}
+                        />
                       </Stack>
 
-                      <Typography variant="h6" fontWeight={800} color="#0f172a" sx={{ mb: 1.5, lineHeight: 1.3 }}>
+                      {/* Prominent Reel Heading */}
+                      <Typography variant="h6" fontWeight={850} color="#0f172a" sx={{ mb: 1.5, lineHeight: 1.3 }}>
                         {wf.title}
                       </Typography>
 
-                      <Typography variant="body2" color="#475569" sx={{ mb: 2, minHeight: 40 }}>
-                        {wf.businessImpact}
-                      </Typography>
+                      {/* In-Card Media Player */}
+                      <Box sx={{ my: 2, borderRadius: 2, overflow: 'hidden', border: '1px solid #e2e8f0', bgcolor: '#090d16' }}>
+                        <UniversalVideoPlayer
+                          url={wf.demoVideoUrl || wf.mediaUrl}
+                          title={wf.title}
+                          mediaType={wf.mediaType}
+                          autoPlay={false}
+                          muted={true}
+                          maxHeight={260}
+                        />
+                      </Box>
 
-                      <Stack direction="row" flexWrap="wrap" gap={0.8} sx={{ mb: 3 }}>
-                        {wf.techStack?.map(t => (
-                          <Chip key={t} label={t} size="small" variant="outlined" sx={{ borderColor: '#cbd5e1', color: '#334155', fontSize: '0.75rem' }} />
-                        ))}
-                      </Stack>
-
-                      <Divider sx={{ my: 2 }} />
+                      <Divider sx={{ my: 1.5 }} />
 
                       <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
                         <Button
-                          variant={isSelected ? 'contained' : 'outlined'}
+                          variant="outlined"
                           size="small"
-                          startIcon={<PlayCircleFilledWhiteIcon />}
-                          onClick={() => setActiveWorkflowId(wf.id)}
-                          sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2 }}
+                          startIcon={<VisibilityIcon />}
+                          onClick={() => handleOpenPreview(idx)}
+                          sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            borderRadius: 2,
+                            color: '#4f46e5',
+                            borderColor: 'rgba(79,70,229,0.3)'
+                          }}
                         >
-                          {isSelected ? 'Playing' : 'Play Demo'}
+                          Preview as Reel
                         </Button>
 
                         <Stack direction="row" spacing={1}>
@@ -395,126 +512,249 @@ export const Workflows: React.FC = () => {
           </Grid>
         )}
 
-        {/* Workflow Creation & Editing Dialog */}
+        {/* ================================================================= */}
+        {/* WORK REEL UPLOAD & EDIT DIALOG                                     */}
+        {/* ================================================================= */}
         <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle sx={{ fontWeight: 800, color: '#0f172a', borderBottom: '1px solid #e2e8f0' }}>
-            {editingWfId ? '✏️ Edit Delivered Workflow' : '✨ Add Delivered Workflow & Case Study'}
+          <DialogTitle sx={{ fontWeight: 850, color: '#0f172a', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h6" fontWeight={850}>
+                {editingWfId ? '✏️ Edit Work Reel' : '✨ Upload Work Reel (Video or Photo)'}
+              </Typography>
+            </Box>
+            <IconButton size="small" onClick={() => setIsModalOpen(false)} sx={{ color: '#94a3b8' }}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
           </DialogTitle>
           <DialogContent sx={{ pt: 3 }}>
             {errorMsg && <Alert severity="error" sx={{ mb: 2.5 }}>{errorMsg}</Alert>}
             {uploadMsg && <Alert severity="success" sx={{ mb: 2.5 }}>{uploadMsg}</Alert>}
 
             <Stack spacing={2.5} sx={{ mt: 1 }}>
-              <TextField
-                label="Workflow Title"
-                placeholder="e.g. AI Vector Logo & Complete Business Branding Kit"
-                value={wfTitle}
-                onChange={e => setWfTitle(e.target.value)}
-                fullWidth
-                required
-              />
+              {/* Option Selector Toggle: Catalog Workflow vs Manual Entry */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Workflow Entry Mode
+                </Typography>
+                <ToggleButtonGroup
+                  value={entryMode}
+                  exclusive
+                  onChange={(_, newMode) => {
+                    if (newMode) setEntryMode(newMode);
+                  }}
+                  fullWidth
+                  size="small"
+                  sx={{
+                    bgcolor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 2.5,
+                    p: 0.5,
+                    '& .MuiToggleButton-root': {
+                      borderRadius: '8px !important',
+                      border: 'none',
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      py: 1,
+                      color: '#64748b',
+                      '&.Mui-selected': {
+                        bgcolor: '#ffffff',
+                        color: '#4f46e5',
+                        boxShadow: '0 2px 8px rgba(79,70,229,0.15)',
+                        fontWeight: 800,
+                      }
+                    }
+                  }}
+                >
+                  <ToggleButton value="catalog">
+                    🎯 Select from Catalog Workflows
+                  </ToggleButton>
+                  <ToggleButton value="manual">
+                    ✍️ Manual Entry (Custom Deliverable)
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
 
-              <TextField
-                select
-                label="Service Category"
-                value={wfCategory || 'Branding & Print'}
-                onChange={e => setWfCategory(e.target.value)}
-                fullWidth
-              >
-                <MenuItem value="Branding & Print">Branding & Print (Logo Design & Branding Kit)</MenuItem>
-                <MenuItem value="Social & Marketing">Social & Marketing (Promo Reels & Videos)</MenuItem>
-                <MenuItem value="Web & Digital Presence">Web & Digital Presence (5-Page Website)</MenuItem>
-                <MenuItem value="Product Visuals">Product Visuals (AI Photo Makeover)</MenuItem>
-              </TextField>
+              {/* MODE 1: Catalog Workflow Preset Dropdown */}
+              {entryMode === 'catalog' && (
+                <Box sx={{ p: 2, bgcolor: 'rgba(79,70,229,0.03)', borderRadius: 2.5, border: '1px solid rgba(79,70,229,0.18)' }}>
+                  <Typography variant="subtitle2" fontWeight={800} color="#4f46e5" sx={{ mb: 0.5 }}>
+                    🎯 Select Workflow Preset
+                  </Typography>
+                  <Typography variant="caption" color="#64748b" display="block" sx={{ mb: 1.5 }}>
+                    Choose an official catalog workflow. Category is automatically linked to your selection.
+                  </Typography>
 
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="workflow-template-label">Choose Workflow Preset</InputLabel>
+                    <Select
+                      labelId="workflow-template-label"
+                      label="Choose Workflow Preset"
+                      value={selectedDropdownWorkflow}
+                      onChange={(e) => handleDropdownSelect(e.target.value)}
+                    >
+                      {WORKFLOW_DROPDOWN_OPTIONS.map((opt) => (
+                        <MenuItem key={opt.title} value={opt.title}>
+                          <strong>{opt.category}</strong>: {opt.title}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+
+              {/* MODE 2: Manual Custom Entry */}
+              {entryMode === 'manual' && (
+                <Stack spacing={2} sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 2.5, border: '1px solid #e2e8f0' }}>
+                  <Typography variant="subtitle2" fontWeight={800} color="#0f172a">
+                    ✍️ Custom Deliverable / Reel Details
+                  </Typography>
+
+                  <TextField
+                    label="Reel Heading (Custom Topic) *"
+                    placeholder="e.g. 3D Architectural AI Walkthrough for Luxury Villa"
+                    value={wfCustomTitle}
+                    onChange={e => setWfCustomTitle(e.target.value)}
+                    helperText="This custom heading will be associated with this reel."
+                    fullWidth
+                    required
+                  />
+
+                  <TextField
+                    select
+                    size="small"
+                    label="Service Category"
+                    value={wfCategory || 'Branding & Print'}
+                    onChange={e => setWfCategory(e.target.value)}
+                    fullWidth
+                  >
+                    <MenuItem value="Branding & Print">Branding & Print (Logo Design & Branding Kit)</MenuItem>
+                    <MenuItem value="Social & Marketing">Social & Marketing (Promo Reels & Videos)</MenuItem>
+                    <MenuItem value="Web & Digital Presence">Web & Digital Presence (5-Page Website)</MenuItem>
+                    <MenuItem value="Product Visuals">Product Visuals (AI Photo Makeover)</MenuItem>
+                  </TextField>
+                </Stack>
+              )}
+
+              {/* Description / Deliverable Notes (Optional) */}
               <TextField
-                label="Business Impact Metrics"
-                placeholder="e.g. Generated scalable vector SVG logo and print-ready CMYK visiting cards in 48 hours, lifting brand credibility."
-                value={wfImpact}
-                onChange={e => setWfImpact(e.target.value)}
+                label="Reel Description / Case Notes (Optional)"
+                placeholder="e.g. Generated vector logo and complete visual kit for an organic grocery brand..."
+                value={wfDescription}
+                onChange={e => setWfDescription(e.target.value)}
                 multiline
                 rows={2}
                 fullWidth
+                helperText="Optional context or client results for this deliverable."
               />
 
-              <TextField
-                label="Tech Stack (comma separated)"
-                placeholder="Recraft V3, Vectorizer.ai, Figma, Print CMYK PDF, WhatsApp DP"
-                value={wfTechInput}
-                onChange={e => setWfTechInput(e.target.value)}
-                fullWidth
-              />
+              {/* "Display this heading on video" Checkbox */}
+              <Box sx={{ p: 1.5, bgcolor: '#f1f5f9', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={displayHeadingOnVideo}
+                      onChange={e => setDisplayHeadingOnVideo(e.target.checked)}
+                      sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" fontWeight={800} color="#0f172a">
+                        Display this heading on the video reel overlay
+                      </Typography>
+                      <Typography variant="caption" color="#64748b" display="block">
+                        When enabled, the heading & description appear neatly over the video. Uncheck for pure edge-to-edge media without any overlay.
+                      </Typography>
+                    </Box>
+                  }
+                />
+              </Box>
 
-              <TextField
-                label="Live Project / GitHub Repository Link"
-                placeholder="https://aitag.in/#packages"
-                value={wfLiveUrl}
-                onChange={e => setWfLiveUrl(e.target.value)}
-                fullWidth
-              />
-
-              {/* Video Demo Section */}
-              <Box sx={{ p: 2.5, bgcolor: '#f8fafc', borderRadius: 2.5, border: '1px solid #e2e8f0' }}>
-                <Typography variant="subtitle2" fontWeight={800} color="#0f172a" gutterBottom>
-                  🎬 Video Demo Integration (GCS MP4, YouTube, or Loom)
+              {/* 7. Media Upload Section (Videos & Pictures) */}
+              <Box sx={{ p: 2.5, bgcolor: '#0f172a', borderRadius: 2.5, color: '#fff' }}>
+                <Typography variant="subtitle2" fontWeight={850} color="#fff" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  🎬 Upload Reel Media (Video or High-Res Picture)
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 2, display: 'block' }}>
+                  Supports MP4, WebM, MOV videos (&lt; 2 min) AND PNG, JPG, WebP pictures.
                 </Typography>
 
                 <Tabs
-                  value={videoInputMode}
-                  onChange={(_, val) => setVideoInputMode(val)}
-                  sx={{ mb: 2, borderBottom: '1px solid #e2e8f0' }}
+                  value={mediaUploadTab}
+                  onChange={(_, val) => setMediaUploadTab(val)}
+                  sx={{
+                    mb: 2,
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    '& .MuiTab-root': { color: '#94a3b8', '&.Mui-selected': { color: '#38bdf8' } }
+                  }}
                 >
-                  <Tab label="Direct GCS Video (< 2 min)" value="upload" sx={{ textTransform: 'none', fontWeight: 700 }} />
-                  <Tab label="YouTube URL" value="youtube" sx={{ textTransform: 'none', fontWeight: 700 }} />
-                  <Tab label="Loom URL" value="loom" sx={{ textTransform: 'none', fontWeight: 700 }} />
+                  <Tab label="Direct File Upload (Video or Picture)" value="upload" sx={{ textTransform: 'none', fontWeight: 700 }} />
+                  <Tab label="YouTube Video Link" value="youtube" sx={{ textTransform: 'none', fontWeight: 700 }} />
+                  <Tab label="Loom Video Link" value="loom" sx={{ textTransform: 'none', fontWeight: 700 }} />
                 </Tabs>
 
-                {videoInputMode === 'upload' && (
+                {mediaUploadTab === 'upload' && (
                   <Box>
-                    <Typography variant="body2" color="#64748b" sx={{ mb: 2 }}>
-                      Upload an MP4 video demo directly into Google Cloud Storage (limit: strictly under 2 minutes / 120 seconds).
-                    </Typography>
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       component="label"
-                      startIcon={uploading ? <CircularProgress size={18} /> : <CloudUploadIcon />}
+                      startIcon={uploading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <CloudUploadIcon />}
                       disabled={uploading}
-                      sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2 }}
+                      sx={{
+                        background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        borderRadius: 2
+                      }}
                     >
-                      {uploading ? 'Uploading to GCS...' : 'Choose MP4 Video (< 2 min)'}
-                      <input type="file" hidden accept="video/mp4,video/webm" onChange={handleGcsFileUpload} />
+                      {uploading ? 'Uploading to Cloud...' : 'Choose File (Video or Photo)'}
+                      <input
+                        type="file"
+                        hidden
+                        accept="video/mp4,video/webm,video/quicktime,image/jpeg,image/png,image/webp,image/svg+xml"
+                        onChange={handleMediaFileUpload}
+                      />
                     </Button>
+                    <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', mt: 1 }}>
+                      Accepted formats: MP4, MOV, WebM (under 120s) OR JPG, PNG, WebP (under 25MB)
+                    </Typography>
                   </Box>
                 )}
 
-                {videoInputMode === 'youtube' && (
+                {mediaUploadTab === 'youtube' && (
                   <TextField
                     label="YouTube Video Link"
                     placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
                     value={wfVideoUrl}
-                    onChange={e => setWfVideoUrl(e.target.value)}
+                    onChange={e => {
+                      setWfVideoUrl(e.target.value);
+                      setWfMediaType('video');
+                    }}
                     fullWidth
-                    helperText="Enter any YouTube public or unlisted video URL."
+                    sx={{ input: { color: '#fff' }, label: { color: '#94a3b8' } }}
                   />
                 )}
 
-                {videoInputMode === 'loom' && (
+                {mediaUploadTab === 'loom' && (
                   <TextField
-                    label="Loom Share Link"
+                    label="Loom Video Link"
                     placeholder="https://www.loom.com/share/..."
                     value={wfVideoUrl}
-                    onChange={e => setWfVideoUrl(e.target.value)}
+                    onChange={e => {
+                      setWfVideoUrl(e.target.value);
+                      setWfMediaType('video');
+                    }}
                     fullWidth
-                    helperText="Enter any Loom video share link."
+                    sx={{ input: { color: '#fff' }, label: { color: '#94a3b8' } }}
                   />
                 )}
 
                 {wfVideoUrl && (
                   <Box sx={{ mt: 2.5 }}>
-                    <Typography variant="caption" fontWeight={700} color="#475569" display="block" sx={{ mb: 1 }}>
-                      Live Preview:
+                    <Typography variant="caption" fontWeight={700} color="#38bdf8" display="block" sx={{ mb: 1 }}>
+                      Live Media Preview:
                     </Typography>
-                    <UniversalVideoPlayer url={wfVideoUrl} title={wfTitle} />
+                    <UniversalVideoPlayer url={wfVideoUrl} title={wfTitle} mediaType={wfMediaType} autoPlay={false} muted={true} />
                   </Box>
                 )}
               </Box>
@@ -526,14 +766,161 @@ export const Workflows: React.FC = () => {
             </Button>
             <Button
               variant="contained"
-              startIcon={saving ? <CircularProgress size={18} /> : <SaveIcon />}
+              startIcon={saving ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <SaveIcon />}
               onClick={handleSaveWorkflow}
               disabled={saving || uploading}
-              sx={{ bgcolor: '#2563eb', textTransform: 'none', fontWeight: 700, px: 3, borderRadius: 2 }}
+              sx={{
+                background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                textTransform: 'none',
+                fontWeight: 700,
+                px: 3,
+                borderRadius: 2
+              }}
             >
-              {saving ? 'Saving...' : 'Save Workflow'}
+              {saving ? 'Saving...' : 'Save & Publish Reel'}
             </Button>
           </DialogActions>
+        </Dialog>
+
+        {/* ================================================================= */}
+        {/* INTERACTIVE WORK REEL VIEWER PREVIEW MODAL                        */}
+        {/* ================================================================= */}
+        <Dialog
+          open={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '24px',
+              bgcolor: '#090d16',
+              color: '#ffffff',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+              overflow: 'hidden'
+            }
+          }}
+        >
+          {/* Top Bar */}
+          <Box sx={{ p: 2, px: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#38bdf8' }}>
+                🎞️ Work Reel {previewReelIndex + 1} of {workflows.length}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748b' }}>
+                (Use [↑ / ↓] keys)
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={1} alignItems="center">
+              <IconButton onClick={() => setPreviewMuted(!previewMuted)} sx={{ color: '#94a3b8' }}>
+                {previewMuted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
+              </IconButton>
+              <IconButton onClick={() => setPreviewModalOpen(false)} sx={{ color: '#94a3b8' }}>
+                <CloseIcon />
+              </IconButton>
+            </Stack>
+          </Box>
+
+          {/* Reel Stage */}
+          {currentPreviewReel && (
+            <Box sx={{ position: 'relative', width: '100%', minHeight: 460, maxHeight: 540, bgcolor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <UniversalVideoPlayer
+                url={currentPreviewReel.demoVideoUrl || currentPreviewReel.mediaUrl}
+                title={currentPreviewReel.title}
+                mediaType={currentPreviewReel.mediaType}
+                autoPlay={true}
+                muted={previewMuted}
+                loop={true}
+                maxHeight={540}
+              />
+
+              {/* Floating Up / Down Navigation Controls */}
+              <Box sx={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 1.5, zIndex: 10 }}>
+                <IconButton
+                  size="small"
+                  disabled={previewReelIndex === 0}
+                  onClick={() => setPreviewReelIndex(prev => Math.max(prev - 1, 0))}
+                  sx={{
+                    bgcolor: 'rgba(0,0,0,0.6)',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    '&:hover': { bgcolor: 'rgba(79,70,229,0.8)' },
+                    '&.Mui-disabled': { opacity: 0.2, color: '#666' }
+                  }}
+                >
+                  <KeyboardArrowUpIcon />
+                </IconButton>
+
+                <IconButton
+                  size="small"
+                  disabled={previewReelIndex === workflows.length - 1}
+                  onClick={() => setPreviewReelIndex(prev => Math.min(prev + 1, workflows.length - 1))}
+                  sx={{
+                    bgcolor: 'rgba(0,0,0,0.6)',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    '&:hover': { bgcolor: 'rgba(79,70,229,0.8)' },
+                    '&.Mui-disabled': { opacity: 0.2, color: '#666' }
+                  }}
+                >
+                  <KeyboardArrowDownIcon />
+                </IconButton>
+              </Box>
+
+              {/* Floating Bottom Reel Overlay (when displayHeadingOnVideo is enabled) */}
+              {currentPreviewReel.displayHeadingOnVideo !== false ? (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    p: 2.5,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 60%, transparent 100%)',
+                    zIndex: 5
+                  }}
+                >
+                  <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                    <Chip
+                      label={currentPreviewReel.category}
+                      size="small"
+                      sx={{ bgcolor: 'rgba(79,70,229,0.3)', color: '#a5b4fc', fontWeight: 800, fontSize: '0.7rem' }}
+                    />
+                    <Chip
+                      label={currentPreviewReel.mediaType === 'image' ? '🖼️ Photo Reel' : '🎬 Video Reel'}
+                      size="small"
+                      sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 700, fontSize: '0.7rem' }}
+                    />
+                  </Stack>
+
+                  <Typography variant="h6" sx={{ fontWeight: 850, color: '#ffffff', mb: 0.5, lineHeight: 1.3 }}>
+                    {currentPreviewReel.title}
+                  </Typography>
+
+                  {currentPreviewReel.description && (
+                    <Typography variant="body2" sx={{ color: '#cbd5e1', fontSize: '0.82rem', lineHeight: 1.35, mt: 0.5 }}>
+                      {currentPreviewReel.description}
+                    </Typography>
+                  )}
+                </Box>
+              ) : (
+                <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+                  <Chip
+                    label={currentPreviewReel.category}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(15,23,42,0.85)',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      fontSize: '0.68rem',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      backdropFilter: 'blur(8px)'
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+          )}
         </Dialog>
       </Container>
     </DashboardLayout>

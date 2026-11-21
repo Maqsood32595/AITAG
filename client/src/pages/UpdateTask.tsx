@@ -71,7 +71,7 @@ const UpdateTask = () => {
       .catch(() => {
         setMerchant({
           vpa: 'mohammedmaqsoodai@oksbi',
-          name: 'Mohammed Maqsood',
+          name: 'AITAG Escrow',
           qrImage: '/images/payment-qr.jpeg'
         });
       });
@@ -263,6 +263,16 @@ const UpdateTask = () => {
                 Scan with any UPI App (GPay, PhonePe, Paytm, BHIM)
               </Typography>
 
+              {/* Official AITAG Brand Lockup */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
+                <Box
+                  component="img"
+                  src="/images/aitag-logo.png"
+                  alt="AITAG Official"
+                  sx={{ height: 38, objectFit: 'contain' }}
+                />
+              </Box>
+
               {/* QR Image */}
               <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
                 <Box
@@ -284,7 +294,7 @@ const UpdateTask = () => {
                 ₹{grossBudget.toLocaleString('en-IN')}
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mb: 2 }}>
-                Payee: {merchant?.name || 'Mohammed Maqsood'}
+                Payee: {merchant?.name || 'AITAG Escrow'}
               </Typography>
 
               {/* VPA Copy Bar */}

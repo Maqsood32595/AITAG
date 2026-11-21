@@ -13,16 +13,19 @@ const authMiddleware = authRoutes.authMiddleware;
 const { sanitizeStoragePath } = require('../../../aitag-security-guard/middleware/ssrf-guard');
 const multer = require('multer');
 
-const ALLOWED_VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/quicktime'];
-const ALLOWED_EXTENSIONS = ['.mp4', '.webm', '.mov'];
+const ALLOWED_MEDIA_MIMES = [
+  'video/mp4', 'video/webm', 'video/quicktime',
+  'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'
+];
+const ALLOWED_EXTENSIONS = ['.mp4', '.webm', '.mov', '.jpg', '.jpeg', '.png', '.webp', '.svg'];
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max video size
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max media size
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname || '').toLowerCase();
-    if (!ALLOWED_VIDEO_MIMES.includes(file.mimetype) || !ALLOWED_EXTENSIONS.includes(ext)) {
-      return cb(new Error('Invalid video format. Only MP4, WebM, and MOV files under 100MB are permitted.'));
+    if (!ALLOWED_MEDIA_MIMES.includes(file.mimetype) || !ALLOWED_EXTENSIONS.includes(ext)) {
+      return cb(new Error('Invalid media format. Supported formats: MP4, WebM, MOV, JPG, PNG, WebP, SVG under 100MB.'));
     }
     cb(null, true);
   }
@@ -60,26 +63,33 @@ router.get('/workflows/stream-video', async (req, res) => {
   await profileService.streamWorkflowVideo(req, res, pathCheck.cleanPath);
 });
 
-// POST /api/profile/workflows/video-upload — Multipart server-to-GCS upload (Zero CORS)
-router.post('/workflows/video-upload', authMiddleware, upload.single('video'), async (req, res) => {
+// POST /api/profile/workflows/video-upload & /media-upload — Multipart server-to-GCS upload (Zero CORS)
+const handleMediaUpload = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Video file is required' });
+    const file = req.file || (req.files && (req.files.find((f) => f.fieldname === 'video' || f.fieldname === 'media' || f.fieldname === 'image') || req.files[0]));
+    if (!file) {
+      return res.status(400).json({ error: 'Media file (video or image) is required' });
     }
-    const { workflowId, durationSeconds } = req.body;
+    const { workflowId, durationSeconds, mediaType } = req.body;
+    const isImage = file.mimetype.startsWith('image/');
+    const detectedType = mediaType || (isImage ? 'image' : 'video');
     const result = await profileService.uploadWorkflowVideoBuffer(req.user.id, {
       workflowId,
-      filename: req.file.originalname,
-      buffer: req.file.buffer,
-      mimeType: req.file.mimetype,
-      durationSeconds
+      filename: file.originalname,
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      mediaType: detectedType,
+      durationSeconds: isImage ? undefined : durationSeconds
     });
     res.json(result);
   } catch (err) {
-    console.error('[Video Upload Error]:', err);
+    console.error('[Media Upload Error]:', err);
     res.status(400).json({ error: err.message });
   }
-});
+};
+
+router.post('/workflows/video-upload', authMiddleware, upload.any(), handleMediaUpload);
+router.post('/workflows/media-upload', authMiddleware, upload.any(), handleMediaUpload);
 
 router.post('/workflows/video-signed-url', authMiddleware, async (req, res) => {
   try {

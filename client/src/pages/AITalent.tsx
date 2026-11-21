@@ -476,7 +476,7 @@ const AITalent = () => {
                           px: 1.5,
                         }}
                       >
-                        🎬 View Work Samples
+                        🎬 Watch Work Reels
                       </Button>
                       <Button
                         variant="contained"

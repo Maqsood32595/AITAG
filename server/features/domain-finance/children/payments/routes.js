@@ -27,7 +27,7 @@ router.get('/merchant-config', (req, res) => {
     success: true,
     merchant: {
       vpa: process.env.MERCHANT_UPI_VPA || 'mohammedmaqsoodai@oksbi',
-      name: process.env.MERCHANT_NAME || 'Mohammed Maqsood',
+      name: process.env.MERCHANT_NAME || 'AITAG Escrow',
       qrImage: process.env.MERCHANT_QR_IMAGE || '/images/payment-qr.jpeg'
     }
   });

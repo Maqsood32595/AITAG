@@ -18,6 +18,7 @@ import {
 import SaveIcon from '@mui/icons-material/Save';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import LanguageIcon from '@mui/icons-material/Language';
 import SecurityIcon from '@mui/icons-material/Security';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -691,32 +692,70 @@ export const Profile: React.FC = () => {
                       </Stack>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5, flexWrap: 'wrap', gap: 1 }}>
-                      <Stack direction="row" spacing={1}>
-                        <TextField
+                    <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                        <Box>
+                          <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>
+                            External Professional Profiles & Governance Portfolios
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.68rem', color: '#64748b' }}>
+                            GitHub, LinkedIn, and personal website links for platform governance and audit.
+                          </Typography>
+                        </Box>
+                        <Button
+                          component={Link}
+                          to="/dashboard"
+                          variant="outlined"
                           size="small"
-                          placeholder="GitHub URL"
-                          value={githubUrl}
-                          onChange={(e) => setGithubUrl(e.target.value)}
-                          sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem' } }}
-                        />
-                        <TextField
-                          size="small"
-                          placeholder="LinkedIn URL"
-                          value={linkedinUrl}
-                          onChange={(e) => setLinkedinUrl(e.target.value)}
-                          sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem' } }}
-                        />
-                      </Stack>
-                      <Button
-                        component={Link}
-                        to="/dashboard"
-                        variant="outlined"
-                        size="small"
-                        sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px', borderColor: '#cbd5e1', color: '#334155', cursor: 'pointer !important' }}
-                      >
-                        📊 Dispatch Center ➔
-                      </Button>
+                          sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px', borderColor: '#cbd5e1', color: '#334155', cursor: 'pointer !important' }}
+                        >
+                          📊 Dispatch Center ➔
+                        </Button>
+                      </Box>
+                      <Grid container spacing={1.5}>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="GitHub Profile"
+                            placeholder="https://github.com/..."
+                            value={githubUrl}
+                            onChange={(e) => setGithubUrl(e.target.value)}
+                            InputProps={{
+                              startAdornment: <GitHubIcon sx={{ fontSize: 16, color: '#334155', mr: 0.8 }} />
+                            }}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem', bgcolor: '#fff' } }}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="LinkedIn Profile"
+                            placeholder="https://linkedin.com/in/..."
+                            value={linkedinUrl}
+                            onChange={(e) => setLinkedinUrl(e.target.value)}
+                            InputProps={{
+                              startAdornment: <LinkedInIcon sx={{ fontSize: 16, color: '#0a66c2', mr: 0.8 }} />
+                            }}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem', bgcolor: '#fff' } }}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Website / Portfolio"
+                            placeholder="https://aitag.in"
+                            value={websiteUrl}
+                            onChange={(e) => setWebsiteUrl(e.target.value)}
+                            InputProps={{
+                              startAdornment: <LanguageIcon sx={{ fontSize: 16, color: '#0891b2', mr: 0.8 }} />
+                            }}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem', bgcolor: '#fff' } }}
+                          />
+                        </Grid>
+                      </Grid>
                     </Box>
                   </Stack>
                 </Paper>
@@ -853,32 +892,79 @@ export const Profile: React.FC = () => {
                       <Chip label="Instant UPI Disbursal ⚡" size="small" sx={{ bgcolor: '#059669', color: '#ffffff', fontWeight: 700, fontSize: '0.7rem' }} />
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5, flexWrap: 'wrap', gap: 1 }}>
-                      <Stack direction="row" spacing={1}>
-                        <TextField
+                    {/* Dedicated External Portfolios & Social Credentials Box */}
+                    <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                        <Box>
+                          <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                            External Professional Profiles & Code Portfolios
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
+                            Moved here so your public Work Reels feed stays focused on video and photo deliverables.
+                          </Typography>
+                        </Box>
+                        <Button
+                          component={Link}
+                          to="/workflows"
+                          variant="outlined"
                           size="small"
-                          placeholder="GitHub URL"
-                          value={githubUrl}
-                          onChange={(e) => setGithubUrl(e.target.value)}
-                          sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem' } }}
-                        />
-                        <TextField
-                          size="small"
-                          placeholder="LinkedIn URL"
-                          value={linkedinUrl}
-                          onChange={(e) => setLinkedinUrl(e.target.value)}
-                          sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.78rem' } }}
-                        />
-                      </Stack>
-                      <Button
-                        component={Link}
-                        to="/workflows"
-                        variant="outlined"
-                        size="small"
-                        sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '8px', borderColor: '#cbd5e1', color: '#334155', cursor: 'pointer !important' }}
-                      >
-                        🎬 Workflows Studio ➔
-                      </Button>
+                          sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            borderRadius: '8px',
+                            borderColor: 'rgba(79,70,229,0.3)',
+                            color: '#4f46e5',
+                            '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(79,70,229,0.04)' }
+                          }}
+                        >
+                          🎞️ Work Reels Studio ➔
+                        </Button>
+                      </Box>
+
+                      <Grid container spacing={1.5}>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="GitHub Profile URL"
+                            placeholder="https://github.com/username"
+                            value={githubUrl}
+                            onChange={(e) => setGithubUrl(e.target.value)}
+                            InputProps={{
+                              startAdornment: <GitHubIcon sx={{ fontSize: 18, color: '#334155', mr: 1 }} />
+                            }}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.8rem', bgcolor: '#fff' } }}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="LinkedIn Profile URL"
+                            placeholder="https://linkedin.com/in/username"
+                            value={linkedinUrl}
+                            onChange={(e) => setLinkedinUrl(e.target.value)}
+                            InputProps={{
+                              startAdornment: <LinkedInIcon sx={{ fontSize: 18, color: '#0a66c2', mr: 1 }} />
+                            }}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.8rem', bgcolor: '#fff' } }}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Personal Website / Portfolio"
+                            placeholder="https://yourportfolio.com"
+                            value={websiteUrl}
+                            onChange={(e) => setWebsiteUrl(e.target.value)}
+                            InputProps={{
+                              startAdornment: <LanguageIcon sx={{ fontSize: 18, color: '#0891b2', mr: 1 }} />
+                            }}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.8rem', bgcolor: '#fff' } }}
+                          />
+                        </Grid>
+                      </Grid>
                     </Box>
                   </Stack>
                 </Paper>

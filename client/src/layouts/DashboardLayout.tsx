@@ -80,7 +80,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const menuItems = isFreelancer ? [
     { text: 'Dashboard', icon: <span>📊</span>, path: '/dashboard' },
     { text: 'Analytics', icon: <span>📈</span>, path: '/analytics' },
-    { text: 'Workflows', icon: <span>🎬</span>, path: '/workflows' },
+    { text: 'Work Reels', icon: <span>🎞️</span>, path: '/workflows' },
     { text: 'Account', icon: <span>👤</span>, path: '/account' },
   ] : isAdmin ? [
     { text: 'Dashboard', icon: <span>📊</span>, path: '/dashboard' },

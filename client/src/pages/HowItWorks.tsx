@@ -92,7 +92,7 @@ const FAQS = [
 export const HowItWorks: React.FC = () => {
   const navigate = useNavigate();
   const [activeVideo, setActiveVideo] = useState<'kinetic' | 'walkthrough'>('kinetic');
-  const videoUrl = activeVideo === 'kinetic' ? '/workflow-demo.mp4' : '/aitag-walkthrough.mp4';
+  const videoUrl = activeVideo === 'kinetic' ? '/AITAG-Advertisement1.mp4' : '/aitag-walkthrough.mp4?v=aitag-escrow-logo';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
@@ -253,7 +253,7 @@ export const HowItWorks: React.FC = () => {
               }}
             >
               <Chip
-                label="⚡ 20-Sec Kinetic Overview"
+                label="⚡ AITAG in 30 Seconds"
                 clickable
                 onClick={() => setActiveVideo('kinetic')}
                 sx={{

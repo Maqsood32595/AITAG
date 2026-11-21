@@ -1,22 +1,17 @@
-import PaletteIcon from '@mui/icons-material/Palette';
-import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button, Box, Chip, Stack, Avatar, Divider,
-  Card, IconButton
+  Typography, Button, Box, Chip, Stack, IconButton, Tooltip
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import LanguageIcon from '@mui/icons-material/Language';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import SendIcon from '@mui/icons-material/Send';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import CodeIcon from '@mui/icons-material/Code';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import { profileApi } from '../api';
 import UniversalVideoPlayer, { parseVideoSource } from './UniversalVideoPlayer';
 import AnimatedAvatar from './AnimatedAvatar';
@@ -47,13 +42,6 @@ const CATEGORY_MAP: Record<string, string> = {
   'Web & Funnels': 'Web & Digital Presence',
 };
 
-const getServiceCategoryIcon = (category: string) => {
-  const norm = CATEGORY_MAP[category] || category;
-  if (norm?.includes('Visual')) return <CameraAltIcon sx={{ fontSize: '13px !important', color: '#0891b2' }} />;
-  if (norm?.includes('Branding') || norm?.includes('Print')) return <PaletteIcon sx={{ fontSize: '13px !important', color: '#7c3aed' }} />;
-  if (norm?.includes('Social') || norm?.includes('Marketing') || norm?.includes('Video')) return <VideoCameraBackIcon sx={{ fontSize: '13px !important', color: '#e11d48' }} />;
-  return <LanguageIcon sx={{ fontSize: '13px !important', color: '#10b981' }} />;
-};
 export const getWorkflowPackageInfo = (category?: string, title?: string) => {
   const normCategory = CATEGORY_MAP[category || ''] || category || '';
   const c = normCategory.toLowerCase();
@@ -72,7 +60,7 @@ export const getWorkflowPackageInfo = (category?: string, title?: string) => {
       price: 499,
       formattedPrice: '₹499',
       slug: 'ai-logo-identity-kit',
-      packageName: 'Logo Design',
+      packageName: 'Logo Design & Branding Kit',
     };
   }
 
@@ -126,43 +114,34 @@ export const getWorkflowPackageInfo = (category?: string, title?: string) => {
   };
 };
 
-
 const DEFAULT_WORKFLOWS = [
   {
     id: 'wf-1',
     title: 'AI Vector Logo & Complete Business Branding Kit',
     category: 'Branding & Print',
-    businessImpact: 'Generated clean vector brand logo, visiting cards, and WhatsApp profile image for a retail shop.',
-    demoVideoUrl: '',
-    techStack: ['Recraft V3', 'Vectorizer.ai', 'Figma', 'Print CMYK PDF', 'WhatsApp DP'],
-    liveUrl: 'https://aitag.in/#package-ai-logo-identity-kit'
+    demoVideoUrl: '/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-1%2F1794608454365_Gift_Wrapping_Video.mp4',
+    mediaType: 'video'
   },
   {
     id: 'wf-2',
     title: 'Viral 9:16 Promotional Video Reels with Indian AI Voiceover',
     category: 'Social & Marketing',
-    businessImpact: 'Produced promotional video reels with clear voiceover and captions for social media campaigns.',
-    demoVideoUrl: '',
-    techStack: ['ElevenLabs Indian AI', 'CapCut AI', 'HeyGen', 'Dynamic Captions', 'HD MP4'],
-    liveUrl: 'https://aitag.in/#package-ai-marketing-video-reels'
+    demoVideoUrl: '/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-2%2F1795101059170_Shark.mp4',
+    mediaType: 'video'
   },
   {
     id: 'wf-3',
     title: 'High-Converting 5-Page Mobile Business Website with WhatsApp CTA',
     category: 'Web & Digital Presence',
-    businessImpact: 'Built mobile-friendly business website with instant WhatsApp click-to-chat button.',
-    demoVideoUrl: '',
-    techStack: ['Mobile-First HTML5', 'Cloudflare Pages', 'WhatsApp API', 'Local SEO', 'Zero Hosting Fees'],
-    liveUrl: 'https://aitag.in/#package-ai-website-landing-page'
+    demoVideoUrl: '/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-3%2F1795100852475_Website_Built_By_Gemma.mp4',
+    mediaType: 'video'
   },
   {
     id: 'wf-4',
     title: 'Studio-Grade AI Photo Transformation for Amazon & Meesho',
     category: 'Product Visuals',
-    businessImpact: 'Converted product smartphone photos into clean, studio-lit catalogue listings for marketplace selling.',
-    demoVideoUrl: '',
-    techStack: ['Photoroom AI', 'FLUX.1', 'Photoshop Generative Fill', 'Amazon 2000px', 'Clean Cutouts'],
-    liveUrl: 'https://aitag.in/#package-ai-product-photo-makeover'
+    demoVideoUrl: '/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-4%2F1795251034494_Mountview_Flowers_With_Voice_Loud.mp4',
+    mediaType: 'video'
   }
 ];
 
@@ -175,16 +154,21 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [activeReelIndex, setActiveReelIndex] = useState<number>(0);
+  const [isMuted, setIsMuted] = useState<boolean>(true);
+
+  // Touch Swipe tracking
+  const touchStartY = useRef<number>(0);
 
   useEffect(() => {
     if (open && talent) {
       setLoading(true);
+      setActiveReelIndex(0);
 
-      // For curated placeholder IDs, start with empty workflows so we don't show fake data
       const isCuratedPlaceholder = /^curated-/.test(talent.id);
       const initialWorkflows = (!isCuratedPlaceholder && talent.deliveredWorkflows && talent.deliveredWorkflows.length > 0)
         ? talent.deliveredWorkflows
-        : [];
+        : DEFAULT_WORKFLOWS;
 
       setProfileData({
         ...talent,
@@ -192,18 +176,16 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
         links: talent.links || {},
       });
 
-      // Fetch live profile — always use the server's data as source of truth
       profileApi.getById(talent.id)
         .then(res => {
           if (res.data) {
-            setProfileData(prev => ({
+            setProfileData((prev: any) => ({
               ...prev,
               ...res.data,
-              // Merge: prefer server's workflows; fall back to initial if server returns empty AND we already had real ones
               deliveredWorkflows:
                 (res.data.deliveredWorkflows && res.data.deliveredWorkflows.length > 0)
                   ? res.data.deliveredWorkflows
-                  : initialWorkflows,
+                  : DEFAULT_WORKFLOWS,
             }));
           }
         })
@@ -212,394 +194,456 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
     }
   }, [open, talent]);
 
+  const rawWorkflows = profileData?.deliveredWorkflows ?? [];
+  const workflows = rawWorkflows.map((wf: any) => ({
+    ...wf,
+    category: CATEGORY_MAP[wf.category] || wf.category || 'Product Visuals'
+  }));
+
+  const filteredReels = workflows.filter((wf: any) => selectedCategory === 'All' || wf.category === selectedCategory);
+  const totalReels = filteredReels.length;
+  const currentReel = filteredReels[activeReelIndex] || filteredReels[0];
+
+  // Reset index when category changes
+  const handleCategoryChange = (cat: string) => {
+    setSelectedCategory(cat);
+    setActiveReelIndex(0);
+  };
+
+  const handleNextReel = () => {
+    if (activeReelIndex < totalReels - 1) {
+      setActiveReelIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrevReel = () => {
+    if (activeReelIndex > 0) {
+      setActiveReelIndex(prev => prev - 1);
+    }
+  };
+
+  // Keyboard Down / Up Arrow Listener
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        handleNextReel();
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        handlePrevReel();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, activeReelIndex, totalReels]);
+
+  // Touch Swipe Handlers (Swipe Up -> Next Reel, Swipe Down -> Prev Reel)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+    if (diff > 45) {
+      // Swiped Up
+      handleNextReel();
+    } else if (diff < -45) {
+      // Swiped Down
+      handlePrevReel();
+    }
+  };
+
   if (!talent) return null;
 
-  const workflows = profileData?.deliveredWorkflows ?? [];
-  const hasWorkflows = workflows.length > 0;
+  const pkgInfo = currentReel ? getWorkflowPackageInfo(currentReel.category, currentReel.title) : null;
+  const mediaParsed = currentReel ? parseVideoSource(currentReel.demoVideoUrl || currentReel.mediaUrl, currentReel.mediaType) : { isImage: false };
+  const isImageReel = currentReel?.mediaType === 'image' || mediaParsed.isImage;
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: '20px',
-          bgcolor: '#ffffff',
-          boxShadow: '0 24px 48px -12px rgba(0,0,0,0.18)',
-          border: '1px solid #e2e8f0',
+          borderRadius: '24px',
+          bgcolor: '#090d16',
+          color: '#ffffff',
+          boxShadow: '0 25px 60px -12px rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          overflow: 'hidden'
         }
       }}
     >
-      <DialogTitle sx={{ m: 0, p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      {/* ── Top Header: Specialist & Work Reels Controls ── */}
+      <DialogTitle
+        sx={{
+          m: 0,
+          p: { xs: 2, sm: 2.5 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          bgcolor: '#0b1120'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
           <AnimatedAvatar
             name={talent.name}
-            size={60}
+            size={46}
             src={talent.avatar || talent.photo_url}
           />
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 850, color: '#ffffff', lineHeight: 1.2 }}>
                 {talent.name}
               </Typography>
               <Chip
-                icon={<VerifiedIcon sx={{ fontSize: '14px !important', color: '#0284c7 !important' }} />}
-                label="Verified Specialist"
+                icon={<VerifiedIcon sx={{ fontSize: '13px !important', color: '#38bdf8 !important' }} />}
+                label="Verified"
                 size="small"
-                sx={{ bgcolor: 'rgba(2,132,199,0.08)', color: '#0284c7', fontWeight: 700, fontSize: '0.72rem' }}
+                sx={{ bgcolor: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontWeight: 700, fontSize: '0.68rem', height: 22 }}
               />
             </Box>
-            <Typography variant="body2" sx={{ color: '#4f46e5', fontWeight: 700, mt: 0.2 }}>
-              {profileData?.headline || talent.role || 'Senior AI Automation Specialist'}
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {profileData?.headline || talent.role || 'Senior AI Specialist'}
             </Typography>
           </Box>
         </Box>
 
-        <IconButton onClick={onClose} sx={{ color: '#94a3b8' }}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {totalReels > 0 && (
+            <Chip
+              label={`Reel ${activeReelIndex + 1} of ${totalReels}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(79,70,229,0.25)',
+                color: '#a5b4fc',
+                fontWeight: 800,
+                fontSize: '0.72rem',
+                border: '1px solid rgba(79,70,229,0.4)'
+              }}
+            />
+          )}
 
-      <DialogContent dividers sx={{ p: { xs: 2, md: 4 }, borderTop: '1px solid #f1f5f9' }}>
-        <Box>
-          {/* SECTION 1: DELIVERED WORKFLOWS & VIDEO DEMOS */}
-          <Box sx={{ mb: 4 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 1 }}>
-                🎬 Delivered Services & Work Samples {hasWorkflows ? `(${workflows.length})` : ''}
-              </Typography>
-            </Box>
-
-            {loading ? (
-              <Box sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 1.5 }}>
-                <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem' }}>Loading specialist profile…</Typography>
-              </Box>
-            ) : !hasWorkflows ? (
-              /* ── Empty state: specialist hasn't published workflows yet ── */
-              <Box
+          {!isImageReel && (
+            <Tooltip title={isMuted ? 'Tap to Unmute Audio' : 'Mute Audio'}>
+              <IconButton
+                size="small"
+                onClick={() => setIsMuted(!isMuted)}
                 sx={{
-                  py: 5,
-                  px: 3,
-                  textAlign: 'center',
-                  borderRadius: '16px',
-                  border: '2px dashed rgba(79,70,229,0.2)',
-                  bgcolor: 'rgba(79,70,229,0.02)',
+                  color: isMuted ? '#94a3b8' : '#38bdf8',
+                  bgcolor: 'rgba(255,255,255,0.06)',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.12)' }
                 }}
               >
-                <Typography sx={{ fontSize: '2rem', mb: 1.5 }}>🎬</Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a', mb: 0.5 }}>
-                  Workflows coming soon
-                </Typography>
-                <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', maxWidth: 360, mx: 'auto' }}>
-                  This specialist hasn't published any delivered workflow demos yet.
-                  Once they update their profile, videos and case studies will appear here.
-                </Typography>
-              </Box>
-            ) : (
-              <>
+                {isMuted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          )}
 
-            {/* 4 Core Services Filter Chips */}
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2.5 }}>
-              {['All', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'].map((cat) => (
-                <Chip
-                  key={cat}
-                  label={cat}
-                  size="small"
-                  onClick={() => setSelectedCategory(cat)}
-                  sx={{
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '0.72rem',
-                    bgcolor: selectedCategory === cat ? '#4f46e5' : '#f1f5f9',
-                    color: selectedCategory === cat ? '#ffffff' : '#475569',
-                    '&:hover': {
-                      bgcolor: selectedCategory === cat ? '#4338ca' : '#e2e8f0',
-                    }
-                  }}
-                />
-              ))}
-            </Box>
+          <IconButton onClick={onClose} sx={{ color: '#94a3b8', '&:hover': { color: '#ffffff' } }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      </DialogTitle>
 
-            {/* Workflows Cards List */}
-            <Stack spacing={3}>
-              {workflows
-                .map((wf: any) => ({
-                  ...wf,
-                  category: CATEGORY_MAP[wf.category] || wf.category || 'Product Visuals'
-                }))
-                .filter((wf: any) => selectedCategory === 'All' || wf.category === selectedCategory)
-                .map((wf: any, idx: number) => {
-                const parsedVideo = parseVideoSource(wf.demoVideoUrl);
+      <DialogContent sx={{ p: 0, bgcolor: '#090d16', display: 'flex', flexDirection: 'column' }}>
+        {/* Category Filters Bar */}
+        <Box sx={{ p: 1.5, px: 2, display: 'flex', gap: 0.8, overflowX: 'auto', bgcolor: '#0d1527', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          {['All', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'].map((cat) => (
+            <Chip
+              key={cat}
+              label={cat}
+              size="small"
+              onClick={() => handleCategoryChange(cat)}
+              sx={{
+                cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: '0.7rem',
+                bgcolor: selectedCategory === cat ? '#4f46e5' : 'rgba(255,255,255,0.05)',
+                color: selectedCategory === cat ? '#ffffff' : '#94a3b8',
+                border: selectedCategory === cat ? '1px solid #6366f1' : '1px solid rgba(255,255,255,0.05)',
+                '&:hover': {
+                  bgcolor: selectedCategory === cat ? '#4338ca' : 'rgba(255,255,255,0.1)',
+                }
+              }}
+            />
+          ))}
+        </Box>
 
-                return (
-                  <Card
-                    key={wf.id || idx}
-                    elevation={0}
+        {loading ? (
+          <Box sx={{ py: 12, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 1.5 }}>
+            <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem' }}>Loading Work Reels…</Typography>
+          </Box>
+        ) : totalReels === 0 ? (
+          <Box sx={{ py: 10, px: 3, textAlign: 'center' }}>
+            <Typography sx={{ fontSize: '2.5rem', mb: 1 }}>🎬</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#ffffff', mb: 0.5 }}>
+              Work Reels Coming Soon
+            </Typography>
+            <Typography sx={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: 360, mx: 'auto' }}>
+              This specialist hasn't published work reels for this category yet.
+            </Typography>
+          </Box>
+        ) : (
+          /* ── THE WORK REELS STAGE (Interactive Glide Viewport) ── */
+          <Box
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            sx={{
+              position: 'relative',
+              width: '100%',
+              minHeight: { xs: 480, sm: 540 },
+              maxHeight: 560,
+              bgcolor: '#000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}
+          >
+            {/* The Active Media Player / Viewer */}
+            <UniversalVideoPlayer
+              key={currentReel?.id || activeReelIndex}
+              url={currentReel?.demoVideoUrl || currentReel?.mediaUrl}
+              title={currentReel?.title}
+              mediaType={currentReel?.mediaType}
+              autoPlay={true}
+              muted={isMuted}
+              loop={true}
+              controls={!isImageReel}
+              maxHeight={560}
+            />
+
+            {/* Floating Navigation Controls (Up / Down Arrows) */}
+            <Box
+              sx={{
+                position: 'absolute',
+                right: 14,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1.5,
+                zIndex: 12
+              }}
+            >
+              <Tooltip title="Previous Reel (Press ↑)" placement="left">
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={activeReelIndex === 0}
+                    onClick={handlePrevReel}
                     sx={{
-                      borderRadius: '16px',
-                      border: '1px solid #e2e8f0',
-                      bgcolor: '#ffffff',
-                      p: { xs: 2, sm: 2.5 },
-                      transition: 'all 0.2s ease-in-out',
-                      '&:hover': {
-                        borderColor: 'rgba(79,70,229,0.3)',
-                        boxShadow: '0 8px 24px rgba(79,70,229,0.06)',
-                      }
+                      bgcolor: 'rgba(15,23,42,0.75)',
+                      color: '#ffffff',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(8px)',
+                      '&:hover': { bgcolor: 'rgba(79,70,229,0.9)', borderColor: '#818cf8' },
+                      '&.Mui-disabled': { opacity: 0.2, color: '#64748b' }
                     }}
                   >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
-                      <Box>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1, flexWrap: 'wrap', gap: 0.5 }}>
-                          <Chip
-                            label={wf.category || 'Workflow Automation'}
-                            size="small"
-                            sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 700, fontSize: '0.72rem' }}
-                          />
-                          {parsedVideo.type === 'youtube' && (
-                            <Chip label="YouTube Walkthrough" size="small" sx={{ bgcolor: '#fee2e2', color: '#dc2626', fontWeight: 700, fontSize: '0.7rem' }} />
-                          )}
-                          {parsedVideo.type === 'loom' && (
-                            <Chip label="Loom Walkthrough" size="small" sx={{ bgcolor: '#f3e8ff', color: '#9333ea', fontWeight: 700, fontSize: '0.7rem' }} />
-                          )}
-                          {parsedVideo.type === 'direct' && wf.demoVideoUrl && (
-                            <Chip label="GCS Cloud Video" size="small" sx={{ bgcolor: '#ecfdf5', color: '#059669', fontWeight: 700, fontSize: '0.7rem' }} />
-                          )}
-                        </Stack>
+                    <KeyboardArrowUpIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
 
-                        <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0f172a' }}>
-                          {wf.title}
-                        </Typography>
-                      </Box>
+              {/* Vertical Reel Dots */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.6, my: 0.5 }}>
+                {filteredReels.map((_, dotIdx) => (
+                  <Box
+                    key={dotIdx}
+                    onClick={() => setActiveReelIndex(dotIdx)}
+                    sx={{
+                      width: dotIdx === activeReelIndex ? 8 : 5,
+                      height: dotIdx === activeReelIndex ? 18 : 5,
+                      borderRadius: '4px',
+                      bgcolor: dotIdx === activeReelIndex ? '#38bdf8' : 'rgba(255,255,255,0.3)',
+                      transition: 'all 0.25s ease',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: '#ffffff' }
+                    }}
+                  />
+                ))}
+              </Box>
 
-                      {wf.demoVideoUrl && (
-                        <Chip
-                          icon={<PlayCircleFilledWhiteIcon sx={{ fontSize: '15px !important', color: '#4f46e5 !important' }} />}
-                          label="Video Walkthrough"
-                          size="small"
-                          sx={{
-                            bgcolor: 'rgba(79,70,229,0.08)',
-                            color: '#4f46e5',
-                            fontWeight: 700,
-                            fontSize: '0.72rem',
-                            borderRadius: '8px',
-                          }}
-                        />
-                      )}
-                    </Box>
+              <Tooltip title="Next Reel (Press ↓)" placement="left">
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={activeReelIndex === totalReels - 1}
+                    onClick={handleNextReel}
+                    sx={{
+                      bgcolor: 'rgba(15,23,42,0.75)',
+                      color: '#ffffff',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(8px)',
+                      '&:hover': { bgcolor: 'rgba(79,70,229,0.9)', borderColor: '#818cf8' },
+                      '&.Mui-disabled': { opacity: 0.2, color: '#64748b' }
+                    }}
+                  >
+                    <KeyboardArrowDownIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Box>
 
-                    {/* Business Impact Metric */}
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, my: 1.5, p: 1.5, bgcolor: 'rgba(16,185,129,0.06)', borderRadius: '10px', border: '1px solid rgba(16,185,129,0.15)' }}>
-                      <TrendingUpIcon sx={{ color: '#10b981', fontSize: 20, mt: 0.2 }} />
-                      <Typography sx={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 600 }}>
-                        Impact: <span style={{ fontWeight: 400, color: '#334155' }}>{wf.businessImpact}</span>
-                      </Typography>
-                    </Box>
-
-                    {/* Directly Embedded Video Player in this Section */}
-                    {wf.demoVideoUrl && (
-                      <Box
-                        sx={{
-                          my: 2,
-                          borderRadius: '12px',
-                          overflow: 'hidden',
-                          border: '1px solid #e2e8f0',
-                          bgcolor: '#000000',
-                          boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
-                        }}
-                      >
-                        <UniversalVideoPlayer url={wf.demoVideoUrl} title={wf.title} />
-                      </Box>
-                    )}
-
-                    {/* Tech Stack Chips */}
-                    {wf.techStack && wf.techStack.length > 0 && (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, alignItems: 'center', mt: 1.5 }}>
-                        <CodeIcon sx={{ fontSize: 16, color: '#94a3b8' }} />
-                        {wf.techStack.map((tech: string) => (
-                          <Chip
-                            key={tech}
-                            label={tech}
-                            size="small"
-                            sx={{ bgcolor: '#f1f5f9', color: '#475569', fontSize: '0.72rem', fontWeight: 600, borderRadius: '6px' }}
-                          />
-                        ))}
-                        {wf.liveUrl && (
-                          <Button
-                            href={formatExternalUrl(wf.liveUrl)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            size="small"
-                            endIcon={<OpenInNewIcon sx={{ fontSize: 13 }} />}
-                            sx={{ ml: 'auto', color: '#4f46e5', textTransform: 'none', fontSize: '0.75rem', fontWeight: 700 }}
-                          >
-                            Live Repo / Demo
-                          </Button>
-                        )}
-                      </Box>
-                    )}
-
-                    {/* Direct Action to Order Service with dynamic package pricing */}
-                    {(() => {
-                      const pkgInfo = getWorkflowPackageInfo(wf.category, wf.title);
-                      return (
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, pt: 1.5, borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: 1 }}>
-                          <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
-                            Want this outcome for your business?
-                          </Typography>
-                          <Button
-                            component="a"
-                            href={`/#package-${pkgInfo.slug}`}
-                            onClick={() => {
-                              onClose();
-                              if (window.location.pathname === '/' || window.location.pathname === '') {
-                                const el = document.getElementById(`package-${pkgInfo.slug}`);
-                                if (el) {
-                                  const navOffset = 90;
-                                  const elementPosition = el.getBoundingClientRect().top;
-                                  const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-                                  window.scrollTo({
-                                    top: offsetPosition,
-                                    behavior: 'smooth',
-                                  });
-                                }
-                              }
-                            }}
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                              borderRadius: '8px',
-                              color: '#4f46e5',
-                              borderColor: 'rgba(79,70,229,0.3)',
-                              fontWeight: 700,
-                              fontSize: '0.75rem',
-                              textTransform: 'none',
-                              py: 0.4,
-                              px: 1.5,
-                              '&:hover': {
-                                borderColor: '#4f46e5',
-                                bgcolor: 'rgba(79,70,229,0.06)'
-                              }
-                            }}
-                          >
-                            Order Package (From {pkgInfo.formattedPrice}) →
-                          </Button>
-                        </Box>
-                      );
-                    })()}
-                  </Card>
-                );
-              })}
-            </Stack>
-          </>
-        )}
-      </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* SECTION 2: ABOUT SPECIALIST & VERIFIED CREDENTIALS */}
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', mb: 1.5 }}>
-            About Specialist & Verified Credentials
-          </Typography>
-
-          <Typography sx={{ color: '#475569', fontSize: '0.925rem', lineHeight: 1.6, mb: 2.5 }}>
-            {profileData?.bio || talent.bio}
-          </Typography>
-
-          {/* Social & Portfolio Links */}
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 3 }}>
-            {profileData?.links?.github && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<GitHubIcon />}
-                href={formatExternalUrl(profileData.links.github)}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ borderRadius: '8px', color: '#0f172a', borderColor: '#cbd5e1', textTransform: 'none', fontWeight: 600 }}
+            {/* Bottom Scrim & Reel Heading Overlay (when displayHeadingOnVideo is enabled) */}
+            {currentReel?.displayHeadingOnVideo !== false ? (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  p: { xs: 2, sm: 2.5 },
+                  pr: 6,
+                  background: 'linear-gradient(to top, rgba(9,13,22,0.97) 0%, rgba(9,13,22,0.85) 65%, transparent 100%)',
+                  zIndex: 10
+                }}
               >
-                GitHub
-              </Button>
-            )}
-            {profileData?.links?.linkedin && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<LinkedInIcon />}
-                href={formatExternalUrl(profileData.links.linkedin)}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ borderRadius: '8px', color: '#0077b5', borderColor: '#cbd5e1', textTransform: 'none', fontWeight: 600 }}
-              >
-                LinkedIn
-              </Button>
-            )}
-            {profileData?.links?.website && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<LanguageIcon />}
-                href={formatExternalUrl(profileData.links.website)}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ borderRadius: '8px', color: '#4f46e5', borderColor: '#cbd5e1', textTransform: 'none', fontWeight: 600 }}
-              >
-                Portfolio
-              </Button>
+                {/* Category & Media Badge */}
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.8, flexWrap: 'wrap', gap: 0.5 }}>
+                  <Chip
+                    label={currentReel?.category}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(79,70,229,0.3)',
+                      color: '#c7d2fe',
+                      fontWeight: 800,
+                      fontSize: '0.68rem',
+                      border: '1px solid rgba(99,102,241,0.3)'
+                    }}
+                  />
+                  <Chip
+                    icon={isImageReel ? <PhotoCameraIcon sx={{ fontSize: '13px !important', color: '#38bdf8 !important' }} /> : <VideoLibraryIcon sx={{ fontSize: '13px !important', color: '#38bdf8 !important' }} />}
+                    label={isImageReel ? 'Photo Reel' : 'Video Reel'}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.08)',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '0.68rem'
+                    }}
+                  />
+                </Stack>
+
+                {/* Reel Heading — Selected or Typed Heading */}
+                <Typography variant="h6" sx={{ fontWeight: 850, color: '#ffffff', lineHeight: 1.25, mb: 0.5, fontSize: { xs: '1rem', sm: '1.15rem' } }}>
+                  {currentReel?.title}
+                </Typography>
+
+                {currentReel?.description && (
+                  <Typography variant="body2" sx={{ color: '#cbd5e1', fontSize: '0.82rem', lineHeight: 1.35, mt: 0.5 }}>
+                    {currentReel.description}
+                  </Typography>
+                )}
+              </Box>
+            ) : (
+              <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+                <Chip
+                  label={currentReel?.category}
+                  size="small"
+                  sx={{
+                    bgcolor: 'rgba(15,23,42,0.85)',
+                    color: '#ffffff',
+                    fontWeight: 800,
+                    fontSize: '0.68rem',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                />
+              </Box>
             )}
           </Box>
-
-          {/* Skills Tags */}
-          {((profileData?.skills && profileData.skills.length > 0) || (!profileData && talent?.skills && talent.skills.length > 0)) && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 1.5 }}>
-              {(profileData?.skills && profileData.skills.length > 0 ? profileData.skills : (talent.skills || [])).map((skill: string) => (
-                <Chip
-                  key={skill}
-                  label={skill}
-                  size="small"
-                  sx={{ bgcolor: 'rgba(79,70,229,0.06)', color: '#4f46e5', fontWeight: 600, borderRadius: '8px' }}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
+        )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 2.5, justifyContent: 'space-between' }}>
-        <Box>
-          <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
-            Hourly Rate
-          </Typography>
-          <Typography sx={{ fontWeight: 900, color: '#0f172a', fontSize: '1.2rem' }}>
-            ₹{(profileData?.hourlyRate || talent.hourlyRate)?.toLocaleString()}
-            <Typography component="span" sx={{ fontSize: '0.8rem', color: '#64748b' }}>
-              /hr
-            </Typography>
-          </Typography>
-        </Box>
-
-        <Button
-          variant="contained"
-          onClick={() => {
-            onClose();
-            onInvite(talent);
-          }}
-          startIcon={<SendIcon />}
+      {/* ── Bottom Action Footer: Direct Conversion CTAs ── */}
+      {pkgInfo && (
+        <DialogActions
           sx={{
-            background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
-            color: '#ffffff',
-            fontWeight: 700,
-            borderRadius: '12px',
-            px: 3.5,
-            py: 1.2,
-            boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
-            textTransform: 'none',
+            p: 2,
+            px: 2.5,
+            bgcolor: '#0b1120',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 1
           }}
         >
-          Invite to Task
-        </Button>
-      </DialogActions>
+          <Box>
+            <Typography sx={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+              Specialist Package
+            </Typography>
+            <Typography sx={{ fontWeight: 850, color: '#ffffff', fontSize: '0.95rem' }}>
+              From {pkgInfo.formattedPrice}
+            </Typography>
+          </Box>
+
+          <Stack direction="row" spacing={1.5}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => onInvite(talent)}
+              startIcon={<SendIcon sx={{ fontSize: '13px !important' }} />}
+              sx={{
+                borderRadius: '8px',
+                borderColor: 'rgba(255,255,255,0.2)',
+                color: '#ffffff',
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: '0.78rem',
+                '&:hover': { borderColor: '#ffffff', bgcolor: 'rgba(255,255,255,0.05)' }
+              }}
+            >
+              Invite Specialist
+            </Button>
+
+            <Button
+              component="a"
+              href={`/#package-${pkgInfo.slug}`}
+              onClick={() => {
+                onClose();
+                if (window.location.pathname === '/' || window.location.pathname === '') {
+                  const el = document.getElementById(`package-${pkgInfo.slug}`);
+                  if (el) {
+                    const navOffset = 90;
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: 'smooth',
+                    });
+                  }
+                }
+              }}
+              variant="contained"
+              size="small"
+              sx={{
+                background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
+                color: '#ffffff',
+                fontWeight: 800,
+                fontSize: '0.78rem',
+                borderRadius: '8px',
+                textTransform: 'none',
+                boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
+                px: 2
+              }}
+            >
+              Order Package →
+            </Button>
+          </Stack>
+        </DialogActions>
+      )}
     </Dialog>
   );
 };

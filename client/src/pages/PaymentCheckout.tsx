@@ -110,7 +110,7 @@ export default function PaymentCheckout() {
         // Fallback to defaults
         setMerchant({
           vpa: 'mohammedmaqsoodai@oksbi',
-          name: 'Mohammed Maqsood',
+          name: 'AITAG Escrow',
           qrImage: '/images/payment-qr.jpeg',
         });
       }
@@ -490,14 +490,24 @@ export default function PaymentCheckout() {
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1.5,
+                    justifyContent: 'space-between',
                     mb: 3,
+                    flexWrap: 'wrap',
+                    gap: 1.5,
                   }}
                 >
-                  <QrCodeIcon sx={{ color: '#818cf8', fontSize: 22 }} />
-                  <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
-                    Scan QR Code to Pay
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <QrCodeIcon sx={{ color: '#818cf8', fontSize: 22 }} />
+                    <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
+                      Scan QR Code to Pay
+                    </Typography>
+                  </Box>
+                  <Box
+                    component="img"
+                    src="/images/aitag-logo.png"
+                    alt="AITAG Escrow"
+                    sx={{ height: 30, objectFit: 'contain' }}
+                  />
                 </Box>
 
                 <Box
@@ -784,7 +794,7 @@ export default function PaymentCheckout() {
                         <TextField
                           id="customer-name-input"
                           label="Your Name"
-                          placeholder="Mohammed Maqsood"
+                          placeholder="Your Full Name"
                           value={customerName}
                           onChange={(e) => setCustomerName(e.target.value)}
                           fullWidth
