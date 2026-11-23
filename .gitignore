@@ -41,5 +41,6 @@ video-studio/
 server/public/uploads/
 server/data/contact_inquiries.json
 server/backups/
+Errors/
 *.jpg
 *.jpeg
