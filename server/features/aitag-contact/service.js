@@ -8,7 +8,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 
 const INQUIRIES_FILE = path.join(__dirname, '../../data/contact_inquiries.json');
-const TARGET_EMAIL = process.env.CONTACT_RECEIVER_EMAIL || 'mohammedmaqsoodai@gmail.com';
+const TARGET_EMAIL = process.env.CONTACT_RECEIVER_EMAIL || 'contact@aitag.in';
 
 // Ensure data directory and inquiries store exist
 function getInquiriesStore() {
@@ -62,7 +62,7 @@ async function dispatchEmail(record) {
     });
 
     const mailOptions = {
-      from: `"${process.env.SMTP_FROM_NAME || 'AITAG Platform'}" <${process.env.SMTP_FROM_EMAIL || user}>`,
+      from: `"${process.env.SMTP_FROM_NAME || 'AITAG'}" <${process.env.SMTP_FROM_EMAIL || 'contact@aitag.in'}>`,
       to: TARGET_EMAIL,
       replyTo: record.email,
       subject: `[AITAG Inquiry] ${record.serviceInterest}: ${record.subject || 'New Contact Request'}`,

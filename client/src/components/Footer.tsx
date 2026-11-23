@@ -59,7 +59,7 @@ const Footer: React.FC = () => {
                 Marketing Video & Promo Reels
               </Link>
               <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
-                5-Page Static Business Website
+                Fast Business Website & Landing Page
               </Link>
               <Link href="/#packages" underline="none" sx={{ color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer !important', '&:hover': { color: '#818cf8' } }}>
                 Logo Design & Business Branding Kit

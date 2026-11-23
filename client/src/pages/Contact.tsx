@@ -16,7 +16,10 @@ import {
   Divider,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  IconButton,
+  Tooltip,
+  Link
 } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
@@ -29,14 +32,28 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import EmailIcon from '@mui/icons-material/Email';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Link as RouterLink } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+
+const WhatsAppIcon: React.FC<{ sx?: React.CSSProperties }> = ({ sx }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="currentColor"
+    style={{ ...sx }}
+  >
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 00-3.48-8.413Z" />
+  </svg>
+);
 
 const SERVICE_OPTIONS = [
   '✦ General Inquiry & Guidance',
   'AI Product Photo Makeover (from ₹999)',
   'Marketing Video & Promo Reels (from ₹1,499)',
-  '5-Page Static Business Website (from ₹2,499)',
+  'Fast Business Website & Landing Page (from ₹1,999)',
   'Logo Design & Business Branding Kit (from ₹499)',
   'Custom Enterprise AI Deliverable',
 ];
@@ -56,6 +73,13 @@ export const Contact: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [inquiryRefId, setInquiryRefId] = useState<string | null>(null);
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText('contact@aitag.in');
+    setEmailCopied(true);
+    setTimeout(() => setEmailCopied(false), 2500);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -241,10 +265,31 @@ export const Contact: React.FC = () => {
                       lineHeight: 1.6,
                       maxWidth: 480,
                       mx: 'auto',
-                      mb: 3,
+                      mb: 2,
                     }}
                   >
                     Thank you, <strong>{formData.name}</strong>. Your message has been safely logged in our system. A dedicated AITAG representative will review your requirement and reach out directly to <strong>{formData.email}</strong> within 24 business hours.
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      fontFamily: 'Inter, sans-serif',
+                      color: '#64748b',
+                      fontSize: '0.85rem',
+                      lineHeight: 1.6,
+                      maxWidth: 480,
+                      mx: 'auto',
+                      mb: 3,
+                    }}
+                  >
+                    Need urgent assistance? You can also email us directly at{' '}
+                    <Link href="mailto:contact@aitag.in" sx={{ color: '#2563eb', fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                      contact@aitag.in
+                    </Link>{' '}
+                    or message us on{' '}
+                    <Link href="https://wa.me/919886031643?text=Hi%20AITAG" target="_blank" rel="noopener noreferrer" sx={{ color: '#16a34a', fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                      WhatsApp
+                    </Link>.
                   </Typography>
 
                   {inquiryRefId && (
@@ -540,9 +585,215 @@ export const Contact: React.FC = () => {
             </Card>
           </Grid>
 
-          {/* Right Column: Trust Pillars, Hours & FAQ */}
+          {/* Right Column: Direct Channels, Trust Pillars, Hours & FAQ */}
           <Grid item xs={12} md={5}>
             <Stack spacing={3}>
+              {/* Direct Support Channels Card */}
+              <Card
+                elevation={0}
+                sx={{
+                  p: 3.5,
+                  borderRadius: '16px',
+                  border: '1px solid #e2e8f0',
+                  bgcolor: '#ffffff',
+                  boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '4px',
+                    background: 'linear-gradient(90deg, #2563eb, #10b981)',
+                  }}
+                />
+
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 800,
+                    color: '#0f172a',
+                    fontSize: '1.05rem',
+                    mb: 0.5,
+                  }}
+                >
+                  Direct Support Channels
+                </Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.8rem', mb: 2.5 }}>
+                  Prefer direct messaging over forms? Reach our team directly:
+                </Typography>
+
+                <Stack spacing={2}>
+                  {/* Email Channel */}
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: '12px',
+                      bgcolor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        borderColor: '#93c5fd',
+                        bgcolor: '#f0f7ff',
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.8 }}>
+                      <Box
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '8px',
+                          bgcolor: 'rgba(37,99,235,0.1)',
+                          color: '#2563eb',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <EmailIcon sx={{ fontSize: 18 }} />
+                      </Box>
+                      <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
+                        Official Email
+                      </Typography>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                      <Link
+                        href="mailto:contact@aitag.in"
+                        sx={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.92rem',
+                          fontWeight: 700,
+                          color: '#2563eb',
+                          textDecoration: 'none',
+                          '&:hover': { textDecoration: 'underline' },
+                        }}
+                      >
+                        contact@aitag.in
+                      </Link>
+                      <Tooltip title={emailCopied ? 'Copied to clipboard!' : 'Copy email address'} arrow>
+                        <IconButton
+                          size="small"
+                          onClick={handleCopyEmail}
+                          sx={{
+                            color: emailCopied ? '#10b981' : '#64748b',
+                            bgcolor: emailCopied ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
+                            p: 0.6,
+                            '&:hover': { bgcolor: '#e2e8f0' },
+                          }}
+                        >
+                          {emailCopied ? (
+                            <CheckCircleIcon sx={{ fontSize: 18 }} />
+                          ) : (
+                            <ContentCopyIcon sx={{ fontSize: 18 }} />
+                          )}
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                    <Typography sx={{ color: '#64748b', fontSize: '0.75rem', mt: 0.5 }}>
+                      Direct routing to our core support & operations team.
+                    </Typography>
+                  </Box>
+
+                  {/* WhatsApp Channel */}
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: '12px',
+                      bgcolor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        borderColor: '#86efac',
+                        bgcolor: '#f0fdf4',
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.8 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '8px',
+                            bgcolor: 'rgba(16,185,129,0.1)',
+                            color: '#10b981',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <WhatsAppIcon sx={{ fill: '#10b981' }} />
+                        </Box>
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
+                          WhatsApp Business Chat
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label="Instant Chat"
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          bgcolor: '#f0fdf4',
+                          color: '#16a34a',
+                          border: '1px solid #bbf7d0',
+                        }}
+                      />
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                      <Typography
+                        sx={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.92rem',
+                          fontWeight: 700,
+                          color: '#0f172a',
+                        }}
+                      >
+                        +91 98860 31643
+                      </Typography>
+                      <Button
+                        component="a"
+                        href="https://wa.me/919886031643?text=Hi%20AITAG%2C%20I%20have%20an%20inquiry%20regarding%20your%20services"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="contained"
+                        size="small"
+                        startIcon={<WhatsAppIcon sx={{ fill: '#ffffff' }} />}
+                        sx={{
+                          bgcolor: '#16a34a',
+                          color: '#ffffff',
+                          textTransform: 'none',
+                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          borderRadius: '8px',
+                          px: 1.5,
+                          py: 0.5,
+                          boxShadow: 'none',
+                          '&:hover': {
+                            bgcolor: '#15803d',
+                            boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)',
+                          },
+                        }}
+                      >
+                        Chat Now
+                      </Button>
+                    </Box>
+                    <Typography sx={{ color: '#64748b', fontSize: '0.75rem', mt: 0.5 }}>
+                      Fast inquiries, status checks, and project scoping.
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Card>
+
               {/* Trust Badges Card */}
               <Card
                 elevation={0}

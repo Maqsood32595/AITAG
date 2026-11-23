@@ -136,7 +136,7 @@ const UpdateTask = () => {
   if (!form) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh"><CircularProgress sx={{ color: '#4f46e5' }} /></Box>;
 
   const grossBudget = Number(form.budget) || 0;
-  const platformFee = Number((grossBudget * 0.10).toFixed(2));
+  const platformFee = Number((grossBudget * 0.19).toFixed(2));
   const tdsFee = Number((grossBudget * 0.01).toFixed(2));
   const netSpecialist = Number((grossBudget - (platformFee + tdsFee)).toFixed(2));
 
@@ -323,11 +323,11 @@ const UpdateTask = () => {
               {/* Escrow Splits Breakdown */}
               <Box sx={{ mb: 3, p: 1.5, bgcolor: '#f8fafc', borderRadius: '10px', textAlign: 'left' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" sx={{ color: '#64748b' }}>Specialist Payout (89%):</Typography>
+                  <Typography variant="caption" sx={{ color: '#64748b' }}>Specialist Payout (80%):</Typography>
                   <Typography variant="caption" sx={{ fontWeight: 700 }}>₹{netSpecialist}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" sx={{ color: '#64748b' }}>Platform Fee (10%):</Typography>
+                  <Typography variant="caption" sx={{ color: '#64748b' }}>Platform Fee (19%):</Typography>
                   <Typography variant="caption" sx={{ fontWeight: 700 }}>₹{platformFee}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

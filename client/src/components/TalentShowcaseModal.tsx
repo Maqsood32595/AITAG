@@ -64,7 +64,7 @@ export const getWorkflowPackageInfo = (category?: string, title?: string) => {
     };
   }
 
-  // 2. Web & Digital Presence (5-Page Static Website) -> from ₹1,999
+  // 2. Web & Digital Presence (Fast Business Website & Landing Page) -> from ₹1,999
   if (
     c.includes('web') ||
     c.includes('digital') ||
@@ -79,7 +79,7 @@ export const getWorkflowPackageInfo = (category?: string, title?: string) => {
       price: 1999,
       formattedPrice: '₹1,999',
       slug: 'ai-website-landing-page',
-      packageName: '5-Page Static Business Website',
+      packageName: 'Fast Business Website & Landing Page',
     };
   }
 

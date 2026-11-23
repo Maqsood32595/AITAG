@@ -7,9 +7,9 @@ class EscrowSplitter {
   /**
    * Calculate statutory splits & platform fee
    * @param {number} grossAmount
-   * @param {number} commissionRate Default 10%
+   * @param {number} commissionRate Default 19% (total platform deduction 20% inclusive of 1% TDS)
    */
-  calculate(grossAmount, commissionRate = 0.10) {
+  calculate(grossAmount, commissionRate = 0.19) {
     const gross = Number(grossAmount);
     if (isNaN(gross) || gross <= 0) {
       throw new Error('Gross amount must be a positive number');

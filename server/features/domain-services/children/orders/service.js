@@ -46,8 +46,8 @@ class ServiceOrdersService {
     const tier = packagesService.resolveTier ? packagesService.resolveTier(pkg, resolvedTierName)
       : (pkg.tiers || []).find((t) => t.tier_name === resolvedTierName) || pkg.tiers?.[0];
     const agreed_price = tier ? Number(tier.price_min) : 1499;
-    const platform_fee = Math.round(agreed_price * 0.10); // 10% AITAG commission
-    const expert_payout = agreed_price - platform_fee;
+    const platform_fee = Math.round(agreed_price * 0.20); // 20% AITAG platform fee (inclusive of statutory TDS)
+    const expert_payout = agreed_price - platform_fee; // 80% specialist payout
 
     const orderRecord = {
       id: crypto.randomUUID(),

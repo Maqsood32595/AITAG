@@ -629,7 +629,7 @@ export const Workflows: React.FC = () => {
                   >
                     <MenuItem value="Branding & Print">Branding & Print (Logo Design & Branding Kit)</MenuItem>
                     <MenuItem value="Social & Marketing">Social & Marketing (Promo Reels & Videos)</MenuItem>
-                    <MenuItem value="Web & Digital Presence">Web & Digital Presence (5-Page Website)</MenuItem>
+                    <MenuItem value="Web & Digital Presence">Web & Digital Presence (Fast Business Website & Landing Page)</MenuItem>
                     <MenuItem value="Product Visuals">Product Visuals (AI Photo Makeover)</MenuItem>
                   </TextField>
                 </Stack>

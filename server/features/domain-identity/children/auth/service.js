@@ -6,6 +6,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '../../../../..
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../../../../supabase');
+const registrationNotifier = require('./registration-notifier');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aitag-fractal-kernel-jwt-secret-2026';
 const JWT_EXPIRES = '7d';
@@ -108,6 +109,10 @@ class AuthService {
 
         if (!error && user) {
           const token = this.signToken(user);
+          registrationNotifier.notifyNewUserRegistration({
+            user,
+            method: 'Manual Registration (Email/Password)'
+          }).catch(err => console.warn('[AuthService] Registration alert error:', err.message));
           return { user, token };
         }
       }
@@ -137,6 +142,10 @@ class AuthService {
     SEED_USERS.push(newUser);
     const { password_hash: _, ...safeUser } = newUser;
     const token = this.signToken(safeUser);
+    registrationNotifier.notifyNewUserRegistration({
+      user: safeUser,
+      method: 'Manual Registration (Email/Password)'
+    }).catch(err => console.warn('[AuthService] Registration alert error:', err.message));
     return { user: safeUser, token };
   }
 

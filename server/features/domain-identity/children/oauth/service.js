@@ -11,6 +11,7 @@ const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const supabase = require('../../../../supabase');
 const authService = require('../auth/service');
+const registrationNotifier = require('../auth/registration-notifier');
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '146304368488-snstqv6tulh315kh4gep22verk8gm1pe.apps.googleusercontent.com';
 
@@ -147,6 +148,10 @@ class GoogleOAuthService {
         }
 
         const token = authService.signToken(newUser);
+        registrationNotifier.notifyNewUserRegistration({
+          user: newUser,
+          method: 'Google OAuth (Single Sign-On)'
+        }).catch(err => console.warn('[GoogleOAuthService] Registration alert error:', err.message));
         return {
           user: newUser,
           token,
@@ -176,6 +181,10 @@ class GoogleOAuthService {
     };
 
     const token = authService.signToken(fallbackUser);
+    registrationNotifier.notifyNewUserRegistration({
+      user: fallbackUser,
+      method: 'Google OAuth (Single Sign-On)'
+    }).catch(err => console.warn('[GoogleOAuthService] Registration alert error:', err.message));
     return {
       user: fallbackUser,
       token,

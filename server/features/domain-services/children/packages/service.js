@@ -178,8 +178,8 @@ const FALLBACK_PACKAGES = [
   },
   {
     slug: 'ai-website-landing-page',
-    title: '5-Page Static Business Website',
-    tagline: 'Mobile-first website live in 2–6 days — zero ongoing maintenance, zero hosting fees',
+    title: 'Fast Business Website & Landing Page',
+    tagline: 'Mobile-first website live in 2–6 days — loads in under 1 second, zero monthly hosting fees',
     description:
       'We build a fast, mobile-friendly static website for your business using AI-generated content and modern design. Pure static HTML means it loads in under 1 second on 4G, cannot break from plugin updates, and requires zero monthly hosting fees when deployed on Cloudflare Pages or Netlify.',
     category: 'Web & Digital Presence',

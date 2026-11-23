@@ -303,13 +303,13 @@ const TaskDetails = () => {
   // Find accepted bid if any
   const acceptedBid = bids.find(b => b.status === 'accepted') || (myBid?.status === 'accepted' ? myBid : null);
   const contractAmount = Number(task.agreed_price || acceptedBid?.bid_amount || task.budget) || 1000;
-  const contractPlatformFee = Number((contractAmount * 0.10).toFixed(2));
+  const contractPlatformFee = Number((contractAmount * 0.19).toFixed(2));
   const contractTds = Number((contractAmount * 0.01).toFixed(2));
   const contractNetPayout = Number((contractAmount - (contractPlatformFee + contractTds)).toFixed(2));
 
   // Real-time calculation for Proposal Modal
   const inputAmount = Number(bidAmountInput) || 0;
-  const modalPlatformFee = Number((inputAmount * 0.10).toFixed(2));
+  const modalPlatformFee = Number((inputAmount * 0.19).toFixed(2));
   const modalTds = Number((inputAmount * 0.01).toFixed(2));
   const modalNetPayout = Number((inputAmount - (modalPlatformFee + modalTds)).toFixed(2));
 
@@ -563,7 +563,7 @@ const TaskDetails = () => {
                         ✅ Contract Completed & Payment Released
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.5 }}>
-                        Platform Fee: 10% • Sec 194-O TDS: 1% Withheld • Net Specialist Disbursal: 89%
+                        Platform Fee: 19% • Sec 194-O TDS: 1% Withheld • Net Specialist Disbursal: 80%
                       </Typography>
                       {task.client_rating && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
@@ -765,8 +765,8 @@ const TaskDetails = () => {
                   <strong>₹{Number(task.budget).toLocaleString()}</strong>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', mb: 0.5 }}>
-                  <span>10% Platform Fee:</span>
-                  <strong>₹{(Number(task.budget) * 0.10).toLocaleString()}</strong>
+                  <span>19% Platform Fee:</span>
+                  <strong>₹{(Number(task.budget) * 0.19).toLocaleString()}</strong>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', mb: 0.5 }}>
                   <span>1% TDS (Sec 194-O):</span>
@@ -775,7 +775,7 @@ const TaskDetails = () => {
                 <Divider sx={{ my: 1 }} />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, color: '#10b981' }}>
                   <span>Net Payout:</span>
-                  <span>₹{(Number(task.budget) * 0.89).toLocaleString()}</span>
+                  <span>₹{(Number(task.budget) * 0.80).toLocaleString()}</span>
                 </Box>
               </Box>
             </Paper>
@@ -1097,11 +1097,11 @@ const TaskDetails = () => {
               {/* Section 194-O Escrow Breakdown */}
               <Box sx={{ mb: 2.5, p: 1.5, bgcolor: '#f8fafc', borderRadius: '10px', textAlign: 'left', border: '1px solid #e2e8f0' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" sx={{ color: '#64748b' }}>Specialist Disbursal (89%):</Typography>
+                  <Typography variant="caption" sx={{ color: '#64748b' }}>Specialist Disbursal (80%):</Typography>
                   <Typography variant="caption" sx={{ fontWeight: 700 }}>₹{contractNetPayout.toLocaleString()}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" sx={{ color: '#64748b' }}>Platform Fee (10%):</Typography>
+                  <Typography variant="caption" sx={{ color: '#64748b' }}>Platform Fee (19%):</Typography>
                   <Typography variant="caption" sx={{ fontWeight: 700 }}>₹{contractPlatformFee.toLocaleString()}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

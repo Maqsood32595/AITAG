@@ -31,7 +31,7 @@ import { GoogleAuthButton } from '../components/GoogleAuthButton';
 const DOMAIN_OPTIONS = [
   'AI Product Photo Makeover (E-commerce / Catalogues)',
   'Marketing Video & Promo Reels (Social Media Ads)',
-  '5-Page Static Business Website (Development / Deployment)',
+  'Fast Business Website & Landing Page (Development / Deployment)',
   'Logo Design & Business Branding Kit (Vectors / Guidelines)',
   'Custom Enterprise AI Workflows & Automation',
 ];
@@ -44,7 +44,7 @@ export const HowToBecomeAnExpert: React.FC = () => {
     email: user?.email || '',
     phone: '',
     domain: 'AI Product Photo Makeover (E-commerce / Catalogues)',
-    tools: 'Midjourney, Claude, GPT-4, Photoshop',
+    tools: 'Flux.1, Midjourney v6, Kling AI, Runway Gen-3, ElevenLabs, Claude 3.5 Sonnet, Recraft V3, Cursor',
     portfolio_url: '',
     bio: '',
   });
@@ -181,8 +181,40 @@ export const HowToBecomeAnExpert: React.FC = () => {
               mb: 3,
             }}
           >
-            AITAG does not operate an open, self-verified freelancer directory. To guarantee consistent quality and commercial reliability for everyday businesses, all specialists must complete a structured 1-week training orientation before accepting live customer orders.
+            AITAG connects talented AI creators with small businesses across India. Join our curated network of AI specialists to receive ready customer orders with upfront escrow payment protection.
           </Typography>
+
+          {/* Specialist Economics & Transparency Banner */}
+          <Grid container spacing={2} sx={{ mb: 4, maxWidth: 900 }}>
+            <Grid item xs={6} sm={3}>
+              <Paper elevation={0} sx={{ p: 2.2, bgcolor: '#ffffff', borderRadius: '14px', border: '1.5px solid #bbf7d0', textAlign: 'center', boxShadow: '0 4px 14px rgba(16,185,129,0.08)' }}>
+                <Typography sx={{ color: '#059669', fontWeight: 900, fontSize: '1.5rem', lineHeight: 1 }}>80%</Typography>
+                <Typography sx={{ color: '#0f172a', fontSize: '0.825rem', fontWeight: 700, mt: 0.5 }}>Net Take-Home Pay</Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.72rem', mt: 0.2 }}>20% total fee & tax</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Paper elevation={0} sx={{ p: 2.2, bgcolor: '#ffffff', borderRadius: '14px', border: '1.5px solid #bfdbfe', textAlign: 'center', boxShadow: '0 4px 14px rgba(37,99,235,0.08)' }}>
+                <Typography sx={{ color: '#2563eb', fontWeight: 900, fontSize: '1.5rem', lineHeight: 1 }}>100% Free</Typography>
+                <Typography sx={{ color: '#0f172a', fontSize: '0.825rem', fontWeight: 700, mt: 0.5 }}>Zero Joining Fees</Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.72rem', mt: 0.2 }}>No bidding credits</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Paper elevation={0} sx={{ p: 2.2, bgcolor: '#ffffff', borderRadius: '14px', border: '1.5px solid #e2e8f0', textAlign: 'center', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+                <Typography sx={{ color: '#4f46e5', fontWeight: 900, fontSize: '1.5rem', lineHeight: 1 }}>24h Payout</Typography>
+                <Typography sx={{ color: '#0f172a', fontSize: '0.825rem', fontWeight: 700, mt: 0.5 }}>Fast Direct Disbursal</Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.72rem', mt: 0.2 }}>Direct to UPI / Bank</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Paper elevation={0} sx={{ p: 2.2, bgcolor: '#ffffff', borderRadius: '14px', border: '1.5px solid #fed7aa', textAlign: 'center', boxShadow: '0 4px 14px rgba(234,88,12,0.08)' }}>
+                <Typography sx={{ color: '#ea580c', fontWeight: 900, fontSize: '1.5rem', lineHeight: 1 }}>Capped</Typography>
+                <Typography sx={{ color: '#0f172a', fontSize: '0.825rem', fontWeight: 700, mt: 0.5 }}>1–2 Revisions Max</Typography>
+                <Typography sx={{ color: '#64748b', fontSize: '0.72rem', mt: 0.2 }}>No endless free work</Typography>
+              </Paper>
+            </Grid>
+          </Grid>
 
           <Button
             variant="contained"
@@ -200,7 +232,7 @@ export const HowToBecomeAnExpert: React.FC = () => {
               '&:hover': { boxShadow: '0 6px 20px rgba(79, 70, 229, 0.35)' }
             }}
           >
-            Apply ↓
+            Apply as Specialist ↓
           </Button>
         </Container>
       </Box>
@@ -314,24 +346,78 @@ export const HowToBecomeAnExpert: React.FC = () => {
                 bgcolor: '#ffffff',
                 border: '1px solid #e2e8f0',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.04)',
+                mb: 4
               }}
             >
               <Typography variant="h5" sx={{ color: '#0f172a', fontWeight: 800, mb: 1.5, fontFamily: 'Inter, sans-serif' }}>
-                What We Expect from Applicants
+                What We Look for in Specialists
               </Typography>
               <Stack spacing={1.5}>
                 <Typography sx={{ color: '#334155', fontSize: '0.925rem' }}>
-                  ✓ <strong>Existing Generative Proficiency:</strong> Practical familiarity with tools such as Midjourney, Flux, Claude, GPT-4, Cursor, or Runway.
+                  ✓ <strong>Hands-on AI Tool Skills:</strong> Practical experience with tools like Flux.1, Midjourney v6, Kling, Runway Gen-3, Claude 3.5, or Recraft V3.
                 </Typography>
                 <Typography sx={{ color: '#334155', fontSize: '0.925rem' }}>
-                  ✓ <strong>Speed & Reliability:</strong> Ability to deliver standard order milestones within 24 to 48 hours.
+                  ✓ <strong>Fast Delivery:</strong> Ready to deliver standard tasks in 24 to 48 hours.
                 </Typography>
                 <Typography sx={{ color: '#334155', fontSize: '0.925rem' }}>
-                  ✓ <strong>Clear Communication:</strong> Polite, prompt updates without confusing non-technical clients with jargon.
+                  ✓ <strong>Simple Communication:</strong> Friendly, clear updates without confusing clients with technical prompt jargon.
                 </Typography>
                 <Typography sx={{ color: '#334155', fontSize: '0.925rem' }}>
-                  ✓ <strong>Full Commercial Transfer:</strong> Commitment to granting 100% intellectual property ownership to paying clients.
+                  ✓ <strong>Commercial Quality:</strong> Clean file exports (transparent PNGs, print-ready SVGs, 1080p MP4s).
                 </Typography>
+              </Stack>
+            </Paper>
+
+            {/* Section 4: Specialist Protections & FAQs */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, sm: 4 },
+                borderRadius: '20px',
+                bgcolor: '#ffffff',
+                border: '1.5px solid #e0e7ff',
+                boxShadow: '0 10px 30px rgba(79, 70, 229, 0.04)',
+              }}
+            >
+              <Typography variant="h5" sx={{ color: '#0f172a', fontWeight: 800, mb: 2, fontFamily: 'Inter, sans-serif' }}>
+                Specialist Rights & Fair Play Policy
+              </Typography>
+              <Stack spacing={2}>
+                <Box>
+                  <Typography sx={{ color: '#4f46e5', fontWeight: 700, fontSize: '0.95rem', mb: 0.5 }}>
+                    Can a customer reject my work without paying?
+                  </Typography>
+                  <Typography sx={{ color: '#475569', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                    No. Clients deposit 100% of the funds in advance. Revision requests are strictly limited to the package cap (1 or 2 rounds). Clients cannot cancel or withhold payment if your delivery matches the brief. AITAG moderates any scope disagreement within 72 hours.
+                  </Typography>
+                </Box>
+                <Divider sx={{ borderColor: '#f1f5f9' }} />
+                <Box>
+                  <Typography sx={{ color: '#4f46e5', fontWeight: 700, fontSize: '0.95rem', mb: 0.5 }}>
+                    When and how do I receive payment?
+                  </Typography>
+                  <Typography sx={{ color: '#475569', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                    Payouts are disbursed automatically to your registered UPI ID or Indian bank account within 24 hours of client sign-off (or automatically after 7 days if the client does not review).
+                  </Typography>
+                </Box>
+                <Divider sx={{ borderColor: '#f1f5f9' }} />
+                <Box>
+                  <Typography sx={{ color: '#4f46e5', fontWeight: 700, fontSize: '0.95rem', mb: 0.5 }}>
+                    Can I showcase my work in my personal portfolio?
+                  </Typography>
+                  <Typography sx={{ color: '#475569', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                    Yes! You retain full rights to display completed work in your personal portfolio, Behance, or AITAG profile (unless a client requests an active NDA in writing).
+                  </Typography>
+                </Box>
+                <Divider sx={{ borderColor: '#f1f5f9' }} />
+                <Box>
+                  <Typography sx={{ color: '#4f46e5', fontWeight: 700, fontSize: '0.95rem', mb: 0.5 }}>
+                    Is there any minimum time commitment?
+                  </Typography>
+                  <Typography sx={{ color: '#475569', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                    None. You can work as a freelance side-income creator or take daily orders full-time. You accept orders only when you have bandwidth.
+                  </Typography>
+                </Box>
               </Stack>
             </Paper>
           </Grid>

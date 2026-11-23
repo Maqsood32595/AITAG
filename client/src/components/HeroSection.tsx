@@ -28,6 +28,17 @@ const AUDIENCE_TAGS = [
   'Small and Medium Businesses',
 ];
 
+const EXPERT_TOOLS = [
+  'Flux.1',
+  'Midjourney v6',
+  'Kling AI',
+  'Runway Gen-3',
+  'ElevenLabs',
+  'Claude 3.5',
+  'Recraft V3',
+  'Cursor'
+];
+
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
 
@@ -260,6 +271,42 @@ const HeroSection: React.FC = () => {
                     }}
                   />
                 ))}
+              </Box>
+
+              {/* Compact "Tools Our Experts Use" Badge Row */}
+              <Box sx={{ mt: 2.2, pt: 1.8, borderTop: '1px solid rgba(226, 232, 240, 0.7)' }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: '#64748b',
+                    fontWeight: 800,
+                    letterSpacing: '0.8px',
+                    display: 'block',
+                    mb: 1,
+                    textTransform: 'uppercase',
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  TOOLS OUR EXPERTS USE:
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, justifyContent: { xs: 'center', md: 'flex-start' } }}>
+                  {EXPERT_TOOLS.map((tool) => (
+                    <Chip
+                      key={tool}
+                      label={tool}
+                      size="small"
+                      sx={{
+                        bgcolor: 'rgba(79, 70, 229, 0.05)',
+                        border: '1px solid rgba(79, 70, 229, 0.15)',
+                        color: '#4f46e5',
+                        fontWeight: 700,
+                        fontSize: '0.72rem',
+                        height: 24,
+                        borderRadius: '6px',
+                      }}
+                    />
+                  ))}
+                </Box>
               </Box>
             </Box>
           </Box>

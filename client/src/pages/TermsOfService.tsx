@@ -230,7 +230,7 @@ export const TermsOfService: React.FC = () => {
                 </Typography>
                 <Box component="ul" sx={{ pl: 3, color: '#334155', fontSize: '0.975rem', lineHeight: 1.85, '& li': { mb: 1.2 } }}>
                   <li><strong>Payment Methods:</strong> Payments are processed securely via verified gateways (Razorpay, UPI, Credit/Debit cards, Net Banking).</li>
-                  <li><strong>Disbursement:</strong> Escrowed funds are disbursed to the Specialist only after the Client formally approves the milestone deliverable or upon expiration of the 7-day review window without reported dispute.</li>
+                  <li><strong>Disbursement & Commission:</strong> Escrowed funds are disbursed to the Specialist only after the Client formally approves the milestone deliverable or upon expiration of the 7-day review window without reported dispute. The platform fee is 20% inclusive of 1% statutory TDS withholding under Section 194-O, ensuring specialists receive 80% net earnings.</li>
                   <li><strong>Statutory Tax Withholding:</strong> Where mandated by law, AITAG complies with Section 194-O of the Indian Income Tax Act regarding e-commerce marketplace TDS deductions.</li>
                 </Box>
               </section>
@@ -314,7 +314,7 @@ export const TermsOfService: React.FC = () => {
                     <SupportAgentIcon sx={{ color: '#2563eb' }} /> Customer Support & Legal Inquiries
                   </Typography>
                   <Typography sx={{ color: '#334155', fontSize: '0.925rem', mb: 0.5 }}>
-                    <strong>Email:</strong> <Link href="mailto:support@aitag.in" sx={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>support@aitag.in</Link>
+                    <strong>Email:</strong> <Link href="mailto:contact@aitag.in" sx={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>contact@aitag.in</Link>
                   </Typography>
                   <Typography sx={{ color: '#475569', fontSize: '0.875rem' }}>
                     <strong>Headquarters:</strong> Bengaluru, Karnataka, India

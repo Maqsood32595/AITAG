@@ -50,7 +50,7 @@ const WORKFLOW_STEPS = [
     color: '#f59e0b',
     bg: '#fffbeb',
     details: [
-      'Experts utilize premier AI engines (Midjourney, Claude, GPT-4o, Cursor) to produce assets 5x faster.',
+      'Verified specialists craft your deliverables 5x faster using modern AI tools with guaranteed commercial finish.',
       'You receive initial concept drafts directly in your project dashboard for review.',
       'Request revisions or tweaks directly in the discussion feed with 1-click feedback.',
     ],

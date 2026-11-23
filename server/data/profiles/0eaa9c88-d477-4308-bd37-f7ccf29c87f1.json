@@ -43,7 +43,7 @@
         "Dynamic Captions",
         "HD MP4"
       ],
-      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-2%2F1795101059170_Shark.mp4",
       "businessImpact": "Produced promotional video reels with clear voiceover and captions for social media campaigns."
     },
     {
@@ -58,7 +58,7 @@
         "Local SEO",
         "Zero Hosting Fees"
       ],
-      "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-3%2F1795100852475_Website_Built_By_Gemma.mp4",
       "businessImpact": "Built mobile-friendly business website with instant WhatsApp click-to-chat button."
     },
     {
@@ -73,9 +73,9 @@
         "Amazon 2000px",
         "Clean Cutouts"
       ],
-      "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-4%2F1795251034494_Mountview_Flowers_With_Voice_Loud.mp4",
       "businessImpact": "Converted product smartphone photos into clean, studio-lit catalogue listings for marketplace selling."
     }
   ],
-  "updatedAt": "2026-11-15T09:43:26.426522+00:00"
+  "updatedAt": "2026-11-21T08:50:59.25+00:00"
 }

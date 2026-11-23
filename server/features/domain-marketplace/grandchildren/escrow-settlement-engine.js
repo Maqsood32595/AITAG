@@ -16,8 +16,8 @@ class EscrowSettlementEngine {
       throw new Error('Valid gross payout amount is required for escrow settlement');
     }
 
-    const platformFeeRate = options.platformFeeRate || 0.10;
-    const tdsRate = 0.01; // Sec 194-O 1% TDS
+    const platformFeeRate = options.platformFeeRate || 0.19;
+    const tdsRate = 0.01; // Sec 194-O 1% TDS (Total deduction 20%)
 
     const platformCommission = Number((gross * platformFeeRate).toFixed(2));
     const tdsWithholding = Number((gross * tdsRate).toFixed(2));

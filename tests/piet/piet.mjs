@@ -481,8 +481,8 @@ async function runPietSuite() {
 
       eq(order.status, 'REQUESTED', 'Initial order status must be REQUESTED');
       eq(Number(order.agreed_price), 1499, 'Agreed price must match Starter min price (₹1499)');
-      eq(Number(order.platform_fee), 150, 'Platform fee must be 10% (Math.round(1499 * 0.10) = 150)');
-      eq(Number(order.expert_payout), 1349, 'Expert payout must be 90% (1499 - 150 = 1349)');
+      eq(Number(order.platform_fee), 300, 'Platform fee must be 20% (Math.round(1499 * 0.20) = 300)');
+      eq(Number(order.expert_payout), 1199, 'Expert payout must be 80% (1499 - 300 = 1199)');
     });
 
     await t('Customer uploads project assets via POST /api/service-orders/upload-assets', async () => {
@@ -653,8 +653,8 @@ async function runPietSuite() {
       eq(order.status, 'COMPLETED', 'Order status must be COMPLETED');
       eq(order.rating, 5, 'Order rating must be 5');
       eq(Number(order.agreed_price), 1499, 'Agreed price must remain ₹1,499');
-      eq(Number(order.platform_fee), 150, 'Platform commission must be 10% (₹150)');
-      eq(Number(order.expert_payout), 1349, 'Expert net payout must be 90% (₹1,349)');
+      eq(Number(order.platform_fee), 300, 'Platform commission must be 20% (₹300)');
+      eq(Number(order.expert_payout), 1199, 'Expert net payout must be 80% (₹1,199)');
       assert(order.assigned_expert_email === NONCE_EXPERT, 'Assigned expert email preserved');
     });
 
