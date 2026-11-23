@@ -1,10 +1,27 @@
 /**
- * AITAG New User Registration Notifier
- * Automatically dispatches real-time email alerts to contact@aitag.in
- * whenever a new user signs up via Google OAuth or Manual Registration.
+ * AITAG New User Registration & Welcome Notifier
+ * Automatically dispatches:
+ * 1. Real-time internal ops alert to contact@aitag.in
+ * 2. Role-aware welcome email to the newly registered user (Client vs Specialist)
+ *    Templates loaded dynamically from workflows/welcome_email_templates.js
  */
 
 const nodemailer = require('nodemailer');
+const { renderWelcomeEmail } = require('../../../../../workflows/welcome_email_templates');
+
+function isTestContext(user) {
+  if (process.env.NODE_ENV === 'test' || process.env.PIET_RUN === 'true') return true;
+  if (user && user.email) {
+    const e = user.email.toLowerCase();
+    if (e.includes('aitag-test') || e.includes('aitag-piet') || e.endsWith('.local') || e.includes('test-user') || e.includes('example.com')) {
+      return true;
+    }
+  }
+  if (user && user.name && (user.name.toLowerCase().includes('test') || user.name.toLowerCase().includes('piet'))) {
+    return true;
+  }
+  return false;
+}
 
 class RegistrationNotifier {
   constructor() {
@@ -12,36 +29,96 @@ class RegistrationNotifier {
   }
 
   /**
-   * Dispatches email alert to contact@aitag.in (non-blocking)
+   * Helper to create verified SMTP transport
+   */
+  getTransporter() {
+    const host = process.env.SMTP_HOST || 'smtp.resend.com';
+    const port = Number(process.env.SMTP_PORT) || 465;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    const hasValidCredentials = smtpUser && smtpPass && smtpUser !== 'your-email@gmail.com' && smtpPass !== 'your-app-password';
+
+    if (!hasValidCredentials) {
+      return null;
+    }
+
+    return nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user: smtpUser, pass: smtpPass }
+    });
+  }
+
+  /**
+   * Dispatches branded welcome email to the newly registered user
+   * Content is managed dynamically in workflows/welcome_email_templates.js
+   * @param {Object} params
+   * @param {Object} params.user - { id, name, email, role }
+   */
+  async sendWelcomeEmail({ user }) {
+    if (isTestContext(user)) {
+      return { dispatched: false, reason: 'test_environment' };
+    }
+
+    if (!user || !user.email) {
+      return { dispatched: false, reason: 'missing_user_email' };
+    }
+
+    try {
+      const transporter = this.getTransporter();
+      if (!transporter) {
+        console.log(`ℹ️ [RegistrationNotifier] Welcome email skipped for ${user.email}: SMTP credentials not configured.`);
+        return { dispatched: false, reason: 'smtp_not_configured' };
+      }
+
+      const { subject, text, html } = renderWelcomeEmail(user);
+      const fromAddress = process.env.SMTP_FROM_EMAIL || 'notifications@aitag.in';
+      const fromName = process.env.SMTP_FROM_NAME || 'AITAG Platform';
+      const replyTo = process.env.CONTACT_RECEIVER_EMAIL || 'contact@aitag.in';
+
+      const info = await transporter.sendMail({
+        from: `"${fromName}" <${fromAddress}>`,
+        to: user.email,
+        replyTo,
+        subject,
+        text,
+        html
+      });
+
+      console.log(`✅ [RegistrationNotifier] Welcome email delivered to ${user.email} (Message ID: ${info.messageId})`);
+      return { dispatched: true, messageId: info.messageId };
+    } catch (err) {
+      console.error(`⚠️ [RegistrationNotifier] Failed to send welcome email to ${user.email}:`, err.message);
+      return { dispatched: false, error: err.message };
+    }
+  }
+
+  /**
+   * Dispatches email alert to contact@aitag.in AND welcome email to user (non-blocking)
    * @param {Object} params
    * @param {Object} params.user - { id, name, email, role, created_at, photo_url }
    * @param {string} params.method - 'Manual Registration (Email/Password)' or 'Google OAuth (Single Sign-On)'
    */
   async notifyNewUserRegistration({ user, method }) {
     // 1. Silent skip during automated unit/integration test suites
-    if (process.env.NODE_ENV === 'test') {
+    if (isTestContext(user)) {
       return { dispatched: false, reason: 'test_environment' };
     }
 
+    // 2. Dispatch the Welcome Email to the new user in parallel
+    this.sendWelcomeEmail({ user }).catch(err => {
+      console.warn(`⚠️ [RegistrationNotifier] Welcome email background dispatch warning:`, err.message);
+    });
+
+    // 3. Dispatch the Internal Admin Alert to contact@aitag.in
     try {
-      const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-      const port = Number(process.env.SMTP_PORT) || 587;
-      const smtpUser = process.env.SMTP_USER;
-      const smtpPass = process.env.SMTP_PASS;
-
-      const hasValidCredentials = smtpUser && smtpPass && smtpUser !== 'your-email@gmail.com' && smtpPass !== 'your-app-password';
-
-      if (!hasValidCredentials) {
+      const transporter = this.getTransporter();
+      if (!transporter) {
         console.log(`ℹ️ [RegistrationNotifier] New user registered (${user.email} via ${method}). SMTP not configured; skipping email dispatch.`);
         return { dispatched: false, reason: 'smtp_not_configured' };
       }
-
-      const transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: { user: smtpUser, pass: smtpPass }
-      });
 
       const roleDisplay = user.role === 'freelancer' ? 'AI Specialist / Freelancer' : 'Client / Small Business';
       const formattedDate = new Date(user.created_at || Date.now()).toLocaleString('en-US', {
@@ -114,7 +191,7 @@ View user management at: https://aitag.in/admin
         </div>
       `;
 
-      const fromAddress = process.env.SMTP_FROM_EMAIL || 'contact@aitag.in';
+      const fromAddress = process.env.SMTP_FROM_EMAIL || 'notifications@aitag.in';
       const fromName = process.env.SMTP_FROM_NAME || 'AITAG Platform';
 
       const info = await transporter.sendMail({

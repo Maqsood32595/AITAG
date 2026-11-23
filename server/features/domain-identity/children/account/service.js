@@ -8,6 +8,7 @@
 
 const supabase = require('../../../../supabase');
 const authService = require('../auth/service');
+const deletionNotifier = require('./account-deletion-notifier');
 
 class AccountLifecycleService {
   /**
@@ -109,6 +110,11 @@ class AccountLifecycleService {
     } catch {
       // Non-critical cache cleanup
     }
+
+    // 4. Dispatch Account Deletion Confirmation & Feedback Email (non-blocking)
+    deletionNotifier.notifyAccountDeleted({ user }).catch(err => {
+      console.warn('⚠️ [AccountLifecycle] Deletion email notice:', err.message);
+    });
 
     return deletionReport;
   }
