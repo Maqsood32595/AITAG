@@ -30,8 +30,9 @@ ENV PORT=8080
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy server backend
+# Copy server backend and workflows
 COPY server/ ./server
+COPY workflows/ ./workflows
 
 # Copy built frontend directly to server/public
 COPY --from=builder /app/client/dist ./server/public

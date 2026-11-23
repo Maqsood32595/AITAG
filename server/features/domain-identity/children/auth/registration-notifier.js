@@ -7,7 +7,24 @@
  */
 
 const nodemailer = require('nodemailer');
-const { renderWelcomeEmail } = require('../../../../../workflows/welcome_email_templates');
+const path = require('path');
+
+let renderWelcomeEmail;
+try {
+  ({ renderWelcomeEmail } = require('../../../../../workflows/welcome_email_templates'));
+} catch (err) {
+  try {
+    const fallbackPath = path.join(process.cwd(), 'workflows/welcome_email_templates');
+    ({ renderWelcomeEmail } = require(fallbackPath));
+  } catch (err2) {
+    console.warn('⚠️ [RegistrationNotifier] Could not load workflows/welcome_email_templates, using safe fallback:', err2.message);
+    renderWelcomeEmail = (user) => ({
+      subject: 'Welcome to AITAG — Find AI Skills, Get It Done 🚀',
+      text: `Hi ${user.name || 'there'},\n\nWelcome to AITAG! Find AI skills and get work done at https://aitag.in`,
+      html: `<p>Hi ${user.name || 'there'},</p><p>Welcome to AITAG! Find AI skills and get work done at <a href="https://aitag.in">aitag.in</a>.</p>`
+    });
+  }
+}
 
 function isTestContext(user) {
   if (process.env.NODE_ENV === 'test' || process.env.PIET_RUN === 'true') return true;

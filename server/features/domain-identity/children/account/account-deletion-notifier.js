@@ -7,7 +7,24 @@
  */
 
 const nodemailer = require('nodemailer');
-const { renderAccountDeletionFeedbackEmail } = require('../../../../../workflows/account_deletion_feedback_templates');
+const path = require('path');
+
+let renderAccountDeletionFeedbackEmail;
+try {
+  ({ renderAccountDeletionFeedbackEmail } = require('../../../../../workflows/account_deletion_feedback_templates'));
+} catch (err) {
+  try {
+    const fallbackPath = path.join(process.cwd(), 'workflows/account_deletion_feedback_templates');
+    ({ renderAccountDeletionFeedbackEmail } = require(fallbackPath));
+  } catch (err2) {
+    console.warn('⚠️ [AccountDeletionNotifier] Could not load workflows/account_deletion_feedback_templates, using safe fallback:', err2.message);
+    renderAccountDeletionFeedbackEmail = (user) => ({
+      subject: 'Account Deleted | AITAG',
+      text: `Hi ${user.name || 'there'},\n\nYour account has been deleted. Reply with any feedback.`,
+      html: `<p>Hi ${user.name || 'there'},</p><p>Your account has been deleted. Reply with any feedback.</p>`
+    });
+  }
+}
 
 function isTestContext(user) {
   if (process.env.NODE_ENV === 'test' || process.env.PIET_RUN === 'true') return true;
