@@ -11,6 +11,21 @@ if (fs.existsSync(devEnvPath) && (process.env.NODE_ENV === 'development' || proc
   require('dotenv').config({ path: devEnvPath, override: true });
 }
 
+// Render Secret Files & Container Env Auto-Loader
+if (fs.existsSync('/etc/secrets')) {
+  try {
+    const secretFiles = fs.readdirSync('/etc/secrets');
+    secretFiles.forEach(f => {
+      const fullPath = path.join('/etc/secrets', f);
+      if (fs.statSync(fullPath).isFile()) {
+        require('dotenv').config({ path: fullPath, override: true });
+      }
+    });
+  } catch (err) {
+    console.warn('⚠️ [Server] Could not scan /etc/secrets:', err.message);
+  }
+}
+
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
