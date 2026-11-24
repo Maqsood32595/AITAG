@@ -88,6 +88,11 @@ export default function PaymentCheckout() {
   const [copied, setCopied] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
+  // Guarantee page starts at top (0, 0) on mount without auto-scroll jumps
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
+
   // Sync user credentials if loaded late
   useEffect(() => {
     if (user) {
@@ -231,71 +236,89 @@ export default function PaymentCheckout() {
       sx={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-        py: { xs: 2, md: 6 },
+        py: { xs: 2, md: 3 },
         px: { xs: 1.5, md: 3 },
       }}
     >
-      <Container maxWidth="md">
-        {/* Header */}
+      <Container maxWidth="lg">
+        {/* Header - Compact Row */}
         <Fade in timeout={600}>
-          <Box sx={{ mb: 4 }}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(-1)}
-              sx={{
-                color: 'rgba(255,255,255,0.7)',
-                mb: 2,
-                '&:hover': { color: '#fff', background: 'rgba(255,255,255,0.05)' },
-              }}
-            >
-              Back
-            </Button>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Box
+          <Box
+            sx={{
+              mb: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 1.5,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => navigate(-1)}
                 sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: '14px',
-                  background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 8px 32px rgba(79,70,229,0.35)',
+                  color: 'rgba(255,255,255,0.85)',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '10px',
+                  px: 2,
+                  py: 0.75,
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': { color: '#fff', background: 'rgba(255,255,255,0.12)' },
                 }}
               >
-                <PaymentIcon sx={{ color: '#fff', fontSize: 26 }} />
-              </Box>
-              <Box>
-                <Typography
-                  variant="h5"
-                  sx={{ color: '#fff', fontWeight: 800, letterSpacing: '-0.5px' }}
+                Back to Tasks
+              </Button>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 16px rgba(79,70,229,0.35)',
+                  }}
                 >
-                  Secure Payment
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>
-                  Direct UPI • Zero Processing Fees
-                </Typography>
+                  <PaymentIcon sx={{ color: '#fff', fontSize: 20 }} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="h6"
+                    sx={{ color: '#fff', fontWeight: 800, letterSpacing: '-0.3px', lineHeight: 1.15, fontSize: { xs: '1rem', md: '1.2rem' } }}
+                  >
+                    Secure Payment
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>
+                    Direct UPI • Zero Processing Fees • Instant Activation
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </Box>
         </Fade>
 
-        {/* Stepper */}
+        {/* Stepper - Compact */}
         <Fade in timeout={800}>
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: 2 }}>
             <Stepper
               activeStep={activeStep}
-              alternativeLabel={!isMobile}
-              orientation={isMobile ? 'vertical' : 'horizontal'}
+              alternativeLabel
               sx={{
                 '& .MuiStepLabel-label': {
                   color: 'rgba(255,255,255,0.4)',
-                  fontSize: '0.8rem',
+                  fontSize: '0.75rem',
                   '&.Mui-active': { color: '#818cf8', fontWeight: 700 },
                   '&.Mui-completed': { color: '#10b981' },
                 },
                 '& .MuiStepIcon-root': {
                   color: 'rgba(255,255,255,0.15)',
+                  fontSize: '1.25rem',
                   '&.Mui-active': { color: '#4f46e5' },
                   '&.Mui-completed': { color: '#10b981' },
                 },
@@ -419,13 +442,14 @@ export default function PaymentCheckout() {
                 overflow: 'hidden',
               }}
             >
-              {/* Order Summary Header */}
+              {/* Order Summary Header - Sleek Compact Banner */}
               {(displayPackage || displayAmount > 0) && (
                 <Box
                   sx={{
-                    p: { xs: 2.5, md: 3.5 },
-                    background: 'linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.08))',
-                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    px: { xs: 2, md: 3 },
+                    py: 1.5,
+                    background: 'linear-gradient(135deg, rgba(79,70,229,0.15), rgba(124,58,237,0.1))',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
                   }}
                 >
                   <Box
@@ -434,17 +458,17 @@ export default function PaymentCheckout() {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       flexWrap: 'wrap',
-                      gap: 2,
+                      gap: 1.5,
                     }}
                   >
-                    <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
                       <Typography
-                        variant="body2"
-                        sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', mb: 0.5 }}
+                        variant="caption"
+                        sx={{ color: 'rgba(255,255,255,0.5)', fontWeight: 700, letterSpacing: '0.5px' }}
                       >
-                        ORDER SUMMARY
+                        ORDER:
                       </Typography>
-                      <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem' }}>
+                      <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: { xs: '0.95rem', md: '1.05rem' } }}>
                         {displayPackage}
                       </Typography>
                       {displayTier && (
@@ -452,28 +476,28 @@ export default function PaymentCheckout() {
                           label={displayTier.replace('package_', 'Tier ')}
                           size="small"
                           sx={{
-                            mt: 0.5,
-                            background: 'rgba(79,70,229,0.2)',
+                            background: 'rgba(79,70,229,0.25)',
                             color: '#a5b4fc',
-                            fontWeight: 600,
+                            fontWeight: 700,
                             fontSize: '0.7rem',
                             height: 22,
+                            border: '1px solid rgba(165,180,252,0.3)',
                           }}
                         />
                       )}
                     </Box>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                       <Typography
-                        variant="body2"
-                        sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem' }}
+                        variant="caption"
+                        sx={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}
                       >
-                        AMOUNT
+                        TOTAL:
                       </Typography>
                       <Typography
                         sx={{
                           color: '#10b981',
                           fontWeight: 800,
-                          fontSize: '1.8rem',
+                          fontSize: { xs: '1.3rem', md: '1.5rem' },
                           lineHeight: 1,
                         }}
                       >
@@ -484,164 +508,135 @@ export default function PaymentCheckout() {
                 </Box>
               )}
 
-              {/* QR Code Section */}
-              <Box sx={{ p: { xs: 2.5, md: 3.5 } }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    mb: 3,
-                    flexWrap: 'wrap',
-                    gap: 1.5,
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <QrCodeIcon sx={{ color: '#818cf8', fontSize: 22 }} />
-                    <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
-                      Scan QR Code to Pay
-                    </Typography>
-                  </Box>
-                  <Box
-                    component="img"
-                    src="/images/aitag-logo.png"
-                    alt="AITAG Escrow"
-                    sx={{ height: 30, objectFit: 'contain' }}
-                  />
-                </Box>
-
+              {/* 2-Column Responsive Body */}
+              <Box sx={{ p: { xs: 2, md: 2.75 } }}>
                 <Box
                   sx={{
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
-                    gap: 3,
-                    alignItems: { xs: 'center', md: 'flex-start' },
+                    gap: { xs: 2.5, md: 3 },
+                    alignItems: 'stretch',
                   }}
                 >
-                  {/* QR Image */}
+                  {/* Left Column: QR Code & UPI Apps */}
                   <Box
                     sx={{
-                      flexShrink: 0,
-                      width: { xs: 220, md: 240 },
-                      height: { xs: 220, md: 240 },
-                      borderRadius: '16px',
-                      overflow: 'hidden',
-                      background: '#fff',
-                      p: 1.5,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                      border: '2px solid rgba(79,70,229,0.3)',
-                      position: 'relative',
+                      flex: { xs: '1 1 auto', md: '0 0 46%' },
+                      maxWidth: { md: '46%' },
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}
                   >
-                    {merchant?.qrImage ? (
-                      <img
-                        src={merchant.qrImage}
-                        alt="Payment QR Code"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                          borderRadius: '8px',
-                        }}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <QrCodeIcon sx={{ color: '#818cf8', fontSize: 18 }} />
+                        <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>
+                          Step 1: Scan QR or Pay via App
+                        </Typography>
+                      </Box>
+                      <Box
+                        component="img"
+                        src="/images/aitag-logo.png"
+                        alt="AITAG Escrow"
+                        sx={{ height: 22, objectFit: 'contain' }}
                       />
-                    ) : (
-                      <Skeleton
-                        variant="rectangular"
-                        width="100%"
-                        height="100%"
-                        sx={{ borderRadius: '8px' }}
-                      />
-                    )}
-                  </Box>
+                    </Box>
 
-                  {/* Payment Info */}
-                  <Box sx={{ flex: 1, width: '100%' }}>
-                    {/* UPI VPA */}
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: '12px',
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        mb: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'rgba(255,255,255,0.4)',
-                          fontSize: '0.7rem',
-                          letterSpacing: '0.5px',
-                          mb: 0.5,
-                        }}
-                      >
-                        UPI ID (TAP TO COPY)
-                      </Typography>
+                    {/* QR + Details Row */}
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1.5 }}>
                       <Box
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
+                          flexShrink: 0,
+                          width: { xs: 130, sm: 145 },
+                          height: { xs: 130, sm: 145 },
+                          borderRadius: '12px',
+                          overflow: 'hidden',
+                          background: '#fff',
+                          p: 1,
+                          boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+                          border: '2px solid rgba(79,70,229,0.3)',
                         }}
                       >
-                        <Typography
+                        {merchant?.qrImage ? (
+                          <img
+                            src={merchant.qrImage}
+                            alt="Payment QR Code"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              borderRadius: '6px',
+                            }}
+                          />
+                        ) : (
+                          <Skeleton variant="rectangular" width="100%" height="100%" sx={{ borderRadius: '6px' }} />
+                        )}
+                      </Box>
+
+                      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        {/* UPI ID */}
+                        <Box
                           sx={{
-                            color: '#a5b4fc',
-                            fontWeight: 700,
-                            fontFamily: 'monospace',
-                            fontSize: { xs: '0.85rem', md: '1rem' },
-                            wordBreak: 'break-all',
+                            p: 1.2,
+                            borderRadius: '10px',
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.08)',
                           }}
                         >
-                          {displayVpa}
-                        </Typography>
-                        <Tooltip title={copied ? 'Copied!' : 'Copy UPI ID'}>
-                          <IconButton
-                            onClick={copyVpa}
-                            size="small"
-                            sx={{
-                              color: copied ? '#10b981' : 'rgba(255,255,255,0.5)',
-                              ml: 1,
-                              flexShrink: 0,
-                            }}
+                          <Typography
+                            variant="caption"
+                            sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', display: 'block', mb: 0.25 }}
                           >
-                            {copied ? (
-                              <CheckCircleIcon fontSize="small" />
-                            ) : (
-                              <CopyIcon fontSize="small" />
-                            )}
-                          </IconButton>
-                        </Tooltip>
+                            UPI ID (TAP TO COPY)
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Typography
+                              sx={{
+                                color: '#a5b4fc',
+                                fontWeight: 700,
+                                fontFamily: 'monospace',
+                                fontSize: '0.8rem',
+                                wordBreak: 'break-all',
+                              }}
+                            >
+                              {displayVpa}
+                            </Typography>
+                            <Tooltip title={copied ? 'Copied!' : 'Copy UPI ID'}>
+                              <IconButton
+                                onClick={copyVpa}
+                                size="small"
+                                sx={{ color: copied ? '#10b981' : 'rgba(255,255,255,0.5)', ml: 0.5, p: 0.4 }}
+                              >
+                                {copied ? <CheckCircleIcon fontSize="small" /> : <CopyIcon fontSize="small" />}
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+
+                        {/* Pay To */}
+                        <Box
+                          sx={{
+                            p: 1.2,
+                            borderRadius: '10px',
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          <Typography
+                            variant="caption"
+                            sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', display: 'block', mb: 0.25 }}
+                          >
+                            PAY TO
+                          </Typography>
+                          <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '0.82rem' }}>
+                            {merchant?.name || 'AITAG Services'}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
 
-                    {/* Merchant Name */}
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: '12px',
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        mb: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'rgba(255,255,255,0.4)',
-                          fontSize: '0.7rem',
-                          letterSpacing: '0.5px',
-                          mb: 0.5,
-                        }}
-                      >
-                        PAY TO
-                      </Typography>
-                      <Typography sx={{ color: '#fff', fontWeight: 600 }}>
-                        {merchant?.name || 'AITAG Services'}
-                      </Typography>
-                    </Box>
-
-                    {/* Pay via App Button (Mobile) */}
+                    {/* Pay via UPI App button */}
                     <Button
                       id="upi-intent-button"
                       variant="contained"
@@ -649,124 +644,122 @@ export default function PaymentCheckout() {
                       startIcon={<PhoneIcon />}
                       onClick={handleUpiIntent}
                       sx={{
-                        py: 1.5,
+                        py: 1.2,
                         background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-                        borderRadius: '12px',
+                        borderRadius: '10px',
                         fontWeight: 700,
-                        fontSize: '0.95rem',
-                        boxShadow: '0 8px 24px rgba(79,70,229,0.3)',
+                        fontSize: '0.88rem',
+                        boxShadow: '0 6px 20px rgba(79,70,229,0.3)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #4338ca, #6d28d9)',
-                          boxShadow: '0 12px 32px rgba(79,70,229,0.4)',
                         },
                       }}
                     >
                       Pay ₹{displayAmount.toLocaleString('en-IN')} via UPI App
                     </Button>
 
-                    {/* Accepted Apps */}
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: 1.5,
-                        mt: 1.5,
-                        flexWrap: 'wrap',
-                      }}
-                    >
+                    {/* Accepted App Chips */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1, flexWrap: 'wrap' }}>
                       {['GPay', 'PhonePe', 'Paytm', 'BHIM', 'Any UPI'].map((app) => (
                         <Chip
                           key={app}
                           label={app}
                           size="small"
                           sx={{
-                            background: 'rgba(255,255,255,0.06)',
+                            background: 'rgba(255,255,255,0.05)',
                             color: 'rgba(255,255,255,0.5)',
-                            fontSize: '0.7rem',
-                            height: 24,
+                            fontSize: '0.65rem',
+                            height: 20,
                             border: '1px solid rgba(255,255,255,0.06)',
                           }}
                         />
                       ))}
                     </Box>
                   </Box>
-                </Box>
 
-                <Divider
-                  sx={{ my: 3, borderColor: 'rgba(255,255,255,0.06)' }}
-                />
-
-                {/* UTR Submission Form */}
-                <Box>
-                  <Box
+                  {/* Divider between columns */}
+                  <Divider
+                    orientation="vertical"
+                    flexItem
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      mb: 2.5,
+                      display: { xs: 'none', md: 'block' },
+                      borderColor: 'rgba(255,255,255,0.08)',
                     }}
-                  >
-                    <ReceiptIcon sx={{ color: '#818cf8', fontSize: 22 }} />
-                    <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
-                      After Payment — Submit Reference
-                    </Typography>
-                  </Box>
-
-                  <Alert
-                    severity="info"
-                    icon={<WalletIcon />}
+                  />
+                  <Divider
                     sx={{
-                      mb: 2.5,
-                      background: 'rgba(79,70,229,0.08)',
-                      border: '1px solid rgba(79,70,229,0.15)',
-                      color: 'rgba(255,255,255,0.7)',
-                      borderRadius: '12px',
-                      '& .MuiAlert-icon': { color: '#818cf8' },
+                      display: { xs: 'block', md: 'none' },
+                      borderColor: 'rgba(255,255,255,0.08)',
                     }}
-                  >
-                    After completing your UPI payment, enter the{' '}
-                    <strong>UTR / Transaction Reference Number</strong> from your payment app
-                    confirmation screen.
-                  </Alert>
+                  />
 
-                  {error && (
+                  {/* Right Column: UTR Reference Submission */}
+                  <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.25 }}>
+                      <ReceiptIcon sx={{ color: '#818cf8', fontSize: 18 }} />
+                      <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>
+                        Step 2: Submit Reference (UTR)
+                      </Typography>
+                    </Box>
+
                     <Alert
-                      severity="error"
+                      severity="info"
+                      icon={<WalletIcon sx={{ fontSize: 17 }} />}
                       sx={{
-                        mb: 2,
-                        background: 'rgba(239,68,68,0.08)',
-                        border: '1px solid rgba(239,68,68,0.15)',
-                        color: '#fca5a5',
-                        borderRadius: '12px',
+                        mb: 1.5,
+                        py: 0.4,
+                        px: 1.5,
+                        background: 'rgba(79,70,229,0.08)',
+                        border: '1px solid rgba(79,70,229,0.15)',
+                        color: 'rgba(255,255,255,0.75)',
+                        borderRadius: '10px',
+                        fontSize: '0.78rem',
+                        '& .MuiAlert-icon': { color: '#818cf8', mr: 1, py: 0 },
                       }}
-                      onClose={() => setError('')}
                     >
-                      {error}
+                      Enter the 12-digit UPI UTR from your payment app confirmation screen.
                     </Alert>
-                  )}
 
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                    {error && (
+                      <Alert
+                        severity="error"
+                        sx={{
+                          mb: 1.5,
+                          py: 0.4,
+                          px: 1.5,
+                          background: 'rgba(239,68,68,0.08)',
+                          border: '1px solid rgba(239,68,68,0.15)',
+                          color: '#fca5a5',
+                          borderRadius: '10px',
+                          fontSize: '0.8rem',
+                        }}
+                        onClose={() => setError('')}
+                      >
+                        {error}
+                      </Alert>
+                    )}
+
+                    {/* Customer Account Indicator */}
                     {user ? (
                       <Box
                         sx={{
-                          p: 2,
-                          borderRadius: '12px',
-                          background: 'rgba(255,255,255,0.06)',
-                          border: '1px solid rgba(255,255,255,0.12)',
+                          p: 1.2,
+                          borderRadius: '10px',
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.08)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          flexWrap: 'wrap',
-                          gap: 1.5,
+                          mb: 1.5,
                         }}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <VerifiedIcon sx={{ color: '#10b981', fontSize: 22 }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                          <VerifiedIcon sx={{ color: '#10b981', fontSize: 18 }} />
                           <Box>
-                            <Typography sx={{ color: '#ffffff', fontSize: '0.9rem', fontWeight: 700 }}>
+                            <Typography sx={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 700 }}>
                               {user.name || 'Account Customer'}
                             </Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem' }}>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
                               Order confirmation will be sent to: <strong style={{ color: '#a5b4fc' }}>{user.email}</strong>
                             </Typography>
                           </Box>
@@ -777,10 +770,11 @@ export default function PaymentCheckout() {
                           sx={{
                             color: '#a5b4fc',
                             textTransform: 'none',
-                            fontSize: '0.78rem',
+                            fontSize: '0.75rem',
                             border: '1px solid rgba(165,180,252,0.3)',
                             borderRadius: '8px',
-                            px: 1.5,
+                            px: 1.2,
+                            py: 0.3,
                             '&:hover': { bgcolor: 'rgba(165,180,252,0.1)' }
                           }}
                         >
@@ -790,11 +784,12 @@ export default function PaymentCheckout() {
                     ) : null}
 
                     {(!user || showContactEdit) && (
-                      <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                      <Box sx={{ display: 'flex', gap: 1.5, mb: 1.5, flexDirection: { xs: 'column', sm: 'row' } }}>
                         <TextField
                           id="customer-name-input"
                           label="Your Name"
                           placeholder="Your Full Name"
+                          size="small"
                           value={customerName}
                           onChange={(e) => setCustomerName(e.target.value)}
                           fullWidth
@@ -805,6 +800,7 @@ export default function PaymentCheckout() {
                           id="customer-email-input"
                           label="Email Address"
                           placeholder="you@example.com"
+                          size="small"
                           type="email"
                           value={customerEmail}
                           onChange={(e) => setCustomerEmail(e.target.value)}
@@ -815,7 +811,8 @@ export default function PaymentCheckout() {
                       </Box>
                     )}
 
-                    <Box>
+                    {/* UTR Input (NO autoFocus!) */}
+                    <Box sx={{ mb: 1.5 }}>
                       <TextField
                         id="utr-reference-input"
                         label="12-Digit UPI UTR / Transaction Reference Number *"
@@ -824,44 +821,41 @@ export default function PaymentCheckout() {
                         onChange={(e) => setUtrReference(e.target.value)}
                         fullWidth
                         required
-                        autoFocus
                         sx={textFieldStyles}
-                        helperText="Found directly on your UPI confirmation screen (GPay, PhonePe, Paytm, BHIM, Cred)"
+                        helperText="Found on your UPI app confirmation screen (GPay, PhonePe, Paytm, BHIM, Cred)"
                         FormHelperTextProps={{
-                          sx: { color: 'rgba(255,255,255,0.7)', ml: 0.5, mt: 0.75, fontSize: '0.8rem', fontWeight: 500 },
+                          sx: { color: 'rgba(255,255,255,0.65)', ml: 0.5, mt: 0.5, fontSize: '0.72rem', fontWeight: 500 },
                         }}
                       />
                     </Box>
 
+                    {/* Submit CTA */}
                     <Button
                       id="submit-payment-button"
                       variant="contained"
                       fullWidth
                       size="large"
-                      startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <VerifiedIcon />}
+                      startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : <VerifiedIcon />}
                       onClick={handleSubmitPayment}
                       disabled={submitting || !utrReference.trim()}
                       sx={{
-                        py: 1.8,
-                        mt: 1,
+                        py: 1.35,
                         background: submitting
                           ? 'rgba(79,70,229,0.4)'
                           : 'linear-gradient(135deg, #10b981, #059669)',
-                        borderRadius: '14px',
+                        borderRadius: '12px',
                         fontWeight: 800,
-                        fontSize: '1rem',
+                        fontSize: '0.95rem',
                         letterSpacing: '0.3px',
-                        boxShadow: '0 8px 24px rgba(16,185,129,0.25)',
+                        boxShadow: '0 6px 20px rgba(16,185,129,0.25)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #059669, #047857)',
-                          boxShadow: '0 12px 32px rgba(16,185,129,0.35)',
-                          transform: 'translateY(-1px)',
+                          boxShadow: '0 10px 28px rgba(16,185,129,0.35)',
                         },
                         '&.Mui-disabled': {
                           background: 'rgba(255,255,255,0.08)',
                           color: 'rgba(255,255,255,0.35)',
                         },
-                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
                     >
                       {submitting ? 'Submitting Reference...' : 'Confirm & Activate Order'}
@@ -870,10 +864,11 @@ export default function PaymentCheckout() {
                 </Box>
               </Box>
 
-              {/* Security Footer */}
+              {/* Security Footer - Compact */}
               <Box
                 sx={{
-                  p: 2.5,
+                  px: 2,
+                  py: 1.2,
                   background: 'rgba(255,255,255,0.02)',
                   borderTop: '1px solid rgba(255,255,255,0.04)',
                   display: 'flex',
@@ -883,22 +878,22 @@ export default function PaymentCheckout() {
                 }}
               >
                 {[
-                  { icon: <ShieldIcon sx={{ fontSize: 16 }} />, text: 'End-to-End Encrypted' },
-                  { icon: <VerifiedIcon sx={{ fontSize: 16 }} />, text: 'RBI Regulated UPI' },
-                  { icon: <TimerIcon sx={{ fontSize: 16 }} />, text: 'Instant Confirmation' },
+                  { icon: <ShieldIcon sx={{ fontSize: 14 }} />, text: 'End-to-End Encrypted' },
+                  { icon: <VerifiedIcon sx={{ fontSize: 14 }} />, text: 'RBI Regulated UPI' },
+                  { icon: <TimerIcon sx={{ fontSize: 14 }} />, text: 'Instant Confirmation' },
                 ].map(({ icon, text }) => (
                   <Box
                     key={text}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 0.75,
-                      color: 'rgba(255,255,255,0.3)',
-                      fontSize: '0.72rem',
+                      gap: 0.6,
+                      color: 'rgba(255,255,255,0.35)',
+                      fontSize: '0.7rem',
                     }}
                   >
                     {icon}
-                    <Typography sx={{ fontSize: '0.72rem', color: 'inherit' }}>{text}</Typography>
+                    <Typography sx={{ fontSize: '0.7rem', color: 'inherit' }}>{text}</Typography>
                   </Box>
                 ))}
               </Box>

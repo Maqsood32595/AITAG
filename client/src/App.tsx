@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, CircularProgress, Box } from '@mui/material';
 import { theme } from './theme';
 import { AuthProvider } from './context/AuthContext';
@@ -64,6 +64,7 @@ function App() {
             <Routes>
               {/* Public */}
               <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/services" element={<Services />} />
               <Route path="/packages" element={<Services />} />
@@ -87,6 +88,7 @@ function App() {
               <Route path="/task-details/:id" element={<PrivateRoute><TaskDetails /></PrivateRoute>} />
               <Route path="/pay" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
               <Route path="/tasks/:id/pay" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
+              <Route path="/checkout" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
               <Route path="/checkout/:orderId" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
               <Route path="/add_task" element={<PrivateRoute><AddTask /></PrivateRoute>} />
               <Route path="/my_tasks" element={<PrivateRoute><MyPostedTasks /></PrivateRoute>} />
@@ -97,6 +99,9 @@ function App() {
               <Route path="/account" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/workflows" element={<PrivateRoute><Workflows /></PrivateRoute>} />
               <Route path="/work-reels" element={<PrivateRoute><Workflows /></PrivateRoute>} />
+
+              {/* Fallback / Catch-all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
           <ConditionalFooter />
