@@ -159,7 +159,7 @@ export const Profile: React.FC = () => {
         } catch (e) {
           // resilient update
         }
-        setSuccessMessage('✅ Account Identity & Business Dossier saved successfully!');
+        setSuccessMessage('✅ Account Identity & Business Details saved successfully!');
       } else if (isAdmin) {
         try {
           await (profileApi.updateProfile ? profileApi.updateProfile : profileApi.updateMe)({
@@ -189,7 +189,7 @@ export const Profile: React.FC = () => {
         } catch (e) {
           // resilient update
         }
-        setSuccessMessage('✅ AI Specialist Credentials & Payout Dossier saved successfully!');
+        setSuccessMessage('✅ AI Specialist Credentials & Payout Details saved successfully!');
       }
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: any) {
@@ -365,7 +365,7 @@ export const Profile: React.FC = () => {
                   </Box>
                   <Box>
                     <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
-                      Account Identity & Verification Dossier
+                      Account Identity & Verification
                     </Typography>
                     <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
                       Official platform identity and cryptographic credentials
@@ -1149,7 +1149,7 @@ export const Profile: React.FC = () => {
         <DialogContent sx={{ p: 0, mb: 3 }}>
           <Box sx={{ p: 2, mb: 2.5, borderRadius: '12px', bgcolor: '#fff5f5', border: '1px solid #fecaca' }}>
             <Typography sx={{ fontSize: '0.84rem', color: '#991b1b', lineHeight: 1.5, fontWeight: 500 }}>
-              ⚠️ <strong>Warning:</strong> Deleting your account will permanently wipe your profile dossier, credentials, active bids, invitations, and tasks from the database and across all services. You will be logged out immediately.
+              ⚠️ <strong>Warning:</strong> Deleting your account will permanently wipe your profile, credentials, active bids, invitations, and tasks from the database and across all services. You will be logged out immediately.
             </Typography>
           </Box>
 

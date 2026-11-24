@@ -13,6 +13,8 @@ const Services = lazy(() => import('./pages/Services'));
 const Contact = lazy(() => import('./pages/Contact'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SignUp = lazy(() => import('./pages/SignUp'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const AddTask = lazy(() => import('./pages/AddTask'));
 const BrowseTasks = lazy(() => import('./pages/BrowseTasks'));
 const TaskDetails = lazy(() => import('./pages/TaskDetails'));
@@ -72,6 +74,8 @@ function App() {
               <Route path="/contact-us" element={<Contact />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/talent" element={<AITalent />} />
               <Route path="/blog" element={<BlogList />} />
               <Route path="/blog/:slug" element={<BlogPost />} />

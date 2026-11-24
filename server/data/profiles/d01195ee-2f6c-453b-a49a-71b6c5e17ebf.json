@@ -1,0 +1,81 @@
+{
+  "userId": "d01195ee-2f6c-453b-a49a-71b6c5e17ebf",
+  "name": "Maqs",
+  "email": "l.maqsood.m@gmail.com",
+  "role": "freelancer",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maqs",
+  "serviceDomain": "Product Visuals",
+  "headline": "Senior AI Product Visuals & E-Commerce Media Specialist",
+  "bio": "Delivering studio-grade e-commerce product visual transformations, clean background cutouts, lifestyle scene integrations, and Meesho/Amazon compliance.",
+  "hourlyRate": 0,
+  "skills": [],
+  "payoutUpi": "expert1@okaxis",
+  "links": {
+    "github": "https://github.com/Maqsood32595",
+    "linkedin": "https://linkedin.com/in/maqsood",
+    "website": "https://aitag.in"
+  },
+  "deliveredWorkflows": [
+    {
+      "id": "wf-1",
+      "title": "AI Vector Logo & Complete Business Branding Kit",
+      "category": "Branding & Print",
+      "businessImpact": "Generated clean vector brand logo, visiting cards, and WhatsApp profile image for a retail shop.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4",
+      "techStack": [
+        "Recraft V3",
+        "Vectorizer.ai",
+        "Figma",
+        "Print CMYK PDF",
+        "WhatsApp DP"
+      ],
+      "liveUrl": "https://aitag.in/#packages"
+    },
+    {
+      "id": "wf-2",
+      "title": "Viral 9:16 Promotional Video Reels with Indian AI Voiceover",
+      "category": "Social & Marketing",
+      "businessImpact": "Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5×.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
+      "techStack": [
+        "ElevenLabs Indian AI",
+        "CapCut AI",
+        "HeyGen",
+        "Dynamic Captions",
+        "HD MP4"
+      ],
+      "liveUrl": "https://aitag.in/#packages"
+    },
+    {
+      "id": "wf-3",
+      "title": "High-Converting 5-Page Mobile Business Website with WhatsApp CTA",
+      "category": "Web & Digital Presence",
+      "businessImpact": "Built mobile-friendly business website with instant WhatsApp click-to-chat button.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-3%2F1795100852475_Website_Built_By_Gemma.mp4",
+      "techStack": [
+        "Mobile-First HTML5",
+        "Cloudflare Pages",
+        "WhatsApp API",
+        "Local SEO",
+        "Zero Hosting Fees"
+      ],
+      "liveUrl": "https://aitag.in/#packages"
+    },
+    {
+      "id": "wf-4",
+      "title": "Studio-Grade AI Photo Transformation for Amazon & Meesho",
+      "category": "Product Visuals",
+      "businessImpact": "Converted product smartphone photos into clean, studio-lit catalogue listings for marketplace selling.",
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-4%2F1795251034494_Mountview_Flowers_With_Voice_Loud.mp4",
+      "techStack": [
+        "Photoroom AI",
+        "FLUX.1",
+        "Photoshop Generative Fill",
+        "Amazon 2000px",
+        "Clean Cutouts"
+      ],
+      "liveUrl": "https://aitag.in/#packages"
+    }
+  ],
+  "updatedAt": "2026-11-24T01:48:56.970Z"
+}

@@ -315,7 +315,7 @@ const Navbar = () => {
                   onClick={() => { navigate('/account'); setAnchorEl(null); }}
                   sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
                 >
-                  <AccountCircleIcon fontSize="small" /> Account Dossier
+                  <AccountCircleIcon fontSize="small" /> Account
                 </MenuItem>
                 <MenuItem
                   onClick={handleLogout}

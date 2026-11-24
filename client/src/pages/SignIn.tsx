@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Box, Container, Paper, Typography, TextField, Button, Alert, Divider } from '@mui/material';
+import {
+  Box, Container, Paper, Typography, TextField, Button, Alert, Divider,
+  InputAdornment, IconButton
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { GoogleAuthButton } from '../components/GoogleAuthButton';
@@ -10,6 +14,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(location.state?.error || '');
   const [loading, setLoading] = useState(false);
 
@@ -89,7 +94,7 @@ const SignIn = () => {
             />
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
               value={form.password}
               onChange={e => {
@@ -97,8 +102,33 @@ const SignIn = () => {
                 if (error) setError('');
               }}
               error={Boolean(error)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      onMouseDown={e => e.preventDefault()}
+                      edge="end"
+                      size="small"
+                      sx={{ color: '#64748b', '&:hover': { color: '#4f46e5' } }}
+                    >
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
               sx={fieldStyle}
             />
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: -0.5 }}>
+              <Link
+                to="/forgot-password"
+                style={{ color: '#4f46e5', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Forgot password?
+              </Link>
+            </Box>
 
             {error && (
               <Alert severity="error" sx={{ borderRadius: '10px', py: 0.5, fontSize: '0.875rem' }}>

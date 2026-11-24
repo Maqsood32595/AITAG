@@ -322,13 +322,13 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 onClick={() => { navigate('/analytics'); setUserMenuAnchor(null); }}
                 sx={{ gap: 1.5, py: 1.2, borderRadius: '8px', cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
               >
-                <TrendingUpIcon fontSize="small" /> Analytics & Dossier
+                <TrendingUpIcon fontSize="small" /> Analytics
               </MenuItem>
               <MenuItem
                 onClick={() => { navigate('/account'); setUserMenuAnchor(null); }}
                 sx={{ gap: 1.5, py: 1.2, borderRadius: '8px', cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
               >
-                <AccountCircleIcon fontSize="small" /> Account Dossier
+                <AccountCircleIcon fontSize="small" /> Account
               </MenuItem>
               <Divider sx={{ my: 0.5 }} />
               <MenuItem

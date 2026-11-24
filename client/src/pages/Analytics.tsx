@@ -59,7 +59,7 @@ export const Analytics: React.FC = () => {
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="70vh" gap={2}>
           <CircularProgress sx={{ color: '#4f46e5' }} />
           <Typography sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.95rem' }}>
-            Compiling real-time performance analytics & account dossier...
+            Compiling real-time performance analytics & account...
           </Typography>
         </Box>
       </DashboardLayout>
@@ -161,7 +161,7 @@ export const Analytics: React.FC = () => {
                   px: 2.5
                 }}
               >
-                Account Dossier
+                Account
               </Button>
             </Stack>
           </Box>

@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   Box, Container, Paper, Typography, TextField, Button,
-  Alert, Divider, MenuItem, Select, InputLabel, FormControl
+  Alert, Divider, MenuItem, Select, InputLabel, FormControl,
+  InputAdornment, IconButton
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { GoogleAuthButton } from '../components/GoogleAuthButton';
@@ -13,6 +15,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'client' });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -104,7 +107,7 @@ const SignUp = () => {
             />
             <TextField
               label="Password (min 6 chars, 1 uppercase)"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
               value={form.password}
               onChange={e => {
@@ -113,6 +116,22 @@ const SignUp = () => {
               }}
               error={isPasswordError}
               helperText={isPasswordError ? 'Password must be >= 6 characters and have at least 1 uppercase letter' : ''}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      onMouseDown={e => e.preventDefault()}
+                      edge="end"
+                      size="small"
+                      sx={{ color: '#64748b', '&:hover': { color: '#4f46e5' } }}
+                    >
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
               sx={fieldStyle}
             />
 

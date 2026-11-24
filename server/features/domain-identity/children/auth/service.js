@@ -3,6 +3,7 @@
  * Fractal Kernel Slice: aitag-auth
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../../../../../.env') });
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../../../../supabase');
@@ -10,6 +11,9 @@ const registrationNotifier = require('./registration-notifier');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aitag-fractal-kernel-jwt-secret-2026';
 const JWT_EXPIRES = '7d';
+
+// Ephemeral single-use password reset tokens (hashedToken -> { email, expiresAt })
+const PASSWORD_RESET_TOKENS = new Map();
 
 // Resilient in-memory seed users for zero-downtime logins
 const SEED_USERS = [
@@ -258,6 +262,164 @@ class AuthService {
       return removed[0];
     }
     return null;
+  }
+
+  /**
+   * Request password reset link for user
+   */
+  async requestPasswordReset(email) {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (!cleanEmail) {
+      throw new Error('Email is required');
+    }
+
+    // 1. Check if user exists (in Supabase or SEED_USERS)
+    let userExists = false;
+    let userName = 'AITAG User';
+
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data: user } = await supabase
+          .from('aitag_users')
+          .select('id, name, email')
+          .eq('email', cleanEmail)
+          .single();
+        if (user) {
+          userExists = true;
+          userName = user.name || userName;
+        }
+      }
+    } catch (e) {
+      console.warn('[AuthService] Supabase check during password reset:', e.message);
+    }
+
+    if (!userExists) {
+      const seedUser = SEED_USERS.find(u => u.email === cleanEmail);
+      if (seedUser) {
+        userExists = true;
+        userName = seedUser.name || userName;
+      }
+    }
+
+    // If user does not exist, return generic success message to prevent user enumeration
+    if (!userExists) {
+      return {
+        success: true,
+        message: 'If an account exists with this email, a password reset link has been sent.'
+      };
+    }
+
+    // 2. Generate cryptographically secure reset token
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes expiry
+
+    // Save hashed token
+    PASSWORD_RESET_TOKENS.set(hashedToken, {
+      email: cleanEmail,
+      expiresAt
+    });
+
+    // 3. Build reset URL
+    const baseUrl = process.env.CLIENT_URL || process.env.APP_URL || 'http://localhost:8000';
+    const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+
+    console.log(`🔑 [AuthService] Password reset token generated for ${cleanEmail}: ${resetUrl}`);
+
+    // 4. Dispatch Email via SMTP
+    const transporter = registrationNotifier.getTransporter();
+    if (transporter) {
+      try {
+        const fromEmail = process.env.SMTP_FROM || 'AITAG Security <contact@aitag.in>';
+        await transporter.sendMail({
+          from: fromEmail,
+          to: cleanEmail,
+          subject: 'Reset your AITAG password',
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <h2 style="color: #0f172a; margin: 0; font-size: 24px;">Password Reset Request</h2>
+                <p style="color: #64748b; font-size: 14px; margin-top: 6px;">A password reset was requested for your AITAG account.</p>
+              </div>
+              <p style="color: #334155; font-size: 15px; line-height: 1.5;">Hello ${userName},</p>
+              <p style="color: #334155; font-size: 15px; line-height: 1.5;">Click the button below to choose a new password. This link is valid for <strong>15 minutes</strong>.</p>
+              <div style="text-align: center; margin: 28px 0;">
+                <a href="${resetUrl}" style="background: linear-gradient(135deg, #4f46e5, #0891b2); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; display: inline-block;">Reset Password</a>
+              </div>
+              <p style="color: #64748b; font-size: 13px; line-height: 1.5;">If the button doesn't work, copy and paste this link into your browser:<br/><a href="${resetUrl}" style="color: #4f46e5; word-break: break-all;">${resetUrl}</a></p>
+              <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+              <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">If you did not request this password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+            </div>
+          `
+        });
+        console.log(`✉️ [AuthService] Password reset email sent successfully to ${cleanEmail}`);
+      } catch (err) {
+        console.warn(`⚠️ [AuthService] Failed to send password reset email via SMTP: ${err.message}`);
+      }
+    }
+
+    return {
+      success: true,
+      message: 'If an account exists with this email, a password reset link has been sent.',
+      ...(process.env.NODE_ENV !== 'production' ? { devResetUrl: resetUrl } : {})
+    };
+  }
+
+  /**
+   * Reset password with valid token
+   */
+  async resetPasswordWithToken({ token, newPassword }) {
+    if (!token) {
+      throw new Error('Reset token is required');
+    }
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error('Password must be at least 6 characters');
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      throw new Error('Password must contain at least one uppercase letter (e.g. A-Z)');
+    }
+
+    // Verify token
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const record = PASSWORD_RESET_TOKENS.get(hashedToken);
+
+    if (!record || record.expiresAt < Date.now()) {
+      if (record) PASSWORD_RESET_TOKENS.delete(hashedToken);
+      throw new Error('This password reset link is invalid or has expired. Please request a new one.');
+    }
+
+    const { email } = record;
+    const password_hash = await bcrypt.hash(newPassword, 10);
+
+    // Update in Supabase
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { error } = await supabase
+          .from('aitag_users')
+          .update({ password_hash })
+          .eq('email', email);
+        if (error) {
+          console.warn('[AuthService] Supabase password update notice:', error.message);
+        }
+      }
+    } catch (e) {
+      console.warn('[AuthService] Supabase update error during password reset:', e.message);
+    }
+
+    // Update in SEED_USERS
+    const seedUser = SEED_USERS.find(u => u.email === email);
+    if (seedUser) {
+      seedUser.password_hash = password_hash;
+    }
+
+    // Invalidate token immediately (single-use)
+    PASSWORD_RESET_TOKENS.delete(hashedToken);
+
+    console.log(`✅ [AuthService] Password successfully reset for user: ${email}`);
+    return {
+      success: true,
+      message: 'Your password has been successfully reset. You can now sign in with your new password.'
+    };
   }
 }
 
