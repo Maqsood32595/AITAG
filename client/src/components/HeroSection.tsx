@@ -22,7 +22,7 @@ const WhatsAppIcon: React.FC<{ sx?: React.CSSProperties }> = ({ sx }) => (
 const AUDIENCE_TAGS = [
   'Home Entrepreneurs',
   'Local Shops & Boutiques',
-  'Bakeries & CafÃ©s',
+  'Bakeries & Cafés',
   'Independent Professionals',
   'Early-Stage Founders',
   'Small and Medium Businesses',
@@ -147,7 +147,7 @@ const HeroSection: React.FC = () => {
                 mx: { xs: 'auto', md: 0 },
               }}
             >
-              AITAG is an AI services marketplace. Tell us what you need â€” a logo, social media posts, a catalogue or a website. We tag you to a verified AI expert who delivers it using advanced AI tools: better quality, faster and at a lower cost. Starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>â‚¹499</strong>.
+              AITAG is an AI services marketplace. Tell us what you need — a logo, social media posts, a catalogue or a website. We tag you to a verified AI expert who delivers it using advanced AI tools: better quality, faster and at a lower cost. Starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
             </Typography>
 
             {/* Single WhatsApp Action Button */}
@@ -272,7 +272,7 @@ const HeroSection: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Right Column: "How it works â€” 3 simple steps" Card */}
+          {/* Right Column: "How it works — 3 simple steps" Card */}
           <Box
             id="hero-workflow-card"
             sx={{
@@ -303,7 +303,7 @@ const HeroSection: React.FC = () => {
                     mb: 0.5,
                   }}
                 >
-                  How it works â€” 3 simple steps
+                  How it works — 3 simple steps
                 </Typography>
                 <Typography sx={{ fontSize: '0.84rem', color: '#64748b' }}>
                   No apps to learn. No tech skills needed.

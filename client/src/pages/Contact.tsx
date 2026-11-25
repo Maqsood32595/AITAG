@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -51,10 +51,10 @@ const WhatsAppIcon: React.FC<{ sx?: React.CSSProperties }> = ({ sx }) => (
 
 const SERVICE_OPTIONS = [
   'âœ¦ General Inquiry & Guidance',
-  'AI Product Photo Makeover (from â‚¹999)',
-  'Marketing Video & Promo Reels (from â‚¹1,499)',
-  'Fast Business Website & Landing Page (from â‚¹1,999)',
-  'Logo Design & Business Branding Kit (from â‚¹499)',
+  'AI Product Photo Makeover (from ₹999)',
+  'Marketing Video & Promo Reels (from ₹1,499)',
+  'Fast Business Website & Landing Page (from ₹1,999)',
+  'Logo Design & Business Branding Kit (from ₹499)',
   'Custom Enterprise AI Deliverable',
 ];
 
@@ -924,7 +924,7 @@ export const Contact: React.FC = () => {
                 <Stack spacing={1.5}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#475569', fontSize: '0.82rem' }}>
                     <AccessTimeIcon sx={{ fontSize: 18, color: '#2563eb' }} />
-                    <span>Monday â€“ Saturday: 9:00 AM â€“ 7:00 PM IST</span>
+                    <span>Monday ”“ Saturday: 9:00 AM ”“ 7:00 PM IST</span>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#475569', fontSize: '0.82rem' }}>
                     <LocationOnIcon sx={{ fontSize: 18, color: '#2563eb' }} />
@@ -999,7 +999,7 @@ export const Contact: React.FC = () => {
                   </AccordionSummary>
                   <AccordionDetails sx={{ pt: 0, pb: 2 }}>
                     <Typography sx={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
-                      None whatsoever. All starter packages starting from â‚¹499 are flat-rate with zero hidden platform surprise fees.
+                      None whatsoever. All starter packages starting from ₹499 are flat-rate with zero hidden platform surprise fees.
                     </Typography>
                   </AccordionDetails>
                 </Accordion>

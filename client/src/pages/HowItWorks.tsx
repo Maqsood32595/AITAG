@@ -24,7 +24,7 @@ const WORKFLOW_STEPS = [
     color: '#3b82f6',
     bg: '#eff6ff',
     details: [
-      'Choose from ready-made packages starting at just â‚¹499 (Logos, Social Media, Catalogues, Websites).',
+      'Choose from ready-made packages starting at just ₹499 (Logos, Social Media, Catalogues, Websites).',
       'Or tell us what you need in plain everyday language via our built-in Message Chatbox or WhatsApp.',
       'Specify your brand colors, goals, and any reference files or inspirations you have.',
     ],
@@ -38,7 +38,7 @@ const WORKFLOW_STEPS = [
     bg: '#eef2ff',
     details: [
       'AITAG matches your exact requirements with a vetted AI specialist.',
-      'Your deposit is held 100% safely by AITAG â€” it is never transferred upfront to the expert.',
+      'Your deposit is held 100% safely by AITAG — it is never transferred upfront to the expert.',
       'The expert begins work knowing your budget is locked and guaranteed.',
     ],
   },
@@ -159,7 +159,7 @@ export const HowItWorks: React.FC = () => {
                 textWrap: 'balance',
               }}
             >
-              You donâ€™t need to learn prompts or master AI tools. Tell us what your business needs, and our verified AI specialists craft high-quality deliverables with 100% payment protection.
+              You don’t need to learn prompts or master AI tools. Tell us what your business needs, and our verified AI specialists craft high-quality deliverables with 100% payment protection.
             </Typography>
 
             <Box
@@ -497,7 +497,7 @@ export const HowItWorks: React.FC = () => {
                 textWrap: 'balance',
               }}
             >
-              Start for as low as â‚¹499 with 100% payment safety. No apps to learn.
+              Start for as low as ₹499 with 100% payment safety. No apps to learn.
             </Typography>
             <Box
               sx={{
