@@ -68,6 +68,7 @@ export const tasksApi = {
   getMy: () => api.get('/tasks/my'),
   getById: (id: string) => api.get(`/tasks/${id}`),
   create: (data: object) => api.post('/tasks', data),
+  createGuest: (data: object) => api.post('/tasks/guest', data),
   update: (id: string, data: object) => api.put(`/tasks/${id}`, data),
   delete: (id: string) => api.delete(`/tasks/${id}`),
   uploadFiles: (formData: FormData) =>

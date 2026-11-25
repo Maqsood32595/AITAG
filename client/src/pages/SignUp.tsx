@@ -30,6 +30,20 @@ const SignUp = () => {
     }
   }, [user, location, navigate]);
 
+  // Explicitly wipe state and clear any asynchronous browser autofill
+  React.useEffect(() => {
+    setForm({ name: '', email: '', password: '', role: 'client' });
+    const timer = setTimeout(() => {
+      const nameInput = document.getElementById('aitag_signup_name') as HTMLInputElement;
+      const emailInput = document.getElementById('aitag_signup_email') as HTMLInputElement;
+      const passInput = document.getElementById('aitag_signup_password') as HTMLInputElement;
+      if (nameInput && !form.name) nameInput.value = '';
+      if (emailInput && !form.email) emailInput.value = '';
+      if (passInput && !form.password) passInput.value = '';
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [location.pathname, location.key]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -81,12 +95,30 @@ const SignUp = () => {
             or register with email
           </Divider>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            autoComplete="off"
+            noValidate
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}
+          >
+            {/* Decoy fields to intercept aggressive browser credential autofill */}
+            <input type="text" name="fake_email_prevent_autofill" tabIndex={-1} style={{ display: 'none' }} aria-hidden="true" autoComplete="off" />
+            <input type="password" name="fake_password_prevent_autofill" tabIndex={-1} style={{ display: 'none' }} aria-hidden="true" autoComplete="new-password" />
+
             <TextField
               label="Full Name or Business Name"
+              name="aitag_signup_name"
+              id="aitag_signup_name"
               required
               placeholder="e.g. Sumanth Patel / Patel Bakery"
               value={form.name}
+              autoComplete="off"
+              inputProps={{
+                autoComplete: 'off',
+                'data-lpignore': 'true',
+                'data-form-type': 'other'
+              }}
               onChange={e => {
                 setForm({ ...form, name: e.target.value });
                 if (error) setError('');
@@ -96,9 +128,17 @@ const SignUp = () => {
             <TextField
               label="Email"
               type="email"
+              name="aitag_signup_email"
+              id="aitag_signup_email"
               required
               placeholder="e.g. sumanth@gmail.com"
               value={form.email}
+              autoComplete="off"
+              inputProps={{
+                autoComplete: 'off',
+                'data-lpignore': 'true',
+                'data-form-type': 'other'
+              }}
               onChange={e => {
                 setForm({ ...form, email: e.target.value });
                 if (error) setError('');
@@ -108,8 +148,16 @@ const SignUp = () => {
             <TextField
               label="Password (min 6 chars, 1 uppercase)"
               type={showPassword ? 'text' : 'password'}
+              name="aitag_signup_password"
+              id="aitag_signup_password"
               required
               value={form.password}
+              autoComplete="new-password"
+              inputProps={{
+                autoComplete: 'new-password',
+                'data-lpignore': 'true',
+                'data-form-type': 'other'
+              }}
               onChange={e => {
                 setForm({ ...form, password: e.target.value });
                 if (error) setError('');

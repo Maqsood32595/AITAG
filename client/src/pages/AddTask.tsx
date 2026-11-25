@@ -16,8 +16,10 @@ const AddTask = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ title: '', category: 'Branding & Print', description: '', deadline: '', budget: '', image: '' });
+  const [guestContact, setGuestContact] = useState({ name: '', email: '', phone: '' });
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,10 +64,33 @@ const AddTask = () => {
         }
       }
 
-      await tasksApi.create({
+      const payload: any = {
         ...form,
         attachments: uploadedAttachments
-      });
+      };
+
+      if (!user) {
+        if (!guestContact.name.trim() || !guestContact.email.trim()) {
+          setError('Please enter your name and email address to post this requirement.');
+          setLoading(false);
+          return;
+        }
+        payload.clientName = guestContact.name.trim();
+        payload.clientEmail = guestContact.email.trim();
+        payload.clientPhone = guestContact.phone.trim();
+      }
+
+      const res = user ? await tasksApi.create(payload) : await tasksApi.createGuest(payload);
+      if (!user && res.data?.token) {
+        localStorage.setItem('aitag_token', res.data.token);
+        window.location.href = '/my_tasks';
+        return;
+      }
+      if (!user) {
+        setSuccessMsg('✅ Your requirement has been posted! Please sign in with your email to view quotes.');
+        setTimeout(() => navigate('/signin'), 2500);
+        return;
+      }
       navigate('/my_tasks');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to add task');
@@ -77,11 +102,12 @@ const AddTask = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
-      <Container maxWidth="sm" sx={{ pt: 14, pb: 6 }}>
-        <Paper elevation={0} sx={{ p: 5, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
+      <Container maxWidth="sm" sx={{ pt: { xs: 11, md: 14 }, pb: 6 }}>
+        <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 5 }, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
           <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>Post a Requirement</Typography>
           <Typography sx={{ color: '#64748b', mb: 4, fontSize: '0.95rem' }}>Describe what you need — verified AI specialists will respond with quotes</Typography>
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
+          {successMsg && <Alert severity="success" sx={{ mb: 3, borderRadius: '10px' }}>{successMsg}</Alert>}
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <TextField label="Task Title *" required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} sx={fieldStyle} />
             <FormControl sx={fieldStyle}>
@@ -186,9 +212,49 @@ const AddTask = () => {
               )}
             </Box>
 
-            <Box sx={{ p: 2, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.08)' }}>
-              <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>Posting as: <strong style={{ color: '#0f172a' }}>{user?.name}</strong> ({user?.email})</Typography>
-            </Box>
+            {user ? (
+              <Box sx={{ p: 2, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.08)' }}>
+                <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>Posting as: <strong style={{ color: '#0f172a' }}>{user?.name}</strong> ({user?.email})</Typography>
+              </Box>
+            ) : (
+              <Box sx={{ p: 2.5, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box>
+                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>
+                    Your Contact Information
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>
+                    Where should verified AI specialists send their quotes?
+                  </Typography>
+                </Box>
+                <TextField
+                  label="Your Name or Business Name *"
+                  required
+                  size="small"
+                  value={guestContact.name}
+                  onChange={e => setGuestContact({ ...guestContact, name: e.target.value })}
+                  placeholder="e.g. Sumanth Patel / Patel Bakery"
+                  sx={fieldStyle}
+                />
+                <TextField
+                  label="Email Address *"
+                  type="email"
+                  required
+                  size="small"
+                  value={guestContact.email}
+                  onChange={e => setGuestContact({ ...guestContact, email: e.target.value })}
+                  placeholder="e.g. sumanth@gmail.com"
+                  sx={fieldStyle}
+                />
+                <TextField
+                  label="WhatsApp / Phone Number (Optional)"
+                  size="small"
+                  value={guestContact.phone}
+                  onChange={e => setGuestContact({ ...guestContact, phone: e.target.value })}
+                  placeholder="e.g. +91 98765 43210"
+                  sx={fieldStyle}
+                />
+              </Box>
+            )}
             <Button
               type="submit"
               variant="contained"

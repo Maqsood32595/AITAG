@@ -30,6 +30,7 @@ import { useAuth } from '../context/AuthContext';
 import { AnimatedAvatar } from '../components/AnimatedAvatar';
 import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
 import { TaskAssetsModal } from '../components/TaskAssetsModal';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 const VETTED_SPECIALISTS = [
   { name: 'Expert 1', email: 'expert1@aitag.com', role: 'Verified AI Specialist' },
@@ -57,6 +58,7 @@ const TASK_STEPS = [
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { isSmallScreen: isMobileDialog } = useMobileDetect();
   const [myTasks, setMyTasks] = useState<any[]>([]);
   const [myBids, setMyBids] = useState<any[]>([]);
   const [invitations, setInvitations] = useState<any[]>([]);
@@ -596,7 +598,7 @@ const Dashboard = () => {
                     )}
                   </Box>
 
-                  <Stack direction="row" spacing={1.5}>
+                  <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
                     <Button
                       variant="outlined"
                       color="inherit"
@@ -1311,7 +1313,7 @@ const Dashboard = () => {
                       )}
                     </Box>
 
-                    <Stack direction="row" spacing={1} sx={{ alignSelf: { xs: 'flex-start', md: 'center' } }}>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ alignSelf: { xs: 'flex-start', md: 'center' } }}>
                       {app.status !== 'approved' && (
                         <Button
                           variant="contained"
@@ -1382,7 +1384,7 @@ const Dashboard = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Stack direction="row" spacing={1.5} alignItems="center">
+              <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
                 <Chip
                   label={`${allMarketplaceTasks.length} Tasks`}
                   sx={{
@@ -1682,7 +1684,7 @@ const Dashboard = () => {
         {/* --- MODAL DIALOGS --- */}
 
         {/* 1. Assign Expert Modal (Dual-mode: Pilot Orders & Marketplace Tasks) */}
-        <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} maxWidth="sm" fullWidth>
+        <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullScreen={isMobileDialog} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
             {assignTargetType === 'task' ? 'Assign Verified AI Specialist to Task' : 'Assign Verified AI Specialist'}
           </DialogTitle>
@@ -1752,7 +1754,7 @@ const Dashboard = () => {
         </Dialog>
 
         {/* 2. Submit Draft Modal */}
-        <Dialog open={draftDialogOpen} onClose={() => setDraftDialogOpen(false)} maxWidth="sm" fullWidth>
+        <Dialog open={draftDialogOpen} onClose={() => setDraftDialogOpen(false)} fullScreen={isMobileDialog} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
             Submit Draft Deliverables
           </DialogTitle>
@@ -1806,7 +1808,7 @@ const Dashboard = () => {
         </Dialog>
 
         {/* 3. Request Revision Modal */}
-        <Dialog open={revisionDialogOpen} onClose={() => setRevisionDialogOpen(false)} maxWidth="sm" fullWidth>
+        <Dialog open={revisionDialogOpen} onClose={() => setRevisionDialogOpen(false)} fullScreen={isMobileDialog} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
             Request Revision
           </DialogTitle>
@@ -1842,7 +1844,7 @@ const Dashboard = () => {
         </Dialog>
 
         {/* 4. Approve & Complete Modal */}
-        <Dialog open={approveDialogOpen} onClose={() => setApproveDialogOpen(false)} maxWidth="sm" fullWidth>
+        <Dialog open={approveDialogOpen} onClose={() => setApproveDialogOpen(false)} fullScreen={isMobileDialog} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
             Approve & Complete Project
           </DialogTitle>

@@ -584,7 +584,7 @@ const ServicePackagesSection: React.FC = () => {
                           </Typography>
                         </Stack>
 
-                        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
                           <Chip
                             icon={<BoltIcon sx={{ fontSize: 13, color: '#0891b2 !important' }} />}
                             label={deliveryText}

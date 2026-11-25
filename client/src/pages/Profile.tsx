@@ -38,10 +38,12 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import AnimatedAvatar from '../components/AnimatedAvatar';
 import { useAuth } from '../context/AuthContext';
 import { profileApi, analyticsApi, accountApi } from '../api';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 export const Profile: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { isSmallScreen: isMobileDialog } = useMobileDetect();
   const isClient = user?.role === 'client';
   const isAdmin = user?.role === 'admin';
   const isFreelancer = user?.role === 'freelancer' || (!isClient && !isAdmin);
@@ -247,17 +249,17 @@ export const Profile: React.FC = () => {
             gap: 2
           }}
         >
-          <Stack direction="row" spacing={3} alignItems="center">
+          <Stack direction="row" spacing={{ xs: 1.5, sm: 3 }} alignItems="center" sx={{ minWidth: 0 }}>
             <AnimatedAvatar
               name={user?.name || (isAdmin ? 'Admin Console' : isClient ? 'Client 1' : 'Expert 1')}
               size={48}
               src={user?.photo_url || user?.photoURL}
             />
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography variant="h5" fontWeight={800} color="#0f172a">
                 {user?.name || (isAdmin ? 'User1 Admin' : isClient ? 'Client 1' : 'Expert 1')}
               </Typography>
-              <Typography variant="body2" color="#64748b">
+              <Typography variant="body2" color="#64748b" sx={{ overflowWrap: 'anywhere' }}>
                 {user?.email || (isAdmin ? 'admin@aitag.com' : isClient ? 'client1@aitag.com' : 'expert1@aitag.com')}
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
@@ -276,7 +278,7 @@ export const Profile: React.FC = () => {
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
             {isFreelancer && (
               <Button
                 component={Link}
@@ -1094,13 +1096,14 @@ export const Profile: React.FC = () => {
       <Dialog
         open={deleteDialogOpen}
         onClose={() => !isDeleting && setDeleteDialogOpen(false)}
+        fullScreen={isMobileDialog}
         maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: '24px',
-            p: { xs: 2.5, sm: 3.5 },
-            border: '1px solid #fee2e2',
+            borderRadius: isMobileDialog ? 0 : '24px',
+            p: { xs: 2, sm: 3.5 },
+            border: isMobileDialog ? 'none' : '1px solid #fee2e2',
             boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25)',
             bgcolor: '#ffffff',
             position: 'relative',

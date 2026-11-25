@@ -15,6 +15,7 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import { profileApi } from '../api';
 import UniversalVideoPlayer, { parseVideoSource } from './UniversalVideoPlayer';
 import AnimatedAvatar from './AnimatedAvatar';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 export function formatExternalUrl(url?: string): string {
   if (!url) return '';
@@ -151,6 +152,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
   talent,
   onInvite,
 }) => {
+  const { isMobile, isMobileLandscape } = useMobileDetect();
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -263,126 +265,381 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
   const mediaParsed = currentReel ? parseVideoSource(currentReel.demoVideoUrl || currentReel.mediaUrl, currentReel.mediaType) : { isImage: false };
   const isImageReel = currentReel?.mediaType === 'image' || mediaParsed.isImage;
 
+  const reelCaptionOverlay = currentReel ? (
+    currentReel?.displayHeadingOnVideo !== false ? (
+      <Box
+        sx={{
+          px: { xs: 1.8, sm: 2.5 },
+          py: { xs: 1.2, sm: 1.5 },
+          pr: { xs: 6.5, sm: 7 },
+          background: 'linear-gradient(to top, rgba(9,13,22,0.88) 0%, rgba(9,13,22,0.5) 75%, transparent 100%)',
+        }}
+      >
+        <Stack direction="row" spacing={0.8} alignItems="center" sx={{ mb: 0.6, flexWrap: 'wrap', gap: 0.5 }}>
+          <Chip
+            label={currentReel?.category}
+            size="small"
+            sx={{
+              bgcolor: 'rgba(79,70,229,0.45)',
+              color: '#e0e7ff',
+              fontWeight: 800,
+              fontSize: '0.66rem',
+              height: 20,
+              border: '1px solid rgba(129,140,248,0.4)'
+            }}
+          />
+          <Chip
+            icon={isImageReel ? <PhotoCameraIcon sx={{ fontSize: '12px !important', color: '#38bdf8 !important' }} /> : <VideoLibraryIcon sx={{ fontSize: '12px !important', color: '#38bdf8 !important' }} />}
+            label={isImageReel ? 'Photo Reel' : 'Video Reel'}
+            size="small"
+            sx={{
+              bgcolor: 'rgba(15,23,42,0.75)',
+              color: '#ffffff',
+              fontWeight: 700,
+              fontSize: '0.66rem',
+              height: 20
+            }}
+          />
+        </Stack>
+        <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#ffffff', lineHeight: 1.22, fontSize: { xs: '0.92rem', sm: '1.05rem' } }}>
+          {currentReel?.title}
+        </Typography>
+        {currentReel?.description && (
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#cbd5e1',
+              fontSize: '0.78rem',
+              lineHeight: 1.3,
+              mt: 0.35,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            {currentReel.description}
+          </Typography>
+        )}
+      </Box>
+    ) : (
+      <Box sx={{ px: 2, pb: 1.5 }}>
+        <Chip
+          label={currentReel?.category}
+          size="small"
+          sx={{
+            bgcolor: 'rgba(15,23,42,0.85)',
+            color: '#ffffff',
+            fontWeight: 800,
+            fontSize: '0.68rem',
+            border: '1px solid rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(8px)'
+          }}
+        />
+      </Box>
+    )
+  ) : null;
+
   return (
     <Dialog
       open={open}
       onClose={onClose}
+      fullScreen={isMobile}
       maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: '24px',
+          width: isMobile ? '100vw' : undefined,
+          maxWidth: isMobile ? '100vw' : undefined,
+          borderRadius: isMobile ? 0 : '22px',
           bgcolor: '#090d16',
           color: '#ffffff',
-          boxShadow: '0 25px 60px -12px rgba(0,0,0,0.7)',
-          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: isMobile ? 'none' : '0 25px 60px -12px rgba(0,0,0,0.7)',
+          border: isMobile ? 'none' : '1px solid rgba(255,255,255,0.1)',
+          height: isMobile ? '100dvh' : 'min(90vh, 760px)',
+          maxHeight: isMobile ? '100dvh' : '90vh',
+          m: isMobile ? 0 : 2,
+          display: 'flex',
+          flexDirection: 'column',
           overflow: 'hidden'
         }
       }}
     >
-      {/* ── Top Header: Specialist & Work Reels Controls ── */}
-      <DialogTitle
-        sx={{
-          m: 0,
-          p: { xs: 2, sm: 2.5 },
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          bgcolor: '#0b1120'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-          <AnimatedAvatar
-            name={talent.name}
-            size={46}
-            src={talent.avatar || talent.photo_url}
-          />
-          <Box sx={{ minWidth: 0 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 850, color: '#ffffff', lineHeight: 1.2 }}>
-                {talent.name}
-              </Typography>
-              <Chip
-                icon={<VerifiedIcon sx={{ fontSize: '13px !important', color: '#38bdf8 !important' }} />}
-                label="Verified"
-                size="small"
-                sx={{ bgcolor: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontWeight: 700, fontSize: '0.68rem', height: 22 }}
+      {/* ── Desktop Header & Category Filters (Mobile uses translucent Shorts overlay inside stage) ── */}
+      {!isMobile && (
+        <>
+          <DialogTitle
+            sx={{
+              m: 0,
+              py: 1.8,
+              px: 2.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              bgcolor: '#0b1120',
+              flexShrink: 0
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1 }}>
+              <AnimatedAvatar
+                name={talent.name}
+                size={44}
+                src={talent.avatar || talent.photo_url}
               />
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'nowrap' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 850, color: '#ffffff', lineHeight: 1.2, fontSize: '1rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {talent.name}
+                  </Typography>
+                  <Chip
+                    icon={<VerifiedIcon sx={{ fontSize: '12px !important', color: '#38bdf8 !important' }} />}
+                    label="Verified"
+                    size="small"
+                    sx={{ bgcolor: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontWeight: 700, fontSize: '0.64rem', height: 20, flexShrink: 0 }}
+                  />
+                </Box>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
+                  {profileData?.headline || talent.role || 'Senior AI Specialist'}
+                </Typography>
+              </Box>
             </Box>
-            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {profileData?.headline || talent.role || 'Senior AI Specialist'}
-            </Typography>
-          </Box>
-        </Box>
 
-        <Stack direction="row" spacing={1} alignItems="center">
-          {totalReels > 0 && (
-            <Chip
-              label={`Reel ${activeReelIndex + 1} of ${totalReels}`}
-              size="small"
-              sx={{
-                bgcolor: 'rgba(79,70,229,0.25)',
-                color: '#a5b4fc',
-                fontWeight: 800,
-                fontSize: '0.72rem',
-                border: '1px solid rgba(79,70,229,0.4)'
-              }}
-            />
-          )}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+              {totalReels > 0 && (
+                <Chip
+                  label={`Reel ${activeReelIndex + 1} of ${totalReels}`}
+                  size="small"
+                  sx={{
+                    bgcolor: 'rgba(79,70,229,0.25)',
+                    color: '#a5b4fc',
+                    fontWeight: 800,
+                    fontSize: '0.7rem',
+                    height: 24,
+                    border: '1px solid rgba(79,70,229,0.4)'
+                  }}
+                />
+              )}
 
-          {!isImageReel && (
-            <Tooltip title={isMuted ? 'Tap to Unmute Audio' : 'Mute Audio'}>
-              <IconButton
+              {!isImageReel && (
+                <Tooltip title={isMuted ? 'Click to Unmute Audio' : 'Mute Audio'}>
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsMuted(!isMuted)}
+                    sx={{
+                      color: isMuted ? '#94a3b8' : '#38bdf8',
+                      bgcolor: 'rgba(255,255,255,0.06)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.12)' }
+                    }}
+                  >
+                    {isMuted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              <IconButton onClick={onClose} size="small" aria-label="Close reels viewer" sx={{ color: '#94a3b8', '&:hover': { color: '#ffffff' } }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          </DialogTitle>
+
+          <Box
+            sx={{
+              py: 1,
+              px: 2,
+              display: 'flex',
+              gap: 0.75,
+              overflowX: 'auto',
+              flexShrink: 0,
+              bgcolor: '#0d1527',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none'
+            }}
+          >
+            {['All', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'].map((cat) => (
+              <Chip
+                key={cat}
+                label={cat}
                 size="small"
-                onClick={() => setIsMuted(!isMuted)}
+                onClick={() => handleCategoryChange(cat)}
                 sx={{
-                  color: isMuted ? '#94a3b8' : '#38bdf8',
-                  bgcolor: 'rgba(255,255,255,0.06)',
-                  '&:hover': { bgcolor: 'rgba(255,255,255,0.12)' }
+                  flexShrink: 0,
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                  height: 26,
+                  bgcolor: selectedCategory === cat ? '#4f46e5' : 'rgba(255,255,255,0.06)',
+                  color: selectedCategory === cat ? '#ffffff' : '#94a3b8',
+                  border: selectedCategory === cat ? '1px solid #6366f1' : '1px solid rgba(255,255,255,0.06)',
+                  '&:hover': {
+                    bgcolor: selectedCategory === cat ? '#4338ca' : 'rgba(255,255,255,0.12)',
+                  }
+                }}
+              />
+            ))}
+          </Box>
+        </>
+      )}
+
+      <DialogContent sx={{ p: 0, bgcolor: '#000000', flex: 1, minHeight: 0, position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* ── Mobile YouTube Shorts–Style Floating Translucent Header + Filter Pills ── */}
+        {isMobile && (
+          <Box
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 25,
+              pt: 'calc(8px + env(safe-area-inset-top, 0px))',
+              pb: isMobileLandscape ? 1.5 : 3,
+              px: 1.5,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.48) 68%, transparent 100%)',
+              pointerEvents: 'none'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, pointerEvents: 'auto' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, flex: 1 }}>
+                <AnimatedAvatar
+                  name={talent.name}
+                  size={34}
+                  src={talent.avatar || talent.photo_url}
+                />
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 800,
+                        color: '#ffffff',
+                        lineHeight: 1.2,
+                        fontSize: '0.9rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {talent.name}
+                    </Typography>
+                    <VerifiedIcon sx={{ fontSize: 15, color: '#38bdf8', flexShrink: 0 }} />
+                  </Box>
+                  {!isMobileLandscape && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'rgba(226,232,240,0.88)',
+                        fontWeight: 500,
+                        display: 'block',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        fontSize: '0.7rem'
+                      }}
+                    >
+                      {profileData?.headline || talent.role || 'Senior AI Specialist'}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+
+              <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
+                {totalReels > 0 && (
+                  <Chip
+                    label={`${activeReelIndex + 1}/${totalReels}`}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(15,23,42,0.75)',
+                      color: '#e0e7ff',
+                      fontWeight: 800,
+                      fontSize: '0.68rem',
+                      height: 22,
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(6px)'
+                    }}
+                  />
+                )}
+                {!isImageReel && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsMuted(!isMuted)}
+                    aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
+                    sx={{
+                      width: 34,
+                      height: 34,
+                      color: isMuted ? '#e2e8f0' : '#38bdf8',
+                      bgcolor: 'rgba(15,23,42,0.65)',
+                      border: '1px solid rgba(255,255,255,0.16)',
+                      backdropFilter: 'blur(6px)'
+                    }}
+                  >
+                    {isMuted ? <VolumeOffIcon sx={{ fontSize: 18 }} /> : <VolumeUpIcon sx={{ fontSize: 18 }} />}
+                  </IconButton>
+                )}
+                <IconButton
+                  onClick={onClose}
+                  size="small"
+                  aria-label="Close reels viewer"
+                  sx={{
+                    width: 34,
+                    height: 34,
+                    color: '#ffffff',
+                    bgcolor: 'rgba(15,23,42,0.65)',
+                    border: '1px solid rgba(255,255,255,0.16)',
+                    backdropFilter: 'blur(6px)'
+                  }}
+                >
+                  <CloseIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Stack>
+            </Box>
+
+            {!isMobileLandscape && (
+              <Box
+                sx={{
+                  mt: 0.9,
+                  display: 'flex',
+                  gap: 0.65,
+                  overflowX: 'auto',
+                  pointerEvents: 'auto',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                  scrollbarWidth: 'none'
                 }}
               >
-                {isMuted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
-              </IconButton>
-            </Tooltip>
-          )}
-
-          <IconButton onClick={onClose} sx={{ color: '#94a3b8', '&:hover': { color: '#ffffff' } }}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Stack>
-      </DialogTitle>
-
-      <DialogContent sx={{ p: 0, bgcolor: '#090d16', display: 'flex', flexDirection: 'column' }}>
-        {/* Category Filters Bar */}
-        <Box sx={{ p: 1.5, px: 2, display: 'flex', gap: 0.8, overflowX: 'auto', bgcolor: '#0d1527', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          {['All', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'].map((cat) => (
-            <Chip
-              key={cat}
-              label={cat}
-              size="small"
-              onClick={() => handleCategoryChange(cat)}
-              sx={{
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '0.7rem',
-                bgcolor: selectedCategory === cat ? '#4f46e5' : 'rgba(255,255,255,0.05)',
-                color: selectedCategory === cat ? '#ffffff' : '#94a3b8',
-                border: selectedCategory === cat ? '1px solid #6366f1' : '1px solid rgba(255,255,255,0.05)',
-                '&:hover': {
-                  bgcolor: selectedCategory === cat ? '#4338ca' : 'rgba(255,255,255,0.1)',
-                }
-              }}
-            />
-          ))}
-        </Box>
+                {['All', 'Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'].map((cat) => (
+                  <Chip
+                    key={cat}
+                    label={cat}
+                    size="small"
+                    onClick={() => handleCategoryChange(cat)}
+                    sx={{
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      fontSize: '0.68rem',
+                      height: 24,
+                      bgcolor: selectedCategory === cat ? '#4f46e5' : 'rgba(15,23,42,0.65)',
+                      color: selectedCategory === cat ? '#ffffff' : '#e2e8f0',
+                      border: selectedCategory === cat ? '1px solid #818cf8' : '1px solid rgba(255,255,255,0.16)',
+                      backdropFilter: 'blur(6px)'
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
+        )}
 
         {loading ? (
-          <Box sx={{ py: 12, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 1.5 }}>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 1.5 }}>
             <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem' }}>Loading Work Reels…</Typography>
           </Box>
         ) : totalReels === 0 ? (
-          <Box sx={{ py: 10, px: 3, textAlign: 'center' }}>
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', px: 3, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '2.5rem', mb: 1 }}>🎬</Typography>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#ffffff', mb: 0.5 }}>
               Work Reels Coming Soon
@@ -392,15 +649,15 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
             </Typography>
           </Box>
         ) : (
-          /* ── THE WORK REELS STAGE (Interactive Glide Viewport) ── */
+          /* ── THE WORK REELS STAGE (Interactive YouTube-Shorts Style Viewport) ── */
           <Box
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             sx={{
               position: 'relative',
               width: '100%',
-              minHeight: { xs: 480, sm: 540 },
-              maxHeight: 560,
+              flex: 1,
+              minHeight: 0,
               bgcolor: '#000000',
               display: 'flex',
               alignItems: 'center',
@@ -418,194 +675,144 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
               muted={isMuted}
               loop={true}
               controls={!isImageReel}
-              maxHeight={560}
+              fillHeight={true}
+              soundPillTop={isMobile ? (isMobileLandscape ? 54 : 92) : 14}
+              onMutedChange={(m) => setIsMuted(m)}
+              reelsOverlay={reelCaptionOverlay}
             />
 
-            {/* Floating Navigation Controls (Up / Down Arrows) */}
-            <Box
-              sx={{
-                position: 'absolute',
-                right: 14,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1.5,
-                zIndex: 12
-              }}
-            >
-              <Tooltip title="Previous Reel (Press ↑)" placement="left">
-                <span>
-                  <IconButton
-                    size="small"
-                    disabled={activeReelIndex === 0}
-                    onClick={handlePrevReel}
-                    sx={{
-                      bgcolor: 'rgba(15,23,42,0.75)',
-                      color: '#ffffff',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(8px)',
-                      '&:hover': { bgcolor: 'rgba(79,70,229,0.9)', borderColor: '#818cf8' },
-                      '&.Mui-disabled': { opacity: 0.2, color: '#64748b' }
-                    }}
-                  >
-                    <KeyboardArrowUpIcon />
-                  </IconButton>
-                </span>
-              </Tooltip>
-
-              {/* Vertical Reel Dots */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.6, my: 0.5 }}>
-                {filteredReels.map((_, dotIdx) => (
-                  <Box
-                    key={dotIdx}
-                    onClick={() => setActiveReelIndex(dotIdx)}
-                    sx={{
-                      width: dotIdx === activeReelIndex ? 8 : 5,
-                      height: dotIdx === activeReelIndex ? 18 : 5,
-                      borderRadius: '4px',
-                      bgcolor: dotIdx === activeReelIndex ? '#38bdf8' : 'rgba(255,255,255,0.3)',
-                      transition: 'all 0.25s ease',
-                      cursor: 'pointer',
-                      '&:hover': { bgcolor: '#ffffff' }
-                    }}
-                  />
-                ))}
-              </Box>
-
-              <Tooltip title="Next Reel (Press ↓)" placement="left">
-                <span>
-                  <IconButton
-                    size="small"
-                    disabled={activeReelIndex === totalReels - 1}
-                    onClick={handleNextReel}
-                    sx={{
-                      bgcolor: 'rgba(15,23,42,0.75)',
-                      color: '#ffffff',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(8px)',
-                      '&:hover': { bgcolor: 'rgba(79,70,229,0.9)', borderColor: '#818cf8' },
-                      '&.Mui-disabled': { opacity: 0.2, color: '#64748b' }
-                    }}
-                  >
-                    <KeyboardArrowDownIcon />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </Box>
-
-            {/* Bottom Scrim & Reel Heading Overlay (when displayHeadingOnVideo is enabled) */}
-            {currentReel?.displayHeadingOnVideo !== false ? (
+            {/* Floating Navigation Controls (Up / Down Shorts Rail — safely above bottom controls) */}
+            {totalReels > 1 && (
               <Box
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
                 sx={{
                   position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  p: { xs: 2, sm: 2.5 },
-                  pr: 6,
-                  background: 'linear-gradient(to top, rgba(9,13,22,0.97) 0%, rgba(9,13,22,0.85) 65%, transparent 100%)',
-                  zIndex: 10
+                  right: { xs: 8, sm: 14 },
+                  top: isMobile ? '48%' : '44%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  zIndex: 15
                 }}
               >
-                {/* Category & Media Badge */}
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.8, flexWrap: 'wrap', gap: 0.5 }}>
-                  <Chip
-                    label={currentReel?.category}
-                    size="small"
-                    sx={{
-                      bgcolor: 'rgba(79,70,229,0.3)',
-                      color: '#c7d2fe',
-                      fontWeight: 800,
-                      fontSize: '0.68rem',
-                      border: '1px solid rgba(99,102,241,0.3)'
-                    }}
-                  />
-                  <Chip
-                    icon={isImageReel ? <PhotoCameraIcon sx={{ fontSize: '13px !important', color: '#38bdf8 !important' }} /> : <VideoLibraryIcon sx={{ fontSize: '13px !important', color: '#38bdf8 !important' }} />}
-                    label={isImageReel ? 'Photo Reel' : 'Video Reel'}
-                    size="small"
-                    sx={{
-                      bgcolor: 'rgba(255,255,255,0.08)',
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      fontSize: '0.68rem'
-                    }}
-                  />
-                </Stack>
+                <Tooltip title="Previous Reel (↑)" placement="left">
+                  <span>
+                    <IconButton
+                      size="small"
+                      disabled={activeReelIndex === 0}
+                      onClick={handlePrevReel}
+                      aria-label="Previous reel"
+                      sx={{
+                        width: isMobile ? 36 : undefined,
+                        height: isMobile ? 36 : undefined,
+                        bgcolor: 'rgba(15,23,42,0.72)',
+                        color: '#ffffff',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(8px)',
+                        '&:hover': { bgcolor: 'rgba(79,70,229,0.9)', borderColor: '#818cf8' },
+                        '&.Mui-disabled': { opacity: 0.25, color: '#64748b' }
+                      }}
+                    >
+                      <KeyboardArrowUpIcon fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
 
-                {/* Reel Heading — Selected or Typed Heading */}
-                <Typography variant="h6" sx={{ fontWeight: 850, color: '#ffffff', lineHeight: 1.25, mb: 0.5, fontSize: { xs: '1rem', sm: '1.15rem' } }}>
-                  {currentReel?.title}
-                </Typography>
+                {/* Vertical Reel Dots */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, my: 0.3 }}>
+                  {filteredReels.map((_: any, dotIdx: number) => (
+                    <Box
+                      key={dotIdx}
+                      onClick={() => setActiveReelIndex(dotIdx)}
+                      sx={{
+                        width: dotIdx === activeReelIndex ? 7 : 5,
+                        height: dotIdx === activeReelIndex ? 16 : 5,
+                        borderRadius: '4px',
+                        bgcolor: dotIdx === activeReelIndex ? '#38bdf8' : 'rgba(255,255,255,0.35)',
+                        transition: 'all 0.25s ease',
+                        cursor: 'pointer',
+                        '&:hover': { bgcolor: '#ffffff' }
+                      }}
+                    />
+                  ))}
+                </Box>
 
-                {currentReel?.description && (
-                  <Typography variant="body2" sx={{ color: '#cbd5e1', fontSize: '0.82rem', lineHeight: 1.35, mt: 0.5 }}>
-                    {currentReel.description}
-                  </Typography>
-                )}
-              </Box>
-            ) : (
-              <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
-                <Chip
-                  label={currentReel?.category}
-                  size="small"
-                  sx={{
-                    bgcolor: 'rgba(15,23,42,0.85)',
-                    color: '#ffffff',
-                    fontWeight: 800,
-                    fontSize: '0.68rem',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    backdropFilter: 'blur(8px)'
-                  }}
-                />
+                <Tooltip title="Next Reel (↓)" placement="left">
+                  <span>
+                    <IconButton
+                      size="small"
+                      disabled={activeReelIndex === totalReels - 1}
+                      onClick={handleNextReel}
+                      aria-label="Next reel"
+                      sx={{
+                        width: isMobile ? 36 : undefined,
+                        height: isMobile ? 36 : undefined,
+                        bgcolor: 'rgba(15,23,42,0.72)',
+                        color: '#ffffff',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(8px)',
+                        '&:hover': { bgcolor: 'rgba(79,70,229,0.9)', borderColor: '#818cf8' },
+                        '&.Mui-disabled': { opacity: 0.25, color: '#64748b' }
+                      }}
+                    >
+                      <KeyboardArrowDownIcon fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Box>
             )}
           </Box>
         )}
       </DialogContent>
 
-      {/* ── Bottom Action Footer: Direct Conversion CTAs ── */}
+      {/* ── Bottom Action Footer: Single-Row Conversion CTAs ── */}
       {pkgInfo && (
         <DialogActions
           sx={{
-            p: 2,
-            px: 2.5,
+            py: isMobileLandscape ? 0.65 : { xs: 1, sm: 1.6 },
+            px: { xs: 1.5, sm: 2.5 },
+            pb: isMobile ? 'calc(10px + env(safe-area-inset-bottom, 0px))' : undefined,
             bgcolor: '#0b1120',
             borderTop: '1px solid rgba(255,255,255,0.08)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 1
+            gap: 1,
+            flexShrink: 0
           }}
         >
-          <Box>
-            <Typography sx={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Specialist Package
+          <Box sx={{ minWidth: 0 }}>
+            <Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.68rem' }, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', lineHeight: 1.1 }}>
+              Package
             </Typography>
-            <Typography sx={{ fontWeight: 850, color: '#ffffff', fontSize: '0.95rem' }}>
+            <Typography sx={{ fontWeight: 850, color: '#ffffff', fontSize: { xs: '0.86rem', sm: '0.95rem' }, whiteSpace: 'nowrap' }}>
               From {pkgInfo.formattedPrice}
             </Typography>
           </Box>
 
-          <Stack direction="row" spacing={1.5}>
+          <Stack direction="row" spacing={{ xs: 0.75, sm: 1.5 }} sx={{ flexShrink: 0 }}>
             <Button
               variant="outlined"
               size="small"
               onClick={() => onInvite(talent)}
-              startIcon={<SendIcon sx={{ fontSize: '13px !important' }} />}
+              startIcon={<SendIcon sx={{ fontSize: '12px !important' }} />}
               sx={{
                 borderRadius: '8px',
-                borderColor: 'rgba(255,255,255,0.2)',
+                borderColor: 'rgba(255,255,255,0.22)',
                 color: '#ffffff',
                 textTransform: 'none',
                 fontWeight: 700,
-                fontSize: '0.78rem',
+                fontSize: { xs: '0.74rem', sm: '0.78rem' },
+                px: { xs: 1.15, sm: 1.6 },
+                py: isMobile ? 0.6 : undefined,
+                whiteSpace: 'nowrap',
                 '&:hover': { borderColor: '#ffffff', bgcolor: 'rgba(255,255,255,0.05)' }
               }}
             >
-              Invite Specialist
+              Invite
             </Button>
 
             <Button
@@ -632,11 +839,13 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                 background: 'linear-gradient(135deg, #4f46e5 0%, #0891b2 100%)',
                 color: '#ffffff',
                 fontWeight: 800,
-                fontSize: '0.78rem',
+                fontSize: { xs: '0.74rem', sm: '0.78rem' },
                 borderRadius: '8px',
                 textTransform: 'none',
                 boxShadow: '0 4px 14px rgba(79,70,229,0.3)',
-                px: 2
+                px: { xs: 1.3, sm: 2 },
+                py: isMobile ? 0.6 : undefined,
+                whiteSpace: 'nowrap'
               }}
             >
               Order Package →

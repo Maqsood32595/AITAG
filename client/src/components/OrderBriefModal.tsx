@@ -17,6 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { serviceOrdersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 interface OrderBriefModalProps {
   open: boolean;
@@ -48,6 +49,7 @@ export const OrderBriefModal: React.FC<OrderBriefModalProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isSmallScreen: isMobileDialog } = useMobileDetect();
 
   const [customerName, setCustomerName] = useState(user?.name || '');
   const [customerEmail, setCustomerEmail] = useState(user?.email || '');
@@ -168,12 +170,13 @@ export const OrderBriefModal: React.FC<OrderBriefModalProps> = ({
     <Dialog
       open={open}
       onClose={handleResetAndClose}
+      fullScreen={isMobileDialog}
       maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
-          p: { xs: 1, sm: 2 },
+          borderRadius: isMobileDialog ? 0 : 3,
+          p: isMobileDialog ? 0 : { xs: 1, sm: 2 },
           bgcolor: '#ffffff'
         }
       }}

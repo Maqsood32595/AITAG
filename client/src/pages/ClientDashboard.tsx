@@ -35,7 +35,7 @@ export const ClientDashboard = () => {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'flex-end' }, flexWrap: 'wrap', gap: 2 }}>
         <Box className="fade-in-up">
           <Typography variant="h5" sx={{ mb: 1, color: 'text.primary' }}>Client Dashboard</Typography>
           <Typography variant="body2" color="text.secondary">Manage your job postings, proposals, and secure payments.</Typography>
@@ -43,9 +43,9 @@ export const ClientDashboard = () => {
         <Button className="fade-in-up" variant="contained" color="primary" startIcon={<span style={{fontSize: '16px'}}>➕</span>} sx={{ px: 3 }}>Browse Talent</Button>
       </Box>
 
-      <Grid container spacing={4}>
+      <Grid container spacing={{ xs: 2.5, md: 4 }}>
         <Grid xs={12} md={4}>
-          <Paper className="fade-in-up stagger-1" sx={{ p: 3, borderRadius: '16px' }}>
+          <Paper className="fade-in-up stagger-1" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: '16px' }}>
             <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
               <span>💼</span> Post a Job
             </Typography>
@@ -60,22 +60,22 @@ export const ClientDashboard = () => {
 
         <Grid xs={12} md={8}>
           <Paper className="fade-in-up stagger-2" sx={{ p: 0, borderRadius: '16px', overflow: 'hidden' }}>
-            <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ p: { xs: 2, sm: 3 }, borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
               <Typography variant="h6">Your Active Postings</Typography>
-              <TextField size="small" placeholder="Search postings..." InputProps={{ startAdornment: <span style={{marginRight: '8px', opacity: 0.5}}>🔍</span>, sx: { borderRadius: '20px', bgcolor: '#f8fafc', '& fieldset': { border: 'none' } } }} />
+              <TextField size="small" placeholder="Search postings..." sx={{ width: { xs: '100%', sm: 'auto' } }} InputProps={{ startAdornment: <span style={{marginRight: '8px', opacity: 0.5}}>🔍</span>, sx: { borderRadius: '20px', bgcolor: '#f8fafc', '& fieldset': { border: 'none' } } }} />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {jobs.map((j: any) => (
-                <Box key={j.id} sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s', borderBottom: '1px solid #e2e8f0', '&:hover': { bgcolor: '#f8fafc' } }}>
-                  <Box sx={{ flex: 1 }}>
+                <Box key={j.id} sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2, transition: 'all 0.2s', borderBottom: '1px solid #e2e8f0', '&:hover': { bgcolor: '#f8fafc' } }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography fontWeight={700} sx={{ mb: 0.5, fontSize: '16px' }}>{j.title}</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{j.description}</Typography>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       <Chip size="small" label={j.category} sx={{ bgcolor: 'primary.50', color: 'primary.main', fontWeight: 600, fontSize: '12px' }} />
                       <Chip size="small" label={j.escrowStatus} sx={{ bgcolor: '#ecfdf5', color: '#10b981', fontWeight: 600, fontSize: '12px' }} />
                     </Box>
                   </Box>
-                  <Box sx={{ ml: 4, textAlign: 'right' }}>
+                  <Box sx={{ ml: { xs: 0, sm: 4 }, textAlign: { xs: 'left', sm: 'right' } }}>
                     <Typography variant="h6" color="text.primary" fontWeight={800} sx={{ mb: 1 }}>₹{j.budget.toLocaleString()}</Typography>
                     <Button variant="outlined" size="small" sx={{ borderRadius: '8px' }}>View Proposals (0)</Button>
                   </Box>

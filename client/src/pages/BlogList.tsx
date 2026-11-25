@@ -90,7 +90,7 @@ const BlogList = () => {
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
 
-      <Container maxWidth="lg" sx={{ pt: 14, pb: 12 }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 11, md: 14 }, pb: 12 }}>
         {/* Section Header - Central Pattern */}
         <Box sx={{ textAlign: 'center', mb: 5 }}>
           <Chip
@@ -136,7 +136,7 @@ const BlogList = () => {
         </Box>
 
         {/* Centered Category Filters */}
-        <Stack direction="row" spacing={1} sx={{ mb: 4.5, overflowX: 'auto', pb: 1, justifyContent: 'center' }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 4.5, overflowX: 'auto', pb: 1, justifyContent: { xs: 'flex-start', md: 'center' } }}>
           {CATEGORIES.map((cat) => (
             <Chip
               key={cat}
@@ -180,9 +180,9 @@ const BlogList = () => {
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
-                  height: '310px',
-                  minHeight: '310px',
-                  maxHeight: '310px',
+                  height: { xs: 'auto', md: '310px' },
+                  minHeight: { xs: 'auto', md: '310px' },
+                  maxHeight: { xs: 'none', md: '310px' },
                   width: '100%',
                   boxSizing: 'border-box',
                   textDecoration: 'none',

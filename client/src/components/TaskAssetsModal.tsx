@@ -13,6 +13,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
 import { tasksApi } from '../api';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 interface Attachment {
   id: string;
@@ -39,6 +40,7 @@ export const TaskAssetsModal: React.FC<TaskAssetsModalProps> = ({
   isOwner = true
 }) => {
   const [uploading, setUploading] = useState(false);
+  const { isSmallScreen: isMobileDialog } = useMobileDetect();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -136,11 +138,12 @@ export const TaskAssetsModal: React.FC<TaskAssetsModalProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
+      fullScreen={isMobileDialog}
       maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: '20px',
+          borderRadius: isMobileDialog ? 0 : '20px',
           boxShadow: '0 24px 60px rgba(15, 23, 42, 0.18)',
           bgcolor: '#ffffff',
           overflow: 'hidden'
@@ -149,7 +152,7 @@ export const TaskAssetsModal: React.FC<TaskAssetsModalProps> = ({
     >
       <DialogTitle
         sx={{
-          p: 2.5,
+          p: { xs: 2, sm: 2.5 },
           bgcolor: '#f8fafc',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
@@ -157,8 +160,8 @@ export const TaskAssetsModal: React.FC<TaskAssetsModalProps> = ({
           alignItems: 'center'
         }}
       >
-        <Box>
-          <Stack direction="row" spacing={1.5} alignItems="center">
+        <Box sx={{ minWidth: 0, pr: 1 }}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
               Project Assets & References
             </Typography>

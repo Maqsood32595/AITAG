@@ -48,10 +48,10 @@ function computeClientAnalytics({ user, orders = [], tasks = [], bids = [], invi
 
   // 3. Category Distribution
   const categoryMap = {
-    'Product Visuals': { count: 0, spend: 0 },
-    'E-Commerce & Copy': { count: 0, spend: 0 },
+    'Branding & Print': { count: 0, spend: 0 },
     'Social & Marketing': { count: 0, spend: 0 },
-    'Web & Funnels': { count: 0, spend: 0 }
+    'Web & Digital Presence': { count: 0, spend: 0 },
+    'Product Visuals': { count: 0, spend: 0 }
   };
 
   orders.forEach((ord) => {
@@ -88,43 +88,42 @@ function computeClientAnalytics({ user, orders = [], tasks = [], bids = [], invi
     summaryCards: [
       {
         id: 'total_invested',
-        label: 'Total Capital Invested',
+        label: 'Total Spent',
         value: `₹${totalInvested.toLocaleString('en-IN')}`,
         numeric: totalInvested,
-        subtitle: `${orders.length} pilot packages & ${tasks.length} tasks`,
+        subtitle: `${orders.length} ${orders.length === 1 ? 'package' : 'packages'} & ${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}`,
         color: '#4f46e5',
         bg: 'rgba(79,70,229,0.08)',
-        trend: '+100% On-Scope'
+        trend: 'Orders & Tasks'
       },
       {
         id: 'in_escrow',
-        label: 'Funds in Active Escrow',
+        label: 'Protected Balance',
         value: `₹${inEscrow.toLocaleString('en-IN')}`,
         numeric: inEscrow,
-        subtitle: 'Protected by RBI compliant milestone escrow',
+        subtitle: 'Held safely until your work is delivered',
         color: '#0891b2',
-        bg: 'rgba(8,145,178,0.08)',
-        trend: '100% Safe'
+        bg: 'rgba(8,145,178,0.08)'
       },
       {
         id: 'completed_outcomes',
-        label: 'Delivered Business Outcomes',
+        label: 'Completed Projects',
         value: orderFunnel.COMPLETED + tasks.filter(t => t.status === 'completed').length,
         numeric: orderFunnel.COMPLETED,
-        subtitle: `₹${completedSpend.toLocaleString('en-IN')} successfully deployed`,
+        subtitle: `₹${completedSpend.toLocaleString('en-IN')} in finished work`,
         color: '#10b981',
         bg: 'rgba(16,185,129,0.08)',
-        trend: '5/5 Rating'
+        trend: 'Done'
       },
       {
         id: 'proposals_received',
-        label: 'Talent Proposals Received',
+        label: 'Expert Quotes',
         value: bids.length,
         numeric: bids.length,
-        subtitle: `Across ${tasks.length} custom posted tasks`,
+        subtitle: `Across ${tasks.length} posted ${tasks.length === 1 ? 'task' : 'tasks'}`,
         color: '#8b5cf6',
         bg: 'rgba(139,92,246,0.08)',
-        trend: `${tasks.length ? Math.round(bids.length / tasks.length) : 0} avg / task`
+        trend: 'Quotes'
       }
     ],
     financials: {

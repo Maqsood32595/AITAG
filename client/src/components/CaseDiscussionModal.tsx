@@ -13,6 +13,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import { caseDiscussionsApi } from '../api';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 interface Attachment {
   id: string;
@@ -49,6 +50,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
   task,
   currentUser
 }) => {
+  const { isSmallScreen: isMobile } = useMobileDetect();
   const target = order || task;
   const targetId = target?.id;
   const isTask = !order && !!task;
@@ -188,13 +190,18 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
+      fullScreen={isMobile}
       maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: '20px',
+          borderRadius: isMobile ? 0 : '20px',
           boxShadow: '0 24px 60px rgba(15, 23, 42, 0.18)',
           bgcolor: '#ffffff',
+          height: isMobile ? '100dvh' : undefined,
+          maxHeight: isMobile ? '100dvh' : '90vh',
+          display: 'flex',
+          flexDirection: 'column',
           overflow: 'hidden'
         }
       }}
@@ -202,7 +209,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
       {/* Header */}
       <DialogTitle
         sx={{
-          p: 2.5,
+          p: { xs: 1.75, sm: 2.5 },
           bgcolor: '#f8fafc',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
@@ -210,8 +217,8 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
           alignItems: 'center'
         }}
       >
-        <Box>
-          <Stack direction="row" spacing={1.5} alignItems="center">
+        <Box sx={{ minWidth: 0, pr: 1 }}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
               {isTask ? 'Task Discussion' : 'Case Discussion'}
             </Typography>
@@ -241,7 +248,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '620px' }}>
+      <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, height: { xs: 'auto', sm: '620px' }, minHeight: 0 }}>
         {/* Parties Dossier Banner */}
         {isTask ? (
           <Box

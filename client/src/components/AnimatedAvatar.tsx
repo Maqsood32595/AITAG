@@ -67,6 +67,9 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
       sx={{
         width: size,
         height: size,
+        minWidth: size,
+        minHeight: size,
+        aspectRatio: '1 / 1',
         perspective: '800px',
         display: 'inline-flex',
         alignItems: 'center',
@@ -86,11 +89,15 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
           sx={{
             width: size,
             height: size,
+            minWidth: size,
+            minHeight: size,
+            aspectRatio: '1 / 1',
             borderRadius: '50%',
             objectFit: 'cover',
             border: '2px solid rgba(255, 255, 255, 0.18)',
             boxShadow: '0 4px 14px rgba(30, 41, 59, 0.25)',
             display: 'block',
+            flexShrink: 0,
             animationDelay: syncDelay,
             backfaceVisibility: 'visible'
           }}
@@ -101,6 +108,9 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
           sx={{
             width: size,
             height: size,
+            minWidth: size,
+            minHeight: size,
+            aspectRatio: '1 / 1',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #1e293b 0%, #3b0764 100%)',
             border: '2px solid rgba(255, 255, 255, 0.15)',

@@ -81,7 +81,7 @@ export const Services: React.FC = () => {
             }}
           >
             Choose a ready-made package starting at <strong>₹499</strong> or request custom work.
-            Every order includes verified AI expert execution, fast turnaround, and 100% payment escrow safety.
+            Every order includes verified AI expert execution, fast turnaround, and 100% payment safety.
           </Typography>
         </Container>
       </Box>

@@ -118,7 +118,7 @@ export const HowToBecomeAnExpert: React.FC = () => {
             </Typography>
           </Breadcrumbs>
 
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
             <Chip
               icon={<SchoolIcon sx={{ fontSize: '18px !important', color: '#4f46e5' }} />}
               label="✦ SPECIALIST ONBOARDING & TRAINING"

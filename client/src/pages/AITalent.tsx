@@ -228,8 +228,8 @@ const AITalent = () => {
       {/* Hero Header */}
       <Box
         sx={{
-          pt: 16,
-          pb: 8,
+          pt: { xs: 11, md: 16 },
+          pb: { xs: 5, md: 8 },
           background: 'linear-gradient(180deg, rgba(79,70,229,0.06) 0%, rgba(248,250,252,1) 100%)',
           textAlign: 'center',
           position: 'relative',
@@ -246,6 +246,10 @@ const AITalent = () => {
               fontWeight: 700,
               mb: 2,
               px: 1,
+              py: 0.4,
+              height: 'auto',
+              maxWidth: '100%',
+              '& .MuiChip-label': { whiteSpace: 'normal', textAlign: 'center', lineHeight: 1.3 },
             }}
           />
           <Typography
@@ -256,7 +260,7 @@ const AITalent = () => {
               fontFamily: 'Inter, sans-serif',
               letterSpacing: '-1.5px',
               mb: 2,
-              fontSize: { xs: '2rem', md: '3rem' },
+              fontSize: { xs: '1.85rem', sm: '2.2rem', md: '3rem' },
             }}
           >
             Hire Verified{' '}
@@ -271,7 +275,7 @@ const AITalent = () => {
               AI Business Specialists
             </Box>
           </Typography>
-          <Typography sx={{ color: '#64748b', fontSize: '1.1rem', maxWidth: 650, mx: 'auto', mb: 4 }}>
+          <Typography sx={{ color: '#64748b', fontSize: { xs: '0.95rem', md: '1.1rem' }, maxWidth: 650, mx: 'auto', mb: 4 }}>
             Pre-verified specialists ready to deliver product photo makeovers, high-ranking e-commerce listings, monthly social media packs, and high-converting landing pages.
           </Typography>
 
@@ -297,11 +301,11 @@ const AITalent = () => {
               InputProps={{
                 disableUnderline: true,
                 startAdornment: (
-                  <InputAdornment position="start" sx={{ pl: 1.5 }}>
+                  <InputAdornment position="start" sx={{ pl: { xs: 0.75, sm: 1.5 } }}>
                     <SearchIcon sx={{ color: '#4f46e5' }} />
                   </InputAdornment>
                 ),
-                sx: { fontSize: '0.95rem' },
+                sx: { fontSize: { xs: '0.85rem', sm: '0.95rem' } },
               }}
             />
           </Paper>
@@ -361,9 +365,9 @@ const AITalent = () => {
                     boxShadow: '0 12px 28px rgba(79,70,229,0.08)',
                     borderColor: '#4f46e5',
                   },
-                  height: '215px',
-                  minHeight: '215px',
-                  maxHeight: '215px',
+                  height: { xs: 'auto', md: '215px' },
+                  minHeight: { xs: 'auto', md: '215px' },
+                  maxHeight: { xs: 'none', md: '215px' },
                   display: 'flex',
                   flexDirection: 'column',
                 }}
@@ -422,7 +426,7 @@ const AITalent = () => {
                   </Typography>
 
                   {/* Skills Chips */}
-                  <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'hidden', gap: 0.7, mb: 0.5 }}>
+                  <Box sx={{ display: 'flex', flexWrap: { xs: 'wrap', md: 'nowrap' }, overflowX: { xs: 'visible', md: 'hidden' }, gap: 0.7, mb: 0.5 }}>
                     {talent.skills.map((skill) => (
                       <Chip
                         key={skill}
@@ -457,7 +461,7 @@ const AITalent = () => {
                       </Typography>
                     </Box>
 
-                    <Stack direction="row" spacing={1}>
+                    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                       <Button
                         variant="outlined"
                         size="small"

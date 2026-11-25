@@ -34,7 +34,7 @@ const Navbar = () => {
   const handleLogout = () => {
     setAnchorEl(null);
     logout();
-    navigate('/signin');
+    navigate('/signin', { replace: true, state: { message: 'You have been signed out successfully.' } });
   };
 
   const handleHomeClick = (e: React.MouseEvent) => {
@@ -71,7 +71,7 @@ const Navbar = () => {
         transition: 'all 0.3s ease',
       }}
     >
-      <Toolbar sx={{ maxWidth: 1280, mx: 'auto', width: '100%', px: { xs: 2, md: 4 } }}>
+      <Toolbar sx={{ maxWidth: 1280, mx: 'auto', width: '100%', px: { xs: 1.5, sm: 2, md: 4 }, justifyContent: { xs: 'space-between', md: 'flex-start' } }}>
         {/* Logo */}
         <Box
           component={Link}
@@ -81,15 +81,17 @@ const Navbar = () => {
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
-            mr: 3.5,
+            mr: { xs: 1, md: 3.5 },
             cursor: 'pointer',
+            flexShrink: 0,
           }}
         >
-          <img
+          <Box
+            component="img"
             src="/images/aitag-logo.png?v=deepblack-down"
             alt="AITAG — Find AI Skills, Get It Done"
-            style={{
-              height: 42,
+            sx={{
+              height: { xs: 32, sm: 38, md: 42 },
               width: 'auto',
               objectFit: 'contain',
               display: 'block',
@@ -149,28 +151,30 @@ const Navbar = () => {
 
         {/* Right CTA / Auth Controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          {/* + Post a Requirement Button */}
-          <Button
-            component={Link}
-            to={user ? '/add_task' : '/signin?redirect=/add_task'}
-            sx={{
-              display: { xs: 'none', sm: 'inline-flex' },
-              bgcolor: '#eff6ff',
-              color: '#2563eb',
-              fontWeight: 700,
-              fontSize: '0.82rem',
-              borderRadius: '20px',
-              px: 2,
-              py: 0.7,
-              textTransform: 'none',
-              border: '1px solid #dbeafe',
-              '&:hover': {
-                bgcolor: '#dbeafe',
-              },
-            }}
-          >
-            + Post a Requirement
-          </Button>
+          {/* + Post a Requirement Button (Visible only to logged out visitors; disappears once logged in) */}
+          {!user && (
+            <Button
+              component={Link}
+              to="/add_task"
+              sx={{
+                display: { xs: 'none', sm: 'inline-flex' },
+                bgcolor: '#eff6ff',
+                color: '#2563eb',
+                fontWeight: 700,
+                fontSize: '0.82rem',
+                borderRadius: '20px',
+                px: 2,
+                py: 0.7,
+                textTransform: 'none',
+                border: '1px solid #dbeafe',
+                '&:hover': {
+                  bgcolor: '#dbeafe',
+                },
+              }}
+            >
+              + Post a Requirement
+            </Button>
+          )}
 
           {/* My Orders Text Link */}
           <Button
@@ -231,13 +235,15 @@ const Navbar = () => {
               </MenuItem>
             ))}
             <Divider />
-            <MenuItem
-              component={Link}
-              to={user ? '/add_task' : '/signin?redirect=/add_task'}
-              onClick={() => setMobileMenuAnchorEl(null)}
-            >
-              + Post a Requirement
-            </MenuItem>
+            {!user && (
+              <MenuItem
+                component={Link}
+                to="/add_task"
+                onClick={() => setMobileMenuAnchorEl(null)}
+              >
+                + Post a Requirement
+              </MenuItem>
+            )}
             <MenuItem
               component={Link}
               to={user ? '/my_tasks' : '/signin?redirect=/my_tasks'}
@@ -377,10 +383,11 @@ const Navbar = () => {
                 borderColor: '#cbd5e1',
                 color: '#0f172a',
                 fontWeight: 700,
-                fontSize: '0.84rem',
+                fontSize: { xs: '0.75rem', sm: '0.84rem' },
                 borderRadius: '20px',
-                px: 2.2,
-                py: 0.6,
+                px: { xs: 1.4, sm: 2.2 },
+                py: { xs: 0.5, sm: 0.6 },
+                whiteSpace: 'nowrap',
                 textTransform: 'none',
                 bgcolor: '#ffffff',
                 '&:hover': {
@@ -389,7 +396,7 @@ const Navbar = () => {
                 },
               }}
             >
-              Register / Sign In
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Register / </Box>Sign In
             </Button>
           )}
         </Box>

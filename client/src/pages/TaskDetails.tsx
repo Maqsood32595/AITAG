@@ -24,11 +24,13 @@ import { tasksApi, bidsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { TaskAssetsModal } from '../components/TaskAssetsModal';
 import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 const TaskDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isSmallScreen: isMobileDialog } = useMobileDetect();
   const [task, setTask] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bidding, setBidding] = useState(false);
@@ -108,7 +110,7 @@ const TaskDetails = () => {
       .catch(() => {
         setMerchant({
           vpa: 'mohammedmaqsoodai@oksbi',
-          name: 'AITAG Escrow',
+          name: 'AITAG Payment Protection',
           qrImage: '/images/payment-qr.jpeg'
         });
       });
@@ -147,7 +149,7 @@ const TaskDetails = () => {
         setEscrowModalOpen(false);
         setMessage({
           type: 'success',
-          text: `Escrow funded successfully! ₹${amountToPay.toLocaleString()} is now safely locked in escrow.`
+          text: `Payment submitted! ₹${amountToPay.toLocaleString()} is now safely protected with AITAG.`
         });
         await fetchTaskAndBids();
       } else {
@@ -205,7 +207,7 @@ const TaskDetails = () => {
       const res = await bidsApi.accept(bidId);
       setMessage({
         type: 'success',
-        text: `Bid accepted! Escrow secured: Gross ₹${res.data.escrow?.grossAmount?.toLocaleString()} (1% TDS: ₹${res.data.escrow?.section194OTDS})`
+        text: `Quote accepted! Payment protected: ₹${res.data.escrow?.grossAmount?.toLocaleString()}`
       });
       await fetchTaskAndBids();
     } catch (err: any) {
@@ -259,7 +261,7 @@ const TaskDetails = () => {
       const payout = res.data?.payout;
       setMessage({
         type: 'success',
-        text: `Work approved! Escrow released. Specialist Net Payout: ₹${payout?.netSpecialistPayout?.toLocaleString()} (1% TDS Withheld: ₹${payout?.section194OTDS}) 🎉`
+        text: `Work approved and completed! Specialist payout released. 🎉`
       });
       await fetchTaskAndBids();
     } catch (err: any) {
@@ -274,7 +276,7 @@ const TaskDetails = () => {
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
         <Navbar />
-        <Container maxWidth="sm" sx={{ pt: 16, pb: 8, textAlign: 'center' }}>
+        <Container maxWidth="sm" sx={{ pt: { xs: 11, md: 16 }, pb: { xs: 6, md: 8 }, textAlign: 'center' }}>
           <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid #e2e8f0', bgcolor: '#ffffff' }}>
             <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', mb: 1 }}>
               Task Not Found or Access Restricted
@@ -316,12 +318,12 @@ const TaskDetails = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
-      <Container maxWidth="lg" sx={{ pt: 12, pb: 6 }}>
-        <Box component="img" src={task.image} alt={task.title} sx={{ width: '100%', height: 320, objectFit: 'cover', borderRadius: '20px', mb: 4 }} />
+      <Container maxWidth="lg" sx={{ pt: { xs: 10, md: 12 }, pb: 6 }}>
+        <Box component="img" src={task.image} alt={task.title} sx={{ width: '100%', height: { xs: 190, sm: 260, md: 320 }, objectFit: 'cover', borderRadius: { xs: '14px', md: '20px' }, mb: { xs: 2.5, md: 4 } }} />
 
-        <Grid container spacing={4}>
+        <Grid container spacing={{ xs: 2.5, md: 4 }}>
           <Grid size={{ xs: 12, md: 8 }}>
-            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
               <Chip label={task.category} sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 700 }} />
               <Chip
                 label={`Status: ${normalizedStatus}`}
@@ -332,7 +334,7 @@ const TaskDetails = () => {
                 }}
               />
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>{task.title}</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', mb: 1, fontSize: { xs: '1.45rem', sm: '1.85rem', md: '2.125rem' }, fontFamily: 'Inter, sans-serif', letterSpacing: { xs: '-0.4px', md: '-1px' } }}>{task.title}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
               <AnimatedAvatar name={task.user_name} size={28} />
               <Typography sx={{ color: '#64748b', fontSize: '0.875rem' }}>Posted by <strong>{task.user_name}</strong></Typography>
@@ -458,7 +460,7 @@ const TaskDetails = () => {
                   </Box>
                 ) : (
                   <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>
-                    Contract is active. Specialist is currently executing deliverables under escrow protection.
+                    Order is active. Your specialist is currently working with 100% payment protection.
                   </Typography>
                 )}
 
@@ -786,9 +788,10 @@ const TaskDetails = () => {
         <Dialog
           open={bidModalOpen}
           onClose={() => setBidModalOpen(false)}
+          fullScreen={isMobileDialog}
           maxWidth="sm"
           fullWidth
-          PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
+          PaperProps={{ sx: { borderRadius: isMobileDialog ? 0 : '20px', p: { xs: 0.5, sm: 1 } } }}
         >
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a', pb: 1 }}>
             {hasBid ? '✏️ Update Your Proposal' : '🎯 Submit Your Proposal'}
@@ -834,7 +837,7 @@ const TaskDetails = () => {
               {/* Dynamic Sec 194-O Payout Preview */}
               <Paper elevation={0} sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: '#4f46e5', display: 'block', mb: 1 }}>
-                  💰 Real-Time Escrow Payout Breakdown
+                  💰 Payout Breakdown
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#64748b', mb: 0.5 }}>
                   <span>Bid Amount:</span>
@@ -880,9 +883,10 @@ const TaskDetails = () => {
         <Dialog
           open={deliverModalOpen}
           onClose={() => setDeliverModalOpen(false)}
+          fullScreen={isMobileDialog}
           maxWidth="sm"
           fullWidth
-          PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
+          PaperProps={{ sx: { borderRadius: isMobileDialog ? 0 : '20px', p: { xs: 0.5, sm: 1 } } }}
         >
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
             🚀 Submit Completed Work / Deliverables
@@ -933,9 +937,10 @@ const TaskDetails = () => {
         <Dialog
           open={revisionModalOpen}
           onClose={() => setRevisionModalOpen(false)}
+          fullScreen={isMobileDialog}
           maxWidth="sm"
           fullWidth
-          PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
+          PaperProps={{ sx: { borderRadius: isMobileDialog ? 0 : '20px', p: { xs: 0.5, sm: 1 } } }}
         >
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
             🔄 Request Revisions
@@ -972,9 +977,10 @@ const TaskDetails = () => {
         <Dialog
           open={approveModalOpen}
           onClose={() => setApproveModalOpen(false)}
+          fullScreen={isMobileDialog}
           maxWidth="sm"
           fullWidth
-          PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
+          PaperProps={{ sx: { borderRadius: isMobileDialog ? 0 : '20px', p: { xs: 0.5, sm: 1 } } }}
         >
           <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
             ✅ Approve Deliverables & Release Payout
@@ -1021,9 +1027,10 @@ const TaskDetails = () => {
         <Dialog
           open={escrowModalOpen}
           onClose={() => setEscrowModalOpen(false)}
+          fullScreen={isMobileDialog}
           maxWidth="xs"
           fullWidth
-          PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
+          PaperProps={{ sx: { borderRadius: isMobileDialog ? 0 : '20px', p: { xs: 0.5, sm: 1 } } }}
         >
           <DialogTitle sx={{ fontWeight: 800, textAlign: 'center', pb: 0.5, color: '#0f172a' }}>
             🔒 100% Payment Safety Deposit
@@ -1054,8 +1061,8 @@ const TaskDetails = () => {
                   src={merchant?.qrImage || '/images/payment-qr.jpeg'}
                   alt="UPI Payment QR Code"
                   sx={{
-                    width: 220,
-                    height: 220,
+                    width: { xs: 185, sm: 220 },
+                    height: { xs: 185, sm: 220 },
                     borderRadius: '16px',
                     border: '2px solid #e2e8f0',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
@@ -1068,7 +1075,7 @@ const TaskDetails = () => {
                 ₹{contractAmount.toLocaleString('en-IN')}
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mb: 2 }}>
-                Payee: {merchant?.name || 'AITAG Escrow'}
+                Payee: {merchant?.name || 'AITAG Payment Protection'}
               </Typography>
 
               {/* VPA Copy Bar */}

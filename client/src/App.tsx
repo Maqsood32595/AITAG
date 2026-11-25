@@ -86,6 +86,7 @@ function App() {
               <Route path="/how-to-become-an-expert" element={<HowToBecomeAnExpert />} />
               <Route path="/become-expert" element={<HowToBecomeAnExpert />} />
               <Route path="/become-an-expert" element={<HowToBecomeAnExpert />} />
+              <Route path="/add_task" element={<AddTask />} />
 
               {/* Protected / App Routes (Secured against unauthorized / incognito access) */}
               <Route path="/all_tasks" element={<PrivateRoute><BrowseTasks /></PrivateRoute>} />
@@ -94,7 +95,6 @@ function App() {
               <Route path="/tasks/:id/pay" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
               <Route path="/checkout" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
               <Route path="/checkout/:orderId" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
-              <Route path="/add_task" element={<PrivateRoute><AddTask /></PrivateRoute>} />
               <Route path="/my_tasks" element={<PrivateRoute><MyPostedTasks /></PrivateRoute>} />
               <Route path="/update-task/:id" element={<PrivateRoute><UpdateTask /></PrivateRoute>} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

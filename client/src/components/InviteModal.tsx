@@ -9,6 +9,7 @@ import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
 import { tasksApi, invitationsApi } from '../api';
 import AnimatedAvatar from './AnimatedAvatar';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 interface InviteModalProps {
   open: boolean;
@@ -23,6 +24,7 @@ interface InviteModalProps {
 
 const InviteModal: React.FC<InviteModalProps> = ({ open, onClose, talent }) => {
   const navigate = useNavigate();
+  const { isSmallScreen: isMobileDialog } = useMobileDetect();
   const [tasks, setTasks] = useState<any[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState('');
   const [message, setMessage] = useState('');
@@ -94,10 +96,11 @@ const InviteModal: React.FC<InviteModalProps> = ({ open, onClose, talent }) => {
     <Dialog
       open={open}
       onClose={onClose}
+      fullScreen={isMobileDialog}
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: '20px', p: 1 }
+        sx: { borderRadius: isMobileDialog ? 0 : '20px', p: { xs: 0.5, sm: 1 } }
       }}
     >
       <DialogTitle sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>

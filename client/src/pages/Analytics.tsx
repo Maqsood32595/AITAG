@@ -116,7 +116,7 @@ export const Analytics: React.FC = () => {
                 src={user?.photo_url}
               />
               <Box>
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                   <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
                     {user?.name || 'User'}
                   </Typography>
@@ -133,12 +133,16 @@ export const Analytics: React.FC = () => {
                   />
                 </Stack>
                 <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mt: 0.25 }}>
-                  {user?.email} • Member ID: <code>{dossier.identity?.id?.slice(0, 13)}...</code>
+                  {role === 'client' ? user?.email : (
+                    <>
+                      {user?.email} • Member ID: <code>{dossier.identity?.id?.slice(0, 13)}...</code>
+                    </>
+                  )}
                 </Typography>
               </Box>
             </Box>
 
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
               <Button
                 variant="outlined"
                 size="small"
@@ -171,6 +175,9 @@ export const Analytics: React.FC = () => {
           <Tabs
             value={activeTab}
             onChange={(_, val) => setActiveTab(val)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               minHeight: 44,
               '& .MuiTab-root': {
@@ -186,11 +193,11 @@ export const Analytics: React.FC = () => {
               '& .MuiTabs-indicator': { bgcolor: '#4f46e5', height: 3, borderRadius: 2 }
             }}
           >
-            <Tab icon={<TrendingUpIcon sx={{ fontSize: 20 }} />} iconPosition="start" label="Performance & Financial Analytics" />
+            <Tab icon={<TrendingUpIcon sx={{ fontSize: 20 }} />} iconPosition="start" label={role === 'client' ? 'My Summary' : 'Performance & Financial Analytics'} />
             <Tab
               icon={<AccountCircleIcon sx={{ fontSize: 20 }} />}
               iconPosition="start"
-              label="Lifetime Activity Ledger"
+              label={role === 'client' ? 'Order History' : 'Lifetime Activity Ledger'}
             />
           </Tabs>
         </Paper>
@@ -274,27 +281,32 @@ export const Analytics: React.FC = () => {
                     height: '100%'
                   }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
                     <Box>
                       <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a' }}>
-                        {role === 'admin' ? 'Platform Order Fulfillment Pipeline' : 'Project Lifecycle Pipeline'}
+                        {role === 'admin' ? 'Platform Order Fulfillment Pipeline' : role === 'client' ? 'Your Order Progress' : 'Project Lifecycle Pipeline'}
                       </Typography>
                       <Typography sx={{ color: '#64748b', fontSize: '0.825rem' }}>
-                        Real-time status tracking through our 5 milestone verification stages
+                        {role === 'client' ? 'See where each of your orders stands right now' : 'Real-time status tracking through our 5 milestone verification stages'}
                       </Typography>
                     </Box>
-                    <Chip label="100% Payment Safe" size="small" sx={{ bgcolor: '#ecfeff', color: '#0891b2', fontWeight: 700, fontSize: '0.7rem' }} />
                   </Box>
                   <Divider sx={{ mb: 3 }} />
 
                   <Stack spacing={2.5}>
-                    {[
+                    {(role === 'client' ? [
+                      { key: 'REQUESTED', label: '1. Request Sent', count: funnel.REQUESTED || 0, color: '#f59e0b' },
+                      { key: 'MATCHED', label: '2. Expert Assigned', count: funnel.MATCHED || 0, color: '#6366f1' },
+                      { key: 'ACTIVE', label: '3. Work in Progress', count: funnel.ACTIVE || 0, color: '#10b981' },
+                      { key: 'DRAFT_SUBMITTED', label: '4. Ready for Your Review', count: funnel.DRAFT_SUBMITTED || 0, color: '#8b5cf6' },
+                      { key: 'COMPLETED', label: '5. Completed', count: funnel.COMPLETED || 0, color: '#059669' },
+                    ] : [
                       { key: 'REQUESTED', label: '1. Brief Requested & Matching', count: funnel.REQUESTED || 0, color: '#f59e0b' },
                       { key: 'MATCHED', label: '2. Specialist Matched & Scope Locked', count: funnel.MATCHED || 0, color: '#6366f1' },
                       { key: 'ACTIVE', label: '3. Active & Production in Progress', count: funnel.ACTIVE || 0, color: '#10b981' },
                       { key: 'DRAFT_SUBMITTED', label: '4. Draft Deliverables Under Review', count: funnel.DRAFT_SUBMITTED || 0, color: '#8b5cf6' },
                       { key: 'COMPLETED', label: '5. Approved & Completed Outcome', count: funnel.COMPLETED || 0, color: '#059669' },
-                    ].map((step) => {
+                    ]).map((step) => {
                       const total = Object.values(funnel).reduce((a: number, b: any) => a + Number(b), 0) || 1;
                       const percent = Math.round((step.count / Number(total)) * 100);
                       return (
@@ -337,10 +349,10 @@ export const Analytics: React.FC = () => {
                   }}
                 >
                   <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a', mb: 0.5 }}>
-                    Domain Category Breakdown
+                    {role === 'client' ? 'Your Projects by Service' : 'Domain Category Breakdown'}
                   </Typography>
                   <Typography sx={{ color: '#64748b', fontSize: '0.825rem', mb: 2.5 }}>
-                    Distribution across our 4 launch outcome categories
+                    {role === 'client' ? 'Summary of what you have ordered' : 'Distribution across our 4 launch outcome categories'}
                   </Typography>
                   <Divider sx={{ mb: 3 }} />
 
@@ -444,10 +456,10 @@ export const Analytics: React.FC = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 3 }}>
                 <Box>
                   <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', color: '#0f172a' }}>
-                    Lifetime Chronological Activity Ledger ({dossier.totalHistoricalRecords || ledger.length})
+                    {role === 'client' ? `Order & Task History (${dossier.totalHistoricalRecords || ledger.length})` : `Lifetime Chronological Activity Ledger (${dossier.totalHistoricalRecords || ledger.length})`}
                   </Typography>
                   <Typography sx={{ color: '#64748b', fontSize: '0.825rem' }}>
-                    Every task created, proposal submitted, pilot package ordered, and milestone delivered
+                    {role === 'client' ? 'All your service orders, tasks, and expert quotes in one place' : 'Every task created, proposal submitted, pilot package ordered, and milestone delivered'}
                   </Typography>
                 </Box>
                 <TextField
@@ -471,9 +483,9 @@ export const Analytics: React.FC = () => {
                   <TableHead sx={{ bgcolor: '#f8fafc' }}>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Date</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Record Type</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Title / Project</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Counterparty / Specialist</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Type' : 'Record Type'}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Project' : 'Title / Project'}</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Expert' : 'Counterparty / Specialist'}</TableCell>
                       <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Amount</TableCell>
                       <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Status</TableCell>
                     </TableRow>

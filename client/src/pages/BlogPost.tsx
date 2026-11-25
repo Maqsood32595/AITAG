@@ -168,7 +168,7 @@ const BlogPost = () => {
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
         <Navbar />
-        <Container maxWidth="md" sx={{ pt: 16, textAlign: 'center' }}>
+        <Container maxWidth="md" sx={{ pt: { xs: 11, md: 16 }, textAlign: 'center' }}>
           <Typography variant="h5" sx={{ mb: 2 }}>Article not found</Typography>
           <Button component={Link} to="/blog" variant="contained">Back to Blog</Button>
         </Container>
@@ -232,7 +232,7 @@ const BlogPost = () => {
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
 
-      <Container maxWidth="md" sx={{ pt: 14, pb: 12 }}>
+      <Container maxWidth="md" sx={{ pt: { xs: 10, md: 14 }, pb: { xs: 6, md: 12 } }}>
         {/* Back Link */}
         <Button
           component={Link}
@@ -293,7 +293,7 @@ const BlogPost = () => {
               </Box>
             </Box>
 
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
               <Button
                 variant="outlined"
                 size="small"

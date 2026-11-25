@@ -3,11 +3,10 @@
   "name": "Client 1",
   "email": "client1@aitag.com",
   "role": "client",
-  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Client1",
-  "serviceDomain": "Product Visuals & E-Commerce",
-  "businessName": "AITAG Business Client",
-  "industryCategory": "Retail & E-Commerce",
-  "billingEntity": "AITAG Business Client (GST Exemption Tier) \u2022 Currency: INR (\u20b9)",
+  "photoUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=c0b2dcd3-346a-4633-b58e-78ce929fb56d",
+  "serviceDomain": "Product Visuals",
+  "headline": "",
+  "bio": "",
   "hourlyRate": 0,
   "skills": [
     "Product Visuals",
@@ -15,6 +14,7 @@
     "Social & Marketing",
     "Web & Funnels"
   ],
+  "payoutUpi": "expert1@okaxis",
   "links": {
     "website": "https://aitag.in"
   },
@@ -22,9 +22,8 @@
     {
       "id": "wf-1",
       "title": "AI Vector Logo & Complete Business Branding Kit",
+      "liveUrl": "https://aitag.in/#packages",
       "category": "Branding & Print",
-      "businessImpact": "Generated clean vector brand logo, visiting cards, and WhatsApp profile image for a retail shop.",
-      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4",
       "techStack": [
         "Recraft V3",
         "Vectorizer.ai",
@@ -32,14 +31,14 @@
         "Print CMYK PDF",
         "WhatsApp DP"
       ],
-      "liveUrl": "https://aitag.in/#packages"
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-1%2F1787270540950_AITAG.mp4",
+      "businessImpact": "Generated clean vector brand logo, visiting cards, and WhatsApp profile image for a retail shop."
     },
     {
       "id": "wf-2",
       "title": "Viral 9:16 Promotional Video Reels with Indian AI Voiceover",
+      "liveUrl": "https://aitag.in/#packages",
       "category": "Social & Marketing",
-      "businessImpact": "Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5\u00d7.",
-      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
       "techStack": [
         "ElevenLabs Indian AI",
         "CapCut AI",
@@ -47,14 +46,16 @@
         "Dynamic Captions",
         "HD MP4"
       ],
-      "liveUrl": "https://aitag.in/#packages"
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2Ff8dbf2cc-36a9-4228-bb50-13024787fd35%2Fworkflows%2Fwf-2%2F1787230276571_SREDatabaseError.mp4",
+      "businessImpact": "Produced 5 direct-response vertical promo reels with ElevenLabs Hinglish voiceover and dynamic animated captions, boosting organic engagement by 3.5×."
     },
     {
       "id": "wf-3",
       "title": "High-Converting 5-Page Mobile Business Website with WhatsApp CTA",
+      "liveUrl": "https://aitag.in/#packages",
       "category": "Web & Digital Presence",
-      "businessImpact": "Built mobile-friendly business website with instant WhatsApp click-to-chat button.",
-      "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "mediaUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-3%2F1795100852475_Website_Built_By_Gemma.mp4",
+      "mediaType": "video",
       "techStack": [
         "Mobile-First HTML5",
         "Cloudflare Pages",
@@ -62,14 +63,16 @@
         "Local SEO",
         "Zero Hosting Fees"
       ],
-      "liveUrl": "https://aitag.in/#packages"
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-3%2F1795100852475_Website_Built_By_Gemma.mp4",
+      "businessImpact": "Built mobile-friendly business website with instant WhatsApp click-to-chat button."
     },
     {
       "id": "wf-4",
       "title": "Studio-Grade AI Photo Transformation for Amazon & Meesho",
+      "liveUrl": "https://aitag.in/#packages",
       "category": "Product Visuals",
-      "businessImpact": "Converted product smartphone photos into clean, studio-lit catalogue listings for marketplace selling.",
-      "demoVideoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "mediaUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-4%2F1795251034494_Mountview_Flowers_With_Voice_Loud.mp4",
+      "mediaType": "video",
       "techStack": [
         "Photoroom AI",
         "FLUX.1",
@@ -77,8 +80,9 @@
         "Amazon 2000px",
         "Clean Cutouts"
       ],
-      "liveUrl": "https://aitag.in/#packages"
+      "demoVideoUrl": "/api/profile/workflows/stream-video?path=freelancers%2F0eaa9c88-d477-4308-bd37-f7ccf29c87f1%2Fworkflows%2Fwf-4%2F1795251034494_Mountview_Flowers_With_Voice_Loud.mp4",
+      "businessImpact": "Converted product smartphone photos into clean, studio-lit catalogue listings for marketplace selling."
     }
   ],
-  "updatedAt": "2026-10-13T12:36:34.918Z"
+  "updatedAt": "2026-10-13T12:36:34.918+00:00"
 }

@@ -25,7 +25,7 @@ const WORKFLOW_STEPS = [
     bg: '#eff6ff',
     details: [
       'Choose from ready-made packages starting at just ₹499 (Logos, Social Media, Catalogues, Websites).',
-      'Or tell us what you need in plain everyday language via our short form or directly on WhatsApp.',
+      'Or tell us what you need in plain everyday language via our built-in Message Chatbox or WhatsApp.',
       'Specify your brand colors, goals, and any reference files or inspirations you have.',
     ],
   },
@@ -37,22 +37,22 @@ const WORKFLOW_STEPS = [
     color: '#6366f1',
     bg: '#eef2ff',
     details: [
-      'AITAG algorithms match your exact requirements with a vetted AI specialist.',
+      'AITAG matches your exact requirements with a vetted AI specialist.',
       'Your deposit is held 100% safely by AITAG — it is never transferred upfront to the expert.',
       'The expert begins work knowing your budget is locked and guaranteed.',
     ],
   },
   {
     num: '03',
-    title: 'AI-Powered Production & Rapid Draft Review',
-    subtitle: 'Faster turnaround, higher creative quality, lower cost.',
+    title: 'AI-Assisted Production & Draft Review',
+    subtitle: 'Efficient turnaround, thoughtful creative quality, and transparent pricing.',
     icon: <SpeedIcon sx={{ fontSize: 28, color: '#f59e0b' }} />,
     color: '#f59e0b',
     bg: '#fffbeb',
     details: [
-      'Verified specialists craft your deliverables 5x faster using modern AI tools with guaranteed commercial finish.',
+      'Verified specialists combine modern AI tools with hands-on editing and quality checks to deliver practical, business-ready results.',
       'You receive initial concept drafts directly in your project dashboard for review.',
-      'Request revisions or tweaks directly in the discussion feed with 1-click feedback.',
+      'Request revisions or tweaks directly in the discussion feed.',
     ],
   },
   {
@@ -73,7 +73,7 @@ const WORKFLOW_STEPS = [
 const FAQS = [
   {
     q: 'How does AITAG guarantee my payment safety?',
-    a: 'When you order a service, your payment is held securely in AITAG escrow. The expert cannot withdraw the funds until you have reviewed and approved the delivered work. If the work is not delivered to your satisfaction, your payment remains protected.',
+    a: 'When you order a service, your payment stays safe with AITAG. The expert cannot withdraw the money until you have reviewed and approved the delivered work. If the work is not delivered to your satisfaction, your payment remains protected.',
   },
   {
     q: 'Do I need any technical knowledge or prompt engineering skills?',
@@ -177,9 +177,9 @@ export const HowItWorks: React.FC = () => {
                 sx={{
                   bgcolor: '#2563eb',
                   fontWeight: 800,
-                  fontSize: '0.95rem',
+                  fontSize: { xs: '0.9rem', sm: '0.95rem' },
                   borderRadius: '24px',
-                  px: 4,
+                  px: { xs: 2.8, sm: 4 },
                   py: 1.35,
                   textTransform: 'none',
                   boxShadow: '0 8px 20px rgba(37,99,235,0.25)',
@@ -326,7 +326,7 @@ export const HowItWorks: React.FC = () => {
             The 4 Simple Stages of Every Project
           </Typography>
           <Typography sx={{ fontSize: '1rem', color: '#64748b', maxWidth: 650, mx: 'auto', textWrap: 'balance' }}>
-            Transparent milestone tracking with 100% payment escrow protection at every turn.
+            Transparent step-by-step tracking with 100% payment protection at every stage.
           </Typography>
         </Box>
 
@@ -516,9 +516,9 @@ export const HowItWorks: React.FC = () => {
                   bgcolor: '#2563eb',
                   color: '#ffffff',
                   fontWeight: 800,
-                  fontSize: '0.95rem',
+                  fontSize: { xs: '0.9rem', sm: '0.95rem' },
                   borderRadius: '24px',
-                  px: 4,
+                  px: { xs: 2.8, sm: 4 },
                   py: 1.3,
                   textTransform: 'none',
                   '&:hover': {

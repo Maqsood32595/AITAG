@@ -39,16 +39,16 @@ export const FreelancerDashboard = () => {
         <Typography variant="body2" color="text.secondary">Browse jobs that match your skills and submit proposals.</Typography>
       </Box>
 
-      <Grid container spacing={4}>
+      <Grid container spacing={{ xs: 2.5, md: 4 }}>
         <Grid xs={12} md={7}>
-          <Paper className="fade-in-up stagger-1" sx={{ p: 3, mb: 3, borderRadius: '16px', display: 'flex', gap: 2 }}>
+          <Paper className="fade-in-up stagger-1" sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: '16px', display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
             <TextField fullWidth placeholder="Search for jobs..." InputProps={{ startAdornment: <InputAdornment position="start"><span>🔍</span></InputAdornment>, sx: { borderRadius: '10px' } }} />
-            <Button variant="outlined" sx={{ minWidth: 100 }} startIcon={<span>⚙️</span>}>Filters</Button>
+            <Button variant="outlined" sx={{ minWidth: { xs: '100%', sm: 100 } }} startIcon={<span>⚙️</span>}>Filters</Button>
           </Paper>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {jobs.map((j: any, i) => (
-              <Paper key={j.id} className="fade-in-up" sx={{ animationDelay: `${0.15 + (i * 0.05)}s`, p: 4, borderRadius: '16px', transition: 'all 0.2s', border: '1px solid transparent', '&:hover': { borderColor: 'primary.main', boxShadow: '0 8px 32px rgba(79,70,229,0.08)' } }}>
+              <Paper key={j.id} className="fade-in-up" sx={{ animationDelay: `${0.15 + (i * 0.05)}s`, p: { xs: 2.5, sm: 4 }, borderRadius: '16px', transition: 'all 0.2s', border: '1px solid transparent', '&:hover': { borderColor: 'primary.main', boxShadow: '0 8px 32px rgba(79,70,229,0.08)' } }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                   <Box>
                     <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5, cursor: 'pointer', '&:hover': { color: 'primary.main', textDecoration: 'underline' } }}>{j.title}</Typography>
@@ -64,15 +64,15 @@ export const FreelancerDashboard = () => {
                   <Chip size="small" label={j.category} sx={{ bgcolor: '#f1f5f9', fontWeight: 600 }} />
                 </Box>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 2, borderTop: '1px solid #e2e8f0' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, pt: 2, borderTop: '1px solid #e2e8f0' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
                     <Typography variant="h6" color="text.primary" fontWeight={800}>₹{j.budget.toLocaleString()}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main', ml: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
                       <span style={{ fontSize: '14px' }}>✅</span>
                       <Typography variant="caption" fontWeight={600}>Payment Verified</Typography>
                     </Box>
                   </Box>
-                  <Button variant="contained" color="primary" sx={{ px: 3 }}>Apply Now</Button>
+                  <Button variant="contained" color="primary" sx={{ px: 3, width: { xs: '100%', sm: 'auto' } }}>Apply Now</Button>
                 </Box>
               </Paper>
             ))}
@@ -80,7 +80,7 @@ export const FreelancerDashboard = () => {
         </Grid>
 
         <Grid xs={12} md={5}>
-          <Paper className="fade-in-up stagger-2" sx={{ height: '550px', display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden' }}>
+          <Paper className="fade-in-up stagger-2" sx={{ height: { xs: '65dvh', md: '550px' }, minHeight: 380, display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden' }}>
             <Box sx={{ p: 2, borderBottom: '1px solid #e2e8f0', bgcolor: '#f8fafc', display: 'flex', alignItems: 'center', gap: 2 }}>
               <AnimatedAvatar name="Enterprise Client" size={40} src="https://ui-avatars.com/api/?name=Enterprise+Client&background=0D8ABC&color=fff" />
               <Box>

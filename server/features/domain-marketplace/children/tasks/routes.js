@@ -7,7 +7,21 @@ const multer = require('multer');
 const tasksService = require('./service');
 const authRoutes = require('../../../aitag-auth/routes');
 const auth = authRoutes.authMiddleware;
+const authService = require('../../../domain-identity/children/auth/service');
 const { cacheGuard, cacheService } = require('../../../aitag-cache/routes');
+
+// Optional auth middleware for guest requirement posting
+const optionalAuth = (req, res, next) => {
+  const header = req.headers['authorization'];
+  if (header && header.startsWith('Bearer ')) {
+    try {
+      req.user = authService.verifyToken(header.split(' ')[1]);
+    } catch {
+      // ignore invalid token for optional auth
+    }
+  }
+  next();
+};
 
 // Configure static upload storage for task attachments & materials
 const uploadsDir = path.join(__dirname, '../../../../public/uploads/tasks');
@@ -75,8 +89,8 @@ router.get('/:id', cacheGuard({ ttlMs: 60000, tags: ['tasks'] }), async (req, re
   }
 });
 
-// POST /api/tasks/upload — upload files before task creation (protected)
-router.post('/upload', auth, upload.array('files', 10), (req, res) => {
+// POST /api/tasks/upload — upload files before task creation (supports guest & authenticated)
+router.post('/upload', optionalAuth, upload.array('files', 10), (req, res) => {
   try {
     const files = req.files || [];
     if (files.length === 0 && req.file) files.push(req.file);
@@ -96,6 +110,54 @@ router.post('/upload', auth, upload.array('files', 10), (req, res) => {
     res.status(201).json({ success: true, attachments });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/tasks/guest — create task as a guest visitor (auto-provisions client account)
+router.post('/guest', async (req, res) => {
+  try {
+    const { title, category, description, deadline, budget, image, attachments, clientName, clientEmail, clientPhone } = req.body;
+    if (!title || !category || !description || !deadline || !budget) {
+      return res.status(400).json({ error: 'title, category, description, deadline and budget are required' });
+    }
+    if (!clientName || !clientEmail || !clientEmail.includes('@')) {
+      return res.status(400).json({ error: 'Please provide your name and a valid email address to post a requirement' });
+    }
+
+    const userEmail = clientEmail.toLowerCase().trim();
+    const userName = clientName.trim();
+    let authPayload = null;
+
+    try {
+      const randomPass = `Aitag_${crypto.randomBytes(8).toString('hex')}A1`;
+      const regResult = await authService.register({
+        name: userName,
+        email: userEmail,
+        password: randomPass,
+        role: 'client'
+      });
+      authPayload = { token: regResult.token, user: regResult.user, isNewUser: true };
+    } catch (regErr) {
+      if (!regErr.message || !regErr.message.toLowerCase().includes('already')) {
+        console.warn('[GuestTask] Auto-provision warning:', regErr.message);
+      }
+    }
+
+    const task = await tasksService.createTask({
+      title, category, description, deadline, budget, image, attachments,
+      userEmail,
+      userName,
+      clientPhone
+    });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${userEmail}`);
+
+    if (authPayload) {
+      return res.status(201).json({ ...task, ...authPayload });
+    }
+    res.status(201).json(task);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

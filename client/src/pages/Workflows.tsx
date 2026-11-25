@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, Container, Typography, Paper, Grid, TextField, Button,
   Chip, Divider, Stack, Alert, Card, CardContent,
@@ -28,6 +28,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import UniversalVideoPlayer, { parseVideoSource } from '../components/UniversalVideoPlayer';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 export interface DeliveredWorkflow {
   id: string;
@@ -73,6 +74,8 @@ const WORKFLOW_DROPDOWN_OPTIONS = [
 
 export const Workflows: React.FC = () => {
   const navigate = useNavigate();
+  const { isMobile, isSmallScreen, isMobileLandscape } = useMobileDetect();
+  const touchStartY = useRef<number>(0);
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -355,7 +358,7 @@ export const Workflows: React.FC = () => {
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1.5}>
+          <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
             {workflows.length > 0 && (
               <Button
                 variant="outlined"
@@ -515,7 +518,7 @@ export const Workflows: React.FC = () => {
         {/* ================================================================= */}
         {/* WORK REEL UPLOAD & EDIT DIALOG                                     */}
         {/* ================================================================= */}
-        <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="md" fullWidth>
+        <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} fullScreen={isSmallScreen} maxWidth="md" fullWidth>
           <DialogTitle sx={{ fontWeight: 850, color: '#0f172a', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="h6" fontWeight={850}>
@@ -682,6 +685,9 @@ export const Workflows: React.FC = () => {
                 <Tabs
                   value={mediaUploadTab}
                   onChange={(_, val) => setMediaUploadTab(val)}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  allowScrollButtonsMobile
                   sx={{
                     mb: 2,
                     borderBottom: '1px solid rgba(255,255,255,0.1)',
@@ -788,135 +794,160 @@ export const Workflows: React.FC = () => {
         <Dialog
           open={previewModalOpen}
           onClose={() => setPreviewModalOpen(false)}
+          fullScreen={isMobile}
           maxWidth="sm"
           fullWidth
           PaperProps={{
             sx: {
-              borderRadius: '24px',
+              width: isMobile ? '100vw' : undefined,
+              maxWidth: isMobile ? '100vw' : undefined,
+              borderRadius: isMobile ? 0 : '22px',
               bgcolor: '#090d16',
               color: '#ffffff',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+              boxShadow: isMobile ? 'none' : '0 25px 50px -12px rgba(0,0,0,0.5)',
+              height: isMobile ? '100dvh' : 'min(88vh, 720px)',
+              maxHeight: isMobile ? '100dvh' : '88vh',
+              m: isMobile ? 0 : 2,
+              display: 'flex',
+              flexDirection: 'column',
               overflow: 'hidden'
             }
           }}
         >
           {/* Top Bar */}
-          <Box sx={{ p: 2, px: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#38bdf8' }}>
-                🎞️ Work Reel {previewReelIndex + 1} of {workflows.length}
+          <Box sx={{ pt: isMobile ? 'calc(10px + env(safe-area-inset-top, 0px))' : 2, pb: isMobileLandscape ? 0.75 : { xs: 1.1, sm: 2 }, px: { xs: 1.5, sm: 2.5 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#38bdf8', whiteSpace: 'nowrap' }}>
+                🎞️ Work Reel {previewReelIndex + 1} / {workflows.length}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#64748b' }}>
+              <Typography variant="caption" sx={{ color: '#64748b', display: { xs: 'none', sm: 'inline' } }}>
                 (Use [↑ / ↓] keys)
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={1} alignItems="center">
-              <IconButton onClick={() => setPreviewMuted(!previewMuted)} sx={{ color: '#94a3b8' }}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <IconButton size="small" onClick={() => setPreviewMuted(!previewMuted)} sx={{ color: previewMuted ? '#94a3b8' : '#38bdf8' }}>
                 {previewMuted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
               </IconButton>
-              <IconButton onClick={() => setPreviewModalOpen(false)} sx={{ color: '#94a3b8' }}>
-                <CloseIcon />
+              <IconButton size="small" onClick={() => setPreviewModalOpen(false)} sx={{ color: '#94a3b8' }}>
+                <CloseIcon fontSize="small" />
               </IconButton>
             </Stack>
           </Box>
 
           {/* Reel Stage */}
           {currentPreviewReel && (
-            <Box sx={{ position: 'relative', width: '100%', minHeight: 460, maxHeight: 540, bgcolor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box
+              onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; }}
+              onTouchEnd={(e) => {
+                const diff = touchStartY.current - e.changedTouches[0].clientY;
+                if (diff > 45) setPreviewReelIndex(prev => Math.min(prev + 1, workflows.length - 1));
+                else if (diff < -45) setPreviewReelIndex(prev => Math.max(prev - 1, 0));
+              }}
+              sx={{
+                position: 'relative',
+                width: '100%',
+                flex: 1,
+                minHeight: 0,
+                bgcolor: '#000',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden'
+              }}
+            >
               <UniversalVideoPlayer
+                key={currentPreviewReel.id || previewReelIndex}
                 url={currentPreviewReel.demoVideoUrl || currentPreviewReel.mediaUrl}
                 title={currentPreviewReel.title}
                 mediaType={currentPreviewReel.mediaType}
                 autoPlay={true}
                 muted={previewMuted}
                 loop={true}
-                maxHeight={540}
+                fillHeight={true}
+                onMutedChange={(m) => setPreviewMuted(m)}
+                reelsOverlay={
+                  currentPreviewReel.displayHeadingOnVideo !== false ? (
+                    <Box
+                      sx={{
+                        px: { xs: 1.8, sm: 2.5 },
+                        py: 1.3,
+                        pr: { xs: 6.5, sm: 7 },
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 70%, transparent 100%)'
+                      }}
+                    >
+                      <Stack direction="row" spacing={0.8} sx={{ mb: 0.6, flexWrap: 'wrap', gap: 0.5 }}>
+                        <Chip
+                          label={currentPreviewReel.category}
+                          size="small"
+                          sx={{ bgcolor: 'rgba(79,70,229,0.45)', color: '#e0e7ff', fontWeight: 800, fontSize: '0.66rem', height: 20 }}
+                        />
+                        <Chip
+                          label={currentPreviewReel.mediaType === 'image' ? '🖼️ Photo Reel' : '🎬 Video Reel'}
+                          size="small"
+                          sx={{ bgcolor: 'rgba(255,255,255,0.12)', color: '#fff', fontWeight: 700, fontSize: '0.66rem', height: 20 }}
+                        />
+                      </Stack>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 850, color: '#ffffff', mb: 0.3, lineHeight: 1.25, fontSize: { xs: '0.94rem', sm: '1.05rem' } }}>
+                        {currentPreviewReel.title}
+                      </Typography>
+                      {currentPreviewReel.description && (
+                        <Typography variant="body2" sx={{ color: '#cbd5e1', fontSize: '0.78rem', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {currentPreviewReel.description}
+                        </Typography>
+                      )}
+                    </Box>
+                  ) : (
+                    <Box sx={{ px: 2, pb: 1.5 }}>
+                      <Chip
+                        label={currentPreviewReel.category}
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(15,23,42,0.85)',
+                          color: '#ffffff',
+                          fontWeight: 800,
+                          fontSize: '0.68rem',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          backdropFilter: 'blur(8px)'
+                        }}
+                      />
+                    </Box>
+                  )
+                }
               />
 
               {/* Floating Up / Down Navigation Controls */}
-              <Box sx={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 1.5, zIndex: 10 }}>
-                <IconButton
-                  size="small"
-                  disabled={previewReelIndex === 0}
-                  onClick={() => setPreviewReelIndex(prev => Math.max(prev - 1, 0))}
-                  sx={{
-                    bgcolor: 'rgba(0,0,0,0.6)',
-                    color: '#fff',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    '&:hover': { bgcolor: 'rgba(79,70,229,0.8)' },
-                    '&.Mui-disabled': { opacity: 0.2, color: '#666' }
-                  }}
-                >
-                  <KeyboardArrowUpIcon />
-                </IconButton>
-
-                <IconButton
-                  size="small"
-                  disabled={previewReelIndex === workflows.length - 1}
-                  onClick={() => setPreviewReelIndex(prev => Math.min(prev + 1, workflows.length - 1))}
-                  sx={{
-                    bgcolor: 'rgba(0,0,0,0.6)',
-                    color: '#fff',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    '&:hover': { bgcolor: 'rgba(79,70,229,0.8)' },
-                    '&.Mui-disabled': { opacity: 0.2, color: '#666' }
-                  }}
-                >
-                  <KeyboardArrowDownIcon />
-                </IconButton>
-              </Box>
-
-              {/* Floating Bottom Reel Overlay (when displayHeadingOnVideo is enabled) */}
-              {currentPreviewReel.displayHeadingOnVideo !== false ? (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    p: 2.5,
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 60%, transparent 100%)',
-                    zIndex: 5
-                  }}
-                >
-                  <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                    <Chip
-                      label={currentPreviewReel.category}
-                      size="small"
-                      sx={{ bgcolor: 'rgba(79,70,229,0.3)', color: '#a5b4fc', fontWeight: 800, fontSize: '0.7rem' }}
-                    />
-                    <Chip
-                      label={currentPreviewReel.mediaType === 'image' ? '🖼️ Photo Reel' : '🎬 Video Reel'}
-                      size="small"
-                      sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 700, fontSize: '0.7rem' }}
-                    />
-                  </Stack>
-
-                  <Typography variant="h6" sx={{ fontWeight: 850, color: '#ffffff', mb: 0.5, lineHeight: 1.3 }}>
-                    {currentPreviewReel.title}
-                  </Typography>
-
-                  {currentPreviewReel.description && (
-                    <Typography variant="body2" sx={{ color: '#cbd5e1', fontSize: '0.82rem', lineHeight: 1.35, mt: 0.5 }}>
-                      {currentPreviewReel.description}
-                    </Typography>
-                  )}
-                </Box>
-              ) : (
-                <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
-                  <Chip
-                    label={currentPreviewReel.category}
+              {workflows.length > 1 && (
+                <Box sx={{ position: 'absolute', right: { xs: 8, sm: 14 }, top: '44%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 1.2, zIndex: 15 }}>
+                  <IconButton
                     size="small"
+                    disabled={previewReelIndex === 0}
+                    onClick={() => setPreviewReelIndex(prev => Math.max(prev - 1, 0))}
                     sx={{
-                      bgcolor: 'rgba(15,23,42,0.85)',
-                      color: '#ffffff',
-                      fontWeight: 800,
-                      fontSize: '0.68rem',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      backdropFilter: 'blur(8px)'
+                      bgcolor: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      '&:hover': { bgcolor: 'rgba(79,70,229,0.8)' },
+                      '&.Mui-disabled': { opacity: 0.25, color: '#666' }
                     }}
-                  />
+                  >
+                    <KeyboardArrowUpIcon fontSize="small" />
+                  </IconButton>
+
+                  <IconButton
+                    size="small"
+                    disabled={previewReelIndex === workflows.length - 1}
+                    onClick={() => setPreviewReelIndex(prev => Math.min(prev + 1, workflows.length - 1))}
+                    sx={{
+                      bgcolor: 'rgba(0,0,0,0.65)',
+                      color: '#fff',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      '&:hover': { bgcolor: 'rgba(79,70,229,0.8)' },
+                      '&.Mui-disabled': { opacity: 0.25, color: '#666' }
+                    }}
+                  >
+                    <KeyboardArrowDownIcon fontSize="small" />
+                  </IconButton>
                 </Box>
               )}
             </Box>

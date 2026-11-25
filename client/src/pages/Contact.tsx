@@ -862,10 +862,10 @@ export const Contact: React.FC = () => {
                     </Box>
                     <Box>
                       <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a', mb: 0.2 }}>
-                        100% Escrow Protection
+                        100% Payment Protection
                       </Typography>
                       <Typography sx={{ color: '#64748b', fontSize: '0.8rem', lineHeight: 1.5 }}>
-                        Funds are held safely in escrow until your deliverables meet standard specifications.
+                        Payments are held safely by AITAG until your work is delivered to your satisfaction.
                       </Typography>
                     </Box>
                   </Box>

@@ -77,16 +77,25 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         lastInitRef.current = initKey;
       }
 
-      buttonRef.current.innerHTML = '';
-      window.google.accounts.id.renderButton(buttonRef.current, {
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        text: mode === 'signup' ? 'signup_with' : 'continue_with',
-        shape: 'rectangular',
-        logo_alignment: 'left',
-        width: 320
-      });
+      const renderBtn = () => {
+        if (!buttonRef.current || !window.google?.accounts?.id) return;
+        const containerWidth = buttonRef.current.parentElement?.clientWidth || buttonRef.current.clientWidth || 320;
+        const clampedWidth = Math.max(200, Math.min(320, Math.floor(containerWidth)));
+        buttonRef.current.innerHTML = '';
+        window.google.accounts.id.renderButton(buttonRef.current, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: mode === 'signup' ? 'signup_with' : 'continue_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: clampedWidth
+        });
+      };
+
+      renderBtn();
+      window.addEventListener('resize', renderBtn);
+      return () => window.removeEventListener('resize', renderBtn);
     } catch (err: any) {
       console.warn('Error initializing Google Sign-In:', err);
     }

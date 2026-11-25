@@ -70,7 +70,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const handleLogout = () => {
     setUserMenuAnchor(null);
     logout();
-    navigate('/signin');
+    navigate('/signin', { replace: true, state: { message: 'You have been signed out successfully.' } });
   };
 
   const isFreelancer = user?.role === 'freelancer';
@@ -193,9 +193,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           boxShadow: 'none',
         }}
       >
-        <Toolbar sx={{ minHeight: '52px !important', height: '52px', justifyContent: 'space-between', px: { xs: 1.5, sm: 2.5 } }}>
+        <Toolbar sx={{ minHeight: '52px !important', height: '52px', justifyContent: 'space-between', px: { xs: 1, sm: 2.5 } }}>
           {/* Left: Sidebar Toggle + Brand Logo */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
             <Tooltip title={isMobile ? "Open Navigation Menu" : collapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}>
               <IconButton
                 onClick={toggleSidebar}
@@ -224,11 +224,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
               }}
               onClick={() => navigate('/')}
             >
-              <img
+              <Box
+                component="img"
                 src="/images/aitag-logo.png?v=deepblack-down"
                 alt="AITAG"
-                style={{
-                  height: 34,
+                sx={{
+                  height: { xs: 28, sm: 34 },
                   width: 'auto',
                   objectFit: 'contain',
                   display: 'block',
@@ -390,7 +391,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          p: { xs: 1.5, sm: 2, md: 2.5 },
+          p: { xs: 1.25, sm: 2, md: 2.5 },
           width: {
             xs: '100%',
             md: !collapsed ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
@@ -431,10 +432,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
               }}
             />
             <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
-              © {new Date().getFullYear()} AITAG • Decentralized AI Service Ecosystem • Systems Operational
+              © {new Date().getFullYear()} AITAG • Affordable AI Services for Your Business
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: 2.5 }}>
+          <Box sx={{ display: 'flex', gap: { xs: 1.5, sm: 2.5 }, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Typography
               component="span"
               variant="caption"
@@ -446,7 +447,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 '&:hover': { color: '#4f46e5' },
               }}
             >
-              Platform Analytics
+              {isClient ? 'My Summary' : 'Platform Analytics'}
             </Typography>
             {(user?.role === 'freelancer' || user?.role === 'admin') && (
               <Typography
@@ -474,7 +475,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 '&:hover': { color: '#4f46e5' },
               }}
             >
-              Verified Talent
+              Verified Experts
             </Typography>
           </Box>
         </Box>

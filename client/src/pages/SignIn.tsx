@@ -16,6 +16,7 @@ const SignIn = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(location.state?.error || '');
+  const [infoMessage, setInfoMessage] = useState(location.state?.message || '');
   const [loading, setLoading] = useState(false);
 
   // If already logged in, seamlessly forward to requested destination or dashboard
@@ -33,7 +34,19 @@ const SignIn = () => {
     if (location.state?.error) {
       setError(location.state.error);
     }
-  }, [location.state]);
+    if (location.state?.message) {
+      setInfoMessage(location.state.message);
+    }
+    // Explicitly wipe state and clear any asynchronous browser autofill
+    setForm({ email: '', password: '' });
+    const timer = setTimeout(() => {
+      const emailInput = document.getElementById('aitag_login_email') as HTMLInputElement;
+      const passInput = document.getElementById('aitag_login_password') as HTMLInputElement;
+      if (emailInput && !form.email) emailInput.value = '';
+      if (passInput && !form.password) passInput.value = '';
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [location.state, location.pathname, location.key]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,13 +92,37 @@ const SignIn = () => {
             or continue with email
           </Divider>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}>
+          {infoMessage && (
+            <Alert severity="success" sx={{ mb: 2, borderRadius: '10px', py: 0.5, fontSize: '0.875rem' }}>
+              {infoMessage}
+            </Alert>
+          )}
+
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            autoComplete="off"
+            noValidate
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}
+          >
+            {/* Decoy fields to intercept aggressive browser credential autofill */}
+            <input type="text" name="fake_email_prevent_autofill" tabIndex={-1} style={{ display: 'none' }} aria-hidden="true" autoComplete="off" />
+            <input type="password" name="fake_password_prevent_autofill" tabIndex={-1} style={{ display: 'none' }} aria-hidden="true" autoComplete="new-password" />
+
             <TextField
               label="Email"
               type="email"
+              name="aitag_login_email"
+              id="aitag_login_email"
               required
               placeholder="e.g. rahul.verma@gmail.com"
               value={form.email}
+              autoComplete="off"
+              inputProps={{
+                autoComplete: 'off',
+                'data-lpignore': 'true',
+                'data-form-type': 'other'
+              }}
               onChange={e => {
                 setForm({ ...form, email: e.target.value });
                 if (error) setError('');
@@ -95,8 +132,16 @@ const SignIn = () => {
             <TextField
               label="Password"
               type={showPassword ? 'text' : 'password'}
+              name="aitag_login_password"
+              id="aitag_login_password"
               required
               value={form.password}
+              autoComplete="new-password"
+              inputProps={{
+                autoComplete: 'new-password',
+                'data-lpignore': 'true',
+                'data-form-type': 'other'
+              }}
               onChange={e => {
                 setForm({ ...form, password: e.target.value });
                 if (error) setError('');

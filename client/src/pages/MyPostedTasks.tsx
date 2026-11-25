@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Box, Container, Typography, Table, TableBody, TableCell, TableHead,
+  Box, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Chip, Button, CircularProgress, IconButton, Tooltip, Stack,
   Tabs, Tab
 } from '@mui/material';
@@ -106,6 +106,9 @@ const MyPostedTasks = () => {
           <Tabs
             value={activeTab}
             onChange={(_, val) => setActiveTab(val)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               '& .MuiTab-root': {
                 fontWeight: 700,
@@ -144,7 +147,8 @@ const MyPostedTasks = () => {
           /* Package Orders View */
           <Paper elevation={0} sx={{ borderRadius: '16px', border: '1px solid rgba(79,70,229,0.1)', overflow: 'hidden' }}>
             {packageOrders.length > 0 ? (
-              <Table>
+              <TableContainer sx={{ overflowX: 'auto' }}>
+                <Table sx={{ minWidth: 680 }}>
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#f8fafc' }}>
                     {['Order ID', 'Service Package', 'Tier', 'Price', 'Status', 'Ordered On', 'Actions'].map(h => (
@@ -256,6 +260,7 @@ const MyPostedTasks = () => {
                   })}
                 </TableBody>
               </Table>
+              </TableContainer>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8, px: 2 }}>
                 <ShoppingBagIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 1.5 }} />
@@ -273,7 +278,8 @@ const MyPostedTasks = () => {
         ) : (
           /* Custom Tasks View */
           <Paper elevation={0} sx={{ borderRadius: '16px', border: '1px solid rgba(79,70,229,0.08)', overflow: 'hidden' }}>
-            <Table>
+            <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table sx={{ minWidth: 720 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f8fafc' }}>
                   {['Task Title', 'Category', 'Deadline', 'Budget', 'Bids', 'Status', 'Assets & Chat', 'Actions'].map(h => (
@@ -375,6 +381,7 @@ const MyPostedTasks = () => {
                 ))}
               </TableBody>
             </Table>
+            </TableContainer>
             {tasks.length === 0 && (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Typography sx={{ color: '#94a3b8' }}>No custom tasks posted yet.</Typography>

@@ -76,7 +76,7 @@ const BrowseTasks = () => {
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
         <Navbar />
-        <Container maxWidth="md" sx={{ pt: 16, pb: 10 }}>
+        <Container maxWidth="md" sx={{ pt: { xs: 11, md: 16 }, pb: { xs: 6, md: 10 } }}>
           <Paper
             elevation={0}
             sx={{
@@ -220,7 +220,7 @@ const BrowseTasks = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
-      <Container maxWidth="lg" sx={{ pt: 14, pb: 8 }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 11, md: 14 }, pb: 8 }}>
         {/* Section Header - Central Pattern */}
         <Box sx={{ textAlign: 'center', mb: 5 }}>
           <Typography
@@ -277,9 +277,9 @@ const BrowseTasks = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: '#4f46e5' }} /></InputAdornment> }}
-            sx={{ flex: 1, minWidth: 280, ...fieldStyle }}
+            sx={{ flex: 1, minWidth: { xs: '100%', sm: 280 }, ...fieldStyle }}
           />
-          <FormControl sx={{ minWidth: 220 }}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 220 } }}>
             <InputLabel>Category</InputLabel>
             <Select value={category} label="Category" onChange={e => setCategory(e.target.value)} sx={{ borderRadius: '10px', fontWeight: 600 }}>
               {CATEGORIES.map(c => <MenuItem key={c} value={c} sx={{ fontWeight: 600 }}>{c === 'all' ? 'All Services (4 Categories)' : c}</MenuItem>)}
@@ -303,9 +303,9 @@ const BrowseTasks = () => {
                     borderRadius: '16px',
                     border: '1px solid #e2e8f0',
                     overflow: 'hidden',
-                    height: '310px',
-                    minHeight: '310px',
-                    maxHeight: '310px',
+                    height: { xs: 'auto', md: '310px' },
+                    minHeight: { xs: 'auto', md: '310px' },
+                    maxHeight: { xs: 'none', md: '310px' },
                     display: 'flex',
                     flexDirection: 'column',
                     bgcolor: '#ffffff',

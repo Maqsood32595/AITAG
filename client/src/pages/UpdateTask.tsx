@@ -29,6 +29,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import Navbar from '../components/Navbar';
 import { tasksApi } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useMobileDetect } from '../utils/useMobileDetect';
 
 const CATEGORIES = ['Branding & Print', 'Social & Marketing', 'Web & Digital Presence', 'Product Visuals'];
 
@@ -36,6 +37,7 @@ const UpdateTask = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isSmallScreen: isMobileDialog } = useMobileDetect();
   const [form, setForm] = useState<any>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,7 +73,7 @@ const UpdateTask = () => {
       .catch(() => {
         setMerchant({
           vpa: 'mohammedmaqsoodai@oksbi',
-          name: 'AITAG Escrow',
+          name: 'AITAG Payment Protection',
           qrImage: '/images/payment-qr.jpeg'
         });
       });
@@ -143,9 +145,9 @@ const UpdateTask = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
-      <Container maxWidth="sm" sx={{ pt: 14, pb: 6 }}>
-        <Paper elevation={0} sx={{ p: 5, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+      <Container maxWidth="sm" sx={{ pt: { xs: 11, md: 14 }, pb: 6 }}>
+        <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 5 }, borderRadius: '20px', border: '1px solid rgba(79,70,229,0.1)', boxShadow: '0 8px 40px rgba(79,70,229,0.08)' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1 }}>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif', letterSpacing: '-1px' }}>
               Update Task
             </Typography>
@@ -158,9 +160,9 @@ const UpdateTask = () => {
             />
           </Box>
           <Typography sx={{ color: '#64748b', mb: 3, fontSize: '0.95rem' }}>Edit your task details & safe payment protection below</Typography>
-          
+
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
-          
+
           {/* Escrow Quick Action Card */}
           <Paper elevation={0} sx={{ p: 2.5, mb: 3, borderRadius: '14px', bgcolor: 'rgba(79,70,229,0.04)', border: '1px dashed rgba(79,70,229,0.3)' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -221,7 +223,7 @@ const UpdateTask = () => {
             />
             <TextField label="Budget (₹) *" type="number" required value={form.budget} onChange={e => setForm({ ...form, budget: e.target.value })} sx={fieldStyle} />
             <TextField label="Image URL" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} sx={fieldStyle} />
-            
+
             <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
               <Button type="button" variant="outlined" fullWidth onClick={() => navigate('/my_tasks')}
                 sx={{ borderRadius: '12px', color: '#64748b', borderColor: '#e2e8f0', fontWeight: 600 }}>Cancel</Button>
@@ -238,10 +240,11 @@ const UpdateTask = () => {
       <Dialog
         open={payModalOpen}
         onClose={() => setPayModalOpen(false)}
+        fullScreen={isMobileDialog}
         maxWidth="xs"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: '20px', p: 1 }
+          sx: { borderRadius: isMobileDialog ? 0 : '20px', p: { xs: 0.5, sm: 1 } }
         }}
       >
         <DialogTitle sx={{ fontWeight: 800, textAlign: 'center', pb: 1 }}>
@@ -280,8 +283,8 @@ const UpdateTask = () => {
                   src={merchant?.qrImage || '/images/payment-qr.jpeg'}
                   alt="UPI QR Code"
                   sx={{
-                    width: 220,
-                    height: 220,
+                    width: { xs: 185, sm: 220 },
+                    height: { xs: 185, sm: 220 },
                     borderRadius: '16px',
                     border: '2px solid #e2e8f0',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
@@ -294,7 +297,7 @@ const UpdateTask = () => {
                 ₹{grossBudget.toLocaleString('en-IN')}
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mb: 2 }}>
-                Payee: {merchant?.name || 'AITAG Escrow'}
+                Payee: {merchant?.name || 'AITAG Payment Protection'}
               </Typography>
 
               {/* VPA Copy Bar */}

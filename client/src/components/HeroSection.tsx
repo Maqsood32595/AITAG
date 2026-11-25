@@ -55,7 +55,7 @@ const HeroSection: React.FC = () => {
         overflow: 'hidden',
         bgcolor: '#f8fafc',
         background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 45%, #f0fdf4 100%)',
-        pt: { xs: 12, md: 14 },
+        pt: { xs: 10, md: 14 },
         pb: { xs: 6, md: 8 },
       }}
     >
@@ -88,12 +88,20 @@ const HeroSection: React.FC = () => {
                   bgcolor: 'rgba(79,70,229,0.07)',
                   color: '#4f46e5',
                   fontWeight: 800,
-                  fontSize: '0.74rem',
-                  letterSpacing: '0.5px',
+                  fontSize: { xs: '0.68rem', sm: '0.74rem' },
+                  letterSpacing: '0.4px',
                   border: '1px solid rgba(79,70,229,0.2)',
                   borderRadius: '20px',
                   px: 1,
-                  height: 30,
+                  py: 0.4,
+                  height: 'auto',
+                  minHeight: 30,
+                  maxWidth: '100%',
+                  '& .MuiChip-label': {
+                    whiteSpace: 'normal',
+                    textAlign: 'center',
+                    lineHeight: 1.3,
+                  },
                 }}
               />
             </Box>

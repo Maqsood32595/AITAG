@@ -29,8 +29,8 @@ export const PrivacyPolicy: React.FC = () => {
       {/* Hero Header */}
       <Box
         sx={{
-          pt: { xs: 12, md: 15 },
-          pb: { xs: 6, md: 8 },
+          pt: { xs: 10, md: 15 },
+          pb: { xs: 5, md: 8 },
           background: 'linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%)',
           borderBottom: '1px solid #e2e8f0',
         }}
@@ -45,7 +45,7 @@ export const PrivacyPolicy: React.FC = () => {
             </Typography>
           </Breadcrumbs>
 
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
             <Chip
               icon={<SecurityIcon sx={{ fontSize: '18px !important', color: '#4f46e5' }} />}
               label="✦ TRUST & DATA PRIVACY"

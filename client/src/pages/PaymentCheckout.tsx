@@ -115,7 +115,7 @@ export default function PaymentCheckout() {
         // Fallback to defaults
         setMerchant({
           vpa: 'mohammedmaqsoodai@oksbi',
-          name: 'AITAG Escrow',
+          name: 'AITAG Payment Protection',
           qrImage: '/images/payment-qr.jpeg',
         });
       }
@@ -414,7 +414,7 @@ export default function PaymentCheckout() {
                 onClick={() => navigate('/dashboard')}
                 sx={{
                   mt: 4,
-                  px: 4,
+                  px: { xs: 2.5, sm: 4 },
                   py: 1.5,
                   background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
                   borderRadius: '12px',
@@ -528,7 +528,7 @@ export default function PaymentCheckout() {
                       flexDirection: 'column',
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <QrCodeIcon sx={{ color: '#818cf8', fontSize: 18 }} />
                         <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>
@@ -538,18 +538,19 @@ export default function PaymentCheckout() {
                       <Box
                         component="img"
                         src="/images/aitag-logo.png"
-                        alt="AITAG Escrow"
+                        alt="AITAG Payment Protection"
                         sx={{ height: 22, objectFit: 'contain' }}
                       />
                     </Box>
 
                     {/* QR + Details Row */}
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1.5 }}>
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { xs: 'stretch', sm: 'center' }, mb: 1.5 }}>
                       <Box
                         sx={{
                           flexShrink: 0,
-                          width: { xs: 130, sm: 145 },
-                          height: { xs: 130, sm: 145 },
+                          mx: { xs: 'auto', sm: 0 },
+                          width: { xs: 150, sm: 145 },
+                          height: { xs: 150, sm: 145 },
                           borderRadius: '12px',
                           overflow: 'hidden',
                           background: '#fff',
