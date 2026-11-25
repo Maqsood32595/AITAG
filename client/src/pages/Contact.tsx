@@ -758,7 +758,7 @@ export const Contact: React.FC = () => {
                           color: '#0f172a',
                         }}
                       >
-                        +91 98860 31643
+                        +91 84316 34113
                       </Typography>
                       <Button
                         component="a"
