@@ -1,1 +1,0 @@
-import{et as e}from"./Box-lA8PO16J.js";import{x as t}from"./Tooltip-CwY6iyu5.js";var n=e(),r=t((0,n.jsx)(`path`,{d:`m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z`}),`ArrowForward`);export{r as t};

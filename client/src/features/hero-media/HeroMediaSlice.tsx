@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Typography, IconButton, Tooltip, Slider, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, Slider, Paper, Grid, useTheme, useMediaQuery } from '@mui/material';
 import VolumeOffRoundedIcon from '@mui/icons-material/VolumeOffRounded';
 import VolumeDownRoundedIcon from '@mui/icons-material/VolumeDownRounded';
 import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded';
@@ -12,6 +12,7 @@ import { useMobileDetect, useBodyScrollLock } from '../../utils/useMobileDetect'
 
 export interface HeroMediaSlotProps {
   onOverlayActiveChange?: (active: boolean) => void;
+  fallback?: React.ReactNode;
 }
 
 interface HeroMediaConfig {
@@ -27,7 +28,34 @@ interface HeroMediaConfig {
 const HERO_VIDEO_MIN_KEY = 'aitag_hero_video_minimized';
 const DEFAULT_ASPECT_RATIO = 1024 / 576;
 
-const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange }) => {
+const DESKTOP_HIGHLIGHTS = [
+  {
+    title: 'Starts at ₹499',
+    subtitle: 'clear flat pricing',
+    color: '#059669',
+    bgcolor: '#ecfdf5',
+    borderColor: '#d1fae5',
+  },
+  {
+    title: '24–48 hrs',
+    subtitle: 'fast turnaround',
+    color: '#2563eb',
+    bgcolor: '#eff6ff',
+    borderColor: '#dbeafe',
+  },
+  {
+    title: 'Safe escrow',
+    subtitle: 'pay on approval',
+    color: '#7c3aed',
+    bgcolor: '#faf5ff',
+    borderColor: '#f3e8ff',
+  },
+];
+
+const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
+  onOverlayActiveChange,
+  fallback = null,
+}) => {
   const theme = useTheme();
   const { isMobile, isMobileLandscape } = useMobileDetect();
   const isBelowMd = useMediaQuery(theme.breakpoints.down('md'));
@@ -40,6 +68,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
   const savedTimeRef = useRef(0);
 
   const [config, setConfig] = useState<HeroMediaConfig | null>(null);
+  const [isConfigLoading, setIsConfigLoading] = useState(true);
   const [hasMediaError, setHasMediaError] = useState(false);
 
   const [isMinimized, setIsMinimized] = useState<boolean>(() => {
@@ -60,8 +89,10 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
 
   // Discover Fractal Kernel slice config safely; degrade silently if disabled/unreachable
   useEffect(() => {
+    let isActive = true;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
+    setIsConfigLoading(true);
 
     fetch('/api/hero-media/config', {
       headers: { Accept: 'application/json' },
@@ -75,6 +106,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
         return res.json();
       })
       .then((data) => {
+        if (!isActive) return;
         if (data && data.enabled !== false && data.available && data.videoUrl) {
           setConfig(data);
           if (typeof data.aspectRatio === 'number' && data.aspectRatio > 0) {
@@ -86,29 +118,28 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
         }
       })
       .catch(() => {
-        setConfig(null);
+        if (isActive) setConfig(null);
       })
       .finally(() => {
         clearTimeout(timeoutId);
+        if (isActive) setIsConfigLoading(false);
       });
 
     return () => {
+      isActive = false;
       clearTimeout(timeoutId);
       controller.abort();
     };
   }, []);
 
   const isSliceReady = Boolean(config && !hasMediaError);
-  const isDesktopOverlayActive = isSliceReady && !useCenteredMobileLayout && !isMinimized;
+  const isDesktopInlineActive = isSliceReady && !useCenteredMobileLayout;
   const isMobileOverlayActive = isSliceReady && useCenteredMobileLayout && !isMinimized;
 
-  // Notify parent HeroSection whether the desktop overlay covers #hero-workflow-card
+  // Desktop renders inline without covering sibling content; report false so no floating overlay state is active
   useEffect(() => {
-    onOverlayActiveChange?.(isDesktopOverlayActive);
-    return () => {
-      onOverlayActiveChange?.(false);
-    };
-  }, [isDesktopOverlayActive, onOverlayActiveChange]);
+    onOverlayActiveChange?.(false);
+  }, [isDesktopInlineActive, onOverlayActiveChange]);
 
   // Freeze underlying scroll strictly while the mobile centered video dialog is visible
   useBodyScrollLock(isMobileOverlayActive);
@@ -155,9 +186,9 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
     }
   }, [useCenteredMobileLayout, hasEnded]);
 
-  // Auto-pause desktop video when Hero scrolls out of viewport to save battery/CPU
+  // Auto-pause desktop inline video when Hero scrolls out of viewport to save battery/CPU
   useEffect(() => {
-    if (!isDesktopOverlayActive || !desktopContainerRef.current) return;
+    if (!isDesktopInlineActive || !desktopContainerRef.current) return;
     const target = desktopContainerRef.current;
 
     const observer = new IntersectionObserver(
@@ -175,7 +206,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [isDesktopOverlayActive]);
+  }, [isDesktopInlineActive]);
 
   // Escape key dismisses mobile centered floating video
   useEffect(() => {
@@ -287,28 +318,62 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
     setProgress(100);
   };
 
-  // Graceful no-op when backend slice is disabled, offline, or asset failed
+  if (isConfigLoading) {
+    if (useCenteredMobileLayout) {
+      return null;
+    }
+    return (
+      <Paper
+        elevation={0}
+        sx={{
+          width: '100%',
+          p: 1.75,
+          borderRadius: '24px',
+          bgcolor: '#ffffff',
+          border: '1px solid rgba(79,70,229,0.14)',
+          boxShadow: '0 22px 50px rgba(79,70,229,0.09)',
+        }}
+      >
+        <Box
+          sx={{
+            width: '100%',
+            aspectRatio: `${aspectRatio}`,
+            borderRadius: '16px',
+            bgcolor: '#0f172a',
+          }}
+        />
+        <Box sx={{ height: 108 }} />
+      </Paper>
+    );
+  }
+
+  // Graceful degrade when backend slice is disabled, offline, or asset failed
   if (!config || hasMediaError) {
+    if (!useCenteredMobileLayout && fallback) {
+      return <>{fallback}</>;
+    }
     return null;
   }
 
-  const renderPlayerCard = () => (
+  const renderPlayerCard = (showMinimize: boolean, framed: boolean) => (
     <Box
       onClick={handleTogglePlay}
       sx={{
         position: 'relative',
         width: '100%',
         aspectRatio: `${aspectRatio}`,
-        borderRadius: '18px',
+        borderRadius: framed ? '16px' : '18px',
         overflow: 'hidden',
         bgcolor: '#000000',
         cursor: 'pointer',
-        boxShadow:
-          '0 24px 60px -12px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.22)',
+        boxShadow: framed
+          ? '0 10px 28px -8px rgba(15, 23, 42, 0.28)'
+          : '0 24px 60px -12px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.22)',
         transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease',
         '&:hover': {
-          boxShadow:
-            '0 28px 68px -12px rgba(79, 70, 229, 0.36), 0 0 0 1px rgba(129, 140, 248, 0.45)',
+          boxShadow: framed
+            ? '0 14px 34px -8px rgba(79, 70, 229, 0.28)'
+            : '0 28px 68px -12px rgba(79, 70, 229, 0.36), 0 0 0 1px rgba(129, 140, 248, 0.45)',
         },
       }}
     >
@@ -467,38 +532,40 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
             />
           </Box>
 
-          <Box
-            component="button"
-            type="button"
-            onClick={handleMinimizeClick}
-            aria-label="Minimize hero video"
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 0.45,
-              px: 1.15,
-              py: 0.5,
-              height: 30,
-              borderRadius: '20px',
-              bgcolor: 'rgba(15, 23, 42, 0.74)',
-              color: '#ffffff',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.24)',
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              lineHeight: 1,
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                bgcolor: 'rgba(15, 23, 42, 0.94)',
-                borderColor: 'rgba(255, 255, 255, 0.45)',
-              },
-            }}
-          >
-            <RemoveRoundedIcon sx={{ fontSize: 15 }} />
-            <span>Minimize</span>
-          </Box>
+          {showMinimize && (
+            <Box
+              component="button"
+              type="button"
+              onClick={handleMinimizeClick}
+              aria-label="Minimize hero video"
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.45,
+                px: 1.15,
+                py: 0.5,
+                height: 30,
+                borderRadius: '20px',
+                bgcolor: 'rgba(15, 23, 42, 0.74)',
+                color: '#ffffff',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255, 255, 255, 0.24)',
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                lineHeight: 1,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: 'rgba(15, 23, 42, 0.94)',
+                  borderColor: 'rgba(255, 255, 255, 0.45)',
+                },
+              }}
+            >
+              <RemoveRoundedIcon sx={{ fontSize: 15 }} />
+              <span>Minimize</span>
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -594,8 +661,8 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
     </Box>
   );
 
-  // Minimized pill (shared across Desktop/Windows & Mobile)
-  if (isMinimized) {
+  // Mobile-only minimized floating pill (Desktop always renders fixed inline)
+  if (useCenteredMobileLayout && isMinimized) {
     return (
       <Box
         role="button"
@@ -732,7 +799,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
             animation: 'fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
-          {renderPlayerCard()}
+          {renderPlayerCard(true, false)}
           <Typography
             onClick={handleMinimize}
             sx={{
@@ -752,20 +819,96 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({ onOverlayActiveChange })
     );
   }
 
-  // Desktop / Windows: floats centered over #hero-workflow-card at exact native ratio
+  // Desktop / Windows: framed inline video showcase parallel & symmetrical with left hero text
   return (
     <Box
       ref={desktopContainerRef}
       sx={{
-        position: 'absolute',
-        top: '50%',
-        left: 0,
-        right: 0,
-        transform: 'translateY(-50%)',
-        zIndex: 10,
+        position: 'relative',
+        width: '100%',
       }}
     >
-      {renderPlayerCard()}
+      <Paper
+        elevation={0}
+        sx={{
+          bgcolor: '#ffffff',
+          borderRadius: '24px',
+          p: { md: 1.5, lg: 1.75 },
+          border: '1px solid rgba(79,70,229,0.14)',
+          boxShadow: '0 22px 50px rgba(79,70,229,0.09)',
+        }}
+      >
+        {renderPlayerCard(false, true)}
+
+        <Box sx={{ mt: 1.5, px: 0.4 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+              mb: 1.25,
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: { md: '0.8rem', lg: '0.84rem' },
+                color: '#0f172a',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              See how AITAG delivers studio-grade AI work
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                color: '#4f46e5',
+                bgcolor: 'rgba(79,70,229,0.08)',
+                px: 1,
+                py: 0.3,
+                borderRadius: '12px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              No tech skills needed
+            </Typography>
+          </Box>
+
+          <Grid container spacing={1.2}>
+            {DESKTOP_HIGHLIGHTS.map((item) => (
+              <Grid key={item.title} size={{ xs: 4 }}>
+                <Box
+                  sx={{
+                    py: 1,
+                    px: 0.9,
+                    textAlign: 'center',
+                    borderRadius: '12px',
+                    bgcolor: item.bgcolor,
+                    border: `1px solid ${item.borderColor}`,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { md: '0.78rem', lg: '0.84rem' },
+                      color: item.color,
+                      lineHeight: 1.2,
+                      mb: 0.2,
+                    }}
+                  >
+                    {item.title}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.2 }}>
+                    {item.subtitle}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      </Paper>
     </Box>
   );
 };

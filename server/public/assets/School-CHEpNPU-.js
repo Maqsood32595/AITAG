@@ -1,0 +1,1 @@
+import{tt as e}from"./Box-BuTB8vj-.js";import{S as t}from"./Tooltip-bUEGT8nN.js";var n=e(),r=t((0,n.jsx)(`path`,{d:`M5 13.18v4L12 21l7-3.82v-4L12 17zM12 3 1 9l11 6 9-4.91V17h2V9z`}),`School`);export{r as t};

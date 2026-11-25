@@ -13,6 +13,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import Navbar from '../components/Navbar';
 import UniversalVideoPlayer from '../components/UniversalVideoPlayer';
+import WorkflowStepsCard from '../components/WorkflowStepsCard';
 import { useNavigate } from 'react-router-dom';
 
 const WORKFLOW_STEPS = [
@@ -108,88 +109,118 @@ export const HowItWorks: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', maxWidth: 840, mx: 'auto' }}>
-            <Chip
-              label="✦ STEP-BY-STEP WORKFLOW GUIDE"
-              sx={{
-                bgcolor: 'rgba(79,70,229,0.08)',
-                color: '#4f46e5',
-                fontWeight: 800,
-                fontSize: '0.75rem',
-                letterSpacing: '0.6px',
-                border: '1px solid rgba(79,70,229,0.2)',
-                borderRadius: '20px',
-                mb: 2,
-              }}
-            />
-            <Typography
-              variant="h1"
-              sx={{
-                fontWeight: 900,
-                fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.4rem' },
-                lineHeight: 1.15,
-                color: '#0f172a',
-                letterSpacing: '-1.2px',
-                fontFamily: 'Inter, sans-serif',
-                mb: 2,
-                textWrap: 'balance',
-              }}
-            >
-              How AITAG Turns Your Ideas{' '}
-              <Box
-                component="span"
-                sx={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                Into Reality.
-              </Box>
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: { xs: '1rem', md: '1.12rem' },
-                color: '#475569',
-                lineHeight: 1.6,
-                fontFamily: 'Inter, sans-serif',
-                maxWidth: 680,
-                mx: 'auto',
-                mb: 4,
-                textWrap: 'balance',
-              }}
-            >
-              You don’t need to learn prompts or master AI tools. Tell us what your business needs, and our verified AI specialists craft high-quality deliverables with 100% payment protection.
-            </Typography>
-
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: { xs: 4, md: 5, lg: 6 },
+              width: '100%',
+            }}
+          >
+            {/* Left Column: Workflow Hero Intro & CTA */}
             <Box
               sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                flex: { xs: '1 1 100%', md: '0 0 53%', lg: '0 0 54%' },
+                maxWidth: { xs: '100%', md: '53%', lg: '54%' },
+                width: '100%',
+                textAlign: { xs: 'center', md: 'left' },
+              }}
+            >
+              <Chip
+                label="✦ STEP-BY-STEP WORKFLOW GUIDE"
+                sx={{
+                  bgcolor: 'rgba(79,70,229,0.08)',
+                  color: '#4f46e5',
+                  fontWeight: 800,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.6px',
+                  border: '1px solid rgba(79,70,229,0.2)',
+                  borderRadius: '20px',
+                  mb: 2,
+                }}
+              />
+              <Typography
+                variant="h1"
+                sx={{
+                  fontWeight: 900,
+                  fontSize: { xs: '2.1rem', sm: '2.6rem', md: '2.75rem', lg: '3.05rem' },
+                  lineHeight: 1.15,
+                  color: '#0f172a',
+                  letterSpacing: '-1.2px',
+                  fontFamily: 'Inter, sans-serif',
+                  mb: 2,
+                  textWrap: 'balance',
+                }}
+              >
+                How AITAG Turns Your Ideas{' '}
+                <Box
+                  component="span"
+                  sx={{
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #2563eb 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  Into Reality.
+                </Box>
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: '1rem', md: '1.08rem' },
+                  color: '#475569',
+                  lineHeight: 1.6,
+                  fontFamily: 'Inter, sans-serif',
+                  maxWidth: 580,
+                  mx: { xs: 'auto', md: 0 },
+                  mb: 3.5,
+                  textWrap: 'balance',
+                }}
+              >
+                You don’t need to learn prompts or master AI tools. Tell us what your business needs, and our verified AI specialists craft high-quality deliverables with 100% payment protection.
+              </Typography>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: { xs: 'center', md: 'flex-start' },
+                  alignItems: 'center',
+                  width: '100%',
+                }}
+              >
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/services')}
+                  endIcon={<ArrowForwardIcon />}
+                  sx={{
+                    bgcolor: '#2563eb',
+                    fontWeight: 800,
+                    fontSize: { xs: '0.9rem', sm: '0.95rem' },
+                    borderRadius: '24px',
+                    px: { xs: 2.8, sm: 4 },
+                    py: 1.35,
+                    textTransform: 'none',
+                    boxShadow: '0 8px 20px rgba(37,99,235,0.25)',
+                    '&:hover': {
+                      bgcolor: '#1d4ed8',
+                    },
+                  }}
+                >
+                  Explore Services & Packages
+                </Button>
+              </Box>
+            </Box>
+
+            {/* Right Column: "How it works — 3 simple steps" Card */}
+            <Box
+              sx={{
+                flex: { xs: '1 1 100%', md: '0 0 42%', lg: '0 0 41%' },
+                maxWidth: { xs: '100%', md: '42%', lg: '41%' },
                 width: '100%',
               }}
             >
-              <Button
-                variant="contained"
-                onClick={() => navigate('/services')}
-                endIcon={<ArrowForwardIcon />}
-                sx={{
-                  bgcolor: '#2563eb',
-                  fontWeight: 800,
-                  fontSize: { xs: '0.9rem', sm: '0.95rem' },
-                  borderRadius: '24px',
-                  px: { xs: 2.8, sm: 4 },
-                  py: 1.35,
-                  textTransform: 'none',
-                  boxShadow: '0 8px 20px rgba(37,99,235,0.25)',
-                  '&:hover': {
-                    bgcolor: '#1d4ed8',
-                  },
-                }}
-              >
-                Explore Services & Packages
-              </Button>
+              <WorkflowStepsCard />
             </Box>
           </Box>
         </Container>

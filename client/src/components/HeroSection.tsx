@@ -1,12 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Typography, Button, Container, Chip,
-  Paper, Stack, Grid
+  Box, Typography, Button, Container, Chip
 } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HeroMediaSlot from '../features/hero-media/HeroMediaSlot';
+import WorkflowStepsCard from './WorkflowStepsCard';
 
 const WhatsAppIcon: React.FC<{ sx?: React.CSSProperties }> = ({ sx }) => (
   <svg
@@ -56,32 +55,41 @@ const HeroSection: React.FC = () => {
         overflow: 'hidden',
         bgcolor: '#f8fafc',
         background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 45%, #f0fdf4 100%)',
-        pt: { xs: 10, md: 14 },
-        pb: { xs: 6, md: 8 },
+        pt: { xs: 10, md: 12.5 },
+        pb: { xs: 6, md: 7 },
       }}
     >
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: 1260,
+          mx: 'auto',
+          px: { xs: 2, sm: 3, md: 4 },
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
-            alignItems: 'center',
+            alignItems: { xs: 'center', md: 'flex-start' },
             justifyContent: 'space-between',
-            gap: { xs: 4, md: 5, lg: 6 },
+            gap: { xs: 4, md: 3.5, lg: 4.5 },
             width: '100%',
           }}
         >
           {/* Left Column: Eyebrow, Main Headline, Subtitle, CTAs & Audience Pills */}
           <Box
             sx={{
-              flex: { xs: '1 1 100%', md: '0 0 55%', lg: '0 0 56%' },
-              maxWidth: { xs: '100%', md: '55%', lg: '56%' },
+              flex: { xs: '1 1 100%', md: '0 0 48.5%', lg: '0 0 48.5%' },
+              maxWidth: { xs: '100%', md: '48.5%', lg: '48.5%' },
               width: '100%',
               textAlign: { xs: 'center', md: 'left' },
             }}
           >
             {/* Pill Tag */}
-            <Box sx={{ mb: 2.2, display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' } }}>
+            <Box sx={{ mb: 1.8, display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' } }}>
               <Chip
                 icon={<AutoAwesomeIcon sx={{ fontSize: '14px !important', color: '#4f46e5 !important' }} />}
                 label="✦ THE AI SERVICES MARKETPLACE FOR EVERYDAY ENTREPRENEURS"
@@ -113,11 +121,11 @@ const HeroSection: React.FC = () => {
               sx={{
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 900,
-                fontSize: { xs: '2rem', sm: '2.4rem', md: '2.75rem', lg: '2.9rem' },
+                fontSize: { xs: '2rem', sm: '2.4rem', md: '2.6rem', lg: '2.85rem' },
                 lineHeight: 1.14,
                 letterSpacing: '-1px',
                 color: '#0f172a',
-                mb: 2,
+                mb: 1.8,
               }}
             >
               You Don't Need to
@@ -139,12 +147,12 @@ const HeroSection: React.FC = () => {
             {/* Sub-headline */}
             <Typography
               sx={{
-                fontSize: { xs: '0.92rem', md: '0.98rem' },
+                fontSize: { xs: '0.92rem', md: '0.96rem' },
                 color: '#475569',
-                mb: 2.5,
+                mb: 2.2,
                 lineHeight: 1.6,
                 fontFamily: 'Inter, sans-serif',
-                maxWidth: 540,
+                maxWidth: 550,
                 mx: { xs: 'auto', md: 0 },
               }}
             >
@@ -157,7 +165,7 @@ const HeroSection: React.FC = () => {
                 display: 'flex',
                 justifyContent: { xs: 'center', md: 'flex-start' },
                 alignItems: 'center',
-                mb: 2,
+                mb: 1.8,
               }}
             >
               <Button
@@ -173,7 +181,7 @@ const HeroSection: React.FC = () => {
                   fontWeight: 700,
                   borderRadius: '24px',
                   px: 3.2,
-                  py: 1.3,
+                  py: 1.25,
                   fontSize: '0.92rem',
                   textTransform: 'none',
                   boxShadow: '0 8px 20px rgba(34,197,94,0.25)',
@@ -193,307 +201,143 @@ const HeroSection: React.FC = () => {
               sx={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 1.2,
+                gap: 1,
                 bgcolor: '#f0fdf4',
                 border: '1px solid #bbf7d0',
                 borderRadius: '100px',
-                px: 2,
-                py: 0.8,
-                mb: 3.5,
+                px: { xs: 1.8, md: 1.6 },
+                py: 0.65,
+                mb: { xs: 2.5, md: 0 },
                 maxWidth: '100%',
               }}
             >
               <Box
                 sx={{
-                  width: 20,
-                  height: 20,
+                  width: 19,
+                  height: 19,
                   borderRadius: '50%',
                   bgcolor: '#16a34a',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '11px',
+                  fontSize: '10.5px',
                   fontWeight: 900,
                   flexShrink: 0,
                 }}
               >
                 ✔
               </Box>
-              <Typography sx={{ color: '#166534', fontSize: '0.78rem', fontWeight: 600, textAlign: 'left', lineHeight: 1.35 }}>
+              <Typography
+                sx={{
+                  color: '#166534',
+                  fontSize: { xs: '0.76rem', md: '0.73rem', lg: '0.745rem' },
+                  fontWeight: 600,
+                  textAlign: 'left',
+                  lineHeight: 1.35,
+                }}
+              >
                 <strong>100% Payment Protection:</strong> Your money stays safe with AITAG. The expert is paid only after your work is delivered to you.
               </Typography>
             </Box>
-
-            {/* Audience Tags: MADE FOR */}
-            <Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#64748b',
-                  fontWeight: 800,
-                  letterSpacing: '0.8px',
-                  display: 'block',
-                  mb: 1.2,
-                  textTransform: 'uppercase',
-                  fontSize: '0.72rem',
-                }}
-              >
-                MADE FOR:
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: { xs: 'center', md: 'flex-start' } }}>
-                {AUDIENCE_TAGS.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    onClick={scrollToPackages}
-                    sx={{
-                      cursor: 'pointer',
-                      bgcolor: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      color: '#475569',
-                      fontWeight: 600,
-                      fontSize: '0.78rem',
-                      py: 1.5,
-                      px: 1,
-                      borderRadius: '16px',
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        bgcolor: 'rgba(79,70,229,0.08)',
-                        borderColor: '#4f46e5',
-                        color: '#4f46e5',
-                        transform: 'translateY(-2px)',
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
           </Box>
 
-          {/* Right Column: "How it works — 3 simple steps" Card */}
+          {/* Right Column: Fixed inline Hero video showcase on Desktop; Floating modal + 3-step card preserved on Mobile */}
           <Box
             id="hero-workflow-card"
             sx={{
               position: 'relative',
-              flex: { xs: '1 1 100%', md: '0 0 42%', lg: '0 0 41%' },
-              maxWidth: { xs: '100%', md: '42%', lg: '41%' },
+              flex: { xs: '1 1 100%', md: '0 0 48%', lg: '0 0 48%' },
+              maxWidth: { xs: '100%', md: '48%', lg: '48%' },
               width: '100%',
             }}
           >
-            <HeroMediaSlot />
-            <Paper
-              elevation={0}
-              sx={{
-                bgcolor: '#ffffff',
-                borderRadius: '24px',
-                p: { xs: 3, sm: 3.5 },
-                border: '1px solid rgba(79,70,229,0.14)',
-                boxShadow: '0 20px 45px rgba(79,70,229,0.07)',
-                position: 'relative',
-              }}
-            >
-              {/* Card Header */}
-              <Box sx={{ mb: 2.5 }}>
-                <Typography
-                  sx={{
-                    fontWeight: 800,
-                    fontSize: '1.25rem',
-                    color: '#0f172a',
-                    fontFamily: 'Inter, sans-serif',
-                    mb: 0.5,
-                  }}
-                >
-                  How it works — 3 simple steps
-                </Typography>
-                <Typography sx={{ fontSize: '0.84rem', color: '#64748b' }}>
-                  No apps to learn. No tech skills needed.
-                </Typography>
-              </Box>
-
-              {/* 3 Step Items */}
-              <Stack spacing={1.8} sx={{ mb: 3 }}>
-                {/* Step 1 */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 1.8,
-                    p: 1.5,
-                    borderRadius: '14px',
-                    bgcolor: '#f8fafc',
-                    border: '1px solid #f1f5f9',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      bgcolor: '#3b82f6',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.9rem',
-                      flexShrink: 0,
-                      mt: 0.2,
-                    }}
-                  >
-                    1
-                  </Box>
-                  <Box>
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
-                      Tell us what you need
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mt: 0.2 }}>
-                      Fill a short form or just send a WhatsApp message
-                    </Typography>
-                  </Box>
+            <HeroMediaSlot
+              fallback={
+                <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                  <WorkflowStepsCard />
                 </Box>
+              }
+            />
+            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+              <WorkflowStepsCard />
+            </Box>
+          </Box>
+        </Box>
 
-                {/* Step 2 */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 1.8,
-                    p: 1.5,
-                    borderRadius: '14px',
-                    bgcolor: '#f8fafc',
-                    border: '1px solid #f1f5f9',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      bgcolor: '#3b82f6',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.9rem',
-                      flexShrink: 0,
-                      mt: 0.2,
-                    }}
-                  >
-                    2
-                  </Box>
-                  <Box>
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
-                      We match you with an AI expert
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mt: 0.2 }}>
-                      A verified expert picked for your type of work
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Step 3 */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 1.8,
-                    p: 1.5,
-                    borderRadius: '14px',
-                    bgcolor: '#f8fafc',
-                    border: '1px solid #f1f5f9',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      bgcolor: '#3b82f6',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.9rem',
-                      flexShrink: 0,
-                      mt: 0.2,
-                    }}
-                  >
-                    3
-                  </Box>
-                  <Box>
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
-                      Get your finished work
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mt: 0.2 }}>
-                      Quality-checked by AITAG, ready to use
-                    </Typography>
-                  </Box>
-                </Box>
-              </Stack>
-
-              {/* Bottom 3 Summary Boxes */}
-              <Grid container spacing={1.2}>
-                <Grid size={{ xs: 4 }}>
-                  <Box
-                    sx={{
-                      p: 1.2,
-                      textAlign: 'center',
-                      borderRadius: '12px',
-                      bgcolor: '#ecfdf5',
-                      border: '1px solid #d1fae5',
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.84rem', color: '#059669', mb: 0.2 }}>
-                      Lower cost
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.66rem', color: '#64748b', lineHeight: 1.2 }}>
-                      than traditional agencies
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid size={{ xs: 4 }}>
-                  <Box
-                    sx={{
-                      p: 1.2,
-                      textAlign: 'center',
-                      borderRadius: '12px',
-                      bgcolor: '#eff6ff',
-                      border: '1px solid #dbeafe',
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.84rem', color: '#2563eb', mb: 0.2 }}>
-                      Faster
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.66rem', color: '#64748b', lineHeight: 1.2 }}>
-                      delivery
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid size={{ xs: 4 }}>
-                  <Box
-                    sx={{
-                      p: 1.2,
-                      textAlign: 'center',
-                      borderRadius: '12px',
-                      bgcolor: '#faf5ff',
-                      border: '1px solid #f3e8ff',
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 800, fontSize: '0.84rem', color: '#7c3aed', mb: 0.2 }}>
-                      Safe payment
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.66rem', color: '#64748b', lineHeight: 1.2 }}>
-                      released after delivery
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Paper>
+        {/* Audience Tags: MADE FOR (Full-width single line on desktop) */}
+        <Box
+          sx={{
+            mt: { xs: 3.5, md: 4 },
+            pt: { xs: 2, md: 2.5 },
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'center', md: 'center' },
+            gap: { xs: 1.2, md: 1.5 },
+            width: '100%',
+            justifyContent: { xs: 'center', md: 'flex-start' },
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#64748b',
+              fontWeight: 800,
+              letterSpacing: '0.8px',
+              textTransform: 'uppercase',
+              fontSize: '0.72rem',
+              flexShrink: 0,
+            }}
+          >
+            MADE FOR:
+          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: { xs: 'wrap', md: 'nowrap' },
+              gap: { xs: 0.85, md: 1 },
+              alignItems: 'center',
+              justifyContent: { xs: 'center', md: 'flex-start' },
+              width: '100%',
+              overflowX: { xs: 'visible', md: 'auto' },
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
+            }}
+          >
+            {AUDIENCE_TAGS.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                size="small"
+                onClick={scrollToPackages}
+                sx={{
+                  cursor: 'pointer',
+                  bgcolor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  color: '#475569',
+                  fontWeight: 600,
+                  fontSize: { xs: '0.75rem', md: '0.73rem', lg: '0.745rem' },
+                  height: 'auto',
+                  py: 0.55,
+                  px: 0.4,
+                  borderRadius: '16px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                  '& .MuiChip-label': {
+                    px: 1.15,
+                    lineHeight: 1.3,
+                  },
+                  '&:hover': {
+                    bgcolor: 'rgba(79,70,229,0.08)',
+                    borderColor: '#4f46e5',
+                    color: '#4f46e5',
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              />
+            ))}
           </Box>
         </Box>
       </Container>

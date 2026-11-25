@@ -1,1 +1,0 @@
-import{et as e}from"./Box-lA8PO16J.js";import{x as t}from"./Tooltip-CwY6iyu5.js";var n=e(),r=t((0,n.jsx)(`path`,{d:`M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm7 7V3.5L18.5 9z`}),`InsertDriveFile`);export{r as t};
