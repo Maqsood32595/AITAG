@@ -15,7 +15,7 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import { profileApi } from '../api';
 import UniversalVideoPlayer, { parseVideoSource } from './UniversalVideoPlayer';
 import AnimatedAvatar from './AnimatedAvatar';
-import { useMobileDetect } from '../utils/useMobileDetect';
+import { useMobileDetect, useBodyScrollLock } from '../utils/useMobileDetect';
 
 export function formatExternalUrl(url?: string): string {
   if (!url) return '';
@@ -153,14 +153,16 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
   onInvite,
 }) => {
   const { isMobile, isMobileLandscape } = useMobileDetect();
+  useBodyScrollLock(Boolean(open && isMobile && talent));
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeReelIndex, setActiveReelIndex] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(true);
+  const [dragOffsetY, setDragOffsetY] = useState<number>(0);
 
   // Touch Swipe tracking
-  const touchStartY = useRef<number>(0);
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     if (open && talent) {
@@ -244,12 +246,31 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
 
   // Touch Swipe Handlers (Swipe Up -> Next Reel, Swipe Down -> Prev Reel)
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
+    if (e.touches.length === 1) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null || e.touches.length !== 1) return;
+    const rawDelta = e.touches[0].clientY - touchStartY.current;
+    // Resist drag at first/last boundary, cap damped offset cleanly
+    const isAtTopEdge = activeReelIndex === 0 && rawDelta > 0;
+    const isAtBottomEdge = activeReelIndex >= totalReels - 1 && rawDelta < 0;
+    const damping = isAtTopEdge || isAtBottomEdge ? 0.18 : 0.45;
+    const clamped = Math.max(-72, Math.min(72, rawDelta * damping));
+    setDragOffsetY(clamped);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) {
+      setDragOffsetY(0);
+      return;
+    }
     const touchEndY = e.changedTouches[0].clientY;
     const diff = touchStartY.current - touchEndY;
+    touchStartY.current = null;
+    setDragOffsetY(0);
     if (diff > 45) {
       // Swiped Up
       handleNextReel();
@@ -347,6 +368,10 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
       fullScreen={isMobile}
       maxWidth="sm"
       fullWidth
+      sx={{
+        overscrollBehavior: 'none',
+        touchAction: isMobile ? 'none' : undefined,
+      }}
       PaperProps={{
         sx: {
           width: isMobile ? '100vw' : undefined,
@@ -361,7 +386,9 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
           m: isMobile ? 0 : 2,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          overscrollBehavior: 'none',
+          touchAction: isMobile ? 'none' : undefined,
         }
       }}
     >
@@ -489,6 +516,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
           <Box
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
             sx={{
               position: 'absolute',
@@ -606,6 +634,8 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
                   gap: 0.65,
                   overflowX: 'auto',
                   pointerEvents: 'auto',
+                  touchAction: 'pan-x',
+                  overscrollBehavior: 'contain',
                   '&::-webkit-scrollbar': { display: 'none' },
                   scrollbarWidth: 'none'
                 }}
@@ -652,7 +682,12 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
           /* ── THE WORK REELS STAGE (Interactive YouTube-Shorts Style Viewport) ── */
           <Box
             onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
+            onTouchCancel={() => {
+              touchStartY.current = null;
+              setDragOffsetY(0);
+            }}
             sx={{
               position: 'relative',
               width: '100%',
@@ -662,7 +697,11 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              touchAction: 'none',
+              overscrollBehavior: 'none',
+              transform: dragOffsetY ? `translateY(${dragOffsetY}px)` : undefined,
+              transition: dragOffsetY ? 'none' : 'transform 0.2s ease-out',
             }}
           >
             {/* The Active Media Player / Viewer */}

@@ -537,6 +537,8 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         userSelect: 'none',
+        touchAction: fillHeight && isMobile ? 'none' : undefined,
+        overscrollBehavior: fillHeight ? 'none' : undefined,
         cursor: controls ? 'pointer' : 'default',
         boxShadow: isFullscreen || fillHeight ? 'none' : '0 4px 14px rgba(0,0,0,0.12)'
       }}
@@ -690,6 +692,7 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
         <Box
           onClick={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
           sx={{
             position: 'absolute',

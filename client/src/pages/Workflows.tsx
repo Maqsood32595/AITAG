@@ -28,7 +28,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import UniversalVideoPlayer, { parseVideoSource } from '../components/UniversalVideoPlayer';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api';
-import { useMobileDetect } from '../utils/useMobileDetect';
+import { useMobileDetect, useBodyScrollLock } from '../utils/useMobileDetect';
 
 export interface DeliveredWorkflow {
   id: string;
@@ -99,6 +99,7 @@ export const Workflows: React.FC = () => {
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewReelIndex, setPreviewReelIndex] = useState(0);
   const [previewMuted, setPreviewMuted] = useState(true);
+  useBodyScrollLock(Boolean(previewModalOpen && isMobile));
 
   // Upload feedback
   const [uploading, setUploading] = useState(false);
@@ -797,6 +798,10 @@ export const Workflows: React.FC = () => {
           fullScreen={isMobile}
           maxWidth="sm"
           fullWidth
+          sx={{
+            overscrollBehavior: 'none',
+            touchAction: isMobile ? 'none' : undefined,
+          }}
           PaperProps={{
             sx: {
               width: isMobile ? '100vw' : undefined,
@@ -810,7 +815,9 @@ export const Workflows: React.FC = () => {
               m: isMobile ? 0 : 2,
               display: 'flex',
               flexDirection: 'column',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              overscrollBehavior: 'none',
+              touchAction: isMobile ? 'none' : undefined,
             }
           }}
         >
@@ -853,7 +860,9 @@ export const Workflows: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                touchAction: 'none',
+                overscrollBehavior: 'none',
               }}
             >
               <UniversalVideoPlayer
