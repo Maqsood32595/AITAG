@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Button, Container, Chip,
@@ -22,7 +22,7 @@ const WhatsAppIcon: React.FC<{ sx?: React.CSSProperties }> = ({ sx }) => (
 const AUDIENCE_TAGS = [
   'Home Entrepreneurs',
   'Local Shops & Boutiques',
-  'Bakeries & Cafés',
+  'Bakeries & CafÃ©s',
   'Independent Professionals',
   'Early-Stage Founders',
   'Small and Medium Businesses',
@@ -83,7 +83,7 @@ const HeroSection: React.FC = () => {
             <Box sx={{ mb: 2.2, display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' } }}>
               <Chip
                 icon={<AutoAwesomeIcon sx={{ fontSize: '14px !important', color: '#4f46e5 !important' }} />}
-                label="✦ THE AI SERVICES MARKETPLACE FOR EVERYDAY ENTREPRENEURS"
+                label="âœ¦ THE AI SERVICES MARKETPLACE FOR EVERYDAY ENTREPRENEURS"
                 sx={{
                   bgcolor: 'rgba(79,70,229,0.07)',
                   color: '#4f46e5',
@@ -147,7 +147,7 @@ const HeroSection: React.FC = () => {
                 mx: { xs: 'auto', md: 0 },
               }}
             >
-              AITAG is an AI services marketplace. Tell us what you need — a logo, social media posts, a catalogue or a website. We tag you to a verified AI expert who delivers it using advanced AI tools: better quality, faster and at a lower cost. Starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>₹499</strong>.
+              AITAG is an AI services marketplace. Tell us what you need â€” a logo, social media posts, a catalogue or a website. We tag you to a verified AI expert who delivers it using advanced AI tools: better quality, faster and at a lower cost. Starting at just <strong style={{ color: '#0f172a', fontWeight: 800 }}>â‚¹499</strong>.
             </Typography>
 
             {/* Single WhatsApp Action Button */}
@@ -162,7 +162,7 @@ const HeroSection: React.FC = () => {
               <Button
                 variant="contained"
                 size="large"
-                href="https://wa.me/919886031643?text=Hi%20AITAG%2C%20I%20want%20to%20discuss%20an%20AI%20service%20for%20my%20business"
+                href="https://wa.me/918431634113?text=Hi%20AITAG%2C%20I%20want%20to%20discuss%20an%20AI%20service%20for%20my%20business"
                 target="_blank"
                 rel="noopener noreferrer"
                 startIcon={<WhatsAppIcon />}
@@ -217,7 +217,7 @@ const HeroSection: React.FC = () => {
                   flexShrink: 0,
                 }}
               >
-                ✓
+                âœ“
               </Box>
               <Typography sx={{ color: '#166534', fontSize: '0.78rem', fontWeight: 600, textAlign: 'left', lineHeight: 1.35 }}>
                 <strong>100% Payment Protection:</strong> Your money stays safe with AITAG. The expert is paid only after your work is delivered to you.
@@ -272,7 +272,7 @@ const HeroSection: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Right Column: "How it works — 3 simple steps" Card */}
+          {/* Right Column: "How it works â€” 3 simple steps" Card */}
           <Box
             id="hero-workflow-card"
             sx={{
@@ -303,7 +303,7 @@ const HeroSection: React.FC = () => {
                     mb: 0.5,
                   }}
                 >
-                  How it works — 3 simple steps
+                  How it works â€” 3 simple steps
                 </Typography>
                 <Typography sx={{ fontSize: '0.84rem', color: '#64748b' }}>
                   No apps to learn. No tech skills needed.
@@ -499,3 +499,4 @@ const HeroSection: React.FC = () => {
 };
 
 export default HeroSection;
+

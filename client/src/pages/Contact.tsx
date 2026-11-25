@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -50,11 +50,11 @@ const WhatsAppIcon: React.FC<{ sx?: React.CSSProperties }> = ({ sx }) => (
 );
 
 const SERVICE_OPTIONS = [
-  '✦ General Inquiry & Guidance',
-  'AI Product Photo Makeover (from ₹999)',
-  'Marketing Video & Promo Reels (from ₹1,499)',
-  'Fast Business Website & Landing Page (from ₹1,999)',
-  'Logo Design & Business Branding Kit (from ₹499)',
+  'âœ¦ General Inquiry & Guidance',
+  'AI Product Photo Makeover (from â‚¹999)',
+  'Marketing Video & Promo Reels (from â‚¹1,499)',
+  'Fast Business Website & Landing Page (from â‚¹1,999)',
+  'Logo Design & Business Branding Kit (from â‚¹499)',
   'Custom Enterprise AI Deliverable',
 ];
 
@@ -63,7 +63,7 @@ export const Contact: React.FC = () => {
     name: '',
     email: '',
     phone: '',
-    serviceInterest: '✦ General Inquiry & Guidance',
+    serviceInterest: 'âœ¦ General Inquiry & Guidance',
     subject: '',
     message: '',
     website_trap: '', // Anti-spam bot honeypot
@@ -137,7 +137,7 @@ export const Contact: React.FC = () => {
       name: '',
       email: '',
       phone: '',
-      serviceInterest: '✦ General Inquiry & Guidance',
+      serviceInterest: 'âœ¦ General Inquiry & Guidance',
       subject: '',
       message: '',
       website_trap: '',
@@ -165,7 +165,7 @@ export const Contact: React.FC = () => {
           <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
             <Chip
               icon={<AutoAwesomeIcon sx={{ fontSize: '14px !important', color: '#2563eb !important' }} />}
-              label="✦ DEDICATED SUPPORT & CLIENT INQUIRIES"
+              label="âœ¦ DEDICATED SUPPORT & CLIENT INQUIRIES"
               sx={{
                 bgcolor: 'rgba(37,99,235,0.07)',
                 color: '#2563eb',
@@ -287,7 +287,7 @@ export const Contact: React.FC = () => {
                       contact@aitag.in
                     </Link>{' '}
                     or message us on{' '}
-                    <Link href="https://wa.me/919886031643?text=Hi%20AITAG" target="_blank" rel="noopener noreferrer" sx={{ color: '#16a34a', fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                    <Link href="https://wa.me/918431634113?text=Hi%20AITAG" target="_blank" rel="noopener noreferrer" sx={{ color: '#16a34a', fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                       WhatsApp
                     </Link>.
                   </Typography>
@@ -762,7 +762,7 @@ export const Contact: React.FC = () => {
                       </Typography>
                       <Button
                         component="a"
-                        href="https://wa.me/919886031643?text=Hi%20AITAG%2C%20I%20have%20an%20inquiry%20regarding%20your%20services"
+                        href="https://wa.me/918431634113?text=Hi%20AITAG%2C%20I%20have%20an%20inquiry%20regarding%20your%20services"
                         target="_blank"
                         rel="noopener noreferrer"
                         variant="contained"
@@ -924,7 +924,7 @@ export const Contact: React.FC = () => {
                 <Stack spacing={1.5}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#475569', fontSize: '0.82rem' }}>
                     <AccessTimeIcon sx={{ fontSize: 18, color: '#2563eb' }} />
-                    <span>Monday – Saturday: 9:00 AM – 7:00 PM IST</span>
+                    <span>Monday â€“ Saturday: 9:00 AM â€“ 7:00 PM IST</span>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#475569', fontSize: '0.82rem' }}>
                     <LocationOnIcon sx={{ fontSize: 18, color: '#2563eb' }} />
@@ -999,7 +999,7 @@ export const Contact: React.FC = () => {
                   </AccordionSummary>
                   <AccordionDetails sx={{ pt: 0, pb: 2 }}>
                     <Typography sx={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
-                      None whatsoever. All starter packages starting from ₹499 are flat-rate with zero hidden platform surprise fees.
+                      None whatsoever. All starter packages starting from â‚¹499 are flat-rate with zero hidden platform surprise fees.
                     </Typography>
                   </AccordionDetails>
                 </Accordion>
@@ -1013,3 +1013,4 @@ export const Contact: React.FC = () => {
 };
 
 export default Contact;
+
