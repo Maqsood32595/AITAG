@@ -924,7 +924,7 @@ export const Contact: React.FC = () => {
                 <Stack spacing={1.5}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#475569', fontSize: '0.82rem' }}>
                     <AccessTimeIcon sx={{ fontSize: 18, color: '#2563eb' }} />
-                    <span>Monday ”“ Saturday: 9:00 AM ”“ 7:00 PM IST</span>
+                    <span>Monday — Saturday: 9:00 AM — 7:00 PM IST</span>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: '#475569', fontSize: '0.82rem' }}>
                     <LocationOnIcon sx={{ fontSize: 18, color: '#2563eb' }} />

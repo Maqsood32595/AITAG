@@ -1,0 +1,7 @@
+{
+  "id": "aitag-hero-media",
+  "name": "AITAG Hero Floating Media & Viewport Experience Engine",
+  "version": "1.0.0",
+  "basePath": "/api/hero-media",
+  "enabled": true
+}

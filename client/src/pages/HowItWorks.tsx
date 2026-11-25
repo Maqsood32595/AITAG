@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box, Container, Typography, Grid, Paper, Stack, Button,
   Chip, Accordion, AccordionSummary, AccordionDetails
@@ -110,7 +110,7 @@ export const HowItWorks: React.FC = () => {
         <Container maxWidth="lg">
           <Box sx={{ textAlign: 'center', maxWidth: 840, mx: 'auto' }}>
             <Chip
-              label="âœ¦ STEP-BY-STEP WORKFLOW GUIDE"
+              label="✦ STEP-BY-STEP WORKFLOW GUIDE"
               sx={{
                 bgcolor: 'rgba(79,70,229,0.08)',
                 color: '#4f46e5',
@@ -272,7 +272,7 @@ export const HowItWorks: React.FC = () => {
                 }}
               />
               <Chip
-                label="ðŸ–¥ï¸ Step-by-Step UI Walkthrough (5 Steps)"
+                label="🖥️ Step-by-Step UI Walkthrough (5 Steps)"
                 clickable
                 onClick={() => setActiveVideo('walkthrough')}
                 sx={{

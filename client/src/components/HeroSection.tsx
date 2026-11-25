@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Button, Container, Chip,
@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import HeroMediaSlot from '../features/hero-media/HeroMediaSlot';
 
 const WhatsAppIcon: React.FC<{ sx?: React.CSSProperties }> = ({ sx }) => (
   <svg
@@ -83,7 +84,7 @@ const HeroSection: React.FC = () => {
             <Box sx={{ mb: 2.2, display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' } }}>
               <Chip
                 icon={<AutoAwesomeIcon sx={{ fontSize: '14px !important', color: '#4f46e5 !important' }} />}
-                label="âœ¦ THE AI SERVICES MARKETPLACE FOR EVERYDAY ENTREPRENEURS"
+                label="✦ THE AI SERVICES MARKETPLACE FOR EVERYDAY ENTREPRENEURS"
                 sx={{
                   bgcolor: 'rgba(79,70,229,0.07)',
                   color: '#4f46e5',
@@ -217,7 +218,7 @@ const HeroSection: React.FC = () => {
                   flexShrink: 0,
                 }}
               >
-                âœ“
+                ✔
               </Box>
               <Typography sx={{ color: '#166534', fontSize: '0.78rem', fontWeight: 600, textAlign: 'left', lineHeight: 1.35 }}>
                 <strong>100% Payment Protection:</strong> Your money stays safe with AITAG. The expert is paid only after your work is delivered to you.
@@ -276,11 +277,13 @@ const HeroSection: React.FC = () => {
           <Box
             id="hero-workflow-card"
             sx={{
+              position: 'relative',
               flex: { xs: '1 1 100%', md: '0 0 42%', lg: '0 0 41%' },
               maxWidth: { xs: '100%', md: '42%', lg: '41%' },
               width: '100%',
             }}
           >
+            <HeroMediaSlot />
             <Paper
               elevation={0}
               sx={{
