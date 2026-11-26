@@ -110,6 +110,17 @@ router.post('/workflows/attach-video', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/profile/directory — Public verified specialist showcase directory (zero PII / emails)
+router.get('/directory', async (req, res) => {
+  try {
+    const authService = require('../auth/service');
+    const experts = await authService.getPublicFreelancerDirectory();
+    res.json({ success: true, experts });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // GET /api/profile/:userId — Get public showcase profile for any specialist
 router.get('/:userId', async (req, res) => {
   try {

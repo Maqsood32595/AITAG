@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const authService = require('./service');
+const { requireRole } = require('../../../domain-security/grandchildren/bola-guard');
 
 // Middleware to extract + verify JWT
 const authMiddleware = (req, res, next) => {
@@ -125,8 +126,8 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-// GET /api/auth/users — list all registered platform users for talent directory
-router.get('/users', async (req, res) => {
+// GET /api/auth/users — Admin-only directory of registered platform accounts (PII protected)
+router.get('/users', authMiddleware, requireRole(['admin']), async (req, res) => {
   try {
     const users = await authService.getAllUsers();
     res.json(users);

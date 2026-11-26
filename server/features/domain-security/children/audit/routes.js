@@ -18,6 +18,8 @@ const { logScrubberMiddleware, scrubObject } = require('../../grandchildren/log-
 const { validateUploadedFile, secureMulterFilter, ALLOWED_MIME_TYPES, ALLOWED_EXTENSIONS, BANNED_EXTENSIONS } = require('../../grandchildren/upload-guard');
 const { verifyHmacSignature, validatePasswordStrength, verifyJwtEntropy } = require('../../grandchildren/crypto-guard');
 const { authenticateWsConnection, joinRoom, leaveRoom, broadcastToRoom } = require('../../grandchildren/websocket-guard');
+const { isAllowedOrigin, createCorsOptions } = require('../../grandchildren/cors-guard');
+const { validateRuntimeSecurity, assertSecureRuntime } = require('../../grandchildren/boot-guard');
 
 // Export all grandchild guards on the router for clean cross-slice importing
 router.securityHeaders = headersGuard;
@@ -47,6 +49,10 @@ router.authenticateWsConnection = authenticateWsConnection;
 router.joinRoom = joinRoom;
 router.leaveRoom = leaveRoom;
 router.broadcastToRoom = broadcastToRoom;
+router.isAllowedOrigin = isAllowedOrigin;
+router.createCorsOptions = createCorsOptions;
+router.validateRuntimeSecurity = validateRuntimeSecurity;
+router.assertSecureRuntime = assertSecureRuntime;
 
 // GET /api/security/audit — 20-Point Security Matrix Real-Time Audit
 router.get('/audit', (req, res) => {

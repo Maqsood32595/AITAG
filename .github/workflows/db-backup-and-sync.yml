@@ -1,0 +1,127 @@
+name: AITAG Database Backup & Weekly Prod-to-Dev Sync
+
+on:
+  schedule:
+    # Daily Encrypted Production Backup at 20:30 UTC (02:00 AM IST)
+    - cron: '30 20 * * *'
+    # Weekly Production -> Dev Standby Sync every Sunday at 21:30 UTC (03:00 AM IST)
+    - cron: '30 21 * * 6'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Operation mode to execute'
+        required: true
+        default: 'backup-only'
+        type: choice
+        options:
+          - backup-only
+          - sync-prod-to-dev
+          - both
+
+permissions:
+  contents: read
+
+jobs:
+  encrypted-backup:
+    name: Daily Encrypted Production DB Backup
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event.inputs.mode == 'backup-only' ||
+      github.event.inputs.mode == 'both'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Production Dependencies
+        run: npm ci --omit=dev
+
+      - name: Run Encrypted JSON/GZIP Snapshot & Upload to GCS
+        env:
+          BACKUP_TARGET: production
+          PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PROD_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+          GCS_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          GCS_BACKUP_BUCKET_NAME: aitag-db-backups-us
+        run: |
+          if [ -z "$PROD_SUPABASE_URL" ] || [ -z "$PROD_SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "⚠️ Missing PROD_SUPABASE_URL or PROD_SUPABASE_SERVICE_ROLE_KEY secrets. See D:\\Hayat\\Security\\AITAG_SECURITY_AND_BACKUP_RUNBOOK.md."
+            exit 0
+          fi
+          node server/scripts/backup_database.js
+
+      - name: Verify Backup Archive Integrity (Dry-Run Decrypt Check)
+        if: env.BACKUP_ENCRYPTION_KEY != ''
+        env:
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          if ls server/backups/database/aitag_backup_* 1> /dev/null 2>&1; then
+            node server/scripts/restore_database.js --dry-run
+          fi
+
+      - name: Authenticate to Google Cloud (Optional Full pg_dump SQL Schema Backup)
+        if: ${{ secrets.GCP_SA_KEY != '' && secrets.PROD_DATABASE_URL != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup Cloud SDK (Optional Full pg_dump)
+        if: ${{ secrets.GCP_SA_KEY != '' && secrets.PROD_DATABASE_URL != '' }}
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Full Encrypted Postgres Schema + RLS + Data Dump (pg_dump)
+        if: ${{ secrets.GCP_SA_KEY != '' && secrets.PROD_DATABASE_URL != '' && secrets.BACKUP_ENCRYPTION_KEY != '' }}
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          STAMP=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
+          OUT_SQL="aitag_pgdump_${STAMP}.sql.gz"
+          pg_dump "$PROD_DATABASE_URL" --clean --if-exists --no-owner --no-privileges | gzip -9 > "$OUT_SQL"
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 -in "$OUT_SQL" -out "${OUT_SQL}.enc" -pass env:BACKUP_ENCRYPTION_KEY
+          gsutil cp "${OUT_SQL}.enc" "gs://aitag-db-backups-us/backups/database/${OUT_SQL}.enc"
+          rm -f "$OUT_SQL" "${OUT_SQL}.enc"
+
+  weekly-prod-to-dev-sync:
+    name: Weekly Sanitized Prod-to-Dev Database Sync
+    needs: encrypted-backup
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '30 21 * * 6') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.mode == 'sync-prod-to-dev' || github.event.inputs.mode == 'both'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Production Dependencies
+        run: npm ci --omit=dev
+
+      - name: Sync Production to Dev Standby (With PII Anonymization)
+        env:
+          PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PROD_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+          DEV_SUPABASE_URL: ${{ secrets.DEV_SUPABASE_URL }}
+          DEV_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DEV_SUPABASE_SERVICE_ROLE_KEY }}
+          SANITIZE_DEV_PII: 'true'
+        run: |
+          if [ -z "$DEV_SUPABASE_URL" ] || [ -z "$DEV_SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "⚠️ Missing DEV_SUPABASE_URL or DEV_SUPABASE_SERVICE_ROLE_KEY secrets."
+            exit 0
+          fi
+          node server/scripts/sync_prod_to_dev.js

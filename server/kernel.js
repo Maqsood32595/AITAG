@@ -55,14 +55,28 @@ class FractalKernel {
     try {
       const securityGuard = this._resolveSecurityGuard();
       if (securityGuard) {
+        if (securityGuard.validateRuntimeSecurity) {
+          const bootReport = securityGuard.validateRuntimeSecurity(process.env);
+          bootReport.warnings.forEach((w) => console.warn(`⚠️ [BootGuard] ${w}`));
+          if (!bootReport.secure) {
+            if (process.env.STRICT_SECURITY_BOOT === 'true') {
+              throw new Error(`Critical production security failure: ${bootReport.errors.join('; ')}`);
+            }
+            bootReport.errors.forEach((err) => console.error(`🚨 [BootGuard] CRITICAL: ${err}`));
+          }
+        }
         if (securityGuard.securityHeaders) app.use(securityGuard.securityHeaders);
         if (securityGuard.xssSanitizer) app.use(securityGuard.xssSanitizer);
         if (securityGuard.logScrubberMiddleware) app.use(securityGuard.logScrubberMiddleware);
-        if (securityGuard.authLimiter) app.use('/api/auth', securityGuard.authLimiter);
+        if (securityGuard.authLimiter) {
+          app.use('/api/auth', securityGuard.authLimiter);
+          app.use('/api/oauth', securityGuard.authLimiter);
+        }
         if (securityGuard.apiLimiter) app.use('/api', securityGuard.apiLimiter);
-        console.log('🛡️ Fractal Kernel Security Guard active (OWASP Headers, Rate Limiting, XSS & Log Scrubber).');
+        console.log('🛡️ Fractal Kernel Security Guard active (OWASP Headers, Rate Limiting, XSS, CORS, Boot & Log Scrubber).');
       }
     } catch (e) {
+      if (process.env.STRICT_SECURITY_BOOT === 'true') throw e;
       console.warn('⚠️ Security Guard initialization fallback:', e.message);
     }
 

@@ -130,7 +130,7 @@ const PROFILES_CACHE = new Map();
 class ProfileService {
   constructor() {
     this.storage = null;
-    this.bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || process.env.GCS_BUCKET_NAME || 'shortshub_video_storage';
+    this.bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || process.env.GCS_BUCKET_NAME || 'aitag-media-prod-mumbai';
     this.initGCS();
   }
 

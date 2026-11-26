@@ -9,7 +9,23 @@ const jwt = require('jsonwebtoken');
 const supabase = require('../../../../supabase');
 const registrationNotifier = require('./registration-notifier');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'aitag-fractal-kernel-jwt-secret-2026';
+const { verifyJwtEntropy } = require('../../../domain-security/grandchildren/crypto-guard');
+
+function resolveJwtSecret() {
+  const configured = process.env.JWT_SECRET;
+  if (verifyJwtEntropy(configured) || (process.env.NODE_ENV !== 'production' && configured)) {
+    return configured;
+  }
+  if (process.env.NODE_ENV === 'production' && process.env.PIET_RUN !== 'true') {
+    // Never sign production tokens with the well-known default string; generate an ephemeral high-entropy runtime key
+    const ephemeralSecret = crypto.randomBytes(48).toString('hex');
+    console.error('🚨 [AuthService] Missing or weak JWT_SECRET in production — generated per-instance ephemeral secret. Set a 32+ char JWT_SECRET in Cloud Run/Render!');
+    return ephemeralSecret;
+  }
+  return configured || 'aitag-dev-only-jwt-secret-local-2026';
+}
+
+const JWT_SECRET = resolveJwtSecret();
 const JWT_EXPIRES = '7d';
 
 // Ephemeral single-use password reset tokens (hashedToken -> { email, expiresAt })
@@ -250,6 +266,63 @@ class AuthService {
     return SEED_USERS
       .filter(u => !isTest(u))
       .map(({ password_hash, ...safeUser }) => safeUser);
+  }
+
+  /**
+   * Public verified freelancer directory with ZERO PII (no emails, no client/admin accounts).
+   */
+  async getPublicFreelancerDirectory() {
+    const users = await this.getAllUsers();
+    const filtered = users.filter((u) => {
+      if ((u.role || '').toLowerCase().trim() !== 'freelancer') return false;
+      const cleanEmail = (u.email || '').toLowerCase().trim();
+      const cleanName = (u.name || '').toLowerCase().trim();
+      if (
+        cleanEmail.includes('maqsood') ||
+        cleanEmail.includes('maxmaqs') ||
+        cleanName === 'maqs' ||
+        cleanName.includes('maqsood') ||
+        cleanEmail.includes('test') ||
+        cleanName.includes('test')
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    const uniqueById = new Map();
+    for (const u of filtered) {
+      if (u.id && !uniqueById.has(u.id)) {
+        uniqueById.set(u.id, {
+          id: u.id,
+          name: u.name || 'Verified Specialist',
+          role: 'freelancer',
+          photo_url: u.photo_url || '',
+          created_at: u.created_at || null
+        });
+      }
+    }
+    return Array.from(uniqueById.values());
+  }
+
+  async resolveFreelancerById(userId) {
+    if (!userId) return null;
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data, error } = await supabase
+          .from('aitag_users')
+          .select('id, name, email, role')
+          .eq('id', userId)
+          .single();
+        if (!error && data && data.role === 'freelancer') return data;
+      }
+    } catch {}
+
+    const seed = SEED_USERS.find((u) => u.id === userId && u.role === 'freelancer');
+    if (seed) {
+      return { id: seed.id, name: seed.name, email: seed.email, role: seed.role };
+    }
+    return null;
   }
 
   deleteUserFromMemory(userId, email) {

@@ -12,7 +12,7 @@ function requireAuth(req, res, next) {
   }
 
   try {
-    const authService = require('../../aitag-auth/service');
+    const authService = require('../../domain-identity/children/auth/service');
     req.user = authService.verifyToken(authHeader.split(' ')[1]);
     next();
   } catch {

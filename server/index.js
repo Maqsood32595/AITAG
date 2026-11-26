@@ -34,29 +34,14 @@ const kernel = require('./kernel');
 
 const PORT = process.env.PORT || 8000;
 const app = express();
+app.set('trust proxy', 1); // Accurate client IP resolution behind Cloud Run / Render proxies
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 app.get('/healthz', (req, res) => res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString(), env: process.env.NODE_ENV || 'production' }));
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (
-      origin.endsWith('.onrender.com') ||
-      origin.endsWith('.pages.dev') ||
-      origin.includes('localhost') ||
-      origin.endsWith('.run.app') ||
-      origin.endsWith('shortshub.app') ||
-      origin.endsWith('aitag.in') ||
-      origin === 'https://shortshub.app'
-    ) {
-      return callback(null, true);
-    }
-    return callback(null, true);
-  },
-  credentials: true
-}));
+const securityGuardRoutes = require('./features/aitag-security-guard/routes');
+app.use(cors(securityGuardRoutes.createCorsOptions ? securityGuardRoutes.createCorsOptions() : { origin: false, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -69,39 +54,41 @@ app.use((req, res, next) => {
 kernel.init(app);
 
 // -------------------------------------------------------------
-// Automated Database Backup Scheduler (Runs daily & persists to GCS)
+// Automated Database Backup Scheduler (Production runtime safety guard + GitHub Actions handles scheduled cron)
 // -------------------------------------------------------------
-const { runDatabaseBackup } = require('./scripts/backup_database');
+if (process.env.NODE_ENV === 'production' && process.env.PIET_RUN !== 'true') {
+  const { runDatabaseBackup } = require('./scripts/backup_database');
 
-// Non-blocking daily backup interval (every 24 hours)
-const BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
-const backupTimer = setInterval(() => {
-  runDatabaseBackup({ silent: true }).catch(err => {
-    console.warn('⚠️ [AutomatedBackup] Daily backup notice:', err.message);
-  });
-}, BACKUP_INTERVAL_MS);
-if (backupTimer.unref) backupTimer.unref();
-
-// Initial background snapshot after startup (delayed by 60s so boot is instantaneous)
-const initialBackupTimeout = setTimeout(() => {
-  const backupDir = path.join(__dirname, 'backups/database');
-  let recentBackupExists = false;
-  try {
-    if (fs.existsSync(backupDir)) {
-      const files = fs.readdirSync(backupDir).filter(f => f.startsWith('aitag_backup_') && f.endsWith('.json'));
-      const now = Date.now();
-      recentBackupExists = files.some(f => (now - fs.statSync(path.join(backupDir, f)).mtimeMs) < 12 * 60 * 60 * 1000);
-    }
-  } catch (e) {}
-
-  if (!recentBackupExists) {
-    console.log('📦 [AutomatedBackup] Taking scheduled unified database snapshot...');
+  const BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
+  const backupTimer = setInterval(() => {
     runDatabaseBackup({ silent: true }).catch(err => {
-      console.warn('⚠️ [AutomatedBackup] Initial snapshot notice:', err.message);
+      console.warn('⚠️ [AutomatedBackup] Daily backup notice:', err.message);
     });
-  }
-}, 60 * 1000);
-if (initialBackupTimeout.unref) initialBackupTimeout.unref();
+  }, BACKUP_INTERVAL_MS);
+  if (backupTimer.unref) backupTimer.unref();
+
+  const initialBackupTimeout = setTimeout(() => {
+    const backupDir = path.join(__dirname, 'backups/database');
+    let recentBackupExists = false;
+    try {
+      if (fs.existsSync(backupDir)) {
+        const files = fs.readdirSync(backupDir).filter(
+          (f) => f.startsWith('aitag_backup_') && (f.endsWith('.json.gz.enc') || f.endsWith('.json.gz') || f.endsWith('.json'))
+        );
+        const now = Date.now();
+        recentBackupExists = files.some(f => (now - fs.statSync(path.join(backupDir, f)).mtimeMs) < 12 * 60 * 60 * 1000);
+      }
+    } catch {}
+
+    if (!recentBackupExists) {
+      console.log('📦 [AutomatedBackup] Taking scheduled unified database snapshot...');
+      runDatabaseBackup({ silent: true }).catch(err => {
+        console.warn('⚠️ [AutomatedBackup] Initial snapshot notice:', err.message);
+      });
+    }
+  }, 60 * 1000);
+  if (initialBackupTimeout.unref) initialBackupTimeout.unref();
+}
 
 // -------------------------------------------------------------
 // Global Static Pipeline for Modern AITAG React Frontend (SPA)

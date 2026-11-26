@@ -15,6 +15,7 @@ interface InviteModalProps {
   open: boolean;
   onClose: () => void;
   talent: {
+    id?: string;
     name: string;
     email?: string;
     role: string;
@@ -61,8 +62,8 @@ const InviteModal: React.FC<InviteModalProps> = ({ open, onClose, talent }) => {
       setError('Please select a task to invite this specialist.');
       return;
     }
-    if (!talent?.email) {
-      setError('Selected talent does not have an active registered email.');
+    if (!talent?.email && !talent?.id) {
+      setError('Selected talent does not have an active registered profile.');
       return;
     }
 
@@ -72,7 +73,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ open, onClose, talent }) => {
     try {
       await invitationsApi.send({
         taskId: selectedTaskId,
-        freelancerEmail: talent.email,
+        ...(talent.email ? { freelancerEmail: talent.email } : { freelancerId: talent.id }),
         message,
       });
 

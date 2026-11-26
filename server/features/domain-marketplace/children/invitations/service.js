@@ -9,9 +9,18 @@ const supabase = require('../../../../supabase');
 const IN_MEMORY_INVITES = new Map();
 
 class InvitationsService {
-  async sendInvitation({ taskId, clientEmail, freelancerEmail, message }) {
-    if (!taskId || !clientEmail || !freelancerEmail) {
-      throw new Error('taskId, clientEmail, and freelancerEmail are required');
+  async sendInvitation({ taskId, clientEmail, freelancerEmail, freelancerId, message }) {
+    let resolvedEmail = freelancerEmail;
+    if (!resolvedEmail && freelancerId) {
+      const authService = require('../../../domain-identity/children/auth/service');
+      const expert = await authService.resolveFreelancerById(freelancerId);
+      if (expert?.email) {
+        resolvedEmail = expert.email;
+      }
+    }
+
+    if (!taskId || !clientEmail || !resolvedEmail) {
+      throw new Error('taskId, clientEmail, and freelancer target are required');
     }
 
     // Fetch task details from Supabase or fallback
@@ -39,7 +48,7 @@ class InvitationsService {
       task_title: taskTitle,
       task_budget: taskBudget,
       client_email: clientEmail,
-      freelancer_email: freelancerEmail,
+      freelancer_email: resolvedEmail,
       message: message || `Hi! I would like to invite you to bid on my task: "${taskTitle}".`,
       status: 'pending',
       created_at: new Date().toISOString()

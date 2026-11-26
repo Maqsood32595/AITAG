@@ -1,16 +1,10 @@
 /**
- * AITAG Supabase Database Restore Engine
- * 
- * Capabilities:
- * 1. Inspects local or GCS database backups (summary, record counts, metadata).
- * 2. Downloads and extracts latest snapshot from Google Cloud Storage if local not specified.
- * 3. Supports safe dry-run mode by default (`--dry-run`).
- * 4. Upserts records back into Supabase tables on explicit confirmation (`--execute`).
- * 
+ * AITAG Supabase Database Restore Engine (Supports AES-256-GCM Encrypted Backups)
+ *
  * Usage:
  *   node server/scripts/restore_database.js --inspect
  *   node server/scripts/restore_database.js --dry-run
- *   node server/scripts/restore_database.js --file server/backups/database/aitag_backup_XYZ.json --inspect
+ *   node server/scripts/restore_database.js --file server/backups/database/aitag_backup_XYZ.json.gz.enc --inspect
  *   node server/scripts/restore_database.js --execute --confirm=RESTORE_NOW
  */
 
@@ -18,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const { Storage } = require('@google-cloud/storage');
+const { decryptBuffer } = require('../features/domain-security/grandchildren/crypto-guard');
 
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const devEnv = path.resolve(__dirname, '../../.env.development');
@@ -35,7 +30,7 @@ function initGCS() {
       try {
         const decoded = Buffer.from(process.env.GCS_KEY_BASE64, 'base64').toString('utf8');
         credentials = JSON.parse(decoded);
-      } catch (e) {}
+      } catch {}
     }
     if (!credentials) {
       const candidates = [
@@ -51,11 +46,27 @@ function initGCS() {
     }
     const projectId = credentials?.project_id || 'corded-cable-460921-u1';
     const storage = credentials ? new Storage({ projectId, credentials }) : new Storage({ projectId });
-    const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || 'shortshub_video_storage';
+    const bucketName = process.env.GCS_BACKUP_BUCKET_NAME || 'aitag-db-backups-us';
     return { storage, bucket: storage.bucket(bucketName), bucketName };
-  } catch (err) {
+  } catch {
     return { storage: null, bucket: null, bucketName: null };
   }
+}
+
+function decodeArchiveBuffer(rawBuffer, filename) {
+  let buf = rawBuffer;
+  if (filename.endsWith('.enc')) {
+    const key = process.env.BACKUP_ENCRYPTION_KEY;
+    if (!key) {
+      throw new Error('Encrypted backup encountered. Set BACKUP_ENCRYPTION_KEY in your environment to decrypt.');
+    }
+    buf = decryptBuffer(buf, key);
+  }
+  if (filename.endsWith('.gz') || filename.endsWith('.gz.enc')) {
+    const decompressed = zlib.gunzipSync(buf).toString('utf8');
+    return JSON.parse(decompressed);
+  }
+  return JSON.parse(buf.toString('utf8'));
 }
 
 async function loadBackupPayload(filePath) {
@@ -64,36 +75,30 @@ async function loadBackupPayload(filePath) {
     if (!fs.existsSync(resolved)) {
       throw new Error(`Specified backup file not found: ${resolved}`);
     }
-    if (resolved.endsWith('.gz')) {
-      const buf = fs.readFileSync(resolved);
-      const decompressed = zlib.gunzipSync(buf).toString('utf8');
-      return JSON.parse(decompressed);
-    }
-    return JSON.parse(fs.readFileSync(resolved, 'utf8'));
+    return decodeArchiveBuffer(fs.readFileSync(resolved), resolved);
   }
 
-  // Find latest local backup
   const backupDir = path.resolve(__dirname, '../backups/database');
   if (fs.existsSync(backupDir)) {
-    const files = fs.readdirSync(backupDir).filter(f => f.startsWith('aitag_backup_') && f.endsWith('.json'));
+    const files = fs
+      .readdirSync(backupDir)
+      .filter((f) => f.startsWith('aitag_backup_') && (f.endsWith('.json.gz.enc') || f.endsWith('.json.gz') || f.endsWith('.json')));
     if (files.length > 0) {
       files.sort().reverse();
       const latestLocal = path.join(backupDir, files[0]);
       console.log(`📁 Using latest local backup: ${latestLocal}`);
-      return JSON.parse(fs.readFileSync(latestLocal, 'utf8'));
+      return decodeArchiveBuffer(fs.readFileSync(latestLocal), latestLocal);
     }
   }
 
-  // Fetch from GCS
   const { bucket, bucketName } = initGCS();
   if (bucket) {
     console.log(`☁️ Fetching latest backup manifest from gs://${bucketName}/backups/database/latest.json`);
     const [manifestContent] = await bucket.file('backups/database/latest.json').download();
     const manifest = JSON.parse(manifestContent.toString('utf8'));
-    console.log(`☁️ Downloading ${manifest.latest_backup}...`);
-    const [gzContent] = await bucket.file(`backups/database/${manifest.latest_backup}`).download();
-    const decompressed = zlib.gunzipSync(gzContent).toString('utf8');
-    return JSON.parse(decompressed);
+    console.log(`☁️ Downloading ${manifest.latest_backup} (encrypted: ${Boolean(manifest.encrypted)})...`);
+    const [archiveContent] = await bucket.file(`backups/database/${manifest.latest_backup}`).download();
+    return decodeArchiveBuffer(archiveContent, manifest.latest_backup);
   }
 
   throw new Error('No local or GCS backup file found.');
@@ -119,12 +124,12 @@ async function main() {
   console.log(`----------------------------------------------------------------------`);
   console.log(`   Table Breakdown:`);
   for (const [tbl, count] of Object.entries(payload.table_counts || {})) {
-    console.log(`     - ${tbl.padEnd(25)} : ${count} records`);
+    console.log(`     - ${tbl.padEnd(26)} : ${count} records`);
   }
   console.log(`======================================================================\n`);
 
   if (isInspect || (!isExecute && !args.includes('--dry-run'))) {
-    console.log(`ℹ️ [Inspection Mode Only] To test restore without writing, pass: --dry-run`);
+    console.log(`ℹ️ [Inspection Mode Only] To verify restore without writing, pass: --dry-run`);
     console.log(`ℹ️ To apply restore to Supabase, pass: --execute --confirm=RESTORE_NOW\n`);
     return;
   }
@@ -141,6 +146,9 @@ async function main() {
   }
 
   if (isExecute) {
+    if (!supabase) {
+      throw new Error('Missing active Supabase connection for live restore.');
+    }
     if (!args.includes('--confirm=RESTORE_NOW')) {
       console.error(`❌ Confirmation token missing! Pass --confirm=RESTORE_NOW to execute live restore.`);
       process.exit(1);
@@ -163,11 +171,10 @@ async function main() {
 }
 
 if (require.main === module) {
-  main().catch(err => {
+  main().catch((err) => {
     console.error('❌ Restore engine error:', err.message);
     process.exit(1);
   });
 }
 
-module.exports = { loadBackupPayload };
-
+module.exports = { loadBackupPayload, decodeArchiveBuffer };

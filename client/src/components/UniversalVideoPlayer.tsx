@@ -3,6 +3,7 @@ import { Box, Typography, IconButton, Slider, Tooltip } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeDownIcon from '@mui/icons-material/VolumeDown';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
@@ -138,6 +139,7 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
 
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [localMuted, setLocalMuted] = useState(muted);
+  const [volume, setVolume] = useState(0.8);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -154,6 +156,14 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
       videoRef.current.muted = muted;
     }
   }, [muted]);
+
+  // Keep DOM volume and mute state synced across source switches & adjustments
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+      videoRef.current.muted = localMuted;
+    }
+  }, [volume, localMuted, url]);
 
   // Reset playback states when URL changes
   useEffect(() => {
@@ -379,9 +389,28 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
     if (e) e.stopPropagation();
     const vid = videoRef.current;
     const nextMuted = !localMuted;
+    const nextVol = !nextMuted && volume === 0 ? 0.8 : volume;
+    if (nextVol !== volume) setVolume(nextVol);
     setLocalMuted(nextMuted);
-    if (vid) vid.muted = nextMuted;
+    if (vid) {
+      vid.volume = nextVol;
+      vid.muted = nextMuted;
+    }
     onMutedChange?.(nextMuted);
+    scheduleHideControls();
+  };
+
+  const handleVolumeChange = (_: Event, val: number | number[]) => {
+    const raw = Array.isArray(val) ? val[0] : val;
+    const clamped = Math.max(0, Math.min(1, raw));
+    const shouldMute = clamped === 0;
+    setVolume(clamped);
+    setLocalMuted(shouldMute);
+    if (videoRef.current) {
+      videoRef.current.volume = clamped;
+      videoRef.current.muted = shouldMute;
+    }
+    onMutedChange?.(shouldMute);
     scheduleHideControls();
   };
 
@@ -554,6 +583,8 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
         src={parsed.embedUrl}
         onLoadedMetadata={(e) => {
           const v = e.currentTarget;
+          v.volume = volume;
+          v.muted = localMuted;
           setDuration(v.duration || 0);
           setIsPortrait(v.videoHeight > v.videoWidth);
         }}
@@ -755,16 +786,63 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
                 </IconButton>
               </Tooltip>
 
-              <Tooltip title={localMuted ? 'Unmute (m)' : 'Mute (m)'}>
-                <IconButton
+              <Box
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: { xs: 0.5, sm: 0.75 },
+                  pr: { xs: 0.75, sm: 1 },
+                }}
+              >
+                <Tooltip title={localMuted || volume === 0 ? 'Unmute (m)' : 'Mute (m)'}>
+                  <IconButton
+                    size="small"
+                    onClick={toggleMute}
+                    aria-label={localMuted || volume === 0 ? 'Unmute video' : 'Mute video'}
+                    sx={{ color: '#ffffff', p: 0.75, '&:hover': { bgcolor: 'rgba(255,255,255,0.14)' } }}
+                  >
+                    {localMuted || volume === 0 ? (
+                      <VolumeOffIcon fontSize="small" />
+                    ) : volume < 0.5 ? (
+                      <VolumeDownIcon fontSize="small" />
+                    ) : (
+                      <VolumeUpIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                </Tooltip>
+                <Slider
                   size="small"
-                  onClick={toggleMute}
-                  aria-label={localMuted ? 'Unmute video' : 'Mute video'}
-                  sx={{ color: '#ffffff', p: 0.75, '&:hover': { bgcolor: 'rgba(255,255,255,0.14)' } }}
-                >
-                  {localMuted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
-                </IconButton>
-              </Tooltip>
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={localMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  aria-label="Adjust video volume"
+                  sx={{
+                    width: { xs: 48, sm: 68 },
+                    color: '#ffffff',
+                    py: 0.75,
+                    touchAction: 'none',
+                    '& .MuiSlider-thumb': {
+                      width: 11,
+                      height: 11,
+                      bgcolor: '#ffffff',
+                      '&:hover, &.Mui-focusVisible': {
+                        boxShadow: '0 0 0 5px rgba(255,255,255,0.22)',
+                      },
+                    },
+                    '& .MuiSlider-rail': {
+                      bgcolor: 'rgba(255,255,255,0.3)',
+                      opacity: 1,
+                    },
+                  }}
+                />
+              </Box>
 
               <Typography
                 sx={{

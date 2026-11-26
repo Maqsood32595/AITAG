@@ -111,7 +111,7 @@ export const blogApi = {
 
 // Invitations
 export const invitationsApi = {
-  send: (data: { taskId: string; freelancerEmail: string; message?: string }) =>
+  send: (data: { taskId: string; freelancerEmail?: string; freelancerId?: string; message?: string }) =>
     api.post('/invitations', data),
   getMy: () => api.get('/invitations/my'),
   accept: (id: string) => api.patch(`/invitations/${id}/accept`),
@@ -120,6 +120,7 @@ export const invitationsApi = {
 
 // Profile & Delivered Workflows
 export const profileApi = {
+  getDirectory: () => api.get('/profile/directory'),
   getProfile: () => api.get('/profile/me'),
   updateProfile: (data: object) => api.put('/profile/me', data),
   getById: (userId: string) => api.get(`/profile/${userId}`),

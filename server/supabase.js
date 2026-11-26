@@ -1,40 +1,45 @@
 /**
- * AITAG Supabase Client — Resilient & Zero-Downtime Initialization
+ * AITAG Supabase Client — Fail-Safe Multi-Environment Initialization
  * Fractal Kernel Core Slice
- * Unified Database: byekbjxiowkrtwpsxevz
+ * Notice: Production defaults are never hardcoded to avoid accidental local writes to Prod DB.
  */
 const path = require('path');
 const fs = require('fs');
 
+const forceProdTarget = process.env.BACKUP_TARGET === 'production';
 const devEnvPath = path.resolve(__dirname, '../.env.development');
-if (fs.existsSync(devEnvPath) && (process.env.PORT === '8000' || process.env.NODE_ENV === 'development' || process.env.USE_DEV_DB === 'true')) {
+
+if (
+  !forceProdTarget &&
+  fs.existsSync(devEnvPath) &&
+  (process.env.PORT === '8000' || process.env.NODE_ENV === 'development' || process.env.USE_DEV_DB === 'true')
+) {
   require('dotenv').config({ path: devEnvPath, override: true });
 }
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 require('dotenv').config();
+
 const { createClient } = require('@supabase/supabase-js');
 
-// Unified Single Database across All Environments (Local, Render, Cloud Run)
-const UNIFIED_SUPABASE_URL = 'https://byekbjxiowkrtwpsxevz.supabase.co';
-const UNIFIED_SUPABASE_ANON = 'sb_publishable_73Bgkq70Z7b2yQffYwRAAg_0DFxoWjd';
-
 const PLACEHOLDER = 'PASTE_YOUR_SERVICE_ROLE_KEY_HERE';
+const rawUrl = process.env.SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const apiKey = (serviceKey && serviceKey !== PLACEHOLDER)
-  ? serviceKey
-  : (process.env.SUPABASE_ANON_KEY || UNIFIED_SUPABASE_ANON);
+const rawKey = (serviceKey && serviceKey !== PLACEHOLDER) ? serviceKey : process.env.SUPABASE_ANON_KEY;
 
-const supabaseUrl = process.env.SUPABASE_URL || UNIFIED_SUPABASE_URL;
-const supabaseKey = (apiKey && apiKey !== PLACEHOLDER) ? apiKey : UNIFIED_SUPABASE_ANON;
+let supabase = null;
 
-let supabase;
-try {
-  supabase = createClient(supabaseUrl, supabaseKey);
-  const isDevDb = supabaseUrl.includes('trdwewugrqdpopzqhkuk');
-  console.log(`✅ [SUPABASE] Connected to ${isDevDb ? 'Dev / Standby Replica' : 'Production'} Database:`, supabaseUrl);
-} catch (e) {
-  console.warn('⚠️ Supabase client creation error, falling back to default client:', e.message);
-  supabase = createClient(UNIFIED_SUPABASE_URL, UNIFIED_SUPABASE_ANON);
+if (rawUrl && rawKey && rawKey !== PLACEHOLDER) {
+  try {
+    supabase = createClient(rawUrl, rawKey);
+    const isDevDb = rawUrl.includes('trdwewugrqdpopzqhkuk');
+    console.log(`✅ [SUPABASE] Connected to ${isDevDb ? 'Dev / Standby Replica' : 'Production'} Database:`, rawUrl);
+  } catch (e) {
+    console.warn('⚠️ Supabase client initialization notice:', e.message);
+  }
+} else if (process.env.NODE_ENV === 'test' || process.env.PIET_RUN === 'true') {
+  console.log('ℹ️ [SUPABASE] Running in isolated in-RAM test mode (no Supabase env credentials supplied).');
+} else {
+  console.warn('⚠️ [SUPABASE] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY; server will rely on resilient in-memory fallbacks.');
 }
 
 module.exports = supabase;

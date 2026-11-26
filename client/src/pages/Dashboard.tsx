@@ -146,7 +146,7 @@ const Dashboard = () => {
       ordersPromise.then(r => setServiceOrders(r.data?.orders || [])).catch(() => setServiceOrders([])),
       ...(user?.role === 'admin' ? [
         fetch('/api/expert-applications', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem('aitag_token')}` }
         })
           .then(r => r.json())
           .then(data => { if (Array.isArray(data)) setExpertApplications(data); })
@@ -178,7 +178,7 @@ const Dashboard = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('aitag_token')}`
         },
         body: JSON.stringify({ status })
       });

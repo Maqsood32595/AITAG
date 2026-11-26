@@ -92,8 +92,8 @@ const FAQS = [
 
 export const HowItWorks: React.FC = () => {
   const navigate = useNavigate();
-  const [activeVideo, setActiveVideo] = useState<'kinetic' | 'walkthrough'>('kinetic');
-  const videoUrl = activeVideo === 'kinetic' ? '/AITAG-Advertisement1.mp4' : '/aitag-walkthrough.mp4?v=walkthrough-upgraded';
+  const [activeVideo, setActiveVideo] = useState<'walkthrough' | 'kinetic'>('walkthrough');
+  const videoUrl = activeVideo === 'walkthrough' ? '/aitag-walkthrough.mp4?v=walkthrough-upgraded' : '/AITAG-Advertisement1.mp4';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
@@ -272,7 +272,7 @@ export const HowItWorks: React.FC = () => {
               See how everyday entrepreneurs submit briefs, get tagged to vetted specialists, review samples, and approve final deliverables.
             </Typography>
 
-            {/* Video Mode Switcher */}
+            {/* Video Mode Switcher: Main (Step-by-Step Walkthrough) first, Secondary (30s Intro) second */}
             <Box
               sx={{
                 display: 'flex',
@@ -283,25 +283,6 @@ export const HowItWorks: React.FC = () => {
                 mb: 3.5,
               }}
             >
-              <Chip
-                label="⚡ AITAG in 30 Seconds"
-                clickable
-                onClick={() => setActiveVideo('kinetic')}
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '0.88rem',
-                  py: 2.2,
-                  px: 1,
-                  borderRadius: '20px',
-                  bgcolor: activeVideo === 'kinetic' ? '#2563eb' : '#f1f5f9',
-                  color: activeVideo === 'kinetic' ? '#ffffff' : '#334155',
-                  border: activeVideo === 'kinetic' ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
-                  boxShadow: activeVideo === 'kinetic' ? '0 4px 14px rgba(37,99,235,0.3)' : 'none',
-                  '&:hover': {
-                    bgcolor: activeVideo === 'kinetic' ? '#1d4ed8' : '#e2e8f0',
-                  },
-                }}
-              />
               <Chip
                 label="🖥️ Step-by-Step UI Walkthrough (5 Steps)"
                 clickable
@@ -318,6 +299,25 @@ export const HowItWorks: React.FC = () => {
                   boxShadow: activeVideo === 'walkthrough' ? '0 4px 14px rgba(37,99,235,0.3)' : 'none',
                   '&:hover': {
                     bgcolor: activeVideo === 'walkthrough' ? '#1d4ed8' : '#e2e8f0',
+                  },
+                }}
+              />
+              <Chip
+                label="⚡ AITAG in 30 Seconds"
+                clickable
+                onClick={() => setActiveVideo('kinetic')}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.88rem',
+                  py: 2.2,
+                  px: 1,
+                  borderRadius: '20px',
+                  bgcolor: activeVideo === 'kinetic' ? '#2563eb' : '#f1f5f9',
+                  color: activeVideo === 'kinetic' ? '#ffffff' : '#334155',
+                  border: activeVideo === 'kinetic' ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
+                  boxShadow: activeVideo === 'kinetic' ? '0 4px 14px rgba(37,99,235,0.3)' : 'none',
+                  '&:hover': {
+                    bgcolor: activeVideo === 'kinetic' ? '#1d4ed8' : '#e2e8f0',
                   },
                 }}
               />

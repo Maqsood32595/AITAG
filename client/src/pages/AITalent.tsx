@@ -12,7 +12,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
-import { authApi } from '../api';
+import { profileApi } from '../api';
 import AnimatedAvatar from '../components/AnimatedAvatar';
 
 interface Talent {
@@ -122,78 +122,30 @@ const AITalent = () => {
   useEffect(() => {
     const fetchRegisteredUsers = async () => {
       try {
-        const res = await authApi.getUsers();
-        const rawUsers = res.data || [];
+        const res = await profileApi.getDirectory();
+        const experts = res.data?.experts || [];
 
-        // Deduplicate registered users and consolidate legacy records
-        const uniqueUsersMap = new Map();
+        const registeredTalent: Talent[] = experts.map((u: any) => ({
+          id: u.id,
+          name: u.name || 'Verified Specialist',
+          role: 'AI Business Service Specialist',
+          category: 'Branding & Print',
+          avatar: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : '',
+          rating: 5.0,
+          reviewsCount: 14,
+          hourlyRate: 1200,
+          completedTasks: 8,
+          location: 'India',
+          bio: 'Verified specialist for AI business services, social media content, and practical marketplace outcomes.',
+          skills: ['Product Copy', 'Social Media', 'Landing Pages', 'Marketplace SEO'],
+          verified: true,
+          isRegisteredUser: true
+        }));
 
-        rawUsers.forEach((u: any) => {
-          const cleanEmail = (u.email || '').trim().toLowerCase();
-          if (cleanEmail && !uniqueUsersMap.has(cleanEmail)) {
-            uniqueUsersMap.set(cleanEmail, u);
-          }
-        });
-
-        // Filter out client accounts (business owners), platform admins, owner accounts, and automated test accounts from the Talent Directory
-        const dedupedUsers = Array.from(uniqueUsersMap.values()).filter((u: any) => {
-          // AI Talent directory is strictly for specialists/freelancers ready for hire, never clients, admins, or platform owners
-          if (u.role === 'client' || u.role === 'buyer' || u.role === 'business_owner' || u.role === 'admin') {
-            return false;
-          }
-          const cleanEmail = (u.email || '').toLowerCase().trim();
-          const cleanName = (u.name || '').toLowerCase().trim();
-          if (
-            cleanEmail.includes('maqsood') ||
-            cleanEmail.includes('maxmaqs') ||
-            cleanName === 'maqs' ||
-            cleanName.includes('maqsood') ||
-            cleanEmail.includes('del-neg') ||
-            cleanEmail.includes('aitag-test') ||
-            cleanEmail.includes('aitag-piet') ||
-            cleanEmail.includes('test') ||
-            cleanName.includes('delete neg') ||
-            cleanName.includes('legit client') ||
-            cleanName.includes('test')
-          ) {
-            return false;
-          }
-          return true;
-        });
-
-        // Transform registered users into Talent cards mapped to our 4 core service categories
-        const registeredTalent: Talent[] = dedupedUsers.map((u: any) => {
-          const isUser1 = u.email?.toLowerCase().includes('user1');
-
-          return {
-            id: u.id,
-            name: u.name || u.email.split('@')[0],
-            email: u.email,
-            role: isUser1
-              ? 'AI Website & WhatsApp Specialist'
-              : 'AI Business Service Specialist',
-            category: isUser1 ? 'Web & Digital Presence' : 'Branding & Print',
-            avatar: u.photo_url && !u.photo_url.includes('dicebear') ? u.photo_url : '',
-            rating: 5.0,
-            reviewsCount: isUser1 ? 19 : 14,
-            hourlyRate: isUser1 ? 1800 : 1200,
-            completedTasks: isUser1 ? 19 : 8,
-            location: 'India',
-            bio: isUser1
-              ? 'Verified specialist in fast mobile business website creation, responsive design, and WhatsApp click-to-chat setup.'
-              : 'Verified specialist for AI business services, social media content, and practical marketplace outcomes.',
-            skills: isUser1
-              ? ['AI Landing Pages', 'Mobile Web Funnels', 'WhatsApp Integration', 'Conversion Copy', 'Fast Deployment', 'SEO Setup']
-              : ['Product Copy', 'Social Media', 'Landing Pages', 'Marketplace SEO'],
-            verified: true,
-            isRegisteredUser: true
-          };
-        });
-
-        // Prepend real registered users at the top, followed by curated profiles
+        // Prepend verified registered specialists before curated profiles
         setTalents([...registeredTalent, ...CURATED_TALENT]);
       } catch (err) {
-        console.error('Failed to load registered users for talent directory:', err);
+        console.error('Failed to load verified talent directory:', err);
       } finally {
         setLoading(false);
       }

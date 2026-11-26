@@ -1,14 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Typography, IconButton, Tooltip, Slider, Paper, Grid, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, Slider, Paper, Grid } from '@mui/material';
 import VolumeOffRoundedIcon from '@mui/icons-material/VolumeOffRounded';
 import VolumeDownRoundedIcon from '@mui/icons-material/VolumeDownRounded';
 import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded';
-import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded';
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded';
-import OpenInFullRoundedIcon from '@mui/icons-material/OpenInFullRounded';
-import { useMobileDetect, useBodyScrollLock } from '../../utils/useMobileDetect';
 
 export interface HeroMediaSlotProps {
   onOverlayActiveChange?: (active: boolean) => void;
@@ -25,10 +22,9 @@ interface HeroMediaConfig {
   mutedByDefault: boolean;
 }
 
-const HERO_VIDEO_MIN_KEY = 'aitag_hero_video_minimized';
 const DEFAULT_ASPECT_RATIO = 1024 / 576;
 
-const DESKTOP_HIGHLIGHTS = [
+const HERO_HIGHLIGHTS = [
   {
     title: 'Starts at ₹499',
     subtitle: 'clear flat pricing',
@@ -56,13 +52,8 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
   onOverlayActiveChange,
   fallback = null,
 }) => {
-  const theme = useTheme();
-  const { isMobile, isMobileLandscape } = useMobileDetect();
-  const isBelowMd = useMediaQuery(theme.breakpoints.down('md'));
-  const useCenteredMobileLayout = isMobile || isBelowMd;
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const desktopContainerRef = useRef<HTMLDivElement | null>(null);
+  const inlineContainerRef = useRef<HTMLDivElement | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userPausedRef = useRef(false);
   const savedTimeRef = useRef(0);
@@ -70,14 +61,6 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
   const [config, setConfig] = useState<HeroMediaConfig | null>(null);
   const [isConfigLoading, setIsConfigLoading] = useState(true);
   const [hasMediaError, setHasMediaError] = useState(false);
-
-  const [isMinimized, setIsMinimized] = useState<boolean>(() => {
-    try {
-      return typeof window !== 'undefined' && sessionStorage.getItem(HERO_VIDEO_MIN_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
 
   const [isMuted, setIsMuted] = useState(true);
   const [volume, setVolume] = useState(0.5);
@@ -133,16 +116,11 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
   }, []);
 
   const isSliceReady = Boolean(config && !hasMediaError);
-  const isDesktopInlineActive = isSliceReady && !useCenteredMobileLayout;
-  const isMobileOverlayActive = isSliceReady && useCenteredMobileLayout && !isMinimized;
 
-  // Desktop renders inline without covering sibling content; report false so no floating overlay state is active
+  // Inline fixed layout renders without covering sibling content on mobile or desktop
   useEffect(() => {
     onOverlayActiveChange?.(false);
-  }, [isDesktopInlineActive, onOverlayActiveChange]);
-
-  // Freeze underlying scroll strictly while the mobile centered video dialog is visible
-  useBodyScrollLock(isMobileOverlayActive);
+  }, [isSliceReady, onOverlayActiveChange]);
 
   // Keep DOM muted & volume properties synced on mount and adjustments
   useEffect(() => {
@@ -151,7 +129,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
       vid.muted = isMuted;
       vid.volume = volume;
     }
-  }, [isMuted, volume, isMinimized, useCenteredMobileLayout, isSliceReady]);
+  }, [isMuted, volume, isSliceReady]);
 
   const showFeedback = useCallback((state: 'play' | 'pause') => {
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
@@ -159,37 +137,10 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
     feedbackTimerRef.current = setTimeout(() => setTapFeedback(null), 550);
   }, []);
 
-  const handleMinimize = useCallback(() => {
-    if (videoRef.current) {
-      savedTimeRef.current = videoRef.current.currentTime;
-      videoRef.current.pause();
-    }
-    setIsMuted(true);
-    setIsPlaying(false);
-    setIsMinimized(true);
-    try {
-      sessionStorage.setItem(HERO_VIDEO_MIN_KEY, '1');
-    } catch {}
-  }, []);
-
-  const handleRestore = useCallback(() => {
-    setIsMinimized(false);
-    if (!hasEnded) {
-      userPausedRef.current = false;
-      setIsPlaying(true);
-    }
-    try {
-      sessionStorage.setItem(HERO_VIDEO_MIN_KEY, '0');
-    } catch {}
-    if (!useCenteredMobileLayout && typeof window !== 'undefined' && window.scrollY > 140) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [useCenteredMobileLayout, hasEnded]);
-
-  // Auto-pause desktop inline video when Hero scrolls out of viewport to save battery/CPU
+  // Auto-pause inline video when Hero scrolls out of viewport to save battery/CPU
   useEffect(() => {
-    if (!isDesktopInlineActive || !desktopContainerRef.current) return;
-    const target = desktopContainerRef.current;
+    if (!isSliceReady || !inlineContainerRef.current) return;
+    const target = inlineContainerRef.current;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -206,17 +157,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [isDesktopInlineActive]);
-
-  // Escape key dismisses mobile centered floating video
-  useEffect(() => {
-    if (!isMobileOverlayActive) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleMinimize();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isMobileOverlayActive, handleMinimize]);
+  }, [isSliceReady]);
 
   useEffect(() => {
     return () => {
@@ -284,11 +225,6 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
     }
   };
 
-  const handleMinimizeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    handleMinimize();
-  };
-
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const vid = e.currentTarget;
     if (vid.videoWidth > 0 && vid.videoHeight > 0) {
@@ -319,16 +255,13 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
   };
 
   if (isConfigLoading) {
-    if (useCenteredMobileLayout) {
-      return null;
-    }
     return (
       <Paper
         elevation={0}
         sx={{
           width: '100%',
-          p: 1.75,
-          borderRadius: '24px',
+          p: { xs: 1.15, sm: 1.5, lg: 1.75 },
+          borderRadius: { xs: '20px', md: '24px' },
           bgcolor: '#ffffff',
           border: '1px solid rgba(79,70,229,0.14)',
           boxShadow: '0 22px 50px rgba(79,70,229,0.09)',
@@ -338,491 +271,23 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
           sx={{
             width: '100%',
             aspectRatio: `${aspectRatio}`,
-            borderRadius: '16px',
+            borderRadius: { xs: '14px', md: '16px' },
             bgcolor: '#0f172a',
           }}
         />
-        <Box sx={{ height: 108 }} />
+        <Box sx={{ height: { xs: 88, md: 108 } }} />
       </Paper>
     );
   }
 
   // Graceful degrade when backend slice is disabled, offline, or asset failed
   if (!config || hasMediaError) {
-    if (!useCenteredMobileLayout && fallback) {
-      return <>{fallback}</>;
-    }
-    return null;
+    return fallback ? <>{fallback}</> : null;
   }
 
-  const renderPlayerCard = (showMinimize: boolean, framed: boolean) => (
-    <Box
-      onClick={handleTogglePlay}
-      sx={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: `${aspectRatio}`,
-        borderRadius: framed ? '16px' : '18px',
-        overflow: 'hidden',
-        bgcolor: '#000000',
-        cursor: 'pointer',
-        boxShadow: framed
-          ? '0 10px 28px -8px rgba(15, 23, 42, 0.28)'
-          : '0 24px 60px -12px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.22)',
-        transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease',
-        '&:hover': {
-          boxShadow: framed
-            ? '0 14px 34px -8px rgba(79, 70, 229, 0.28)'
-            : '0 28px 68px -12px rgba(79, 70, 229, 0.36), 0 0 0 1px rgba(129, 140, 248, 0.45)',
-        },
-      }}
-    >
-      <video
-        ref={videoRef}
-        src={config.videoUrl}
-        poster={config.posterUrl || undefined}
-        autoPlay={!hasEnded}
-        muted={isMuted}
-        playsInline
-        preload="auto"
-        onLoadedMetadata={handleLoadedMetadata}
-        onTimeUpdate={handleTimeUpdate}
-        onPlay={() => {
-          setHasEnded(false);
-          setIsPlaying(true);
-        }}
-        onPause={() => setIsPlaying(false)}
-        onEnded={handleVideoEnded}
-        onError={() => setHasMediaError(true)}
-        style={{
-          width: '100%',
-          height: 'auto',
-          display: 'block',
-          aspectRatio: `${aspectRatio}`,
-          objectFit: 'contain',
-          backgroundColor: '#000000',
-        }}
-      />
-
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 64,
-          background:
-            'linear-gradient(180deg, rgba(2, 6, 23, 0.72) 0%, rgba(2, 6, 23, 0.24) 60%, transparent 100%)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 10,
-          left: 10,
-          right: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 1,
-          zIndex: 3,
-          pointerEvents: 'none',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.75,
-            px: 1.2,
-            py: 0.45,
-            borderRadius: '20px',
-            bgcolor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255, 255, 255, 0.16)',
-          }}
-        >
-          <Box
-            sx={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              bgcolor: '#22c55e',
-              boxShadow: '0 0 8px #22c55e',
-            }}
-          />
-          <Typography
-            sx={{
-              color: '#f8fafc',
-              fontSize: '0.68rem',
-              fontWeight: 700,
-              letterSpacing: '0.2px',
-              lineHeight: 1,
-            }}
-          >
-            {config.label || 'AITAG Intro'}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7, pointerEvents: 'auto' }}>
-          {/* Compact Mute + Volume Level Control */}
-          <Box
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 0.65,
-              px: 0.85,
-              pr: 1.25,
-              height: 30,
-              borderRadius: '20px',
-              bgcolor: isMuted ? 'rgba(15, 23, 42, 0.72)' : 'rgba(79, 70, 229, 0.88)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.22)',
-              transition: 'background-color 0.2s ease',
-            }}
-          >
-            <Tooltip title={isMuted ? 'Unmute sound' : 'Mute sound'} arrow>
-              <IconButton
-                size="small"
-                onClick={handleToggleMute}
-                aria-label={isMuted ? 'Unmute hero video' : 'Mute hero video'}
-                sx={{
-                  p: 0.25,
-                  color: '#ffffff',
-                }}
-              >
-                {isMuted || volume === 0 ? (
-                  <VolumeOffRoundedIcon sx={{ fontSize: 16 }} />
-                ) : volume < 0.5 ? (
-                  <VolumeDownRoundedIcon sx={{ fontSize: 16 }} />
-                ) : (
-                  <VolumeUpRoundedIcon sx={{ fontSize: 16 }} />
-                )}
-              </IconButton>
-            </Tooltip>
-            <Slider
-              size="small"
-              min={0}
-              max={1}
-              step={0.05}
-              value={isMuted ? 0 : volume}
-              onChange={handleVolumeChange}
-              aria-label="Adjust hero video volume"
-              sx={{
-                width: { xs: 48, sm: 62 },
-                color: '#ffffff',
-                py: 0,
-                '& .MuiSlider-thumb': {
-                  width: 11,
-                  height: 11,
-                  bgcolor: '#ffffff',
-                  '&:hover, &.Mui-focusVisible': {
-                    boxShadow: '0 0 0 5px rgba(255,255,255,0.22)',
-                  },
-                },
-                '& .MuiSlider-rail': {
-                  opacity: 0.35,
-                },
-              }}
-            />
-          </Box>
-
-          {showMinimize && (
-            <Box
-              component="button"
-              type="button"
-              onClick={handleMinimizeClick}
-              aria-label="Minimize hero video"
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0.45,
-                px: 1.15,
-                py: 0.5,
-                height: 30,
-                borderRadius: '20px',
-                bgcolor: 'rgba(15, 23, 42, 0.74)',
-                color: '#ffffff',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.24)',
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                lineHeight: 1,
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  bgcolor: 'rgba(15, 23, 42, 0.94)',
-                  borderColor: 'rgba(255, 255, 255, 0.45)',
-                },
-              }}
-            >
-              <RemoveRoundedIcon sx={{ fontSize: 15 }} />
-              <span>Minimize</span>
-            </Box>
-          )}
-        </Box>
-      </Box>
-
-      {hasEnded ? (
-        <Box
-          component="button"
-          type="button"
-          onClick={handleReplay}
-          aria-label="Watch AITAG intro again"
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.8,
-            px: 2.2,
-            py: 1,
-            borderRadius: '28px',
-            bgcolor: 'rgba(15, 23, 42, 0.86)',
-            color: '#ffffff',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.28)',
-            boxShadow: '0 12px 32px rgba(15, 23, 42, 0.35)',
-            cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
-            fontSize: '0.82rem',
-            fontWeight: 800,
-            zIndex: 3,
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              bgcolor: '#4f46e5',
-              transform: 'translate(-50%, -50%) scale(1.04)',
-            },
-          }}
-        >
-          <ReplayRoundedIcon sx={{ fontSize: 19 }} />
-          <span>Watch Again</span>
-        </Box>
-      ) : (
-        (!isPlaying || tapFeedback) && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 52,
-              height: 52,
-              borderRadius: '50%',
-              bgcolor: 'rgba(15, 23, 42, 0.72)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.28)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              pointerEvents: 'none',
-              zIndex: 2,
-            }}
-          >
-            {(!isPlaying && tapFeedback !== 'play') || tapFeedback === 'pause' ? (
-              <PlayArrowRoundedIcon sx={{ fontSize: 30, ml: 0.3 }} />
-            ) : (
-              <PauseRoundedIcon sx={{ fontSize: 28 }} />
-            )}
-          </Box>
-        )
-      )}
-
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 3,
-          bgcolor: 'rgba(255, 255, 255, 0.2)',
-          pointerEvents: 'none',
-          zIndex: 3,
-        }}
-      >
-        <Box
-          sx={{
-            width: `${Math.min(100, Math.max(0, progress))}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%)',
-            transition: 'width 0.2s linear',
-          }}
-        />
-      </Box>
-    </Box>
-  );
-
-  // Mobile-only minimized floating pill (Desktop always renders fixed inline)
-  if (useCenteredMobileLayout && isMinimized) {
-    return (
-      <Box
-        role="button"
-        tabIndex={0}
-        aria-label="Open AITAG intro video"
-        onClick={handleRestore}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleRestore();
-          }
-        }}
-        sx={{
-          position: 'fixed',
-          bottom: { xs: 16, md: 24 },
-          right: { xs: 16, md: 24 },
-          zIndex: 1250,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 1.25,
-          p: 0.75,
-          pr: 1.75,
-          borderRadius: '50px',
-          bgcolor: 'rgba(15, 23, 42, 0.94)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(99, 102, 241, 0.45)',
-          boxShadow: '0 14px 36px rgba(15, 23, 42, 0.32)',
-          cursor: 'pointer',
-          color: '#ffffff',
-          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-          '&:hover': {
-            transform: 'translateY(-3px)',
-            borderColor: '#818cf8',
-            boxShadow: '0 18px 42px rgba(79, 70, 229, 0.36)',
-          },
-        }}
-      >
-        <Box
-          sx={{
-            position: 'relative',
-            width: 52,
-            aspectRatio: `${aspectRatio}`,
-            borderRadius: '20px',
-            overflow: 'hidden',
-            flexShrink: 0,
-            bgcolor: '#0f172a',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}
-        >
-          {config.posterUrl && (
-            <Box
-              component="img"
-              src={config.posterUrl}
-              alt="Watch AITAG video"
-              sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          )}
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              bgcolor: 'rgba(15, 23, 42, 0.35)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <PlayArrowRoundedIcon sx={{ fontSize: 16, color: '#ffffff' }} />
-          </Box>
-        </Box>
-
-        <Box sx={{ textAlign: 'left', lineHeight: 1.15 }}>
-          <Typography
-            sx={{
-              fontSize: '0.78rem',
-              fontWeight: 800,
-              color: '#ffffff',
-              fontFamily: 'Inter, sans-serif',
-              lineHeight: 1.2,
-            }}
-          >
-            Watch AITAG
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: '0.66rem',
-              color: '#94a3b8',
-              fontWeight: 500,
-              lineHeight: 1.2,
-            }}
-          >
-            Tap to open video
-          </Typography>
-        </Box>
-
-        <OpenInFullRoundedIcon sx={{ fontSize: 15, color: '#818cf8', ml: 0.25 }} />
-      </Box>
-    );
-  }
-
-  // Mobile / stacked viewport: centered floating hero overlay
-  if (useCenteredMobileLayout) {
-    const mobileWidth = isMobileLandscape
-      ? `min(92vw, calc((100dvh - 88px) * ${aspectRatio}))`
-      : 'min(92vw, 520px)';
-
-    return (
-      <Box
-        onClick={handleMinimize}
-        role="dialog"
-        aria-modal="true"
-        aria-label="AITAG intro floating video"
-        sx={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 1300,
-          bgcolor: 'rgba(15, 23, 42, 0.56)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          px: 1.5,
-          pt: 'calc(56px + env(safe-area-inset-top, 0px))',
-          pb: 2,
-          touchAction: 'none',
-        }}
-      >
-        <Box
-          onClick={(e) => e.stopPropagation()}
-          sx={{
-            width: mobileWidth,
-            maxWidth: '100%',
-            animation: 'fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
-          {renderPlayerCard(true, false)}
-          <Typography
-            onClick={handleMinimize}
-            sx={{
-              mt: 1.25,
-              textAlign: 'center',
-              color: 'rgba(255, 255, 255, 0.82)',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              userSelect: 'none',
-            }}
-          >
-            Tap outside or Minimize to continue browsing
-          </Typography>
-        </Box>
-      </Box>
-    );
-  }
-
-  // Desktop / Windows: framed inline video showcase parallel & symmetrical with left hero text
   return (
     <Box
-      ref={desktopContainerRef}
+      ref={inlineContainerRef}
       sx={{
         position: 'relative',
         width: '100%',
@@ -832,28 +297,294 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
         elevation={0}
         sx={{
           bgcolor: '#ffffff',
-          borderRadius: '24px',
-          p: { md: 1.5, lg: 1.75 },
+          borderRadius: { xs: '20px', md: '24px' },
+          p: { xs: 1.15, sm: 1.5, lg: 1.75 },
           border: '1px solid rgba(79,70,229,0.14)',
           boxShadow: '0 22px 50px rgba(79,70,229,0.09)',
         }}
       >
-        {renderPlayerCard(false, true)}
+        <Box
+          onClick={handleTogglePlay}
+          sx={{
+            position: 'relative',
+            width: '100%',
+            aspectRatio: `${aspectRatio}`,
+            borderRadius: { xs: '14px', md: '16px' },
+            overflow: 'hidden',
+            bgcolor: '#000000',
+            cursor: 'pointer',
+            boxShadow: '0 10px 28px -8px rgba(15, 23, 42, 0.28)',
+            transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease',
+            '&:hover': {
+              boxShadow: '0 14px 34px -8px rgba(79, 70, 229, 0.28)',
+            },
+          }}
+        >
+          <video
+            ref={videoRef}
+            src={config.videoUrl}
+            poster={config.posterUrl || undefined}
+            autoPlay={!hasEnded}
+            muted={isMuted}
+            playsInline
+            preload="auto"
+            onLoadedMetadata={handleLoadedMetadata}
+            onTimeUpdate={handleTimeUpdate}
+            onPlay={() => {
+              setHasEnded(false);
+              setIsPlaying(true);
+            }}
+            onPause={() => setIsPlaying(false)}
+            onEnded={handleVideoEnded}
+            onError={() => setHasMediaError(true)}
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              aspectRatio: `${aspectRatio}`,
+              objectFit: 'contain',
+              backgroundColor: '#000000',
+            }}
+          />
 
-        <Box sx={{ mt: 1.5, px: 0.4 }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 64,
+              background:
+                'linear-gradient(180deg, rgba(2, 6, 23, 0.72) 0%, rgba(2, 6, 23, 0.24) 60%, transparent 100%)',
+              pointerEvents: 'none',
+            }}
+          />
+
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              right: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+              zIndex: 3,
+              pointerEvents: 'none',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.75,
+                px: 1.2,
+                py: 0.45,
+                borderRadius: '20px',
+                bgcolor: 'rgba(15, 23, 42, 0.65)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255, 255, 255, 0.16)',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  bgcolor: '#22c55e',
+                  boxShadow: '0 0 8px #22c55e',
+                }}
+              />
+              <Typography
+                sx={{
+                  color: '#f8fafc',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.2px',
+                  lineHeight: 1,
+                }}
+              >
+                {config.label || 'AITAG Intro'}
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7, pointerEvents: 'auto' }}>
+              {/* Compact Mute + Volume Level Control */}
+              <Box
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 0.65,
+                  px: 0.85,
+                  pr: 1.25,
+                  height: 30,
+                  borderRadius: '20px',
+                  bgcolor: isMuted ? 'rgba(15, 23, 42, 0.72)' : 'rgba(79, 70, 229, 0.88)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.22)',
+                  transition: 'background-color 0.2s ease',
+                }}
+              >
+                <Tooltip title={isMuted ? 'Unmute sound' : 'Mute sound'} arrow>
+                  <IconButton
+                    size="small"
+                    onClick={handleToggleMute}
+                    aria-label={isMuted ? 'Unmute hero video' : 'Mute hero video'}
+                    sx={{
+                      p: 0.25,
+                      color: '#ffffff',
+                    }}
+                  >
+                    {isMuted || volume === 0 ? (
+                      <VolumeOffRoundedIcon sx={{ fontSize: 16 }} />
+                    ) : volume < 0.5 ? (
+                      <VolumeDownRoundedIcon sx={{ fontSize: 16 }} />
+                    ) : (
+                      <VolumeUpRoundedIcon sx={{ fontSize: 16 }} />
+                    )}
+                  </IconButton>
+                </Tooltip>
+                <Slider
+                  size="small"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  aria-label="Adjust hero video volume"
+                  sx={{
+                    width: { xs: 48, sm: 62 },
+                    color: '#ffffff',
+                    py: 0,
+                    touchAction: 'none',
+                    '& .MuiSlider-thumb': {
+                      width: 11,
+                      height: 11,
+                      bgcolor: '#ffffff',
+                      '&:hover, &.Mui-focusVisible': {
+                        boxShadow: '0 0 0 5px rgba(255,255,255,0.22)',
+                      },
+                    },
+                    '& .MuiSlider-rail': {
+                      opacity: 0.35,
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+
+          {hasEnded ? (
+            <Box
+              component="button"
+              type="button"
+              onClick={handleReplay}
+              aria-label="Watch AITAG intro again"
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.8,
+                px: 2.2,
+                py: 1,
+                borderRadius: '28px',
+                bgcolor: 'rgba(15, 23, 42, 0.86)',
+                color: '#ffffff',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.28)',
+                boxShadow: '0 12px 32px rgba(15, 23, 42, 0.35)',
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '0.82rem',
+                fontWeight: 800,
+                zIndex: 3,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#4f46e5',
+                  transform: 'translate(-50%, -50%) scale(1.04)',
+                },
+              }}
+            >
+              <ReplayRoundedIcon sx={{ fontSize: 19 }} />
+              <span>Watch Again</span>
+            </Box>
+          ) : (
+            (!isPlaying || tapFeedback) && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 52,
+                  height: 52,
+                  borderRadius: '50%',
+                  bgcolor: 'rgba(15, 23, 42, 0.72)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.28)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  pointerEvents: 'none',
+                  zIndex: 2,
+                }}
+              >
+                {(!isPlaying && tapFeedback !== 'play') || tapFeedback === 'pause' ? (
+                  <PlayArrowRoundedIcon sx={{ fontSize: 30, ml: 0.3 }} />
+                ) : (
+                  <PauseRoundedIcon sx={{ fontSize: 28 }} />
+                )}
+              </Box>
+            )
+          )}
+
+          <Box
+            sx={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 3,
+              bgcolor: 'rgba(255, 255, 255, 0.2)',
+              pointerEvents: 'none',
+              zIndex: 3,
+            }}
+          >
+            <Box
+              sx={{
+                width: `${Math.min(100, Math.max(0, progress))}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%)',
+                transition: 'width 0.2s linear',
+              }}
+            />
+          </Box>
+        </Box>
+
+        <Box sx={{ mt: { xs: 1.15, sm: 1.5 }, px: 0.4 }}>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 1,
-              mb: 1.25,
+              mb: { xs: 1, sm: 1.25 },
             }}
           >
             <Typography
               sx={{
                 fontWeight: 700,
-                fontSize: { md: '0.8rem', lg: '0.84rem' },
+                fontSize: { xs: '0.74rem', sm: '0.8rem', lg: '0.84rem' },
                 color: '#0f172a',
                 fontFamily: 'Inter, sans-serif',
               }}
@@ -862,27 +593,28 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
             </Typography>
             <Typography
               sx={{
-                fontSize: '0.7rem',
+                fontSize: { xs: '0.64rem', sm: '0.7rem' },
                 fontWeight: 700,
                 color: '#4f46e5',
                 bgcolor: 'rgba(79,70,229,0.08)',
-                px: 1,
+                px: { xs: 0.85, sm: 1 },
                 py: 0.3,
                 borderRadius: '12px',
                 whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               No tech skills needed
             </Typography>
           </Box>
 
-          <Grid container spacing={1.2}>
-            {DESKTOP_HIGHLIGHTS.map((item) => (
+          <Grid container spacing={{ xs: 0.75, sm: 1.2 }}>
+            {HERO_HIGHLIGHTS.map((item) => (
               <Grid key={item.title} size={{ xs: 4 }}>
                 <Box
                   sx={{
-                    py: 1,
-                    px: 0.9,
+                    py: { xs: 0.8, sm: 1 },
+                    px: { xs: 0.45, sm: 0.9 },
                     textAlign: 'center',
                     borderRadius: '12px',
                     bgcolor: item.bgcolor,
@@ -892,7 +624,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
                   <Typography
                     sx={{
                       fontWeight: 800,
-                      fontSize: { md: '0.78rem', lg: '0.84rem' },
+                      fontSize: { xs: '0.72rem', sm: '0.78rem', lg: '0.84rem' },
                       color: item.color,
                       lineHeight: 1.2,
                       mb: 0.2,
@@ -900,7 +632,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
                   >
                     {item.title}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.67rem', color: '#64748b', lineHeight: 1.2 }}>
+                  <Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.67rem' }, color: '#64748b', lineHeight: 1.2 }}>
                     {item.subtitle}
                   </Typography>
                 </Box>

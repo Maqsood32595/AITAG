@@ -10,16 +10,17 @@ const invitationsService = require('./service');
 const authRoutes = require('../../../aitag-auth/routes');
 const authMiddleware = authRoutes.authMiddleware;
 
-// POST /api/invitations — Client invites freelancer to a task
+// POST /api/invitations — Client invites freelancer to a task (by freelancerId or email)
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { taskId, freelancerEmail, message } = req.body;
+    const { taskId, freelancerEmail, freelancerId, message } = req.body;
     const clientEmail = req.user.email;
 
     const result = await invitationsService.sendInvitation({
       taskId,
       clientEmail,
       freelancerEmail,
+      freelancerId,
       message
     });
 

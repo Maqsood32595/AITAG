@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const service = require('./service');
+const { requireAuth, requireRole, verifyResourceAccess } = require('../../../domain-security/grandchildren/bola-guard');
 
 // Auth extractor middleware
 const extractUser = (req, res, next) => {
@@ -53,22 +54,32 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/payments/order/:orderId — Get payments for a specific order
-router.get('/order/:orderId', async (req, res) => {
+// GET /api/payments/order/:orderId — Get payments for a specific order (authenticated owner or admin)
+router.get('/order/:orderId', requireAuth, async (req, res) => {
   try {
     const payments = await service.getPaymentsByOrderId(req.params.orderId);
-    res.json({ success: true, payments });
+    if (req.user.role === 'admin') {
+      return res.json({ success: true, payments });
+    }
+    const scoped = payments.filter((p) => verifyResourceAccess(req.user, p));
+    if (payments.length > 0 && scoped.length === 0) {
+      return res.status(403).json({ success: false, error: 'Forbidden: You do not have access to these payment records' });
+    }
+    res.json({ success: true, payments: scoped });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// GET /api/payments/:id — Get payment by ID
-router.get('/:id', async (req, res) => {
+// GET /api/payments/:id — Get payment by ID (authenticated owner or admin)
+router.get('/:id', requireAuth, async (req, res) => {
   try {
     const payment = await service.getPaymentById(req.params.id);
     if (!payment) {
       return res.status(404).json({ success: false, error: 'Payment not found' });
+    }
+    if (!verifyResourceAccess(req.user, payment)) {
+      return res.status(403).json({ success: false, error: 'Forbidden: You do not have access to this payment record' });
     }
     res.json({ success: true, payment });
   } catch (err) {
@@ -77,30 +88,25 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/payments/:id/verify — Admin verifies payment & transitions order to PAID
-router.post('/:id/verify', extractUser, async (req, res) => {
+router.post('/:id/verify', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    if (req.user && req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, error: 'Forbidden: Only administrators can verify payments' });
-    }
-    const adminEmail = req.user ? req.user.email : 'admin@aitag.com';
-    const payment = await service.verifyPayment(req.params.id, adminEmail);
+    const payment = await service.verifyPayment(req.params.id, req.user.email);
     res.json({ success: true, payment });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
 });
 
-// GET /api/payments — List all payments (admin) or filtered by user
-router.get('/', extractUser, async (req, res) => {
+// GET /api/payments — List payments (admin sees all; client/freelancer scoped strictly to own email)
+router.get('/', requireAuth, async (req, res) => {
   try {
     const filters = {};
     if (req.query.status) filters.status = req.query.status;
 
-    // Scope to user's own payments if authenticated as client
-    if (req.user && req.user.role === 'client') {
+    if (req.user.role === 'admin') {
+      if (req.query.customer_email) filters.customer_email = req.query.customer_email;
+    } else {
       filters.customer_email = req.user.email;
-    } else if (req.query.customer_email) {
-      filters.customer_email = req.query.customer_email;
     }
 
     const payments = await service.listPayments(filters);

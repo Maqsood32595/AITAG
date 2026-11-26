@@ -27,6 +27,8 @@ const { scrubObject, logScrubberMiddleware } = require('../../grandchildren/log-
 const { validateUploadedFile, secureMulterFilter, ALLOWED_MIME_TYPES, ALLOWED_EXTENSIONS, BANNED_EXTENSIONS } = require('../../grandchildren/upload-guard');
 const { verifyHmacSignature, validatePasswordStrength, verifyJwtEntropy } = require('../../grandchildren/crypto-guard');
 const { authenticateWsConnection, joinRoom, leaveRoom, broadcastToRoom } = require('../../grandchildren/websocket-guard');
+const { isAllowedOrigin, createCorsOptions } = require('../../grandchildren/cors-guard');
+const { validateRuntimeSecurity, assertSecureRuntime } = require('../../grandchildren/boot-guard');
 
 class SecurityGuardService {
   constructor() {
@@ -40,7 +42,9 @@ class SecurityGuardService {
       scrubber: { scrubObject, logScrubberMiddleware },
       upload: { validateUploadedFile, secureMulterFilter, ALLOWED_MIME_TYPES, ALLOWED_EXTENSIONS, BANNED_EXTENSIONS },
       crypto: { verifyHmacSignature, validatePasswordStrength, verifyJwtEntropy },
-      websocket: { authenticateWsConnection, joinRoom, leaveRoom, broadcastToRoom }
+      websocket: { authenticateWsConnection, joinRoom, leaveRoom, broadcastToRoom },
+      cors: { isAllowedOrigin, createCorsOptions },
+      boot: { validateRuntimeSecurity, assertSecureRuntime }
     };
   }
 

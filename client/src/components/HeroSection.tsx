@@ -55,8 +55,8 @@ const HeroSection: React.FC = () => {
         overflow: 'hidden',
         bgcolor: '#f8fafc',
         background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 45%, #f0fdf4 100%)',
-        pt: { xs: 10, md: 12.5 },
-        pb: { xs: 6, md: 7 },
+        pt: { xs: 9.5, md: 12.5 },
+        pb: { xs: 5, md: 7 },
       }}
     >
       <Container
@@ -75,13 +75,14 @@ const HeroSection: React.FC = () => {
             flexDirection: { xs: 'column', md: 'row' },
             alignItems: { xs: 'center', md: 'flex-start' },
             justifyContent: 'space-between',
-            gap: { xs: 4, md: 3.5, lg: 4.5 },
+            gap: { xs: 2.5, sm: 3, md: 3.5, lg: 4.5 },
             width: '100%',
           }}
         >
-          {/* Left Column: Eyebrow, Main Headline, Subtitle, CTAs & Audience Pills */}
+          {/* Text Column: Renders second (below video) on mobile, left column on desktop */}
           <Box
             sx={{
+              order: { xs: 2, md: 1 },
               flex: { xs: '1 1 100%', md: '0 0 48.5%', lg: '0 0 48.5%' },
               maxWidth: { xs: '100%', md: '48.5%', lg: '48.5%' },
               width: '100%',
@@ -207,7 +208,7 @@ const HeroSection: React.FC = () => {
                 borderRadius: '100px',
                 px: { xs: 1.8, md: 1.6 },
                 py: 0.65,
-                mb: { xs: 2.5, md: 0 },
+                mb: 0,
                 maxWidth: '100%',
               }}
             >
@@ -242,26 +243,23 @@ const HeroSection: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Right Column: Fixed inline Hero video showcase on Desktop; Floating modal + 3-step card preserved on Mobile */}
+          {/* Video Column: Renders first (on top of text) on mobile, right column on desktop */}
           <Box
             id="hero-workflow-card"
             sx={{
+              order: { xs: 1, md: 2 },
               position: 'relative',
               flex: { xs: '1 1 100%', md: '0 0 48%', lg: '0 0 48%' },
               maxWidth: { xs: '100%', md: '48%', lg: '48%' },
               width: '100%',
             }}
           >
-            <HeroMediaSlot
-              fallback={
-                <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-                  <WorkflowStepsCard />
-                </Box>
-              }
-            />
-            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-              <WorkflowStepsCard />
-            </Box>
+            <HeroMediaSlot fallback={<WorkflowStepsCard />} />
+          </Box>
+
+          {/* Mobile-only 3-step summary card placed cleanly below hero copy */}
+          <Box sx={{ display: { xs: 'block', md: 'none' }, width: '100%', order: 3 }}>
+            <WorkflowStepsCard />
           </Box>
         </Box>
 

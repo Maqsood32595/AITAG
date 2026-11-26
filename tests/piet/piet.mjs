@@ -311,13 +311,6 @@ async function runPietSuite() {
       assert(Number(res.data.budget) >= 999, 'Task budget must be >= 999');
     });
 
-    await t('Fetches and filters service orders via /api/service-orders with role and status query params', async () => {
-      const res = await requestJson('/api/service-orders?status=REQUESTED');
-      eq(res.status, 200, 'GET /api/service-orders?status=REQUESTED must return 200 OK');
-      eq(res.data.success, true, 'Response must indicate success');
-      assert(Array.isArray(res.data.orders), 'Orders must be an array');
-    });
-
     const authServiceModule = await import('../../server/features/aitag-auth/service.js');
     const authService = authServiceModule.default || authServiceModule;
 
@@ -340,6 +333,22 @@ async function runPietSuite() {
       name: 'Verified AI Specialist',
       email: NONCE_EXPERT,
       role: 'freelancer'
+    });
+
+    const strangerToken = authService.signToken({
+      id: 'piet-stranger-uuid',
+      name: 'Other Stranger User',
+      email: `piet-stranger-${RUN_ID}@aitag-test.local`,
+      role: 'client'
+    });
+
+    await t('Fetches and filters service orders via /api/service-orders with authenticated admin role and status query params', async () => {
+      const res = await requestJson('/api/service-orders?status=REQUESTED', {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      eq(res.status, 200, 'Admin GET /api/service-orders?status=REQUESTED must return 200 OK');
+      eq(res.data.success, true, 'Response must indicate success');
+      assert(Array.isArray(res.data.orders), 'Orders must be an array');
     });
 
     await t('Enforces strict role-based data isolation on GET /api/service-orders', async () => {
@@ -517,6 +526,7 @@ async function runPietSuite() {
     await t('Negative input defense: rejects assigning expert without expertEmail with HTTP 400', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/assign`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: JSON.stringify({})
       });
       eq(res.status, 400, 'Assign without expertEmail must return 400 Bad Request');
@@ -525,6 +535,7 @@ async function runPietSuite() {
     await t('Admin qualifies & matches expert (MATCHED)', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/assign`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: JSON.stringify({
           expertEmail: NONCE_EXPERT,
           expertName: 'Verified AI Visual Specialist'
@@ -538,7 +549,8 @@ async function runPietSuite() {
 
     await t('Admin resets task assignment back to REQUESTED matching pool', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/reset`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
       eq(res.status, 200, 'POST /reset must return 200 OK');
       eq(res.data.order.status, 'REQUESTED', 'Status must revert to REQUESTED');
@@ -548,6 +560,7 @@ async function runPietSuite() {
       // Re-assign to proceed with subsequent tests
       const reassignRes = await requestJson(`/api/service-orders/${ephemeralOrderId}/assign`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
         body: JSON.stringify({
           expertEmail: NONCE_EXPERT,
           expertName: 'Verified AI Visual Specialist'
@@ -559,7 +572,8 @@ async function runPietSuite() {
 
     await t('Admin confirms payment received (ACTIVE)', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/activate`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
 
       eq(res.status, 200, 'Activation must return 200 OK');
@@ -569,6 +583,7 @@ async function runPietSuite() {
     await t('Negative input defense: rejects empty draft submission with HTTP 400', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/draft`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${freelancerToken}` },
         body: JSON.stringify({ draftFiles: [] })
       });
       eq(res.status, 400, 'Empty draftFiles must return 400 Bad Request');
@@ -577,6 +592,7 @@ async function runPietSuite() {
     await t('Expert submits draft deliverables (DRAFT_SUBMITTED)', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/draft`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${freelancerToken}` },
         body: JSON.stringify({
           draftFiles: [
             { url: 'https://example.com/draft_1.jpg', label: 'Draft 1 - White Studio Cutout' },
@@ -592,6 +608,7 @@ async function runPietSuite() {
     await t('Negative input defense: rejects empty revision notes with HTTP 400', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/revision`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` },
         body: JSON.stringify({})
       });
       eq(res.status, 400, 'Empty revisionNotes must return 400 Bad Request');
@@ -600,6 +617,7 @@ async function runPietSuite() {
     await t('Customer requests included revision (REVISION)', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/revision`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` },
         body: JSON.stringify({
           revisionNotes: 'Please enhance the lighting on the jar label on photo 1.'
         })
@@ -613,6 +631,7 @@ async function runPietSuite() {
     await t('Expert resubmits revised draft deliverables (DRAFT_SUBMITTED)', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/draft`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${freelancerToken}` },
         body: JSON.stringify({
           draftFiles: [
             { url: 'https://example.com/revised_draft_1.jpg', label: 'Revised Cutout with enhanced lighting' }
@@ -632,6 +651,7 @@ async function runPietSuite() {
     await t('Customer approves final output with 5-star rating (COMPLETED)', async () => {
       const res = await requestJson(`/api/service-orders/${ephemeralOrderId}/approve`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` },
         body: JSON.stringify({
           rating: 5,
           testimonial: 'Exceptional photo makeover! Product got approved on Meesho within an hour.',
@@ -649,7 +669,9 @@ async function runPietSuite() {
     });
 
     await t('Enforces finished order physical invariants and 10% platform commission accounting', async () => {
-      const res = await requestJson(`/api/service-orders/${ephemeralOrderId}`);
+      const res = await requestJson(`/api/service-orders/${ephemeralOrderId}`, {
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
       eq(res.status, 200, 'Fetch order by ID must return 200 OK');
       const order = res.data.order;
       eq(order.status, 'COMPLETED', 'Order status must be COMPLETED');
@@ -1107,6 +1129,117 @@ async function runPietSuite() {
       assert(!cleanedToggle.includes('ontoggle'), 'ontoggle event handler must be removed');
     });
 
+    await t('PII & Auth Guard invariant: /api/auth/users rejects unauthenticated/non-admin callers; /api/profile/directory exposes zero emails', async () => {
+      const unauthUsers = await requestJson('/api/auth/users');
+      eq(unauthUsers.status, 401, 'Unauthenticated GET /api/auth/users must return 401');
+
+      const clientUsers = await requestJson('/api/auth/users', {
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
+      eq(clientUsers.status, 403, 'Non-admin GET /api/auth/users must return 403 Forbidden');
+
+      const adminUsers = await requestJson('/api/auth/users', {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      eq(adminUsers.status, 200, 'Admin GET /api/auth/users must return 200 OK');
+
+      const dirRes = await requestJson('/api/profile/directory');
+      eq(dirRes.status, 200, 'GET /api/profile/directory must return 200 OK');
+      eq(dirRes.data.success, true, 'Directory must report success');
+      assert(Array.isArray(dirRes.data.experts), 'Directory experts must be an array');
+      for (const expert of dirRes.data.experts) {
+        eq(expert.email, undefined, 'Public talent directory must NEVER leak private user emails');
+        eq(expert.role, 'freelancer', 'Public talent directory must only include freelancers');
+      }
+    });
+
+    await t('Service Orders BOLA & RBAC invariant: blocks unauthenticated & unauthorized cross-user order access/mutations', async () => {
+      const unauthList = await requestJson('/api/service-orders');
+      eq(unauthList.status, 401, 'Unauthenticated GET /api/service-orders must return 401');
+
+      const unauthGet = await requestJson(`/api/service-orders/${ephemeralOrderId}`);
+      eq(unauthGet.status, 401, 'Unauthenticated GET /api/service-orders/:id must return 401');
+
+      const strangerGet = await requestJson(`/api/service-orders/${ephemeralOrderId}`, {
+        headers: { Authorization: `Bearer ${strangerToken}` }
+      });
+      eq(strangerGet.status, 403, 'Cross-user GET /api/service-orders/:id must return 403 Forbidden');
+
+      const clientAssign = await requestJson(`/api/service-orders/${ephemeralOrderId}/assign`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${clientToken}` },
+        body: JSON.stringify({ expertEmail: NONCE_EXPERT })
+      });
+      eq(clientAssign.status, 403, 'Non-admin assign must return 403 Forbidden');
+
+      const strangerDraft = await requestJson(`/api/service-orders/${ephemeralOrderId}/draft`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${strangerToken}` },
+        body: JSON.stringify({ draftFiles: [{ url: 'https://example.com/x.png' }] })
+      });
+      eq(strangerDraft.status, 403, 'Unauthorized draft submission must return 403 Forbidden');
+
+      const strangerApprove = await requestJson(`/api/service-orders/${ephemeralOrderId}/approve`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${strangerToken}` },
+        body: JSON.stringify({ rating: 5 })
+      });
+      eq(strangerApprove.status, 403, 'Cross-user order approval must return 403 Forbidden');
+    });
+
+    await t('Strict CORS & Boot Integrity invariant: blocks rogue production origins and flags default JWT secret', async () => {
+      const { isAllowedOrigin } = await import('../../server/features/domain-security/grandchildren/cors-guard.js');
+      const { validateRuntimeSecurity } = await import('../../server/features/domain-security/grandchildren/boot-guard.js');
+
+      eq(isAllowedOrigin('https://aitag.in', { NODE_ENV: 'production' }), true, 'Official aitag.in domain must be allowed');
+      eq(isAllowedOrigin('https://aitag-dev.onrender.com', { NODE_ENV: 'production' }), true, 'Render staging origin must be allowed');
+      eq(isAllowedOrigin('https://evil-phishing-site.com', { NODE_ENV: 'production' }), false, 'Rogue cross-origin domain must be blocked in production');
+
+      const weakBoot = validateRuntimeSecurity({
+        NODE_ENV: 'production',
+        JWT_SECRET: 'aitag-fractal-kernel-jwt-secret-2026',
+        SUPABASE_URL: 'https://example.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'valid-key'
+      });
+      eq(weakBoot.secure, false, 'Default known JWT_SECRET must fail production boot audit');
+
+      const strongBoot = validateRuntimeSecurity({
+        NODE_ENV: 'production',
+        JWT_SECRET: '9a7c2e1f8b4d60e3c9f1a2b4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708',
+        SUPABASE_URL: 'https://example.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'valid-key'
+      });
+      eq(strongBoot.secure, true, 'High-entropy secret & DB config must pass production boot audit');
+    });
+
+    await t('Backup Encryption & PII Sanitization invariant: AES-256-GCM roundtrip & Dev sync email masking', async () => {
+      const { encryptBuffer, decryptBuffer } = await import('../../server/features/domain-security/grandchildren/crypto-guard.js');
+      const { maskEmail, sanitizeRowsForDev } = await import('../../server/scripts/sync_prod_to_dev.js');
+
+      const secret = 'test-backup-encryption-secret-2026-xyz';
+      const plain = Buffer.from(JSON.stringify({ users: [{ email: 'realcustomer@gmail.com' }] }), 'utf8');
+      const encrypted = encryptBuffer(plain, secret);
+      assert(!encrypted.toString('utf8').includes('realcustomer@gmail.com'), 'Encrypted backup must conceal plain PII');
+
+      const decrypted = decryptBuffer(encrypted, secret);
+      eq(decrypted.toString('utf8'), plain.toString('utf8'), 'Decrypted payload must match original bytes');
+
+      let wrongKeyThrew = false;
+      try {
+        decryptBuffer(encrypted, 'wrong-encryption-secret-1234');
+      } catch {
+        wrongKeyThrew = true;
+      }
+      eq(wrongKeyThrew, true, 'Wrong decryption key must fail authentication tag verification');
+
+      const masked = maskEmail('realcustomer@gmail.com');
+      assert(masked.endsWith('@sandbox.aitag.local') && !masked.includes('realcustomer'), 'Customer email must be masked in Dev sync');
+      eq(maskEmail('user1@aitag.com'), 'user1@aitag.com', 'Protected test/admin emails must remain usable in Dev');
+
+      const sanitizedOrders = sanitizeRowsForDev('aitag_orders', [{ customer_email: 'buyer@shop.in', customer_phone: '+919999988888' }], true);
+      eq(sanitizedOrders[0].customer_phone, '+910000000000', 'Customer phone must be scrubbed in Dev sync');
+    });
+
     // --------------------------------------------------------------------------
     // GATE 8: Adaptive Cache Invariants & Performance Contracts
     // --------------------------------------------------------------------------
@@ -1340,7 +1473,17 @@ async function runPietSuite() {
     });
 
     await t('Fetches payment by ID with complete attributes', async () => {
-      const res = await requestJson(`/api/payments/${ephemeralPaymentId}`);
+      const unauthPay = await requestJson(`/api/payments/${ephemeralPaymentId}`);
+      eq(unauthPay.status, 401, 'Unauthenticated GET /api/payments/:id must return 401');
+
+      const strangerPay = await requestJson(`/api/payments/${ephemeralPaymentId}`, {
+        headers: { Authorization: `Bearer ${strangerToken}` }
+      });
+      eq(strangerPay.status, 403, 'Cross-user GET /api/payments/:id must return 403 Forbidden');
+
+      const res = await requestJson(`/api/payments/${ephemeralPaymentId}`, {
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
       eq(res.status, 200, 'GET /api/payments/:id must return 200 OK');
       eq(res.data.payment.id, ephemeralPaymentId, 'Payment ID must match');
       eq(res.data.payment.customer_email, NONCE_EMAIL, 'Customer email must match');
@@ -1348,7 +1491,9 @@ async function runPietSuite() {
 
     await t('Fetches payments by order ID', async () => {
       const testOrderId = ephemeralOrderId || 'piet-test-order';
-      const res = await requestJson(`/api/payments/order/${testOrderId}`);
+      const res = await requestJson(`/api/payments/order/${testOrderId}`, {
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
       eq(res.status, 200, 'GET /api/payments/order/:orderId must return 200 OK');
       assert(Array.isArray(res.data.payments), 'Payments must be an array');
     });

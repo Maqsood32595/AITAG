@@ -13,7 +13,7 @@ const ROOM_SUBSCRIBERS = new Map();
  */
 function authenticateWsConnection(req) {
   try {
-    const authService = require('../../aitag-auth/service');
+    const authService = require('../../domain-identity/children/auth/service');
 
     // 1. Check Authorization header
     const authHeader = req.headers['authorization'];
