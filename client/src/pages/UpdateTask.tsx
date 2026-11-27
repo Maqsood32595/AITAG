@@ -135,7 +135,7 @@ const UpdateTask = () => {
     }
   };
 
-  if (!form) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh"><CircularProgress sx={{ color: '#4f46e5' }} /></Box>;
+  if (!form) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><CircularProgress sx={{ color: '#4f46e5' }} /></Box>;
 
   const grossBudget = Number(form.budget) || 0;
   const platformFee = Number((grossBudget * 0.19).toFixed(2));

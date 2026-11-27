@@ -44,3 +44,8 @@ server/backups/
 Errors/
 *.jpg
 *.jpeg
+!client/public/*.jpg
+!client/public/*.jpeg
+!server/public/*.jpg
+!server/public/*.jpeg
+orders_meta_store.json

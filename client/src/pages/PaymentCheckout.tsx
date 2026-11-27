@@ -52,6 +52,10 @@ interface OrderConfig {
   package_title: string;
   tier_name: string;
   amount: number;
+  original_price?: number;
+  discount_amount?: number;
+  payment_waived?: boolean;
+  waive_reason?: string;
   currency: string;
   merchant: { vpa: string; displayName: string };
   upi_uri: string;
@@ -149,7 +153,10 @@ export default function PaymentCheckout() {
     }
   }, [orderId, merchant]);
 
-  const displayAmount = orderConfig?.amount || Number(amountParam) || 0;
+  const isWaived = Boolean(orderConfig?.payment_waived) || (Boolean(orderConfig) && Number(orderConfig?.amount) <= 0);
+  const displayAmount = isWaived ? 0 : (orderConfig?.amount ?? (Number(amountParam) || 0));
+  const originalPrice = orderConfig?.original_price || displayAmount;
+  const discountAmount = orderConfig?.discount_amount || 0;
   const displayPackage = orderConfig?.package_title || packageTitle || 'AITAG Service';
   const displayTier = orderConfig?.tier_name || tierName || '';
   const displayVpa = orderConfig?.merchant?.vpa || merchant?.vpa || '';
@@ -336,8 +343,44 @@ export default function PaymentCheckout() {
           </Box>
         </Fade>
 
-        {/* Success State */}
-        {submitted ? (
+        {/* Success or Payment Waived State */}
+        {isWaived ? (
+          <Grow in timeout={500}>
+            <Paper
+              id="payment-waived-card"
+              sx={{
+                p: { xs: 3, md: 5 },
+                borderRadius: '20px',
+                background: 'rgba(16,185,129,0.08)',
+                border: '1px solid rgba(16,185,129,0.25)',
+                backdropFilter: 'blur(20px)',
+                textAlign: 'center',
+              }}
+            >
+              <CheckCircleIcon sx={{ color: '#10b981', fontSize: 56, mb: 2 }} />
+              <Typography variant="h5" sx={{ color: '#10b981', fontWeight: 800, mb: 1 }}>
+                Payment Waived by Admin
+              </Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.72)', mb: 3, maxWidth: 440, mx: 'auto' }}>
+                No upfront payment is required for <strong>{displayPackage}</strong>
+                {orderConfig?.waive_reason ? ` (${orderConfig.waive_reason})` : ''}. Your order is active inside your dashboard.
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => navigate('/dashboard')}
+                sx={{
+                  px: { xs: 2.5, sm: 4 },
+                  py: 1.5,
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                }}
+              >
+                Go to Dashboard
+              </Button>
+            </Paper>
+          </Grow>
+        ) : submitted ? (
           <Grow in timeout={500}>
             <Paper
               id="payment-success-card"
@@ -486,7 +529,19 @@ export default function PaymentCheckout() {
                         />
                       )}
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
+                      {discountAmount > 0 && originalPrice > displayAmount && (
+                        <>
+                          <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem', textDecoration: 'line-through' }}>
+                            ₹{originalPrice.toLocaleString('en-IN')}
+                          </Typography>
+                          <Chip
+                            label={`-₹${discountAmount.toLocaleString('en-IN')} Admin Discount`}
+                            size="small"
+                            sx={{ bgcolor: 'rgba(16,185,129,0.2)', color: '#6ee7b7', fontWeight: 700, fontSize: '0.68rem', height: 20 }}
+                          />
+                        </>
+                      )}
                       <Typography
                         variant="caption"
                         sx={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}

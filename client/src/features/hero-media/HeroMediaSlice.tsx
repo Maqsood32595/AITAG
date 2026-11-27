@@ -24,6 +24,16 @@ interface HeroMediaConfig {
 
 const DEFAULT_ASPECT_RATIO = 1024 / 576;
 
+const INITIAL_HERO_CONFIG: HeroMediaConfig = {
+  enabled: true,
+  available: true,
+  videoUrl: '/hero-floating-video.mp4',
+  posterUrl: '/hero-floating-poster.webp',
+  aspectRatio: DEFAULT_ASPECT_RATIO,
+  label: 'AITAG Intro',
+  mutedByDefault: false,
+};
+
 const HERO_HIGHLIGHTS = [
   {
     title: 'Starts at ₹499',
@@ -55,16 +65,18 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const inlineContainerRef = useRef<HTMLDivElement | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const userPausedRef = useRef(false);
+  const userPausedRef = useRef(true);
+  const hasStartedRef = useRef(false);
   const savedTimeRef = useRef(0);
 
-  const [config, setConfig] = useState<HeroMediaConfig | null>(null);
-  const [isConfigLoading, setIsConfigLoading] = useState(true);
+  const [config, setConfig] = useState<HeroMediaConfig | null>(INITIAL_HERO_CONFIG);
+  const [isConfigLoading, setIsConfigLoading] = useState(false);
   const [hasMediaError, setHasMediaError] = useState(false);
 
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.5);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [hasEnded, setHasEnded] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<number>(DEFAULT_ASPECT_RATIO);
   const [progress, setProgress] = useState(0);
@@ -75,7 +87,6 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
     let isActive = true;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
-    setIsConfigLoading(true);
 
     fetch('/api/hero-media/config', {
       headers: { Accept: 'application/json' },
@@ -95,7 +106,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
           if (typeof data.aspectRatio === 'number' && data.aspectRatio > 0) {
             setAspectRatio(data.aspectRatio);
           }
-          setIsMuted(data.mutedByDefault !== false);
+          setIsMuted(data.mutedByDefault === true);
         } else {
           setConfig(null);
         }
@@ -137,7 +148,7 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
     feedbackTimerRef.current = setTimeout(() => setTapFeedback(null), 550);
   }, []);
 
-  // Auto-pause inline video when Hero scrolls out of viewport to save battery/CPU
+  // Auto-pause active video when Hero scrolls out of viewport; never auto-start unprompted
   useEffect(() => {
     if (!isSliceReady || !inlineContainerRef.current) return;
     const target = inlineContainerRef.current;
@@ -147,8 +158,8 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
         const vid = videoRef.current;
         if (!vid) return;
         if (!entries[0].isIntersecting) {
-          vid.pause();
-        } else if (!userPausedRef.current && !vid.ended) {
+          if (!vid.paused) vid.pause();
+        } else if (hasStartedRef.current && !userPausedRef.current && !vid.ended) {
           vid.play().catch(() => {});
         }
       },
@@ -169,9 +180,13 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
     e?.stopPropagation();
     const vid = videoRef.current;
     if (!vid) return;
+    hasStartedRef.current = true;
     userPausedRef.current = false;
     savedTimeRef.current = 0;
     vid.currentTime = 0;
+    vid.muted = isMuted;
+    vid.volume = volume;
+    setHasStarted(true);
     setHasEnded(false);
     setProgress(0);
     setIsPlaying(true);
@@ -189,8 +204,12 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
     }
 
     if (vid.paused) {
+      hasStartedRef.current = true;
       userPausedRef.current = false;
+      vid.muted = isMuted;
+      vid.volume = volume;
       vid.play().catch(() => {});
+      setHasStarted(true);
       setIsPlaying(true);
       showFeedback('play');
     } else {
@@ -323,14 +342,15 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
           <video
             ref={videoRef}
             src={config.videoUrl}
-            poster={config.posterUrl || undefined}
-            autoPlay={!hasEnded}
+            poster={config.posterUrl || '/hero-floating-poster.webp'}
             muted={isMuted}
             playsInline
-            preload="auto"
+            preload="none"
             onLoadedMetadata={handleLoadedMetadata}
             onTimeUpdate={handleTimeUpdate}
             onPlay={() => {
+              hasStartedRef.current = true;
+              setHasStarted(true);
               setHasEnded(false);
               setIsPlaying(true);
             }}
@@ -516,6 +536,43 @@ const HeroMediaSlice: React.FC<HeroMediaSlotProps> = ({
             >
               <ReplayRoundedIcon sx={{ fontSize: 19 }} />
               <span>Watch Again</span>
+            </Box>
+          ) : !hasStarted && !isPlaying ? (
+            <Box
+              component="button"
+              type="button"
+              onClick={handleTogglePlay}
+              aria-label="Play AITAG intro video"
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.75,
+                px: 2.3,
+                py: 1.05,
+                borderRadius: '30px',
+                bgcolor: 'rgba(15, 23, 42, 0.84)',
+                color: '#ffffff',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 14px 34px rgba(15, 23, 42, 0.42)',
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '0.84rem',
+                fontWeight: 800,
+                zIndex: 3,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#4f46e5',
+                  transform: 'translate(-50%, -50%) scale(1.05)',
+                },
+              }}
+            >
+              <PlayArrowRoundedIcon sx={{ fontSize: 22 }} />
+              <span>Watch Intro</span>
             </Box>
           ) : (
             (!isPlaying || tapFeedback) && (

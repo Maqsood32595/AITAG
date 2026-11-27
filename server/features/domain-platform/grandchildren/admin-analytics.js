@@ -9,8 +9,8 @@ function computeAdminAnalytics({ orders = [], tasks = [], users = [], bids = [] 
   let activeEscrow = 0;
 
   orders.forEach((ord) => {
-    const price = Number(ord.agreed_price) || 0;
-    const fee = Number(ord.platform_fee) || Math.round(price * 0.05);
+    const price = ord.payment_waived ? 0 : (Number(ord.agreed_price) || 0);
+    const fee = ord.payment_waived ? 0 : (Number(ord.platform_fee) || Math.round(price * 0.05));
     gmv += price;
     if (ord.status === 'COMPLETED') {
       platformCommission += fee;
@@ -20,7 +20,7 @@ function computeAdminAnalytics({ orders = [], tasks = [], users = [], bids = [] 
   });
 
   tasks.forEach((t) => {
-    const budget = Number(t.budget) || 0;
+    const budget = t.payment_waived ? 0 : (Number(t.budget) || 0);
     gmv += budget;
     if (t.status === 'in-progress') {
       activeEscrow += budget;

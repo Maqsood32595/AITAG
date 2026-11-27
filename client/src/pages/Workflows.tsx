@@ -38,6 +38,8 @@ export interface DeliveredWorkflow {
   displayHeadingOnVideo?: boolean;
   demoVideoUrl: string;
   mediaUrl?: string;
+  thumbnailUrl?: string;
+  posterUrl?: string;
   mediaType?: 'video' | 'image';
   videoDurationSeconds?: number;
   businessImpact?: string;
@@ -472,6 +474,7 @@ export const Workflows: React.FC = () => {
                       <Box sx={{ my: 2, borderRadius: 2, overflow: 'hidden', border: '1px solid #e2e8f0', bgcolor: '#090d16' }}>
                         <UniversalVideoPlayer
                           url={wf.demoVideoUrl || wf.mediaUrl}
+                          posterUrl={wf.thumbnailUrl || wf.posterUrl}
                           title={wf.title}
                           mediaType={wf.mediaType}
                           autoPlay={false}
@@ -868,6 +871,7 @@ export const Workflows: React.FC = () => {
               <UniversalVideoPlayer
                 key={currentPreviewReel.id || previewReelIndex}
                 url={currentPreviewReel.demoVideoUrl || currentPreviewReel.mediaUrl}
+                posterUrl={currentPreviewReel.thumbnailUrl || currentPreviewReel.posterUrl}
                 title={currentPreviewReel.title}
                 mediaType={currentPreviewReel.mediaType}
                 autoPlay={true}

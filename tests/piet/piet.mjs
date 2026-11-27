@@ -12,7 +12,7 @@
  * ==============================================================================
  */
 
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, unlinkSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
 // Force PIET test harness to execute strictly against the isolated Dev / Standby Supabase replica
@@ -68,6 +68,7 @@ async function runPietSuite() {
 
   let localServer = null;
   let ephemeralOrderId = null;
+  let ephemeralPricingOrderId = null;
   let ephemeralTaskId = null;
 
   // Auto-boot In-RAM Server Twin if port is closed
@@ -1527,25 +1528,169 @@ async function runPietSuite() {
       } catch {}
     }
 
+    // --------------------------------------------------------------------------
+    // GATE 10: Managed Services Discount & Payment Waiver Invariants
+    // --------------------------------------------------------------------------
+    gate('Gate 10: Managed Services Discount & Payment Waiver Invariants');
+
+    await t('Negative RBAC defense: client & freelancer get 403 on pricing & skip-payment endpoints', async () => {
+      const checks = [
+        { path: `/api/service-orders/${ephemeralOrderId}/skip-payment`, token: clientToken, label: 'client order skip-payment' },
+        { path: `/api/service-orders/${ephemeralOrderId}/skip-payment`, token: freelancerToken, label: 'freelancer order skip-payment' },
+        { path: `/api/service-orders/${ephemeralOrderId}/pricing`, token: clientToken, label: 'client order pricing' },
+        { path: `/api/service-orders/${ephemeralOrderId}/pricing`, token: freelancerToken, label: 'freelancer order pricing' },
+        { path: `/api/tasks/${ephemeralTaskId}/skip-payment`, token: clientToken, label: 'client task skip-payment' },
+        { path: `/api/tasks/${ephemeralTaskId}/skip-payment`, token: freelancerToken, label: 'freelancer task skip-payment' },
+        { path: `/api/tasks/${ephemeralTaskId}/pricing`, token: clientToken, label: 'client task pricing' },
+        { path: `/api/tasks/${ephemeralTaskId}/pricing`, token: freelancerToken, label: 'freelancer task pricing' }
+      ];
+
+      for (const item of checks) {
+        const res = await requestJson(item.path, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${item.token}` },
+          body: JSON.stringify({ discountAmount: 250, reason: 'Unauthorized attempt' })
+        });
+        eq(res.status, 403, `${item.label} must return 403 Forbidden`);
+      }
+    });
+
+    await t('Admin applies Service Order discount and getPaymentConfig reflects discounted INR amount', async () => {
+      const createRes = await requestJson('/api/service-orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          package_slug: 'ai-product-photo-makeover',
+          tier_name: 'starter',
+          customer_name: 'PIET Pricing Test Client',
+          customer_email: NONCE_EMAIL,
+          customer_phone: '+91 98765 43210',
+          business_name: 'PIET Managed Waiver Test Co.',
+          business_type: 'D2C Brand',
+          brief_notes: 'Testing admin discount and payment waiver workflow'
+        })
+      });
+      eq(createRes.status, 201, 'Fresh service order for pricing test must return 201');
+      ephemeralPricingOrderId = createRes.data.order.id;
+      eq(Number(createRes.data.order.agreed_price), 1499, 'Initial Starter tier price must be 1499');
+
+      const discRes = await requestJson(`/api/service-orders/${ephemeralPricingOrderId}/pricing`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          discountAmount: 500,
+          skipPayment: false,
+          reason: 'Launch promotional discount'
+        })
+      });
+      eq(discRes.status, 200, 'POST /api/service-orders/:id/pricing must return 200 OK');
+      eq(discRes.data.success, true, 'Pricing override must succeed');
+      eq(Number(discRes.data.order.original_price), 1499, 'original_price must preserve 1499');
+      eq(Number(discRes.data.order.discount_amount), 500, 'discount_amount must equal 500');
+      eq(Number(discRes.data.order.agreed_price), 999, 'agreed_price must equal 999');
+      eq(discRes.data.order.payment_waived, false, 'payment_waived must remain false when only discounted');
+
+      const cfgRes = await requestJson(`/api/payments/config/${ephemeralPricingOrderId}`);
+      eq(cfgRes.status, 200, 'GET /api/payments/config/:orderId must return 200 OK');
+      eq(cfgRes.data.success, true, 'Payment config response must succeed');
+      eq(Number(cfgRes.data.config.original_price), 1499, 'Payment config original_price must equal 1499');
+      eq(Number(cfgRes.data.config.discount_amount), 500, 'Payment config discount_amount must equal 500');
+      eq(Number(cfgRes.data.config.amount), 999, 'Payment config amount must reflect discounted price 999');
+      eq(cfgRes.data.config.payment_waived, false, 'Payment config payment_waived must be false');
+    });
+
+    await t('Admin skips Service Order payment (payment_waived=true, amount=0) and assign auto-advances to ACTIVE', async () => {
+      const waiveRes = await requestJson(`/api/service-orders/${ephemeralPricingOrderId}/skip-payment`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ reason: 'Admin waived fee for managed VIP brief' })
+      });
+      eq(waiveRes.status, 200, 'POST /api/service-orders/:id/skip-payment must return 200 OK');
+      eq(waiveRes.data.success, true, 'Skip payment must succeed');
+      eq(waiveRes.data.order.payment_waived, true, 'payment_waived must become true');
+      eq(Number(waiveRes.data.order.agreed_price), 0, 'agreed_price must become 0 when waived');
+      eq(waiveRes.data.order.waive_reason, 'Admin waived fee for managed VIP brief', 'waive_reason must be preserved');
+
+      const cfgRes = await requestJson(`/api/payments/config/${ephemeralPricingOrderId}`);
+      eq(cfgRes.status, 200, 'GET /api/payments/config/:orderId must return 200 OK after waiver');
+      eq(cfgRes.data.config.payment_waived, true, 'Payment config payment_waived must be true');
+      eq(Number(cfgRes.data.config.amount), 0, 'Payment config amount must be 0 when waived');
+
+      const assignRes = await requestJson(`/api/service-orders/${ephemeralPricingOrderId}/assign`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          expertEmail: NONCE_EXPERT,
+          expertName: 'Verified AI Visual Specialist'
+        })
+      });
+      eq(assignRes.status, 200, 'Assigning expert on waived order must return 200 OK');
+      eq(assignRes.data.order.status, 'ACTIVE', 'Waived order must skip payment step and transition directly to ACTIVE');
+    });
+
+    await t('Admin discounts and skips payment on Marketplace Task (ephemeralTaskId)', async () => {
+      const discRes = await requestJson(`/api/tasks/${ephemeralTaskId}/pricing`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          discountAmount: 300,
+          skipPayment: false,
+          reason: 'Task promo discount'
+        })
+      });
+      eq(discRes.status, 200, 'POST /api/tasks/:id/pricing must return 200 OK');
+      eq(discRes.data.success, true, 'Task pricing override must succeed');
+      eq(Number(discRes.data.task.original_price), 1500, 'Task original_price must preserve 1500');
+      eq(Number(discRes.data.task.discount_amount), 300, 'Task discount_amount must equal 300');
+      eq(Number(discRes.data.task.budget), 1200, 'Task budget must be reduced to 1200');
+      eq(discRes.data.task.payment_waived, false, 'Task payment_waived must be false before skip-payment');
+
+      const waiveRes = await requestJson(`/api/tasks/${ephemeralTaskId}/skip-payment`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ reason: 'Internal managed task waived' })
+      });
+      eq(waiveRes.status, 200, 'POST /api/tasks/:id/skip-payment must return 200 OK');
+      eq(waiveRes.data.success, true, 'Task skip-payment must succeed');
+      eq(waiveRes.data.task.payment_waived, true, 'Task payment_waived must become true');
+      eq(Number(waiveRes.data.task.budget), 0, 'Task budget must become 0 when waived');
+      eq(waiveRes.data.task.escrow_funded, true, 'Task escrow_funded must become true when waived');
+    });
+
   } finally {
-    // Teardown: Clean up ephemeral test order
-    if (ephemeralOrderId) {
+    // Teardown: Clean up ephemeral test orders
+    for (const testOrderId of [ephemeralOrderId, ephemeralPricingOrderId].filter(Boolean)) {
       try {
         const rawSupabase = await import('../../server/supabase.js');
         const supabase = rawSupabase.default || rawSupabase;
-        await supabase.from('aitag_orders').delete().eq('id', ephemeralOrderId);
+        await supabase.from('aitag_orders').delete().eq('id', testOrderId);
         
         try {
           const rawDiscussions = await import('../../server/features/aitag-case-discussions/service.js');
           const discussionsService = rawDiscussions.default || rawDiscussions;
-          await discussionsService.purgeByOrderId(ephemeralOrderId);
+          await discussionsService.purgeByOrderId(testOrderId);
         } catch {}
 
-        console.log(`\n🧹 Ephemeral Teardown: Deleted test order ${ephemeralOrderId} (Zero Ghost Records).`);
+        console.log(`\n🧹 Ephemeral Teardown: Deleted test order ${testOrderId} (Zero Ghost Records).`);
       } catch (err) {
         console.warn('⚠️ Teardown cleanup note:', err.message);
       }
     }
+
+    // Teardown: Clean up orders_meta_store.json test entries
+    try {
+      const ordersMetaPath = resolve(process.cwd(), 'server/features/domain-services/children/orders/orders_meta_store.json');
+      if (existsSync(ordersMetaPath)) {
+        const metaData = JSON.parse(readFileSync(ordersMetaPath, 'utf-8'));
+        for (const testOrderId of [ephemeralOrderId, ephemeralPricingOrderId].filter(Boolean)) {
+          delete metaData[testOrderId];
+        }
+        if (Object.keys(metaData).length === 0) {
+          unlinkSync(ordersMetaPath);
+        } else {
+          writeFileSync(ordersMetaPath, JSON.stringify(metaData, null, 2), 'utf-8');
+        }
+      }
+    } catch {}
 
     // Teardown: Clean up ephemeral test task
     if (ephemeralTaskId) {

@@ -56,7 +56,7 @@ export const Analytics: React.FC = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="70vh" gap={2}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '70vh', gap: 2 }}>
           <CircularProgress sx={{ color: '#4f46e5' }} />
           <Typography sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.95rem' }}>
             Compiling real-time performance analytics & account...

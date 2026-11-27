@@ -264,17 +264,64 @@ router.post('/:id/assign', auth, async (req, res) => {
     if (req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Only administrators can match verified specialists to tasks' });
     }
-    const { expertEmail, expertName } = req.body;
+    const { expertEmail, expertName, discountAmount, skipPayment, reason } = req.body;
     if (!expertEmail) {
       return res.status(400).json({ error: 'expertEmail is required' });
     }
-    const task = await tasksService.assignTask(req.params.id, { expertEmail, expertName });
+    const task = await tasksService.assignTask(req.params.id, {
+      expertEmail,
+      expertName,
+      discountAmount,
+      skipPayment,
+      reason,
+      adminEmail: req.user.email,
+    });
     cacheService.invalidateByTag('tasks');
     cacheService.invalidateByTag(`user:${(task.user_email || '').toLowerCase().trim()}`);
     cacheService.invalidateByTag(`user:${(expertEmail || '').toLowerCase().trim()}`);
     res.json({ success: true, task });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/tasks/:id/skip-payment — Admin waives payment requirement on a task
+router.post('/:id/skip-payment', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only administrators can waive task payments' });
+    }
+    const task = await tasksService.applyPricingOverride(req.params.id, {
+      skipPayment: true,
+      reason: req.body?.reason,
+      adminEmail: req.user.email,
+    });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${(task.user_email || '').toLowerCase().trim()}`);
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// POST /api/tasks/:id/pricing — Admin applies discount and/or waives task payment
+router.post('/:id/pricing', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only administrators can modify task pricing' });
+    }
+    const { discountAmount = 0, skipPayment = false, reason = '' } = req.body || {};
+    const task = await tasksService.applyPricingOverride(req.params.id, {
+      discountAmount,
+      skipPayment: Boolean(skipPayment),
+      reason,
+      adminEmail: req.user.email,
+    });
+    cacheService.invalidateByTag('tasks');
+    cacheService.invalidateByTag(`user:${(task.user_email || '').toLowerCase().trim()}`);
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 

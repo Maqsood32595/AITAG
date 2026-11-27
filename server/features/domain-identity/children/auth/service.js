@@ -438,6 +438,87 @@ class AuthService {
     };
   }
 
+  validateNewPassword(newPassword) {
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error('Password must be at least 6 characters');
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      throw new Error('Password must contain at least one uppercase letter (e.g. A-Z)');
+    }
+    const insecurePasswords = ['admin', 'password', '123456', 'qwerty', 'admin123', 'password123'];
+    if (insecurePasswords.includes(newPassword.toLowerCase().trim())) {
+      throw new Error('Password is too common or insecure. Please choose a stronger password.');
+    }
+  }
+
+  /**
+   * Update password for an authenticated user after verifying current password
+   */
+  async changePassword(userId, { currentPassword, newPassword }) {
+    if (!currentPassword) {
+      throw new Error('Current password is required');
+    }
+    this.validateNewPassword(newPassword);
+
+    if (currentPassword === newPassword) {
+      throw new Error('New password must be different from your current password');
+    }
+
+    let userRecord = null;
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { data } = await supabase
+          .from('aitag_users')
+          .select('id, email, password_hash')
+          .eq('id', userId)
+          .maybeSingle();
+        if (data) userRecord = data;
+      }
+    } catch (e) {
+      console.warn('[AuthService] Supabase lookup during password change:', e.message);
+    }
+
+    if (!userRecord) {
+      const seedUser = SEED_USERS.find((u) => u.id === userId);
+      if (seedUser) userRecord = seedUser;
+    }
+
+    if (!userRecord || !userRecord.password_hash) {
+      throw new Error('Account not found');
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, userRecord.password_hash);
+    if (!isMatch) {
+      throw new Error('Current password is incorrect');
+    }
+
+    const password_hash = await bcrypt.hash(newPassword, 10);
+
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        const { error } = await supabase
+          .from('aitag_users')
+          .update({ password_hash })
+          .eq('id', userRecord.id);
+        if (error) {
+          console.warn('[AuthService] Supabase password update notice:', error.message);
+        }
+      }
+    } catch (e) {
+      console.warn('[AuthService] Supabase update error during password change:', e.message);
+    }
+
+    const seedUser = SEED_USERS.find((u) => u.id === userRecord.id || u.email === userRecord.email);
+    if (seedUser) {
+      seedUser.password_hash = password_hash;
+    }
+
+    return {
+      success: true,
+      message: 'Password updated successfully.'
+    };
+  }
+
   /**
    * Reset password with valid token
    */
@@ -445,12 +526,7 @@ class AuthService {
     if (!token) {
       throw new Error('Reset token is required');
     }
-    if (!newPassword || newPassword.length < 6) {
-      throw new Error('Password must be at least 6 characters');
-    }
-    if (!/[A-Z]/.test(newPassword)) {
-      throw new Error('Password must contain at least one uppercase letter (e.g. A-Z)');
-    }
+    this.validateNewPassword(newPassword);
 
     // Verify token
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');

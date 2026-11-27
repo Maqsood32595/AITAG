@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Box, Container, Typography, Paper, Grid, TextField, Button,
-  Chip, Stack, Alert, CircularProgress, IconButton, Tooltip,
+  Chip, Stack, Alert, CircularProgress, IconButton, Tooltip, InputAdornment,
   FormControl, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
@@ -34,10 +34,13 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import LockResetIcon from '@mui/icons-material/LockReset';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import AnimatedAvatar from '../components/AnimatedAvatar';
 import { useAuth } from '../context/AuthContext';
-import { profileApi, analyticsApi, accountApi } from '../api';
+import { profileApi, analyticsApi, accountApi, authApi } from '../api';
 import { useMobileDetect } from '../utils/useMobileDetect';
 
 export const Profile: React.FC = () => {
@@ -56,6 +59,17 @@ export const Profile: React.FC = () => {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+
+  // Simple Password Reset / Update Modal State
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [resetEmailSending, setResetEmailSending] = useState(false);
   
   // Account Dossier State
   const [accountIdentifier, setAccountIdentifier] = useState(
@@ -223,7 +237,7 @@ export const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress />
       </Box>
     );
@@ -1004,7 +1018,15 @@ export const Profile: React.FC = () => {
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => alert('Password update request sent to registered email.')}
+                    onClick={() => {
+                      setCurrentPassword('');
+                      setNewPassword('');
+                      setConfirmPassword('');
+                      setShowPasswords(false);
+                      setPasswordError('');
+                      setPasswordSuccess('');
+                      setPasswordDialogOpen(true);
+                    }}
                     sx={{ textTransform: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer !important' }}
                   >
                     Update Password
@@ -1091,6 +1113,167 @@ export const Profile: React.FC = () => {
           </Paper>
         </Box>
       </Container>
+
+      {/* Simple Password Update / Email Reset Modal */}
+      <Dialog
+        open={passwordDialogOpen}
+        onClose={() => !passwordSaving && !resetEmailSending && setPasswordDialogOpen(false)}
+        fullScreen={isMobileDialog}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: isMobileDialog ? 0 : '18px',
+            p: 1,
+          }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
+          <Stack direction="row" spacing={1.2} alignItems="center">
+            <LockResetIcon sx={{ color: '#4f46e5' }} />
+            <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a' }}>
+              Update Password
+            </Typography>
+          </Stack>
+          <IconButton
+            size="small"
+            onClick={() => setPasswordDialogOpen(false)}
+            disabled={passwordSaving || resetEmailSending}
+            aria-label="Close password modal"
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ pt: 0.5 }}>
+            {passwordError && (
+              <Alert severity="error" sx={{ borderRadius: '10px', fontSize: '0.82rem' }}>
+                {passwordError}
+              </Alert>
+            )}
+            {passwordSuccess && (
+              <Alert severity="success" sx={{ borderRadius: '10px', fontSize: '0.82rem' }}>
+                {passwordSuccess}
+              </Alert>
+            )}
+            <TextField
+              label="Current Password"
+              type={showPasswords ? 'text' : 'password'}
+              size="small"
+              fullWidth
+              value={currentPassword}
+              onChange={(e) => {
+                setCurrentPassword(e.target.value);
+                if (passwordError) setPasswordError('');
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => setShowPasswords((v) => !v)}
+                      aria-label={showPasswords ? 'Hide passwords' : 'Show passwords'}
+                      edge="end"
+                    >
+                      {showPasswords ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              label="New Password"
+              type={showPasswords ? 'text' : 'password'}
+              size="small"
+              fullWidth
+              helperText="At least 6 characters with 1 uppercase letter (A-Z)"
+              value={newPassword}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                if (passwordError) setPasswordError('');
+              }}
+            />
+            <TextField
+              label="Confirm New Password"
+              type={showPasswords ? 'text' : 'password'}
+              size="small"
+              fullWidth
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (passwordError) setPasswordError('');
+              }}
+            />
+            <Box sx={{ pt: 0.5 }}>
+              <Button
+                variant="text"
+                size="small"
+                disabled={resetEmailSending || passwordSaving || !primaryEmail}
+                onClick={async () => {
+                  setResetEmailSending(true);
+                  setPasswordError('');
+                  setPasswordSuccess('');
+                  try {
+                    const res = await authApi.forgotPassword(primaryEmail);
+                    setPasswordSuccess(res.data?.message || `Password reset link sent to ${primaryEmail}.`);
+                  } catch (err: any) {
+                    setPasswordError(err.response?.data?.error || 'Could not send reset email.');
+                  } finally {
+                    setResetEmailSending(false);
+                  }
+                }}
+                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', px: 0, color: '#4f46e5' }}
+              >
+                {resetEmailSending ? 'Sending reset link...' : `Forgot password or signed in with Google? Email reset link to ${primaryEmail}`}
+              </Button>
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button
+            onClick={() => setPasswordDialogOpen(false)}
+            disabled={passwordSaving || resetEmailSending}
+            sx={{ textTransform: 'none', fontWeight: 600, color: '#64748b' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={passwordSaving || resetEmailSending}
+            onClick={async () => {
+              setPasswordError('');
+              setPasswordSuccess('');
+              if (!currentPassword || !newPassword) {
+                setPasswordError('Please fill in your current and new password.');
+                return;
+              }
+              if (newPassword !== confirmPassword) {
+                setPasswordError('New password and confirm password do not match.');
+                return;
+              }
+              if (newPassword.length < 6 || !/[A-Z]/.test(newPassword)) {
+                setPasswordError('New password must be at least 6 characters with one uppercase letter (A-Z).');
+                return;
+              }
+              setPasswordSaving(true);
+              try {
+                const res = await authApi.changePassword({ currentPassword, newPassword });
+                setPasswordSuccess(res.data?.message || 'Password updated successfully.');
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+              } catch (err: any) {
+                setPasswordError(err.response?.data?.error || 'Failed to update password.');
+              } finally {
+                setPasswordSaving(false);
+              }
+            }}
+            sx={{ textTransform: 'none', fontWeight: 700, bgcolor: '#4f46e5', borderRadius: '10px', px: 2.5 }}
+          >
+            {passwordSaving ? 'Updating...' : 'Save Password'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Inbuilt Account Deletion Modal — AITAG Color & Design Pattern */}
       <Dialog

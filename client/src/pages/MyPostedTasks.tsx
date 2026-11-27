@@ -142,7 +142,7 @@ const MyPostedTasks = () => {
         </Box>
 
         {loading ? (
-          <Box display="flex" justifyContent="center" py={8}><CircularProgress sx={{ color: '#4f46e5' }} /></Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress sx={{ color: '#4f46e5' }} /></Box>
         ) : activeTab === 'packages' ? (
           /* Package Orders View */
           <Paper elevation={0} sx={{ borderRadius: '16px', border: '1px solid rgba(79,70,229,0.1)', overflow: 'hidden' }}>

@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const VIDEO_FILENAME = 'hero-floating-video.mp4';
-const POSTER_FILENAME = 'hero-floating-poster.jpg';
+const POSTER_CANDIDATES = ['hero-floating-poster.webp', 'hero-floating-poster.jpg'];
 
 const SEARCH_DIRS = [
   path.join(__dirname, '../../../client/dist'),
@@ -27,7 +27,7 @@ function assetExists(filename) {
 
 function getHeroMediaConfig() {
   const videoAvailable = assetExists(VIDEO_FILENAME);
-  const posterAvailable = assetExists(POSTER_FILENAME);
+  const resolvedPoster = POSTER_CANDIDATES.find((name) => assetExists(name)) || null;
 
   return {
     success: true,
@@ -35,10 +35,10 @@ function getHeroMediaConfig() {
     enabled: true,
     available: videoAvailable,
     videoUrl: `/${VIDEO_FILENAME}`,
-    posterUrl: posterAvailable ? `/${POSTER_FILENAME}` : null,
+    posterUrl: resolvedPoster ? `/${resolvedPoster}` : null,
     aspectRatio: 1024 / 576,
     label: 'AITAG Intro',
-    mutedByDefault: true,
+    mutedByDefault: false,
   };
 }
 

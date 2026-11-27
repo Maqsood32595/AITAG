@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const supabase = require('../../../../supabase');
+const { computePricingAdjustment } = require('../../../domain-services/grandchildren/pricing-waiver-engine');
 
 const META_STORE_PATH = path.join(__dirname, 'tasks_meta_store.json');
 
@@ -194,13 +195,26 @@ class TasksService {
     }
 
     const assignment = taskAssignmentMap.get(task.id) || {};
+    const hasPricingOverride = assignment.payment_waived !== undefined || assignment.discount_amount !== undefined || assignment.agreed_price !== undefined;
+    const rawBudget = assignment.agreed_price !== undefined
+      ? Number(assignment.agreed_price)
+      : Number(task.budget) || 0;
+    const originalPrice = assignment.original_price !== undefined
+      ? Number(assignment.original_price)
+      : Math.max(Number(task.original_price || task.budget) || 0, hasPricingOverride ? 0 : 499);
+
     return {
       ...task,
+      ...assignment,
       category: ({ 'Web & Funnels': 'Web & Digital Presence', 'E-Commerce & Copy': 'Branding & Print' })[task.category] || task.category,
-      budget: Math.max(Number(task.budget) || 0, 499),
+      budget: hasPricingOverride ? rawBudget : Math.max(rawBudget, 499),
+      original_price: originalPrice,
+      discount_amount: Number(assignment.discount_amount ?? task.discount_amount ?? 0),
+      payment_waived: Boolean(assignment.payment_waived ?? task.payment_waived),
+      escrow_funded: Boolean(assignment.escrow_funded ?? task.escrow_funded),
       attachments,
-      assigned_expert_email: task.assigned_expert_email || assignment.assigned_expert_email || null,
-      assigned_expert_name: task.assigned_expert_name || assignment.assigned_expert_name || null,
+      assigned_expert_email: assignment.assigned_expert_email ?? task.assigned_expert_email ?? null,
+      assigned_expert_name: assignment.assigned_expert_name ?? task.assigned_expert_name ?? null,
       status: assignment.status || task.status || 'open'
     };
   }
@@ -540,7 +554,7 @@ class TasksService {
     if (task) task.total_bids = (task.total_bids || 0) + 1;
   }
 
-  async assignTask(id, { expertEmail, expertName }) {
+  async assignTask(id, { expertEmail, expertName, discountAmount, skipPayment, reason = '', adminEmail = 'admin' }) {
     if (!expertEmail) throw new Error('expertEmail is required');
     const cleanExpert = (expertEmail || '').toLowerCase().trim();
     const cleanName = (expertName || '').trim() || cleanExpert;
@@ -548,10 +562,26 @@ class TasksService {
     const task = await this.getTaskById(id);
     if (!task) throw new Error('Task not found');
 
+    let pricingPatch = {};
+    if (Number(discountAmount) > 0 || Boolean(skipPayment)) {
+      pricingPatch = computePricingAdjustment({
+        currentOriginalPrice: task.original_price,
+        currentAgreedPrice: task.agreed_price ?? task.budget,
+        discountAmount,
+        skipPayment,
+        adminEmail,
+        reason,
+      });
+    }
+
+    const existingMeta = taskAssignmentMap.get(id) || {};
     const updates = {
+      ...existingMeta,
       status: 'in-progress',
       assigned_expert_email: cleanExpert,
-      assigned_expert_name: cleanName
+      assigned_expert_name: cleanName,
+      ...(pricingPatch.agreed_price !== undefined ? { budget: pricingPatch.agreed_price, ...pricingPatch } : {}),
+      ...(pricingPatch.payment_waived ? { escrow_funded: true, escrow_status: 'ADMIN_WAIVED' } : {}),
     };
 
     taskAssignmentMap.set(id, updates);
@@ -561,7 +591,12 @@ class TasksService {
       if (supabase && typeof supabase.from === 'function') {
         const { data, error } = await supabase
           .from('aitag_tasks')
-          .update(updates)
+          .update({
+            status: 'in-progress',
+            assigned_expert_email: cleanExpert,
+            assigned_expert_name: cleanName,
+            ...(updates.budget !== undefined ? { budget: updates.budget } : {}),
+          })
           .eq('id', id)
           .select()
           .single();
@@ -578,11 +613,64 @@ class TasksService {
             return this._enrichTask({ ...retryRes.data, ...updates });
           }
         } else if (!error && data) {
-          return this._enrichTask(data);
+          return this._enrichTask({ ...data, ...updates });
         }
       }
     } catch (e) {
       console.warn('[TasksService] Assign task fallback:', e.message);
+    }
+
+    const memTask = SEED_FALLBACK_TASKS.find(t => t.id === id);
+    if (memTask) {
+      Object.assign(memTask, updates);
+      return this._enrichTask(memTask);
+    }
+
+    return this._enrichTask({ ...task, ...updates });
+  }
+
+  async applyPricingOverride(id, { discountAmount = 0, skipPayment = false, reason = '', adminEmail = 'admin' } = {}) {
+    const task = await this.getTaskById(id);
+    if (!task) throw new Error('Task not found');
+
+    const pricingPatch = computePricingAdjustment({
+      currentOriginalPrice: task.original_price,
+      currentAgreedPrice: task.agreed_price ?? task.budget,
+      discountAmount,
+      skipPayment,
+      adminEmail,
+      reason,
+    });
+
+    const existingMeta = taskAssignmentMap.get(id) || {};
+    const updates = {
+      ...existingMeta,
+      ...pricingPatch,
+      budget: pricingPatch.agreed_price,
+      ...(pricingPatch.payment_waived
+        ? {
+            escrow_funded: true,
+            escrow_status: 'ADMIN_WAIVED',
+            status: task.assigned_expert_email && task.status === 'open' ? 'in-progress' : task.status,
+          }
+        : {}),
+    };
+
+    taskAssignmentMap.set(id, updates);
+    this._persistMetaStore();
+
+    try {
+      if (supabase && typeof supabase.from === 'function') {
+        await supabase
+          .from('aitag_tasks')
+          .update({
+            budget: pricingPatch.agreed_price,
+            ...(updates.status ? { status: updates.status } : {}),
+          })
+          .eq('id', id);
+      }
+    } catch (e) {
+      console.warn('[TasksService] Pricing override fallback:', e.message);
     }
 
     const memTask = SEED_FALLBACK_TASKS.find(t => t.id === id);

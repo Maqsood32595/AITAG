@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Typography, IconButton, Slider, Tooltip } from '@mui/material';
+import { Box, Typography, IconButton, Slider, Tooltip, CircularProgress } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
@@ -14,6 +14,7 @@ import { useMobileDetect } from '../utils/useMobileDetect';
 
 interface UniversalVideoPlayerProps {
   url?: string;
+  posterUrl?: string;
   title?: string;
   autoPlay?: boolean;
   muted?: boolean;
@@ -112,6 +113,7 @@ function formatTime(seconds: number): string {
 
 export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
   url,
+  posterUrl,
   title,
   autoPlay = false,
   muted = true,
@@ -148,6 +150,8 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
   const [controlsVisible, setControlsVisible] = useState(true);
   const [centerFeedback, setCenterFeedback] = useState<'play' | 'pause' | null>(null);
   const [seekFeedback, setSeekFeedback] = useState<{ dir: 'back' | 'forward'; count: number } | null>(null);
+  const [isBuffering, setIsBuffering] = useState(Boolean(autoPlay));
+  const [isNearViewport, setIsNearViewport] = useState(Boolean(autoPlay));
 
   // Sync external muted prop -> local video
   useEffect(() => {
@@ -174,7 +178,27 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
     setFitMode(defaultObjectFit);
     setControlsVisible(true);
     setSeekFeedback(null);
+    setIsBuffering(Boolean(autoPlay));
   }, [url, autoPlay, defaultObjectFit]);
+
+  // Lazy-enable metadata preload only when scrolled near viewport (avoids N parallel connections on reel grids)
+  useEffect(() => {
+    if (autoPlay || isNearViewport || !containerRef.current || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+    const el = containerRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '250px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [autoPlay, isNearViewport]);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -579,8 +603,19 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
         autoPlay={autoPlay}
         muted={localMuted}
         loop={loop}
-        preload="metadata"
+        poster={posterUrl || undefined}
+        preload={posterUrl && !autoPlay ? 'none' : (!autoPlay && !isNearViewport ? 'none' : 'metadata')}
         src={parsed.embedUrl}
+        onLoadStart={() => {
+          if (autoPlay || isPlaying) setIsBuffering(true);
+        }}
+        onWaiting={() => setIsBuffering(true)}
+        onLoadedData={() => setIsBuffering(false)}
+        onCanPlay={() => setIsBuffering(false)}
+        onPlaying={() => {
+          setIsBuffering(false);
+          setIsPlaying(true);
+        }}
         onLoadedMetadata={(e) => {
           const v = e.currentTarget;
           v.volume = volume;
@@ -590,7 +625,11 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
         }}
         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
         onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
+        onPause={() => {
+          setIsBuffering(false);
+          setIsPlaying(false);
+        }}
+        onError={() => setIsBuffering(false)}
         style={{
           width: '100%',
           height: isFullscreen || fillHeight ? '100%' : 'auto',
@@ -601,6 +640,23 @@ export const UniversalVideoPlayer: React.FC<UniversalVideoPlayerProps> = ({
       >
         Your browser does not support HTML5 video playback.
       </video>
+
+      {isBuffering && (
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(2, 6, 23, 0.35)',
+            pointerEvents: 'none',
+            zIndex: 14,
+          }}
+        >
+          <CircularProgress size={30} sx={{ color: '#ffffff' }} />
+        </Box>
+      )}
 
       {/* Floating YouTube Shorts–Style Unmute Prompt when autoplaying muted */}
       {controls && localMuted && isPlaying && (fillHeight || isMobile) && (

@@ -33,6 +33,8 @@ const Footer: React.FC = () => {
               <img
                 src="/images/aitag-logo.png?v=footer-aligned-v2"
                 alt="AITAG — Find AI Skills, Get It Done"
+                loading="lazy"
+                decoding="async"
                 style={{
                   height: 44,
                   width: 'auto',

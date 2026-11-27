@@ -94,6 +94,7 @@ export const HowItWorks: React.FC = () => {
   const navigate = useNavigate();
   const [activeVideo, setActiveVideo] = useState<'walkthrough' | 'kinetic'>('walkthrough');
   const videoUrl = activeVideo === 'walkthrough' ? '/aitag-walkthrough.mp4?v=walkthrough-upgraded' : '/AITAG-Advertisement1.mp4';
+  const posterUrl = activeVideo === 'walkthrough' ? '/aitag-walkthrough-poster.webp' : '/aitag-ad-poster.webp';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
@@ -334,7 +335,7 @@ export const HowItWorks: React.FC = () => {
               border: '1px solid #cbd5e1',
             }}
           >
-            <UniversalVideoPlayer url={videoUrl} title="AITAG Workflow Walkthrough" />
+            <UniversalVideoPlayer url={videoUrl} posterUrl={posterUrl} title="AITAG Workflow Walkthrough" />
           </Box>
         </Paper>
       </Container>

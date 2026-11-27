@@ -122,14 +122,49 @@ router.get('/:id', requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/service-orders/:id/assign — Admin assigns expert
+// POST /api/service-orders/:id/assign — Admin assigns expert (optional discount/payment waiver)
 router.post('/:id/assign', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const { expertEmail, expertName } = req.body;
+    const { expertEmail, expertName, discountAmount, skipPayment, reason } = req.body;
     if (!expertEmail) {
       return res.status(400).json({ success: false, error: 'expertEmail is required' });
     }
-    const order = await service.assignExpert(req.params.id, expertEmail, expertName || 'Verified AI Expert');
+    const order = await service.assignExpert(req.params.id, expertEmail, expertName || 'Verified AI Expert', {
+      discountAmount,
+      skipPayment,
+      reason,
+      adminEmail: req.user.email,
+    });
+    res.json({ success: true, order });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/service-orders/:id/skip-payment — Admin waives payment requirement
+router.post('/:id/skip-payment', requireAuth, requireRole(['admin']), async (req, res) => {
+  try {
+    const order = await service.applyPricingOverride(req.params.id, {
+      skipPayment: true,
+      reason: req.body?.reason,
+      adminEmail: req.user.email,
+    });
+    res.json({ success: true, order });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/service-orders/:id/pricing — Admin applies discount and/or waives payment
+router.post('/:id/pricing', requireAuth, requireRole(['admin']), async (req, res) => {
+  try {
+    const { discountAmount = 0, skipPayment = false, reason = '' } = req.body || {};
+    const order = await service.applyPricingOverride(req.params.id, {
+      discountAmount,
+      skipPayment: Boolean(skipPayment),
+      reason,
+      adminEmail: req.user.email,
+    });
     res.json({ success: true, order });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });

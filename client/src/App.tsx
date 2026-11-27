@@ -1,6 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, CircularProgress, Box } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { theme } from './theme';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
@@ -33,9 +33,7 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const HowToBecomeAnExpert = lazy(() => import('./pages/HowToBecomeAnExpert'));
 
 const Loader = () => (
-  <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
-    <CircularProgress sx={{ color: '#4f46e5' }} />
-  </Box>
+  <Box sx={{ minHeight: '85vh', bgcolor: '#f8fafc' }} aria-hidden="true" />
 );
 
 import ScrollToTop from './components/ScrollToTop';
@@ -56,6 +54,26 @@ const ConditionalFooter = () => {
 };
 
 function App() {
+  // Prefetch primary public route chunks on idle so navigation never flashes a blank fallback
+  useEffect(() => {
+    const prefetch = () => {
+      void import('./pages/HowItWorks');
+      void import('./pages/Services');
+      void import('./pages/AITalent');
+      void import('./pages/BlogList');
+    };
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof w.requestIdleCallback === 'function') {
+      const id = w.requestIdleCallback(prefetch, { timeout: 2000 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const timer = window.setTimeout(prefetch, 1000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

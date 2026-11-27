@@ -708,6 +708,7 @@ const TalentShowcaseModal: React.FC<TalentShowcaseModalProps> = ({
             <UniversalVideoPlayer
               key={currentReel?.id || activeReelIndex}
               url={currentReel?.demoVideoUrl || currentReel?.mediaUrl}
+              posterUrl={currentReel?.thumbnailUrl || currentReel?.posterUrl}
               title={currentReel?.title}
               mediaType={currentReel?.mediaType}
               autoPlay={true}

@@ -10,7 +10,7 @@ function computeClientAnalytics({ user, orders = [], tasks = [], bids = [], invi
   let completedSpend = 0;
 
   orders.forEach((ord) => {
-    const price = Number(ord.agreed_price) || 0;
+    const price = ord.payment_waived ? 0 : (Number(ord.agreed_price) || 0);
     totalInvested += price;
     if (['ACTIVE', 'DRAFT_SUBMITTED', 'REVISION'].includes(ord.status)) {
       inEscrow += price;
@@ -20,7 +20,7 @@ function computeClientAnalytics({ user, orders = [], tasks = [], bids = [], invi
   });
 
   tasks.forEach((t) => {
-    const budget = Number(t.budget) || 0;
+    const budget = t.payment_waived ? 0 : (Number(t.budget) || 0);
     if (t.status === 'completed') {
       totalInvested += budget;
       completedSpend += budget;

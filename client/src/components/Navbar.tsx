@@ -90,6 +90,8 @@ const Navbar = () => {
             component="img"
             src="/images/aitag-logo.png?v=deepblack-down"
             alt="AITAG — Find AI Skills, Get It Done"
+            decoding="async"
+            fetchPriority="high"
             sx={{
               height: { xs: 32, sm: 38, md: 42 },
               width: 'auto',

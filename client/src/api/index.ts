@@ -50,6 +50,10 @@ export const authApi = {
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
   me: () => api.get('/auth/me'),
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    api.post('/auth/change-password', data),
+  forgotPassword: (email: string) =>
+    api.post('/auth/forgot-password', { email }),
   getUsers: () => api.get('/auth/users'),
 };
 
@@ -81,8 +85,12 @@ export const tasksApi = {
     }),
   removeAttachment: (id: string, assetId: string) =>
     api.delete(`/tasks/${id}/attachments/${assetId}`),
-  assign: (id: string, data: { expertEmail: string; expertName?: string }) =>
+  assign: (id: string, data: { expertEmail: string; expertName?: string; discountAmount?: number; skipPayment?: boolean; reason?: string }) =>
     api.post(`/tasks/${id}/assign`, data),
+  skipPayment: (id: string, data?: { reason?: string }) =>
+    api.post(`/tasks/${id}/skip-payment`, data || {}),
+  applyPricing: (id: string, data: { discountAmount?: number; skipPayment?: boolean; reason?: string }) =>
+    api.post(`/tasks/${id}/pricing`, data),
   resetAssignment: (id: string) =>
     api.post(`/tasks/${id}/reset`),
   submitDeliverables: (id: string, data: { files?: any[]; completionNotes?: string }) =>
@@ -142,7 +150,12 @@ export const serviceOrdersApi = {
   create: (data: any) => api.post('/service-orders', data),
   getAll: (params?: { role?: string; email?: string; status?: string }) => api.get('/service-orders', { params }),
   getById: (id: string) => api.get(`/service-orders/${id}`),
-  assign: (id: string, data: { expertEmail: string; expertName?: string }) => api.post(`/service-orders/${id}/assign`, data),
+  assign: (id: string, data: { expertEmail: string; expertName?: string; discountAmount?: number; skipPayment?: boolean; reason?: string }) =>
+    api.post(`/service-orders/${id}/assign`, data),
+  skipPayment: (id: string, data?: { reason?: string }) =>
+    api.post(`/service-orders/${id}/skip-payment`, data || {}),
+  applyPricing: (id: string, data: { discountAmount?: number; skipPayment?: boolean; reason?: string }) =>
+    api.post(`/service-orders/${id}/pricing`, data),
   reset: (id: string) => api.post(`/service-orders/${id}/reset`),
   activate: (id: string) => api.post(`/service-orders/${id}/activate`),
   submitDraft: (id: string, data: { draftFiles: any[] }) => api.post(`/service-orders/${id}/draft`, data),

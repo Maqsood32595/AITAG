@@ -24,7 +24,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (loading || !user) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress sx={{ color: '#4f46e5' }} />
       </Box>
     );

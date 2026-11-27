@@ -12,7 +12,9 @@ function computeFreelancerAnalytics({ user, orders = [], bids = [], invitations 
   const testimonials = [];
 
   orders.forEach((ord) => {
-    const payout = Number(ord.expert_payout) || Math.round((Number(ord.agreed_price) || 0) * 0.95);
+    const payout = ord.payment_waived
+      ? 0
+      : (Number(ord.expert_payout) || Math.round((Number(ord.agreed_price) || 0) * 0.95));
     if (ord.status === 'COMPLETED') {
       totalNetEarnings += payout;
       if (ord.rating) {

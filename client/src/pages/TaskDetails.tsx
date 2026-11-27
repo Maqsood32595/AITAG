@@ -24,6 +24,7 @@ import { tasksApi, bidsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { TaskAssetsModal } from '../components/TaskAssetsModal';
 import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
+import { DeliverablePreview } from '../components/DeliverablePreview';
 import { useMobileDetect } from '../utils/useMobileDetect';
 
 const TaskDetails = () => {
@@ -271,7 +272,7 @@ const TaskDetails = () => {
     }
   };
 
-  if (loading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh"><CircularProgress sx={{ color: '#4f46e5' }} /></Box>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><CircularProgress sx={{ color: '#4f46e5' }} /></Box>;
   if (!task) {
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
@@ -445,13 +446,21 @@ const TaskDetails = () => {
                     <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 700, display: 'block', mb: 1 }}>
                       Submitted Files & Links:
                     </Typography>
-                    {task.draft_deliverables.map((item: string, i: number) => (
-                      <Paper key={i} elevation={0} sx={{ p: 1.5, mb: 1, bgcolor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#0f172a' }}>
-                          🔗 <a href={item} target="_blank" rel="noreferrer" style={{ color: '#4f46e5', textDecoration: 'none' }}>{item}</a>
-                        </Typography>
-                      </Paper>
-                    ))}
+                    {task.draft_deliverables.map((item: any, i: number) => {
+                      const rawUrl = typeof item === 'string' ? item : item?.url;
+                      const label = typeof item === 'string' ? item : (item?.label || item?.url);
+                      const posterUrl = typeof item === 'object' ? (item?.thumbnailUrl || item?.posterUrl) : undefined;
+                      return (
+                        <Paper key={i} elevation={0} sx={{ p: 1.5, mb: 1, bgcolor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                          {rawUrl && (
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#0f172a', wordBreak: 'break-all' }}>
+                              🔗 <a href={rawUrl} target="_blank" rel="noreferrer" style={{ color: '#4f46e5', textDecoration: 'none' }}>{label}</a>
+                            </Typography>
+                          )}
+                          <DeliverablePreview url={rawUrl} posterUrl={posterUrl} title={label} />
+                        </Paper>
+                      );
+                    })}
                     {task.deliverable_notes && (
                       <Typography variant="body2" sx={{ mt: 1, color: '#475569', fontStyle: 'italic' }}>
                         Note: "{task.deliverable_notes}"
@@ -464,8 +473,30 @@ const TaskDetails = () => {
                   </Typography>
                 )}
 
-                  {/* Client Escrow Funding Action (If contract accepted but escrow not funded) */}
-                  {isOwner && !task.escrow_funded && normalizedStatus !== 'completed' && (
+                  {/* Admin Payment Waiver Banner */}
+                  {task.payment_waived && normalizedStatus !== 'completed' && (
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        mb: 2,
+                        width: '100%',
+                        borderRadius: '12px',
+                        bgcolor: 'rgba(16, 185, 129, 0.06)',
+                        border: '1px solid rgba(16, 185, 129, 0.35)',
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#047857' }}>
+                        ✓ Payment Step Waived by Admin
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#065f46', display: 'block' }}>
+                        No upfront deposit is required{task.waive_reason ? ` (${task.waive_reason})` : ''}. Your specialist can proceed directly with deliverables.
+                      </Typography>
+                    </Paper>
+                  )}
+
+                  {/* Client Escrow Funding Action (If contract accepted but escrow not funded and not waived) */}
+                  {isOwner && !task.escrow_funded && !task.payment_waived && normalizedStatus !== 'completed' && (
                     <Paper
                       elevation={0}
                       sx={{

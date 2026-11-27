@@ -4,7 +4,8 @@ import {
   Box, Container, Typography, Grid, Paper, Chip, CircularProgress,
   Button, Divider, Stack, Alert, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, MenuItem, Select, FormControl, InputLabel,
-  Rating, Tooltip, Table, TableBody, TableCell, TableHead, TableRow
+  Rating, Tooltip, Table, TableBody, TableCell, TableHead, TableRow,
+  Switch, FormControlLabel
 } from '@mui/material';
 import TaskIcon from '@mui/icons-material/Assignment';
 import BidIcon from '@mui/icons-material/Gavel';
@@ -24,12 +25,15 @@ import PersonIcon from '@mui/icons-material/Person';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SchoolIcon from '@mui/icons-material/School';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import DownloadIcon from '@mui/icons-material/Download';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { tasksApi, bidsApi, invitationsApi, serviceOrdersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedAvatar } from '../components/AnimatedAvatar';
 import { CaseDiscussionModal } from '../components/CaseDiscussionModal';
 import { TaskAssetsModal } from '../components/TaskAssetsModal';
+import { DeliverablePreview } from '../components/DeliverablePreview';
 import { useMobileDetect } from '../utils/useMobileDetect';
 
 const VETTED_SPECIALISTS = [
@@ -80,6 +84,22 @@ const Dashboard = () => {
   const [selectedExpertPreset, setSelectedExpertPreset] = useState(VETTED_SPECIALISTS[0].email);
   const [customExpertName, setCustomExpertName] = useState('');
   const [customExpertEmail, setCustomExpertEmail] = useState('');
+  const [assignDiscount, setAssignDiscount] = useState('');
+  const [assignSkipPayment, setAssignSkipPayment] = useState(false);
+  const [assignPricingReason, setAssignPricingReason] = useState('');
+
+  // Admin Pricing Override (Discount / Waive Payment) Modal
+  const [pricingDialogOpen, setPricingDialogOpen] = useState(false);
+  const [pricingTargetType, setPricingTargetType] = useState<'order' | 'task'>('order');
+  const [pricingTarget, setPricingTarget] = useState<any | null>(null);
+  const [pricingDiscount, setPricingDiscount] = useState('');
+  const [pricingSkipPayment, setPricingSkipPayment] = useState(false);
+  const [pricingReason, setPricingReason] = useState('');
+
+  // Service Order Inspect Modal (Assets & Brief Details — mirrors Picture 2 Oversight)
+  const [orderInspectOpen, setOrderInspectOpen] = useState(false);
+  const [orderInspectTab, setOrderInspectTab] = useState<'assets' | 'details'>('details');
+  const [orderInspectItem, setOrderInspectItem] = useState<any | null>(null);
 
   // Submit Draft Modal
   const [draftDialogOpen, setDraftDialogOpen] = useState(false);
@@ -231,6 +251,9 @@ const Dashboard = () => {
     setSelectedExpertPreset(VETTED_SPECIALISTS[0].email);
     setCustomExpertName('');
     setCustomExpertEmail('');
+    setAssignDiscount(order?.discount_amount > 0 && !order?.payment_waived ? String(order.discount_amount) : '');
+    setAssignSkipPayment(Boolean(order?.payment_waived));
+    setAssignPricingReason(order?.waive_reason || order?.discount_reason || '');
     setAssignDialogOpen(true);
   };
 
@@ -241,7 +264,25 @@ const Dashboard = () => {
     setSelectedExpertPreset(VETTED_SPECIALISTS[0].email);
     setCustomExpertName('');
     setCustomExpertEmail('');
+    setAssignDiscount(task?.discount_amount > 0 && !task?.payment_waived ? String(task.discount_amount) : '');
+    setAssignSkipPayment(Boolean(task?.payment_waived));
+    setAssignPricingReason(task?.waive_reason || task?.discount_reason || '');
     setAssignDialogOpen(true);
+  };
+
+  const openPricingModal = (type: 'order' | 'task', item: any) => {
+    setPricingTargetType(type);
+    setPricingTarget(item);
+    setPricingDiscount(item?.discount_amount > 0 && !item?.payment_waived ? String(item.discount_amount) : '');
+    setPricingSkipPayment(Boolean(item?.payment_waived));
+    setPricingReason(item?.waive_reason || item?.discount_reason || '');
+    setPricingDialogOpen(true);
+  };
+
+  const openOrderInspect = (order: any, tab: 'assets' | 'details') => {
+    setOrderInspectItem(order);
+    setOrderInspectTab(tab);
+    setOrderInspectOpen(true);
   };
 
   const handleResetTaskAssignment = async (task: any) => {
@@ -271,14 +312,26 @@ const Dashboard = () => {
       name = customExpertName.trim() || 'AI Specialist';
     }
 
+    const parsedDiscount = Math.max(0, Number(assignDiscount) || 0);
+    const pricingExtras = {
+      ...(parsedDiscount > 0 ? { discountAmount: parsedDiscount } : {}),
+      ...(assignSkipPayment ? { skipPayment: true } : {}),
+      ...(assignPricingReason.trim() ? { reason: assignPricingReason.trim() } : {}),
+    };
+
     if (assignTargetType === 'task' && activeAssignTask) {
       setActionLoading(`assign-task-${activeAssignTask.id}`);
       try {
         await tasksApi.assign(activeAssignTask.id, {
           expertEmail: email,
-          expertName: name
+          expertName: name,
+          ...pricingExtras,
         });
-        showSuccessBanner(`✅ Verified Expert ${name} matched to Task #${String(activeAssignTask.id).replace('task-', '').slice(-6)}! Status updated to In Progress.`);
+        showSuccessBanner(
+          assignSkipPayment
+            ? `✅ Verified Expert ${name} matched & Payment Waived for Task #${String(activeAssignTask.id).replace('task-', '').slice(-6)}!`
+            : `✅ Verified Expert ${name} matched to Task #${String(activeAssignTask.id).replace('task-', '').slice(-6)}! Status updated to In Progress.`
+        );
         setAssignDialogOpen(false);
         fetchDashboardData();
       } catch (err: any) {
@@ -291,10 +344,15 @@ const Dashboard = () => {
       try {
         await serviceOrdersApi.assign(activeOrder.id, {
           expertEmail: email,
-          expertName: name
+          expertName: name,
+          ...pricingExtras,
         });
 
-        showSuccessBanner(`✅ Expert ${name} matched to Order ${activeOrder.order_number}!`);
+        showSuccessBanner(
+          assignSkipPayment
+            ? `✅ Expert ${name} assigned & Payment Waived — Order ${activeOrder.order_number} is now ACTIVE!`
+            : `✅ Expert ${name} matched to Order ${activeOrder.order_number}!`
+        );
         setAssignDialogOpen(false);
         fetchDashboardData();
       } catch (err: any) {
@@ -302,6 +360,41 @@ const Dashboard = () => {
       } finally {
         setActionLoading(null);
       }
+    }
+  };
+
+  const handleConfirmPricingOverride = async () => {
+    if (!pricingTarget) return;
+    const discountAmount = Math.max(0, Number(pricingDiscount) || 0);
+    const payload = {
+      discountAmount,
+      skipPayment: pricingSkipPayment,
+      reason: pricingReason.trim(),
+    };
+
+    setActionLoading(`pricing-${pricingTarget.id}`);
+    try {
+      if (pricingTargetType === 'order') {
+        await serviceOrdersApi.applyPricing(pricingTarget.id, payload);
+        showSuccessBanner(
+          pricingSkipPayment
+            ? `✅ Payment Waived for Order ${pricingTarget.order_number}.`
+            : `✅ Discount applied to Order ${pricingTarget.order_number}.`
+        );
+      } else {
+        await tasksApi.applyPricing(pricingTarget.id, payload);
+        showSuccessBanner(
+          pricingSkipPayment
+            ? `✅ Payment Waived for Task #${String(pricingTarget.id).replace('task-', '').slice(-6)}.`
+            : `✅ Discount applied to Task #${String(pricingTarget.id).replace('task-', '').slice(-6)}.`
+        );
+      }
+      setPricingDialogOpen(false);
+      fetchDashboardData();
+    } catch (err: any) {
+      showErrorBanner(err.response?.data?.error || 'Failed to update pricing override');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -427,6 +520,105 @@ const Dashboard = () => {
     }
   };
 
+  const renderPriceSummary = (item: any, accentColor: string) => {
+    const isWaived = Boolean(item?.payment_waived);
+    const discountAmt = Number(item?.discount_amount || 0);
+    const currentAmt = isWaived ? 0 : Number(item?.agreed_price ?? item?.budget ?? 0);
+    const origAmt = Number(item?.original_price || currentAmt);
+    const hasSavings = origAmt > currentAmt && (isWaived || discountAmt > 0);
+
+    return (
+      <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+        <Stack direction="row" spacing={0.8} alignItems="baseline" justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} flexWrap="wrap">
+          {hasSavings && (
+            <Typography sx={{ fontSize: '0.82rem', color: '#94a3b8', textDecoration: 'line-through', fontWeight: 600 }}>
+              ₹{origAmt.toLocaleString('en-IN')}
+            </Typography>
+          )}
+          <Typography sx={{ fontWeight: 900, fontSize: '1.15rem', color: isWaived ? '#059669' : accentColor, lineHeight: 1.1 }}>
+            ₹{currentAmt.toLocaleString('en-IN')}
+          </Typography>
+        </Stack>
+        {(isWaived || discountAmt > 0) && (
+          <Box sx={{ mt: 0.4 }}>
+            <Chip
+              label={isWaived ? 'PAYMENT WAIVED' : `-₹${discountAmt.toLocaleString('en-IN')} OFF`}
+              size="small"
+              sx={{
+                height: 19,
+                fontSize: '0.66rem',
+                fontWeight: 800,
+                bgcolor: isWaived ? '#ecfdf5' : '#eef2ff',
+                color: isWaived ? '#047857' : '#4338ca',
+                border: isWaived ? '1px solid #a7f3d0' : '1px solid #c7d2fe',
+              }}
+            />
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
+  const renderPricingOverrideFields = (
+    basePrice: number,
+    discountStr: string,
+    setDiscountStr: (v: string) => void,
+    skipPay: boolean,
+    setSkipPay: (v: boolean) => void,
+    reasonStr: string,
+    setReasonStr: (v: string) => void
+  ) => {
+    const parsedDisc = Math.min(Math.max(0, Math.round(Number(discountStr) || 0)), Math.max(0, basePrice));
+    const finalPreview = skipPay ? 0 : Math.max(0, basePrice - parsedDisc);
+    return (
+      <Box sx={{ mt: 2.2, p: 2, borderRadius: '10px', bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+        <Typography sx={{ fontWeight: 800, fontSize: '0.84rem', color: '#0f172a', mb: 1.2 }}>
+          Managed Services Pricing & Payment Control
+        </Typography>
+        <Stack spacing={1.5}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={skipPay}
+                onChange={(e) => setSkipPay(e.target.checked)}
+                color="success"
+                size="small"
+              />
+            }
+            label={
+              <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: skipPay ? '#047857' : '#334155' }}>
+                Skip Payment Step (Mark as Payment Waived)
+              </Typography>
+            }
+          />
+          <TextField
+            label="Admin Discount (₹)"
+            type="number"
+            size="small"
+            fullWidth
+            disabled={skipPay}
+            value={discountStr}
+            onChange={(e) => setDiscountStr(e.target.value)}
+            inputProps={{ min: 0, max: Math.max(0, basePrice) }}
+            helperText={
+              skipPay
+                ? `Original: ₹${basePrice.toLocaleString('en-IN')} → Final Payable: ₹0 (Payment Waived)`
+                : `Original: ₹${basePrice.toLocaleString('en-IN')} → Final Payable: ₹${finalPreview.toLocaleString('en-IN')}`
+            }
+          />
+          <TextField
+            label="Note / Reason (Optional)"
+            size="small"
+            fullWidth
+            value={reasonStr}
+            onChange={(e) => setReasonStr(e.target.value)}
+            placeholder="e.g. Pilot client, VIP waiver, or offline settlement"
+          />
+        </Stack>
+      </Box>
+    );
+  };
+
   const pendingInvites = invitations.filter(inv => inv.status === 'pending');
   const isAdmin = user?.role === 'admin';
   const isFreelancer = user?.role === 'freelancer';
@@ -469,7 +661,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
         <CircularProgress sx={{ color: '#4f46e5' }} />
       </Box>
     );
@@ -748,7 +940,8 @@ const Dashboard = () => {
                   switch (status) {
                     case 'REQUESTED': return { bg: '#fef3c7', text: '#b45309', border: '#fde68a' };
                     case 'MATCHED': return { bg: '#e0e7ff', text: '#4338ca', border: '#c7d2fe' };
-                    case 'ACTIVE': return { bg: '#dcfce7', text: '#15803d', border: '#bbf7d0' };
+                    case 'PAID': return { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' };
+                    case 'ACTIVE': return { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' };
                     case 'DRAFT_SUBMITTED': return { bg: '#f3e8ff', text: '#7e22ce', border: '#e9d5ff' };
                     case 'REVISION': return { bg: '#ffedd5', text: '#c2410c', border: '#fed7aa' };
                     case 'COMPLETED': return { bg: '#ecfdf5', text: '#047857', border: '#a7f3d0' };
@@ -766,16 +959,16 @@ const Dashboard = () => {
                       p: 2,
                       borderRadius: '10px',
                       bgcolor: '#ffffff',
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid rgba(8,145,178,0.18)',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
                       transition: 'all 0.2s ease',
-                      '&:hover': { borderColor: '#818cf8', boxShadow: '0 8px 24px rgba(79,70,229,0.08)' }
+                      '&:hover': { borderColor: '#0891b2', boxShadow: '0 6px 22px rgba(8,145,178,0.09)' }
                     }}
                   >
                     {/* Header Row */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1.2 }}>
                       <Box>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mb: 0.4 }}>
                           <Typography sx={{ fontWeight: 800, fontSize: '0.98rem', color: '#0f172a' }}>
                             {ord.package_title}
                           </Typography>
@@ -783,7 +976,7 @@ const Dashboard = () => {
                             label={
                               ord.tier_name?.startsWith('package_')
                                 ? ord.tier_name.replace('package_', 'Package ').toUpperCase()
-                                : (ord.tier_name ? `${ord.tier_name.toUpperCase()} TIER` : 'PACKAGE 1')
+                                : (ord.tier_name ? `${ord.tier_name.toUpperCase()} TIER` : 'STARTER')
                             }
                             size="small"
                             sx={{ bgcolor: '#ede9fe', color: '#6d28d9', fontWeight: 800, fontSize: '0.7rem' }}
@@ -795,78 +988,74 @@ const Dashboard = () => {
                         </Typography>
                       </Box>
                       <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-                        <Typography sx={{ fontWeight: 900, fontSize: '1.15rem', color: '#4f46e5' }}>
-                          ₹{Number(ord.agreed_price || 0).toLocaleString('en-IN')}
-                        </Typography>
+                        {renderPriceSummary(ord, '#0f172a')}
                         <Chip
-                          label={ord.status}
+                          label={ord.payment_waived && ord.status === 'ACTIVE' ? 'ACTIVE • WAIVED' : ord.status}
                           size="small"
                           sx={{
                             bgcolor: statusStyle.bg,
                             color: statusStyle.text,
                             border: `1px solid ${statusStyle.border}`,
                             fontWeight: 800,
-                            fontSize: '0.75rem',
+                            fontSize: '0.72rem',
                             mt: 0.5,
-                            letterSpacing: '0.5px'
+                            letterSpacing: '0.4px'
                           }}
                         />
                       </Box>
                     </Box>
 
-                    {/* 5-Stage Visual Workflow Stepper Bar */}
-                    <Box sx={{ mb: 1.2, p: 0.8, px: 1, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-                        {ORDER_STEPS.map((step, idx) => {
-                          const isDone = idx < currentStepIdx || ord.status === 'COMPLETED';
-                          const isCurrent = idx === currentStepIdx && ord.status !== 'COMPLETED';
+                    {/* Picture 2 Style Pill Stepper Bar */}
+                    <Box sx={{ display: 'flex', gap: 1, my: 1.2, flexWrap: 'wrap' }}>
+                      {ORDER_STEPS.map((step, idx) => {
+                        const isDone = idx < currentStepIdx || ord.status === 'COMPLETED';
+                        const isCurrent = idx === currentStepIdx && ord.status !== 'COMPLETED';
 
-                          let stepColor = '#94a3b8';
-                          let stepBg = 'transparent';
-                          let stepBorder = '#cbd5e1';
-
-                          if (isDone) {
-                            stepColor = '#047857';
-                            stepBg = '#ecfdf5';
-                            stepBorder = '#a7f3d0';
-                          } else if (isCurrent) {
-                            stepColor = '#4338ca';
-                            stepBg = '#e0e7ff';
-                            stepBorder = '#818cf8';
-                          }
-
-                          return (
-                            <Chip
-                              key={step.key}
-                              label={step.label}
-                              size="small"
-                              sx={{
-                                fontWeight: isCurrent ? 800 : 600,
-                                fontSize: '0.72rem',
-                                color: stepColor,
-                                bgcolor: stepBg,
-                                border: `1px solid ${stepBorder}`,
-                                px: 0.5
-                              }}
-                            />
-                          );
-                        })}
-                      </Box>
+                        return (
+                          <Chip
+                            key={step.key}
+                            label={step.label}
+                            size="small"
+                            sx={{
+                              fontWeight: isCurrent ? 800 : 600,
+                              fontSize: '0.72rem',
+                              color: isCurrent ? '#ffffff' : isDone ? '#047857' : '#94a3b8',
+                              bgcolor: isCurrent ? '#0891b2' : isDone ? '#ecfdf5' : '#f8fafc',
+                              border: isCurrent ? 'none' : isDone ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                            }}
+                          />
+                        );
+                      })}
                     </Box>
 
                     {/* Brief & Notes */}
                     {(ord.business_name || ord.brief_notes) && (
-                      <Box sx={{ mb: 1.2, p: 1, px: 1.2, bgcolor: '#fafafa', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                      <Box sx={{ mb: 1.4, p: 1.4, bgcolor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                         {ord.business_name && (
-                          <Typography sx={{ fontSize: '0.78rem', color: '#1e293b', fontWeight: 700, mb: 0.2 }}>
+                          <Typography sx={{ fontSize: '0.8rem', color: '#1e293b', fontWeight: 700, mb: 0.3 }}>
                             Business: {ord.business_name} {ord.business_type ? `(${ord.business_type})` : ''}
                           </Typography>
                         )}
                         {ord.brief_notes && (
-                          <Typography sx={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4 }}>
+                          <Typography sx={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
                             <strong>Brief Notes:</strong> "{ord.brief_notes}"
                           </Typography>
                         )}
+                      </Box>
+                    )}
+
+                    {/* Assigned Specialist Strip (Picture 2 Style) */}
+                    {ord.assigned_expert_email && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.3, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.15)', mb: 1.4 }}>
+                        <AnimatedAvatar name={ord.assigned_expert_name || ord.assigned_expert_email} size={28} />
+                        <Box>
+                          <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e293b' }}>
+                            Matched Specialist: <strong>{ord.assigned_expert_name || 'Verified AI Specialist'}</strong> ({ord.assigned_expert_email})
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.7rem', color: '#6366f1' }}>
+                            {ord.payment_waived ? 'Payment Waived by Admin • Managed Services Active' : 'Assigned via AITAG Managed Oversight'}
+                          </Typography>
+                        </Box>
                       </Box>
                     )}
 
@@ -885,21 +1074,30 @@ const Dashboard = () => {
                         </Typography>
                         <Stack spacing={1}>
                           {ord.draft_deliverables.map((d: any, idx: number) => (
-                            <Box key={idx} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: '#ffffff', p: 1, px: 1.5, borderRadius: '8px', border: '1px solid #ede9fe' }}>
-                              <Typography sx={{ fontSize: '0.8rem', color: '#1e293b', fontWeight: 600 }}>
-                                {d.label || `Deliverable File #${idx + 1}`}
-                              </Typography>
+                            <Box key={idx} sx={{ bgcolor: '#ffffff', p: 1.25, px: 1.5, borderRadius: '8px', border: '1px solid #ede9fe' }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                                <Typography sx={{ fontSize: '0.8rem', color: '#1e293b', fontWeight: 600 }}>
+                                  {d.label || `Deliverable File #${idx + 1}`}
+                                </Typography>
+                                {d.url && (
+                                  <Button
+                                    href={d.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    size="small"
+                                    endIcon={<OpenInNewIcon sx={{ fontSize: 14 }} />}
+                                    sx={{ textTransform: 'none', fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}
+                                  >
+                                    View Deliverable
+                                  </Button>
+                                )}
+                              </Box>
                               {d.url && (
-                                <Button
-                                  href={d.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  size="small"
-                                  endIcon={<OpenInNewIcon sx={{ fontSize: 14 }} />}
-                                  sx={{ textTransform: 'none', fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}
-                                >
-                                  View Deliverable
-                                </Button>
+                                <DeliverablePreview
+                                  url={d.url}
+                                  posterUrl={d.thumbnailUrl || d.posterUrl}
+                                  title={d.label || `Deliverable #${idx + 1}`}
+                                />
                               )}
                             </Box>
                           ))}
@@ -960,41 +1158,19 @@ const Dashboard = () => {
                         />
                       </Box>
 
-                      {/* Right: Interactive State Action Buttons */}
-                      <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
-                        {/* Persistent Case Discussion Button */}
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<ForumIcon sx={{ fontSize: 16 }} />}
-                          onClick={() => openDiscussionModal(ord)}
-                          sx={{
-                            textTransform: 'none',
-                            fontWeight: 700,
-                            borderRadius: '8px',
-                            color: '#4f46e5',
-                            borderColor: 'rgba(79, 70, 229, 0.35)',
-                            bgcolor: 'rgba(79, 70, 229, 0.04)',
-                            fontSize: '0.75rem',
-                            '&:hover': {
-                              bgcolor: 'rgba(79, 70, 229, 0.1)',
-                              borderColor: '#4f46e5'
-                            }
-                          }}
-                        >
-                          Case Discussion
-                        </Button>
-                        {/* 1. REQUESTED State */}
-                        {ord.status === 'REQUESTED' && (
-                          isAdmin ? (
+                      {/* Right: Interactive State Action Buttons (Picture 2 Oversight Bar) */}
+                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                        {/* Admin Expert Control across active states */}
+                        {isAdmin && ord.status !== 'COMPLETED' && (
+                          !ord.assigned_expert_email ? (
                             <Button
                               variant="contained"
                               size="small"
                               startIcon={<PersonAddIcon />}
                               onClick={() => openAssignModal(ord)}
                               sx={{
-                                bgcolor: '#4f46e5',
-                                '&:hover': { bgcolor: '#4338ca' },
+                                bgcolor: '#0891b2',
+                                '&:hover': { bgcolor: '#0e7490' },
                                 textTransform: 'none',
                                 fontWeight: 700,
                                 borderRadius: '8px',
@@ -1004,41 +1180,12 @@ const Dashboard = () => {
                               Assign Verified Expert
                             </Button>
                           ) : (
-                            <Chip
-                              label="Matching with Verified Specialist..."
-                              size="small"
-                              sx={{ bgcolor: '#fef3c7', color: '#b45309', fontWeight: 700, fontSize: '0.75rem', border: '1px solid #fde68a' }}
-                            />
-                          )
-                        )}
-
-                        {/* 2. MATCHED State */}
-                        {ord.status === 'MATCHED' && (
-                          isAdmin ? (
                             <>
-                              <Button
-                                variant="contained"
-                                size="small"
-                                startIcon={<PlayArrowIcon />}
-                                disabled={actionLoading === `activate-${ord.id}`}
-                                onClick={() => handleActivateProject(ord)}
-                                sx={{
-                                  background: 'linear-gradient(135deg, #10b981, #059669)',
-                                  color: '#ffffff',
-                                  textTransform: 'none',
-                                  fontWeight: 700,
-                                  borderRadius: '8px',
-                                  px: 2,
-                                  boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
-                                }}
-                              >
-                                {actionLoading === `activate-${ord.id}` ? 'Activating...' : 'Confirm Payment & Start'}
-                              </Button>
                               <Button
                                 variant="outlined"
                                 size="small"
                                 onClick={() => openAssignModal(ord)}
-                                sx={{ textTransform: 'none', borderRadius: '8px', fontSize: '0.75rem' }}
+                                sx={{ textTransform: 'none', borderRadius: '8px', fontSize: '0.75rem', color: '#0891b2', borderColor: 'rgba(8,145,178,0.4)' }}
                               >
                                 Change Expert
                               </Button>
@@ -1060,9 +1207,68 @@ const Dashboard = () => {
                                 {actionLoading === `reset-${ord.id}` ? 'Resetting...' : 'Reset Assignment'}
                               </Button>
                             </>
+                          )
+                        )}
+
+                        {/* Admin Pricing & Skip Payment Authority (Before Active Fulfillment / While Unpaid) */}
+                        {isAdmin && !ord.payment_waived && ['REQUESTED', 'QUALIFIED', 'MATCHED', 'SCOPE_CONFIRMED', 'PAID'].includes(ord.status) && (
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<LocalOfferIcon sx={{ fontSize: 15 }} />}
+                            onClick={() => openPricingModal('order', ord)}
+                            sx={{
+                              textTransform: 'none',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              color: '#b45309',
+                              borderColor: '#fcd34d',
+                              bgcolor: '#fffbeb',
+                              '&:hover': { bgcolor: '#fef3c7', borderColor: '#f59e0b' }
+                            }}
+                          >
+                            Discount / Waive
+                          </Button>
+                        )}
+
+                        {/* Customer Status Pills for Non-Admins */}
+                        {!isAdmin && ord.status === 'REQUESTED' && (
+                          <Chip
+                            label="Matching with Verified Specialist..."
+                            size="small"
+                            sx={{ bgcolor: '#fef3c7', color: '#b45309', fontWeight: 700, fontSize: '0.75rem', border: '1px solid #fde68a' }}
+                          />
+                        )}
+
+                        {/* MATCHED or PAID: Start Work / Confirm Payment */}
+                        {(ord.status === 'MATCHED' || (ord.status === 'PAID' && ord.assigned_expert_email)) && (
+                          isAdmin ? (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<PlayArrowIcon />}
+                              disabled={actionLoading === `activate-${ord.id}`}
+                              onClick={() => handleActivateProject(ord)}
+                              sx={{
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
+                                color: '#ffffff',
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                borderRadius: '8px',
+                                px: 2,
+                                boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
+                              }}
+                            >
+                              {actionLoading === `activate-${ord.id}`
+                                ? 'Activating...'
+                                : ord.status === 'PAID'
+                                ? 'Start Work'
+                                : 'Confirm Payment & Start'}
+                            </Button>
                           ) : (
                             <Chip
-                              label="Specialist Matched • Payment Safely Protected"
+                              label={ord.payment_waived ? 'Payment Waived • Starting Soon' : 'Specialist Matched • Payment Safely Protected'}
                               size="small"
                               sx={{ bgcolor: '#e0e7ff', color: '#4338ca', fontWeight: 700, fontSize: '0.75rem', border: '1px solid #c7d2fe' }}
                             />
@@ -1072,42 +1278,21 @@ const Dashboard = () => {
                         {/* 3. ACTIVE State */}
                         {ord.status === 'ACTIVE' && (
                           (isAdmin || isFreelancer) ? (
-                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-                              <Button
-                                variant="contained"
-                                size="small"
-                                startIcon={<CloudUploadIcon />}
-                                onClick={() => openDraftModal(ord)}
-                                sx={{
-                                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                  textTransform: 'none',
-                                  fontWeight: 700,
-                                  borderRadius: '8px',
-                                  px: 2
-                                }}
-                              >
-                                Submit Draft Deliverables
-                              </Button>
-                              {isAdmin && (
-                                <Button
-                                  variant="outlined"
-                                  color="error"
-                                  size="small"
-                                  disabled={actionLoading === `reset-${ord.id}`}
-                                  onClick={() => handleResetAssignment(ord)}
-                                  sx={{
-                                    textTransform: 'none',
-                                    borderRadius: '8px',
-                                    fontSize: '0.75rem',
-                                    borderColor: '#fca5a5',
-                                    color: '#dc2626',
-                                    '&:hover': { bgcolor: '#fef2f2', borderColor: '#ef4444' }
-                                  }}
-                                >
-                                  {actionLoading === `reset-${ord.id}` ? 'Resetting...' : 'Reset Assignment'}
-                                </Button>
-                              )}
-                            </Box>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<CloudUploadIcon />}
+                              onClick={() => openDraftModal(ord)}
+                              sx={{
+                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                borderRadius: '8px',
+                                px: 2
+                              }}
+                            >
+                              Submit Draft Deliverables
+                            </Button>
                           ) : (
                             <Chip
                               label="Project Active • Deliverables in Production"
@@ -1199,6 +1384,57 @@ const Dashboard = () => {
                             }}
                           />
                         )}
+
+                        {/* Always Available Picture 2 Oversight Buttons: Discussion, Assets, Details */}
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<ForumIcon sx={{ fontSize: 16 }} />}
+                          onClick={() => openDiscussionModal(ord)}
+                          sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            borderRadius: '8px',
+                            color: '#4338ca',
+                            borderColor: '#c7d2fe',
+                            fontSize: '0.75rem',
+                            '&:hover': { bgcolor: '#f5f3ff', borderColor: '#818cf8' }
+                          }}
+                        >
+                          Case Discussion
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<AttachFileIcon sx={{ fontSize: 15 }} />}
+                          onClick={() => openOrderInspect(ord, 'assets')}
+                          sx={{
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            borderColor: 'rgba(79, 70, 229, 0.3)',
+                            color: '#4f46e5',
+                            bgcolor: 'rgba(79, 70, 229, 0.04)',
+                            '&:hover': { bgcolor: 'rgba(79, 70, 229, 0.1)' }
+                          }}
+                        >
+                          Assets ({(ord.uploaded_assets || []).length})
+                        </Button>
+                        <Button
+                          variant="text"
+                          size="small"
+                          startIcon={<VisibilityIcon sx={{ fontSize: 15 }} />}
+                          onClick={() => openOrderInspect(ord, 'details')}
+                          sx={{
+                            color: '#4f46e5',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            textTransform: 'none'
+                          }}
+                        >
+                          Details
+                        </Button>
                       </Stack>
                     </Box>
                   </Paper>
@@ -1463,9 +1699,7 @@ const Dashboard = () => {
                         </Box>
 
                         <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-                          <Typography sx={{ fontWeight: 900, fontSize: '1.15rem', color: '#0f172a', lineHeight: 1.1 }}>
-                            ₹{Number(task.budget || 0).toLocaleString()}
-                          </Typography>
+                          {renderPriceSummary(task, '#0f172a')}
                           <Box sx={{ mt: 0.5 }}>
                             {isDone ? (
                               <Chip
@@ -1589,6 +1823,28 @@ const Dashboard = () => {
                                 {actionLoading === `reset-task-${task.id}` ? 'Resetting...' : 'Reset Assignment'}
                               </Button>
                             </>
+                          )}
+
+                          {/* Admin Discount / Skip Payment Control for Tasks */}
+                          {!isDone && !task.payment_waived && !task.escrow_funded && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<LocalOfferIcon sx={{ fontSize: 15 }} />}
+                              onClick={() => openPricingModal('task', task)}
+                              sx={{
+                                textTransform: 'none',
+                                borderRadius: '8px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                color: '#b45309',
+                                borderColor: '#fcd34d',
+                                bgcolor: '#fffbeb',
+                                '&:hover': { bgcolor: '#fef3c7', borderColor: '#f59e0b' }
+                              }}
+                            >
+                              Discount / Waive
+                            </Button>
                           )}
 
                           {/* Chat Client */}
@@ -1736,6 +1992,18 @@ const Dashboard = () => {
                   placeholder="rahul@example.com"
                 />
               </Stack>
+            )}
+
+            {isAdmin && renderPricingOverrideFields(
+              assignTargetType === 'task'
+                ? Number(activeAssignTask?.original_price ?? activeAssignTask?.budget ?? 0)
+                : Number(activeOrder?.original_price ?? activeOrder?.agreed_price ?? 0),
+              assignDiscount,
+              setAssignDiscount,
+              assignSkipPayment,
+              setAssignSkipPayment,
+              assignPricingReason,
+              setAssignPricingReason
             )}
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
@@ -1934,6 +2202,132 @@ const Dashboard = () => {
             isOwner={true}
           />
         )}
+
+        {/* 7. Admin Pricing Override Modal (Discount & Payment Waived) */}
+        <Dialog open={pricingDialogOpen} onClose={() => setPricingDialogOpen(false)} fullScreen={isMobileDialog} maxWidth="xs" fullWidth>
+          <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
+            Admin Discount & Payment Control
+          </DialogTitle>
+          <DialogContent dividers>
+            <Typography sx={{ color: '#64748b', fontSize: '0.84rem', mb: 1 }}>
+              {pricingTargetType === 'order'
+                ? `Order ${pricingTarget?.order_number} (${pricingTarget?.package_title})`
+                : `Task #${String(pricingTarget?.id || '').replace('task-', '').slice(-6)} (${pricingTarget?.title})`}
+            </Typography>
+            {renderPricingOverrideFields(
+              pricingTargetType === 'order'
+                ? Number(pricingTarget?.original_price ?? pricingTarget?.agreed_price ?? 0)
+                : Number(pricingTarget?.original_price ?? pricingTarget?.budget ?? 0),
+              pricingDiscount,
+              setPricingDiscount,
+              pricingSkipPayment,
+              setPricingSkipPayment,
+              pricingReason,
+              setPricingReason
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setPricingDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748b' }}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleConfirmPricingOverride}
+              disabled={actionLoading?.startsWith('pricing-')}
+              sx={{ bgcolor: pricingSkipPayment ? '#059669' : '#4f46e5', textTransform: 'none', fontWeight: 700, borderRadius: '8px' }}
+            >
+              {actionLoading?.startsWith('pricing-')
+                ? 'Saving...'
+                : pricingSkipPayment
+                ? 'Save & Waive Payment'
+                : 'Apply Discount'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* 8. Service Order Brief & Uploaded Assets Inspector (Picture 2 Oversight Parity) */}
+        <Dialog open={orderInspectOpen} onClose={() => setOrderInspectOpen(false)} fullScreen={isMobileDialog} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ fontWeight: 800, color: '#0f172a' }}>
+            {orderInspectTab === 'assets' ? 'Customer Uploaded Brief Assets' : 'Service Order Brief Details'}
+          </DialogTitle>
+          <DialogContent dividers>
+            {orderInspectItem && (
+              <Stack spacing={2}>
+                <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <Typography sx={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>
+                    {orderInspectItem.package_title} ({orderInspectItem.order_number})
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.8rem', color: '#475569', mt: 0.4 }}>
+                    Customer: <strong>{orderInspectItem.customer_name}</strong> ({orderInspectItem.customer_email})
+                    {orderInspectItem.customer_phone ? ` • ${orderInspectItem.customer_phone}` : ''}
+                  </Typography>
+                  {orderInspectItem.business_name && (
+                    <Typography sx={{ fontSize: '0.8rem', color: '#334155', mt: 0.3 }}>
+                      Business: <strong>{orderInspectItem.business_name}</strong> {orderInspectItem.business_type ? `(${orderInspectItem.business_type})` : ''}
+                    </Typography>
+                  )}
+                  <Typography sx={{ fontSize: '0.8rem', color: '#334155', mt: 0.6 }}>
+                    <strong>Brief Notes:</strong> {orderInspectItem.brief_notes || 'No notes provided.'}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.84rem', color: '#0f172a', mb: 1 }}>
+                    Uploaded Assets ({(orderInspectItem.uploaded_assets || []).length})
+                  </Typography>
+                  {(!orderInspectItem.uploaded_assets || orderInspectItem.uploaded_assets.length === 0) ? (
+                    <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>
+                      No files attached during checkout brief. Use Case Discussion to exchange files.
+                    </Typography>
+                  ) : (
+                    <Stack spacing={1}>
+                      {orderInspectItem.uploaded_assets.map((asset: any, i: number) => {
+                        const assetUrl = typeof asset === 'string' ? asset : asset?.url;
+                        const assetName = typeof asset === 'string' ? asset : (asset?.originalName || asset?.name || assetUrl || `Asset #${i + 1}`);
+                        return (
+                          <Box
+                            key={i}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              p: 1,
+                              px: 1.4,
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              bgcolor: '#ffffff',
+                            }}
+                          >
+                            <Typography noWrap sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#1e293b', maxWidth: 340 }}>
+                              {assetName}
+                            </Typography>
+                            {assetUrl && (
+                              <Button
+                                href={assetUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                size="small"
+                                startIcon={<DownloadIcon sx={{ fontSize: 15 }} />}
+                                sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
+                              >
+                                Open
+                              </Button>
+                            )}
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+                  )}
+                </Box>
+              </Stack>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setOrderInspectOpen(false)} variant="contained" sx={{ bgcolor: '#4f46e5', textTransform: 'none', fontWeight: 700, borderRadius: '8px' }}>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </DashboardLayout>
   );

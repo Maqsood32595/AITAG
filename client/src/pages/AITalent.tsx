@@ -294,7 +294,7 @@ const AITalent = () => {
         </Stack>
 
         {loading ? (
-          <Box display="flex" justifyContent="center" py={8}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress sx={{ color: '#4f46e5' }} />
           </Box>
         ) : (

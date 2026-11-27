@@ -132,7 +132,7 @@ const InviteModal: React.FC<InviteModalProps> = ({ open, onClose, talent }) => {
         )}
 
         {loadingTasks ? (
-          <Box display="flex" justifyContent="center" py={4}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress size={32} sx={{ color: '#4f46e5' }} />
           </Box>
         ) : tasks.length === 0 ? (

@@ -365,7 +365,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
           }}
         >
           {loading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
               <CircularProgress size={32} sx={{ color: '#4f46e5' }} />
             </Box>
           ) : messages.length === 0 ? (

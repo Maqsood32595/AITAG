@@ -27,7 +27,7 @@ const FALLBACK_PACKAGES = [
       'We design a professional logo for your business using AI and deliver it in formats ready for digital use and physical print — visiting cards, GST invoices, WhatsApp DP, letterheads, shop banners and flex printing. Everything your growing business needs to look credible from day one.',
     category: 'Branding & Print',
     badge: 'Most Popular',
-    image_url: '/images/packages/nt-text-logo.png',
+    image_url: '/images/packages/nt-text-logo.webp',
     benefits: [
       'Looks professional and credible from day one — builds customer trust instantly',
       'Print-ready for visiting cards, shop banners, flex printing and GST invoices',
@@ -457,6 +457,8 @@ const ServicePackagesSection: React.FC = () => {
                       <img
                         src={pkg.image_url}
                         alt={pkg.title}
+                        loading="lazy"
+                        decoding="async"
                         style={{
                           width: '100%',
                           height: '100%',

@@ -16,7 +16,7 @@ let cacheService = null;
 try {
   cacheService = require('../../../aitag-cache/service');
 } catch {
-  cacheService = { invalidateByTag: () => {} };
+  cacheService = { invalidateByTag: () => { } };
 }
 
 // Ephemeral in-memory fallback store for payments
@@ -125,7 +125,7 @@ class PaymentsService {
       cacheService.invalidateByTag('payments');
       cacheService.invalidateByTag('tasks');
       cacheService.invalidateByTag(`user:${customer_email.toLowerCase()}`);
-    } catch {}
+    } catch { }
     return paymentRecord;
   }
 
@@ -208,7 +208,7 @@ class PaymentsService {
       if (payment.customer_email) {
         cacheService.invalidateByTag(`user:${payment.customer_email.toLowerCase()}`);
       }
-    } catch {}
+    } catch { }
 
     return payment;
   }
@@ -287,10 +287,14 @@ class PaymentsService {
     const vpa = merchantConfig.vpa || process.env.MERCHANT_UPI_VPA || 'mohammedmaqsoodai@oksbi';
     const displayName = merchantConfig.displayName || process.env.MERCHANT_NAME || 'AITAG Escrow';
 
-    // Check if identifier is a task
+    // Check if identifier is an order or a task
     let itemTitle = 'AITAG AI Service';
     let itemTier = 'Custom';
     let amount = 1499;
+    let originalPrice = 1499;
+    let discountAmount = 0;
+    let paymentWaived = false;
+    let waiveReason = '';
 
     let found = false;
     try {
@@ -299,10 +303,14 @@ class PaymentsService {
       if (order) {
         itemTitle = order.package_title || 'AITAG Service Package';
         itemTier = order.tier_name ? (order.tier_name.charAt(0).toUpperCase() + order.tier_name.slice(1)) : 'Starter';
-        amount = Number(order.agreed_price) || 1499;
+        paymentWaived = Boolean(order.payment_waived);
+        discountAmount = Number(order.discount_amount || 0);
+        originalPrice = order.original_price !== undefined ? Number(order.original_price) : Number(order.agreed_price ?? 1499);
+        amount = paymentWaived ? 0 : (order.agreed_price !== undefined ? Number(order.agreed_price) : 1499);
+        waiveReason = order.waive_reason || '';
         found = true;
       }
-    } catch {}
+    } catch { }
 
     if (!found) {
       try {
@@ -311,27 +319,52 @@ class PaymentsService {
         if (task) {
           itemTitle = task.title || 'Task Escrow';
           itemTier = task.category || 'Freelance Task';
-          amount = Number(task.agreed_price || task.budget) || 1499;
+          paymentWaived = Boolean(task.payment_waived);
+          discountAmount = Number(task.discount_amount || 0);
+          originalPrice = task.original_price !== undefined ? Number(task.original_price) : Number(task.agreed_price ?? task.budget ?? 1499);
+          amount = paymentWaived ? 0 : (task.agreed_price !== undefined ? Number(task.agreed_price) : (task.budget !== undefined ? Number(task.budget) : 1499));
+          waiveReason = task.waive_reason || '';
         }
-      } catch {}
+      } catch { }
     }
 
-    const upiUri = this.generateUpiUri({
-      vpa,
-      payeeName: displayName,
-      amount,
-      referenceId: identifier,
-      note: `${itemTitle} - ${itemTier}`
-    });
+    const normalizedAmount = paymentWaived ? 0 : Math.max(0, Number(amount) || 0);
+    const upiUri = !paymentWaived && normalizedAmount > 0
+      ? this.generateUpiUri({
+          vpa,
+          payeeName: displayName,
+          amount: normalizedAmount,
+          referenceId: identifier,
+          note: `${itemTitle} - ${itemTier}`
+        })
+      : '';
 
-    const splits = this.calculateEscrow(amount);
+    const splits = !paymentWaived && normalizedAmount > 0
+      ? this.calculateEscrow(normalizedAmount)
+      : {
+          grossAmount: 0,
+          commissionRate: 0.19,
+          splits: {
+            specialistNetPayout: 0,
+            platformCommission: 0,
+            section194OTDSWithholding: 0
+          },
+          audit: {
+            timestamp: new Date().toISOString(),
+            rule: paymentWaived ? 'Admin Payment Waiver' : '100% Discount Applied'
+          }
+        };
 
     return {
       reference_id: identifier,
       order_id: identifier,
       package_title: itemTitle,
       tier_name: itemTier,
-      amount,
+      amount: normalizedAmount,
+      original_price: originalPrice,
+      discount_amount: discountAmount,
+      payment_waived: paymentWaived,
+      waive_reason: waiveReason,
       currency: 'INR',
       merchant: {
         vpa,

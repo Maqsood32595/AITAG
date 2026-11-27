@@ -1,1 +1,0 @@
-import{tt as e}from"./Box-BuTB8vj-.js";import{S as t}from"./Tooltip-bUEGT8nN.js";var n=e(),r=t((0,n.jsx)(`path`,{d:`M8 5v14l11-7z`}),`PlayArrow`);export{r as t};
