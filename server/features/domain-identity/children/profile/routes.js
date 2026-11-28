@@ -10,6 +10,7 @@ const router = express.Router();
 const profileService = require('./service');
 const authRoutes = require('../auth/routes');
 const authMiddleware = authRoutes.authMiddleware;
+const { requireRole } = require('../../../domain-security/grandchildren/bola-guard');
 const { sanitizeStoragePath } = require('../../../aitag-security-guard/middleware/ssrf-guard');
 const multer = require('multer');
 
@@ -35,17 +36,22 @@ const upload = multer({
 // GET /api/profile/me — Get authenticated user's profile and delivered workflows
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const profile = await profileService.getProfileByUserId(req.user.id);
+    const profile = await profileService.getProfileByUserId(req.user.id, { role: req.user.role });
     res.json(profile);
   } catch (err) {
     res.status(404).json({ error: err.message });
   }
 });
 
-// PUT /api/profile/me — Update authenticated user's profile and delivered workflows
+// PUT /api/profile/me — Update authenticated user's profile and delivered workflows (Work Reels restricted to specialists/admins)
 router.put('/me', authMiddleware, async (req, res) => {
   try {
-    const updated = await profileService.updateProfile(req.user.id, req.body);
+    const body = req.body || {};
+    const touchesWorkflows = body.deliveredWorkflows !== undefined || body.delivered_workflows !== undefined;
+    if (touchesWorkflows && req.user.role !== 'freelancer' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only verified specialists and admins can publish or modify Work Reels' });
+    }
+    const updated = await profileService.updateProfile(req.user.id, body, { role: req.user.role });
     res.json(updated);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -88,10 +94,10 @@ const handleMediaUpload = async (req, res) => {
   }
 };
 
-router.post('/workflows/video-upload', authMiddleware, upload.any(), handleMediaUpload);
-router.post('/workflows/media-upload', authMiddleware, upload.any(), handleMediaUpload);
+router.post('/workflows/video-upload', authMiddleware, requireRole(['freelancer', 'admin']), upload.any(), handleMediaUpload);
+router.post('/workflows/media-upload', authMiddleware, requireRole(['freelancer', 'admin']), upload.any(), handleMediaUpload);
 
-router.post('/workflows/video-signed-url', authMiddleware, async (req, res) => {
+router.post('/workflows/video-signed-url', authMiddleware, requireRole(['freelancer', 'admin']), async (req, res) => {
   try {
     const result = await profileService.generateWorkflowVideoSignedUrl(req.user.id, req.body);
     res.json(result);
@@ -101,7 +107,7 @@ router.post('/workflows/video-signed-url', authMiddleware, async (req, res) => {
 });
 
 // POST /api/profile/workflows/attach-video — Attach uploaded video demo to workflow
-router.post('/workflows/attach-video', authMiddleware, async (req, res) => {
+router.post('/workflows/attach-video', authMiddleware, requireRole(['freelancer', 'admin']), async (req, res) => {
   try {
     const updatedWorkflow = await profileService.attachVideoToWorkflow(req.user.id, req.body);
     res.json({ success: true, workflow: updatedWorkflow });

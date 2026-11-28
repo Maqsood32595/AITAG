@@ -4,7 +4,7 @@ import {
   Box, Container, Typography, Grid, Paper, Chip, CircularProgress,
   Button, Divider, Stack, Alert, Tabs, Tab, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, LinearProgress,
-  TextField, InputAdornment, Tooltip
+  TextField, InputAdornment, Tooltip, useTheme, useMediaQuery
 } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -29,6 +29,8 @@ import { AnimatedAvatar } from '../components/AnimatedAvatar';
 export const Analytics: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -115,8 +117,8 @@ export const Analytics: React.FC = () => {
                 size={44}
                 src={user?.photo_url}
               />
-              <Box>
-                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                   <Typography variant="h5" sx={{ fontWeight: 800, color: '#0f172a', fontFamily: 'Inter, sans-serif' }}>
                     {user?.name || 'User'}
                   </Typography>
@@ -132,7 +134,7 @@ export const Analytics: React.FC = () => {
                     }}
                   />
                 </Stack>
-                <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mt: 0.25 }}>
+                <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mt: 0.25, overflowWrap: 'anywhere' }}>
                   {role === 'client' ? user?.email : (
                     <>
                       {user?.email} • Member ID: <code>{dossier.identity?.id?.slice(0, 13)}...</code>
@@ -478,79 +480,142 @@ export const Analytics: React.FC = () => {
                 />
               </Box>
 
-              <TableContainer sx={{ borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                <Table>
-                  <TableHead sx={{ bgcolor: '#f8fafc' }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Date</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Type' : 'Record Type'}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Project' : 'Title / Project'}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Expert' : 'Counterparty / Specialist'}</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Amount</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Status</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredLedger.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4, color: '#94a3b8' }}>
-                          No activity records found.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredLedger.map((item: any, idx: number) => {
-                        const isCompleted = item.status === 'COMPLETED';
-                        const isActive = item.status === 'ACTIVE';
-                        return (
-                          <TableRow key={idx} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                            <TableCell sx={{ fontSize: '0.8rem', color: '#64748b', whiteSpace: 'nowrap' }}>
-                              {new Date(item.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            </TableCell>
-                            <TableCell>
-                              <Chip
-                                label={item.recordType}
-                                size="small"
-                                sx={{
-                                  fontSize: '0.7rem',
-                                  fontWeight: 700,
-                                  bgcolor: item.recordType.includes('Order') ? '#ede9fe' : item.recordType.includes('Proposal') ? '#e0f2fe' : '#f1f5f9',
-                                  color: item.recordType.includes('Order') ? '#6d28d9' : item.recordType.includes('Proposal') ? '#0369a1' : '#334155'
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
+              {isMobile ? (
+                filteredLedger.length === 0 ? (
+                  <Box sx={{ textAlign: 'center', py: 4, color: '#94a3b8' }}>
+                    No activity records found.
+                  </Box>
+                ) : (
+                  <Stack spacing={1.5}>
+                    {filteredLedger.map((item: any, idx: number) => {
+                      const isCompleted = item.status === 'COMPLETED';
+                      const isActive = item.status === 'ACTIVE';
+                      return (
+                        <Paper
+                          key={idx}
+                          elevation={0}
+                          sx={{ p: 1.8, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: '#ffffff' }}
+                        >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, mb: 0.8 }}>
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', overflowWrap: 'anywhere' }}>
                                 {item.title}
                               </Typography>
-                              <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                {item.subtitle}
-                              </Typography>
-                            </TableCell>
-                            <TableCell sx={{ fontSize: '0.825rem', color: '#475569' }}>
-                              {item.counterparty}
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: 800, fontSize: '0.85rem', color: '#0f172a' }}>
+                              {item.subtitle && (
+                                <Typography sx={{ fontSize: '0.75rem', color: '#64748b', overflowWrap: 'anywhere' }}>
+                                  {item.subtitle}
+                                </Typography>
+                              )}
+                            </Box>
+                            <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a', flexShrink: 0 }}>
                               {item.amount}
-                            </TableCell>
-                            <TableCell>
-                              <Chip
-                                label={item.status}
-                                size="small"
-                                sx={{
-                                  fontSize: '0.7rem',
-                                  fontWeight: 800,
-                                  bgcolor: isCompleted ? '#ecfdf5' : isActive ? '#dcfce7' : '#fef3c7',
-                                  color: isCompleted ? '#047857' : isActive ? '#15803d' : '#b45309',
-                                }}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, alignItems: 'center', mb: 0.8 }}>
+                            <Chip
+                              label={item.recordType}
+                              size="small"
+                              sx={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                bgcolor: item.recordType.includes('Order') ? '#ede9fe' : item.recordType.includes('Proposal') ? '#e0f2fe' : '#f1f5f9',
+                                color: item.recordType.includes('Order') ? '#6d28d9' : item.recordType.includes('Proposal') ? '#0369a1' : '#334155'
+                              }}
+                            />
+                            <Chip
+                              label={item.status}
+                              size="small"
+                              sx={{
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                bgcolor: isCompleted ? '#ecfdf5' : isActive ? '#dcfce7' : '#fef3c7',
+                                color: isCompleted ? '#047857' : isActive ? '#15803d' : '#b45309',
+                              }}
+                            />
+                          </Box>
+                          <Typography sx={{ fontSize: '0.75rem', color: '#64748b', overflowWrap: 'anywhere' }}>
+                            {new Date(item.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} • {item.counterparty}
+                          </Typography>
+                        </Paper>
+                      );
+                    })}
+                  </Stack>
+                )
+              ) : (
+                <TableContainer sx={{ borderRadius: '12px', border: '1px solid #f1f5f9', overflowX: 'auto' }}>
+                  <Table sx={{ minWidth: 680 }}>
+                    <TableHead sx={{ bgcolor: '#f8fafc' }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Date</TableCell>
+                        <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Type' : 'Record Type'}</TableCell>
+                        <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Project' : 'Title / Project'}</TableCell>
+                        <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>{role === 'client' ? 'Expert' : 'Counterparty / Specialist'}</TableCell>
+                        <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Amount</TableCell>
+                        <TableCell sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#475569' }}>Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredLedger.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4, color: '#94a3b8' }}>
+                            No activity records found.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredLedger.map((item: any, idx: number) => {
+                          const isCompleted = item.status === 'COMPLETED';
+                          const isActive = item.status === 'ACTIVE';
+                          return (
+                            <TableRow key={idx} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                              <TableCell sx={{ fontSize: '0.8rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                                {new Date(item.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={item.recordType}
+                                  size="small"
+                                  sx={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: 700,
+                                    bgcolor: item.recordType.includes('Order') ? '#ede9fe' : item.recordType.includes('Proposal') ? '#e0f2fe' : '#f1f5f9',
+                                    color: item.recordType.includes('Order') ? '#6d28d9' : item.recordType.includes('Proposal') ? '#0369a1' : '#334155'
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
+                                  {item.title}
+                                </Typography>
+                                <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                  {item.subtitle}
+                                </Typography>
+                              </TableCell>
+                              <TableCell sx={{ fontSize: '0.825rem', color: '#475569' }}>
+                                {item.counterparty}
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: 800, fontSize: '0.85rem', color: '#0f172a' }}>
+                                {item.amount}
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={item.status}
+                                  size="small"
+                                  sx={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: 800,
+                                    bgcolor: isCompleted ? '#ecfdf5' : isActive ? '#dcfce7' : '#fef3c7',
+                                    color: isCompleted ? '#047857' : isActive ? '#15803d' : '#b45309',
+                                  }}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
             </Paper>
           </Box>
         )}

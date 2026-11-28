@@ -313,12 +313,21 @@ const Navbar = () => {
                 >
                   <TrendingUpIcon fontSize="small" /> Analytics & Information
                 </MenuItem>
-                <MenuItem
-                  onClick={() => { navigate('/workflows'); setAnchorEl(null); }}
-                  sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
-                >
-                  <TrendingUpIcon fontSize="small" /> Workflows
-                </MenuItem>
+                {(user.role === 'freelancer' || user.role === 'admin') ? (
+                  <MenuItem
+                    onClick={() => { navigate('/workflows'); setAnchorEl(null); }}
+                    sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
+                  >
+                    <TrendingUpIcon fontSize="small" /> Work Reels Studio
+                  </MenuItem>
+                ) : (
+                  <MenuItem
+                    onClick={() => { navigate('/talent'); setAnchorEl(null); }}
+                    sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}
+                  >
+                    <TrendingUpIcon fontSize="small" /> Verified Experts
+                  </MenuItem>
+                )}
                 <MenuItem
                   onClick={() => { navigate('/account'); setAnchorEl(null); }}
                   sx={{ gap: 1.5, py: 1.5, cursor: 'pointer !important', '&:hover': { color: '#4f46e5' } }}

@@ -180,12 +180,16 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%', maxWidth: '100vw', overflowX: 'clip', bgcolor: 'background.default' }}>
       {/* Top Application Bar */}
       <AppBar
         position="fixed"
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
+          width: '100%',
+          maxWidth: '100vw',
+          left: 0,
+          right: 0,
           bgcolor: 'rgba(255,255,255,0.88)',
           backdropFilter: 'blur(16px)',
           color: 'text.primary',
@@ -193,9 +197,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           boxShadow: 'none',
         }}
       >
-        <Toolbar sx={{ minHeight: '52px !important', height: '52px', justifyContent: 'space-between', px: { xs: 1, sm: 2.5 } }}>
+        <Toolbar sx={{ minHeight: '52px !important', height: '52px', width: '100%', minWidth: 0, justifyContent: 'space-between', px: { xs: 1.25, sm: 2.5 }, gap: 1 }}>
           {/* Left: Sidebar Toggle + Brand Logo */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, minWidth: 0, flexShrink: 1 }}>
             <Tooltip title={isMobile ? "Open Navigation Menu" : collapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}>
               <IconButton
                 onClick={toggleSidebar}
@@ -239,7 +243,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           </Box>
 
           {/* Right: Dashboard Role Badge + Interactive User Avatar */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 3 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 2.5 }, flexShrink: 0, minWidth: 0 }}>
             <Typography
               variant="body2"
               color="text.secondary"
@@ -388,6 +392,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         component="main"
         sx={{
           flexGrow: 1,
+          minWidth: 0,
+          maxWidth: '100%',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
@@ -401,7 +407,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         }}
       >
         <Toolbar sx={{ minHeight: '52px !important', height: '52px' }} />
-        <Box sx={{ flex: 1, width: '100%' }}>
+        <Box sx={{ flex: 1, width: '100%', minWidth: 0 }}>
           {children}
         </Box>
 

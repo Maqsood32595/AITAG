@@ -248,8 +248,9 @@ class ProfileService {
     }
   }
 
-  async getProfileByUserId(rawUserId) {
+  async getProfileByUserId(rawUserId, options = {}) {
     const userId = this.normalizeUserId(rawUserId);
+    const requesterRole = options.role;
 
     // 1. Curated placeholder IDs have blank workflows until updated
     if (this.isCuratedPlaceholder(userId)) {
@@ -259,6 +260,19 @@ class ProfileService {
         skills: [],
         links: {},
         bio: ''
+      };
+    }
+
+    // 2. Non-specialist client accounts never inherit specialist Work Reels fallback showcases
+    if (requesterRole === 'client') {
+      return {
+        userId,
+        role: 'client',
+        hourlyRate: 0,
+        skills: [],
+        links: {},
+        bio: '',
+        deliveredWorkflows: [],
       };
     }
 
@@ -392,9 +406,10 @@ class ProfileService {
     return defaultProfile;
   }
 
-  async updateProfile(rawUserId, updateData) {
+  async updateProfile(rawUserId, updateData, options = {}) {
     const userId = this.normalizeUserId(rawUserId);
-    const existing = await this.getProfileByUserId(userId);
+    const existing = await this.getProfileByUserId(userId, options);
+    const canModifyWorkflows = !options.role || options.role === 'freelancer' || options.role === 'admin';
 
     const updated = {
       ...existing,
@@ -408,7 +423,9 @@ class ProfileService {
         ...(existing.links || {}),
         ...(updateData.links || {})
       },
-      deliveredWorkflows: updateData.deliveredWorkflows !== undefined ? updateData.deliveredWorkflows : existing.deliveredWorkflows,
+      deliveredWorkflows: canModifyWorkflows && updateData.deliveredWorkflows !== undefined
+        ? updateData.deliveredWorkflows
+        : (existing.deliveredWorkflows || []),
       updatedAt: new Date().toISOString()
     };
 

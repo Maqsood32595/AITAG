@@ -119,8 +119,8 @@ function App() {
               <Route path="/analytics" element={<PrivateRoute><Analytics /></PrivateRoute>} />
               <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path="/account" element={<PrivateRoute><Profile /></PrivateRoute>} />
-              <Route path="/workflows" element={<PrivateRoute><Workflows /></PrivateRoute>} />
-              <Route path="/work-reels" element={<PrivateRoute><Workflows /></PrivateRoute>} />
+              <Route path="/workflows" element={<PrivateRoute allowedRoles={['freelancer', 'admin']} redirectTo="/talent"><Workflows /></PrivateRoute>} />
+              <Route path="/work-reels" element={<PrivateRoute allowedRoles={['freelancer', 'admin']} redirectTo="/talent"><Workflows /></PrivateRoute>} />
 
               {/* Fallback / Catch-all */}
               <Route path="*" element={<Navigate to="/" replace />} />

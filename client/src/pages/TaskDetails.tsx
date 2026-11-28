@@ -614,8 +614,8 @@ const TaskDetails = () => {
 
             {/* Owner Proposals & Bids Section */}
             {isOwner && (
-              <Paper elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid rgba(79,70,229,0.12)', mb: 3, bgcolor: '#ffffff' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: '16px', border: '1px solid rgba(79,70,229,0.12)', mb: 3, bgcolor: '#ffffff' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>
                     Proposals & Bids ({bids.length})
                   </Typography>
@@ -629,14 +629,14 @@ const TaskDetails = () => {
                   <Stack spacing={2}>
                     {bids.map((b) => (
                       <Card key={b.id} variant="outlined" sx={{ borderRadius: '12px', borderColor: b.status === 'accepted' ? '#10b981' : '#e2e8f0', bgcolor: b.status === 'accepted' ? 'rgba(16,185,129,0.03)' : '#ffffff' }}>
-                        <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, minWidth: 0, flex: '1 1 240px' }}>
                               <AnimatedAvatar name={b.user_name || 'User'} size={40} />
-                              <Box>
+                              <Box sx={{ minWidth: 0, flex: 1 }}>
                                 <Typography sx={{ fontWeight: 700, color: '#0f172a' }}>{b.user_name}</Typography>
-                                <Typography sx={{ color: '#64748b', fontSize: '0.8rem' }}>{b.user_email}</Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5 }}>
+                                <Typography sx={{ color: '#64748b', fontSize: '0.8rem', overflowWrap: 'anywhere' }}>{b.user_email}</Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mt: 0.5 }}>
                                   <Typography sx={{ fontWeight: 800, color: '#10b981', fontSize: '0.95rem' }}>
                                     Bid: ₹{Number(b.bid_amount || task.budget).toLocaleString()}
                                   </Typography>
@@ -645,14 +645,14 @@ const TaskDetails = () => {
                                   </Typography>
                                 </Box>
                                 {b.proposal_pitch && (
-                                  <Typography sx={{ color: '#334155', fontSize: '0.85rem', mt: 1, p: 1, bgcolor: '#f8fafc', borderRadius: '8px', borderLeft: '3px solid #4f46e5' }}>
+                                  <Typography sx={{ color: '#334155', fontSize: '0.85rem', mt: 1, p: 1, bgcolor: '#f8fafc', borderRadius: '8px', borderLeft: '3px solid #4f46e5', overflowWrap: 'anywhere' }}>
                                     "{b.proposal_pitch}"
                                   </Typography>
                                 )}
                               </Box>
                             </Box>
 
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'space-between', sm: 'flex-end' } }}>
                               <Chip
                                 label={b.status.toUpperCase()}
                                 size="small"

@@ -520,6 +520,27 @@ const Dashboard = () => {
     }
   };
 
+  const responsiveActionBarSx = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 1,
+    width: { xs: '100%', md: 'auto' },
+    minWidth: 0,
+    '& > .MuiButton-root': {
+      flexGrow: { xs: 1, sm: 0 },
+      whiteSpace: 'nowrap',
+      px: { xs: 1.25, sm: 1.6 },
+      py: { xs: 0.7, sm: 0.55 },
+      fontSize: { xs: '0.75rem', sm: '0.76rem' },
+    },
+    '& > .MuiChip-root': {
+      maxWidth: '100%',
+      height: 'auto',
+      '& .MuiChip-label': { whiteSpace: 'normal', py: 0.4 },
+    },
+  } as const;
+
   const renderPriceSummary = (item: any, accentColor: string) => {
     const isWaived = Boolean(item?.payment_waived);
     const discountAmt = Number(item?.discount_amount || 0);
@@ -888,9 +909,9 @@ const Dashboard = () => {
             boxShadow: '0 4px 16px rgba(79,70,229,0.03)',
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: 34, height: 34, borderRadius: '8px', bgcolor: 'rgba(79,70,229,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexWrap: 'wrap', gap: 1.5, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: '1 1 240px' }}>
+              <Box sx={{ width: 34, height: 34, flexShrink: 0, borderRadius: '8px', bgcolor: 'rgba(79,70,229,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ShoppingBagIcon sx={{ color: '#4f46e5', fontSize: 18 }} />
               </Box>
               <Box>
@@ -966,9 +987,9 @@ const Dashboard = () => {
                     }}
                   >
                     {/* Header Row */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1.2 }}>
-                      <Box>
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mb: 0.4 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1, mb: 1.2, minWidth: 0 }}>
+                      <Box sx={{ minWidth: 0, flex: '1 1 240px' }}>
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 0.4 }}>
                           <Typography sx={{ fontWeight: 800, fontSize: '0.98rem', color: '#0f172a' }}>
                             {ord.package_title}
                           </Typography>
@@ -982,7 +1003,7 @@ const Dashboard = () => {
                             sx={{ bgcolor: '#ede9fe', color: '#6d28d9', fontWeight: 800, fontSize: '0.7rem' }}
                           />
                         </Stack>
-                        <Typography sx={{ color: '#64748b', fontSize: '0.76rem' }}>
+                        <Typography sx={{ color: '#64748b', fontSize: '0.76rem', overflowWrap: 'anywhere' }}>
                           Order: <strong>{ord.order_number}</strong> • Customer: <strong>{ord.customer_name}</strong> ({ord.customer_email})
                           {ord.customer_phone ? ` • Tel: ${ord.customer_phone}` : ''}
                         </Typography>
@@ -1046,10 +1067,10 @@ const Dashboard = () => {
 
                     {/* Assigned Specialist Strip (Picture 2 Style) */}
                     {ord.assigned_expert_email && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.3, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.15)', mb: 1.4 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.3, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.15)', mb: 1.4, minWidth: 0 }}>
                         <AnimatedAvatar name={ord.assigned_expert_name || ord.assigned_expert_email} size={28} />
-                        <Box>
-                          <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e293b' }}>
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                          <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e293b', overflowWrap: 'anywhere' }}>
                             Matched Specialist: <strong>{ord.assigned_expert_name || 'Verified AI Specialist'}</strong> ({ord.assigned_expert_email})
                           </Typography>
                           <Typography sx={{ fontSize: '0.7rem', color: '#6366f1' }}>
@@ -1108,7 +1129,7 @@ const Dashboard = () => {
                     {/* Completed Outcome Review & Rating */}
                     {ord.status === 'COMPLETED' && (ord.rating || ord.testimonial) && (
                       <Box sx={{ mb: 2, p: 2, bgcolor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 0.5 }}>
                           <Rating value={Number(ord.rating) || 5} readOnly size="small" />
                           <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#065f46' }}>
                             Approved 5/5 Customer Rating
@@ -1127,16 +1148,17 @@ const Dashboard = () => {
                       sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: { xs: 'flex-start', md: 'center' },
+                        alignItems: { xs: 'stretch', md: 'center' },
                         flexDirection: { xs: 'column', md: 'row' },
-                        gap: 1.2,
+                        gap: 1.5,
                         mt: 1.2,
                         pt: 1.2,
-                        borderTop: '1px solid #f1f5f9'
+                        borderTop: '1px solid #f1f5f9',
+                        minWidth: 0
                       }}
                     >
                       {/* Left: Expert & Timestamp */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', minWidth: 0 }}>
                         <Typography sx={{ fontSize: '0.775rem', color: '#94a3b8' }}>
                           Requested on {new Date(ord.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
                         </Typography>
@@ -1149,6 +1171,9 @@ const Dashboard = () => {
                           }
                           size="small"
                           sx={{
+                            maxWidth: '100%',
+                            height: 'auto',
+                            '& .MuiChip-label': { whiteSpace: 'normal', py: 0.35 },
                             bgcolor: ord.assigned_expert_email ? '#e0f2fe' : '#fef3c7',
                             color: ord.assigned_expert_email ? '#0369a1' : '#b45309',
                             fontSize: '0.74rem',
@@ -1159,7 +1184,7 @@ const Dashboard = () => {
                       </Box>
 
                       {/* Right: Interactive State Action Buttons (Picture 2 Oversight Bar) */}
-                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                      <Box sx={responsiveActionBarSx}>
                         {/* Admin Expert Control across active states */}
                         {isAdmin && ord.status !== 'COMPLETED' && (
                           !ord.assigned_expert_email ? (
@@ -1435,7 +1460,7 @@ const Dashboard = () => {
                         >
                           Details
                         </Button>
-                      </Stack>
+                      </Box>
                     </Box>
                   </Paper>
                 );
@@ -1680,8 +1705,8 @@ const Dashboard = () => {
                       }}
                     >
                       {/* Top Header */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1.5, mb: 1.5 }}>
-                        <Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1.5, mb: 1.5, minWidth: 0 }}>
+                        <Box sx={{ minWidth: 0, flex: '1 1 240px' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
                             <Typography sx={{ fontWeight: 800, fontSize: '0.98rem', color: '#0f172a' }}>
                               {task.title}
@@ -1692,7 +1717,7 @@ const Dashboard = () => {
                               sx={{ bgcolor: 'rgba(79,70,229,0.08)', color: '#4f46e5', fontWeight: 700, fontSize: '0.72rem' }}
                             />
                           </Box>
-                          <Typography sx={{ fontSize: '0.76rem', color: '#64748b', mt: 0.3 }}>
+                          <Typography sx={{ fontSize: '0.76rem', color: '#64748b', mt: 0.3, overflowWrap: 'anywhere' }}>
                             Task: <strong>#{String(task.id).replace('task-', '').slice(-6)}</strong> • Customer: <strong>{task.user_name || 'Client'}</strong> ({task.user_email || 'client@aitag.com'})
                             {task.deadline && ` • Deadline: ${new Date(task.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`}
                           </Typography>
@@ -1755,10 +1780,10 @@ const Dashboard = () => {
 
                       {/* Assigned Specialist Banner (if assigned) */}
                       {task.assigned_expert_email && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.15)', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, bgcolor: 'rgba(79,70,229,0.04)', borderRadius: '10px', border: '1px solid rgba(79,70,229,0.15)', mb: 2, minWidth: 0 }}>
                           <AnimatedAvatar name={task.assigned_expert_name || task.assigned_expert_email} size={30} />
-                          <Box>
-                            <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
+                            <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', overflowWrap: 'anywhere' }}>
                               Matched Specialist: <strong>{task.assigned_expert_name || 'Verified AI Specialist'}</strong> ({task.assigned_expert_email})
                             </Typography>
                             <Typography sx={{ fontSize: '0.72rem', color: '#6366f1' }}>
@@ -1769,12 +1794,23 @@ const Dashboard = () => {
                       )}
 
                       {/* Action Footer */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, pt: 1, borderTop: '1px solid #f1f5f9' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: { xs: 'column', md: 'row' },
+                          justifyContent: 'space-between',
+                          alignItems: { xs: 'stretch', md: 'center' },
+                          gap: 1.5,
+                          pt: 1.2,
+                          borderTop: '1px solid #f1f5f9',
+                          minWidth: 0
+                        }}
+                      >
                         <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>
                           {task.created_at ? `Requested on ${new Date(task.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Recent Task'} • <strong>{task.total_bids || 0} Proposals</strong>
                         </Typography>
 
-                        <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap">
+                        <Box sx={responsiveActionBarSx}>
                           {/* Assign / Reassign Actions */}
                           {!isAssigned ? (
                             <Button
@@ -1902,7 +1938,7 @@ const Dashboard = () => {
                           >
                             Details
                           </Button>
-                        </Stack>
+                        </Box>
                       </Box>
                     </Paper>
                   );
@@ -1919,17 +1955,36 @@ const Dashboard = () => {
             <Button component={Link} to="/my_tasks" size="small" sx={{ color: '#4f46e5', fontWeight: 600 }}>View all →</Button>
           </Box>
           <Divider sx={{ mb: 2 }} />
-          {[...myTasks.map(t => ({ type: 'Posted Task', title: t.title, date: t.created_at })),
-            ...myBids.map(b => ({ type: 'Placed Bid', title: b.task_title, date: b.created_at }))]
+          {[...myTasks.map(t => ({ type: 'Posted Task', title: t.title, date: t.created_at, to: `/task-details/${t.id}` })),
+            ...myBids.map(b => ({ type: 'Placed Bid', title: b.task_title, date: b.created_at, to: b.task_id ? `/task-details/${b.task_id}` : '/my_tasks' }))]
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .slice(0, 5)
             .map((item, i) => (
-              <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1.5, borderBottom: '1px solid #f1f5f9' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Chip label={item.type} size="small" sx={{ bgcolor: item.type === 'Posted Task' ? 'rgba(8,145,178,0.08)' : 'rgba(16,185,129,0.08)', color: item.type === 'Posted Task' ? '#0891b2' : '#10b981', fontWeight: 600, fontSize: '0.7rem' }} />
-                  <Typography sx={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 500 }}>{item.title}</Typography>
+              <Box
+                key={i}
+                component={Link}
+                to={item.to}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  py: 1.5,
+                  px: 1,
+                  mx: -1,
+                  borderRadius: '8px',
+                  borderBottom: '1px solid #f1f5f9',
+                  textDecoration: 'none',
+                  transition: 'background-color 0.15s',
+                  '&:hover': { bgcolor: '#f8fafc' }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: '1 1 200px' }}>
+                  <Chip label={item.type} size="small" sx={{ flexShrink: 0, bgcolor: item.type === 'Posted Task' ? 'rgba(8,145,178,0.08)' : 'rgba(16,185,129,0.08)', color: item.type === 'Posted Task' ? '#0891b2' : '#10b981', fontWeight: 600, fontSize: '0.7rem' }} />
+                  <Typography sx={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 600, overflowWrap: 'anywhere' }}>{item.title}</Typography>
                 </Box>
-                <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#64748b', flexShrink: 0 }}>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</Typography>
               </Box>
             ))}
           {myTasks.length === 0 && myBids.length === 0 && (
@@ -2291,14 +2346,17 @@ const Dashboard = () => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'space-between',
+                              flexWrap: 'wrap',
+                              gap: 1,
                               p: 1,
                               px: 1.4,
                               borderRadius: '8px',
                               border: '1px solid #e2e8f0',
                               bgcolor: '#ffffff',
+                              minWidth: 0,
                             }}
                           >
-                            <Typography noWrap sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#1e293b', maxWidth: 340 }}>
+                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#1e293b', minWidth: 0, flex: '1 1 180px', overflowWrap: 'anywhere' }}>
                               {assetName}
                             </Typography>
                             {assetUrl && (

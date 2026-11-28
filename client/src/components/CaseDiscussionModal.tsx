@@ -538,7 +538,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
             <Typography variant="caption" sx={{ fontWeight: 700, color: '#64748b', mb: 0.5, display: 'block' }}>
               Pending Attachments ({attachments.length}):
             </Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
               {attachments.map((att, idx) => (
                 <Chip
                   key={att.id || idx}
@@ -546,7 +546,7 @@ export const CaseDiscussionModal: React.FC<CaseDiscussionModalProps> = ({
                   label={`${att.name} (${formatFileSize(att.size)})`}
                   size="small"
                   onDelete={() => handleRemovePendingAttachment(idx)}
-                  sx={{ bgcolor: '#e0e7ff', color: '#3730a3', fontWeight: 600, fontSize: '0.72rem' }}
+                  sx={{ maxWidth: '100%', bgcolor: '#e0e7ff', color: '#3730a3', fontWeight: 600, fontSize: '0.72rem' }}
                 />
               ))}
             </Stack>

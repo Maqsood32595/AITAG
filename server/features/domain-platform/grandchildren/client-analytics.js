@@ -56,7 +56,7 @@ function computeClientAnalytics({ user, orders = [], tasks = [], bids = [], invi
 
   orders.forEach((ord) => {
     const cat = ord.category || 'Product Visuals';
-    const price = Number(ord.agreed_price) || 0;
+    const price = ord.payment_waived ? 0 : (Number(ord.agreed_price) || 0);
     if (!categoryMap[cat]) categoryMap[cat] = { count: 0, spend: 0 };
     categoryMap[cat].count++;
     categoryMap[cat].spend += price;
@@ -64,7 +64,7 @@ function computeClientAnalytics({ user, orders = [], tasks = [], bids = [], invi
 
   tasks.forEach((t) => {
     const cat = t.category || 'Product Visuals';
-    const budget = Number(t.budget) || 0;
+    const budget = t.payment_waived ? 0 : (Number(t.budget) || 0);
     if (!categoryMap[cat]) categoryMap[cat] = { count: 0, spend: 0 };
     categoryMap[cat].count++;
     categoryMap[cat].spend += budget;
@@ -78,7 +78,7 @@ function computeClientAnalytics({ user, orders = [], tasks = [], bids = [], invi
       const name = ord.assigned_expert_name || email;
       const prev = specialistMap.get(email) || { name, email, ordersCount: 0, totalValue: 0 };
       prev.ordersCount++;
-      prev.totalValue += Number(ord.agreed_price) || 0;
+      prev.totalValue += ord.payment_waived ? 0 : (Number(ord.agreed_price) || 0);
       specialistMap.set(email, prev);
     }
   });

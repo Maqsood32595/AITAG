@@ -79,6 +79,7 @@ export const Workflows: React.FC = () => {
   const { isMobile, isSmallScreen, isMobileLandscape } = useMobileDetect();
   const touchStartY = useRef<number>(0);
   const { user } = useAuth();
+  const canManageReels = user?.role === 'freelancer' || user?.role === 'admin';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [workflows, setWorkflows] = useState<DeliveredWorkflow[]>([]);
@@ -109,8 +110,14 @@ export const Workflows: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    loadWorkflows();
-  }, []);
+    if (user && !canManageReels) {
+      navigate('/talent', { replace: true });
+      return;
+    }
+    if (canManageReels) {
+      loadWorkflows();
+    }
+  }, [user, canManageReels, navigate]);
 
   const loadWorkflows = async () => {
     try {
@@ -341,6 +348,10 @@ export const Workflows: React.FC = () => {
 
   const activeWf = workflows.find(w => w.id === activeWorkflowId) || workflows[0];
   const currentPreviewReel = workflows[previewReelIndex] || workflows[0];
+
+  if (user && !canManageReels) {
+    return null;
+  }
 
   return (
     <DashboardLayout>

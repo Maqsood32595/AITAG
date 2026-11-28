@@ -53,7 +53,7 @@ function computeFreelancerAnalytics({ user, orders = [], bids = [], invitations 
 
   orders.forEach((ord) => {
     const cat = ord.category || 'Product Visuals';
-    const payout = Number(ord.expert_payout) || Math.round((Number(ord.agreed_price) || 0) * 0.95);
+    const payout = ord.payment_waived ? 0 : (Number(ord.expert_payout) || Math.round((Number(ord.agreed_price) || 0) * 0.95));
     if (!categoryMap[cat]) categoryMap[cat] = { count: 0, earnings: 0 };
     categoryMap[cat].count++;
     categoryMap[cat].earnings += payout;

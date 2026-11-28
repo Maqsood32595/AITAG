@@ -164,9 +164,9 @@ const UpdateTask = () => {
           {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>{error}</Alert>}
 
           {/* Escrow Quick Action Card */}
-          <Paper elevation={0} sx={{ p: 2.5, mb: 3, borderRadius: '14px', bgcolor: 'rgba(79,70,229,0.04)', border: '1px dashed rgba(79,70,229,0.3)' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
+          <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, mb: 3, borderRadius: '14px', bgcolor: 'rgba(79,70,229,0.04)', border: '1px dashed rgba(79,70,229,0.3)' }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: 1.5 }}>
+              <Box sx={{ minWidth: 0 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
                   100% Payment Safety (AITAG Protected)
                 </Typography>
@@ -180,10 +180,12 @@ const UpdateTask = () => {
                 startIcon={<QrCode2Icon />}
                 onClick={() => setPayModalOpen(true)}
                 sx={{
+                  alignSelf: { xs: 'flex-start', sm: 'center' },
                   background: 'linear-gradient(135deg, #10b981, #059669)',
                   fontWeight: 700,
                   borderRadius: '10px',
                   textTransform: 'none',
+                  whiteSpace: 'nowrap',
                   boxShadow: '0 4px 12px rgba(16,185,129,0.3)'
                 }}
               >

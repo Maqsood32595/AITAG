@@ -226,6 +226,45 @@ async function runPietSuite() {
       assert(ids.includes('aitag-case-discussions'), 'Kernel missing aitag-case-discussions slice');
     });
 
+    await t('Verifies Fractal Kernel Level 1->2->3 Domain/Child/Grandchild integrity and GET /api/domains', async () => {
+      const expectedDomains = [
+        'domain-finance',
+        'domain-identity',
+        'domain-marketplace',
+        'domain-platform',
+        'domain-security',
+        'domain-services'
+      ];
+      for (const dom of expectedDomains) {
+        const domDir = resolve('server/features', dom);
+        const manifestPath = join(domDir, 'domain.manifest.json');
+        assert(existsSync(manifestPath), `Domain manifest missing for ${dom}`);
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+        eq(manifest.id, dom, `Domain ID mismatch in ${dom}`);
+        eq(manifest.type, 'domain', `Domain type must be 'domain' in ${dom}`);
+        assert(Array.isArray(manifest.children) && manifest.children.length > 0, `${dom} must declare children`);
+        for (const child of manifest.children) {
+          const childDir = join(domDir, child.folder);
+          assert(existsSync(join(childDir, 'child.manifest.json')), `Missing child.manifest.json in ${dom}/${child.folder}`);
+          assert(existsSync(join(childDir, 'routes.js')), `Missing routes.js in ${dom}/${child.folder}`);
+          assert(existsSync(join(childDir, 'service.js')), `Missing service.js in ${dom}/${child.folder}`);
+        }
+      }
+
+      const svcGrandchildren = ['catalog-validator.js', 'pricing-waiver-engine.js', 'tier-resolver.js'];
+      for (const gc of svcGrandchildren) {
+        assert(existsSync(resolve('server/features/domain-services/grandchildren', gc)), `Missing domain-services grandchild: ${gc}`);
+      }
+
+      const domainsRes = await requestJson('/api/domains');
+      eq(domainsRes.status, 200, 'GET /api/domains must return 200 OK');
+      assert(Array.isArray(domainsRes.data), '/api/domains must return array');
+      const domIds = domainsRes.data.map(d => d.id);
+      for (const dom of expectedDomains) {
+        assert(domIds.includes(dom), `/api/domains missing mounted domain ${dom}`);
+      }
+    });
+
     await t('Verifies aitag-oauth config endpoint and input validation contract', async () => {
       const configRes = await requestJson('/api/oauth/config');
       eq(configRes.status, 200, 'GET /api/oauth/config must return 200 OK');
@@ -462,6 +501,55 @@ async function runPietSuite() {
       for (const skill of skills) {
         assert(!legacyBannedSkills.includes(skill), `Specialist profile cannot contain legacy dev skill: ${skill}`);
       }
+    });
+
+    await t('Grandchild pure engine invariants: pricing-waiver-engine.js & analytics zero-cash waivers', async () => {
+      const { computePricingAdjustment } = await import('../../server/features/domain-services/grandchildren/pricing-waiver-engine.js');
+      const { computeAdminAnalytics } = await import('../../server/features/domain-platform/grandchildren/admin-analytics.js');
+      const { computeClientAnalytics } = await import('../../server/features/domain-platform/grandchildren/client-analytics.js');
+      const { computeFreelancerAnalytics } = await import('../../server/features/domain-platform/grandchildren/freelancer-analytics.js');
+
+      // Partial flat ₹500 discount from ₹1499
+      const discounted = computePricingAdjustment({
+        currentOriginalPrice: 1499,
+        currentAgreedPrice: 1499,
+        discountAmount: 500,
+        skipPayment: false,
+        adminEmail: 'user1@aitag.com',
+        reason: 'Launch credit'
+      });
+      eq(discounted.original_price, 1499, 'original_price preserved');
+      eq(discounted.discount_amount, 500, 'discount_amount preserved');
+      eq(discounted.agreed_price, 999, 'agreed_price equals 1499 - 500');
+      eq(discounted.platform_fee, 200, '20% platform fee recalculated on 999');
+      eq(discounted.expert_payout, 799, '80% expert payout recalculated on 999');
+      eq(discounted.payment_waived, false, 'partial discount is not waived');
+      eq(discounted.payment_status, 'DISCOUNTED', 'payment_status set to DISCOUNTED');
+
+      // Re-discount uses original_price (non-compounding) & clamps > original_price to waived ₹0
+      const fullDiscount = computePricingAdjustment({
+        currentOriginalPrice: 1499,
+        currentAgreedPrice: 999,
+        discountAmount: 3000,
+        skipPayment: false
+      });
+      eq(fullDiscount.discount_amount, 1499, 'discount clamped to original_price');
+      eq(fullDiscount.agreed_price, 0, 'agreed_price equals 0 when fully discounted');
+      eq(fullDiscount.payment_waived, true, '100% discount marks payment_waived');
+      eq(fullDiscount.payment_status, 'WAIVED', 'payment_status set to WAIVED');
+
+      // Waiver excluded from cash GMV / spend / earnings across all 3 analytics grandchildren
+      const waivedOrder = { status: 'ACTIVE', payment_waived: true, agreed_price: 0, original_price: 1499, platform_fee: 0, expert_payout: 0 };
+      const waivedTask = { status: 'in-progress', payment_waived: true, budget: 0, original_price: 1500 };
+
+      const adminStats = computeAdminAnalytics({ orders: [waivedOrder], tasks: [waivedTask], users: [], bids: [] });
+      eq(adminStats.summaryCards[0].numeric, 0, 'Waived order & task must contribute ₹0 to Admin GMV');
+
+      const clientStats = computeClientAnalytics({ orders: [waivedOrder], tasks: [waivedTask] });
+      eq(clientStats.summaryCards[0].numeric, 0, 'Waived order & task must contribute ₹0 to Client spend');
+
+      const freelancerStats = computeFreelancerAnalytics({ orders: [{ ...waivedOrder, status: 'COMPLETED' }], tasks: [{ ...waivedTask, status: 'completed' }], bids: [] });
+      eq(freelancerStats.summaryCards[0].numeric, 0, 'Waived deliverables must contribute ₹0 cash earnings');
     });
 
     // --------------------------------------------------------------------------
@@ -1654,6 +1742,158 @@ async function runPietSuite() {
       eq(waiveRes.data.task.payment_waived, true, 'Task payment_waived must become true');
       eq(Number(waiveRes.data.task.budget), 0, 'Task budget must become 0 when waived');
       eq(waiveRes.data.task.escrow_funded, true, 'Task escrow_funded must become true when waived');
+    });
+
+    // --------------------------------------------------------------------------
+    // GATE 11: Auth Password Update & Mobile UI Layout Invariants
+    // --------------------------------------------------------------------------
+    gate('Gate 11: Auth Password Update & Mobile UI Layout Invariants');
+
+    await t('Account password update: POST /api/auth/change-password validates current password and updates hash', async () => {
+      const unauthChange = await requestJson('/api/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword: 'OldPassword1!', newPassword: 'NewPassword1!' })
+      });
+      eq(unauthChange.status, 401, 'Unauthenticated POST /api/auth/change-password must return 401');
+
+      const pwdEmail = `piet-pwd-${RUN_ID}@aitag-test.local`;
+      const regRes = await requestJson('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: 'PIET Password User',
+          email: pwdEmail,
+          password: 'InitPassword1!',
+          role: 'client'
+        })
+      });
+      eq(regRes.status, 201, 'Ephemeral user registration for password test must succeed');
+      const pwdToken = regRes.data.token;
+
+      const wrongCurr = await requestJson('/api/auth/change-password', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${pwdToken}` },
+        body: JSON.stringify({ currentPassword: 'WrongPassword1!', newPassword: 'UpdatedPassword1!' })
+      });
+      eq(wrongCurr.status, 400, 'Wrong current password must be rejected with HTTP 400');
+
+      const weakNew = await requestJson('/api/auth/change-password', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${pwdToken}` },
+        body: JSON.stringify({ currentPassword: 'InitPassword1!', newPassword: 'short' })
+      });
+      eq(weakNew.status, 400, 'Weak new password must be rejected with HTTP 400');
+
+      const okRes = await requestJson('/api/auth/change-password', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${pwdToken}` },
+        body: JSON.stringify({ currentPassword: 'InitPassword1!', newPassword: 'UpdatedPassword1!' })
+      });
+      eq(okRes.status, 200, 'Valid change-password request must return 200 OK');
+      eq(okRes.data.success, true, 'change-password must return success: true');
+
+      const oldLogin = await requestJson('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: pwdEmail, password: 'InitPassword1!' })
+      });
+      eq(oldLogin.status, 401, 'Old password must fail login after password update');
+
+      const newLogin = await requestJson('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: pwdEmail, password: 'UpdatedPassword1!' })
+      });
+      eq(newLogin.status, 200, 'New password must succeed login after password update');
+
+      // Teardown: purge ephemeral user
+      await requestJson('/api/account', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${pwdToken}` },
+        body: JSON.stringify({ confirmation: 'DELETE' })
+      });
+    });
+
+    await t('Mobile UI layout & clickability invariants across Dashboard, MyPostedTasks, Analytics & Shell', () => {
+      const layoutSrc = readFileSync(resolve('client/src/layouts/DashboardLayout.tsx'), 'utf8');
+      assert(layoutSrc.includes("maxWidth: '100vw'") && layoutSrc.includes("overflowX: 'clip'") && layoutSrc.includes('minWidth: 0'),
+        'DashboardLayout must bound viewport width and minWidth: 0 to prevent mobile AppBar clipping');
+
+      const dashSrc = readFileSync(resolve('client/src/pages/Dashboard.tsx'), 'utf8');
+      assert(dashSrc.includes('const responsiveActionBarSx'), 'Dashboard must define shared responsiveActionBarSx for card action footers');
+      assert(!dashSrc.includes('<Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap">'),
+        'Dashboard action footer must not revert to unwrapped/non-flexGap row Stack');
+      assert(dashSrc.includes("to: `/task-details/${t.id}`"), 'Recent Activity items on Dashboard must link to task details');
+
+      const myTasksSrc = readFileSync(resolve('client/src/pages/MyPostedTasks.tsx'), 'utf8');
+      assert(myTasksSrc.includes("useMediaQuery(theme.breakpoints.down('md'))"), 'MyPostedTasks must detect mobile breakpoints');
+      assert(myTasksSrc.includes('onClick={() => navigate(`/task-details/${task.id}`)}'), 'Task cards & rows in MyPostedTasks must be clickable');
+      assert(myTasksSrc.includes('e.stopPropagation()'), 'Individual actions in MyPostedTasks must isolate click propagation');
+      assert(myTasksSrc.includes('activeOrderDetail'), 'Service Package rows/cards in MyPostedTasks must open full details modal');
+
+      const analyticsSrc = readFileSync(resolve('client/src/pages/Analytics.tsx'), 'utf8');
+      assert(analyticsSrc.includes("useMediaQuery(theme.breakpoints.down('md'))") && analyticsSrc.includes('{isMobile ? ('),
+        'Analytics ledger must switch to mobile card layout below md breakpoint');
+
+      const updateTaskSrc = readFileSync(resolve('client/src/pages/UpdateTask.tsx'), 'utf8');
+      assert(updateTaskSrc.includes("flexDirection: { xs: 'column', sm: 'row' }"),
+        'UpdateTask payment strip must stack cleanly on mobile');
+
+      const chatSrc = readFileSync(resolve('client/src/components/CaseDiscussionModal.tsx'), 'utf8');
+      assert(chatSrc.includes("flexWrap=\"wrap\" useFlexGap") || chatSrc.includes('flexWrap="wrap" useFlexGap'),
+        'CaseDiscussionModal attachment tray must use flexWrap with useFlexGap');
+    });
+
+    await t('Work Reels RBAC invariant: client blocked from /workflows uploads & seeded reels; expert access preserved', async () => {
+      // 1. Client GET /api/profile/me returns empty deliveredWorkflows
+      const clientProfile = await requestJson('/api/profile/me', {
+        headers: { Authorization: `Bearer ${clientToken}` }
+      });
+      eq(clientProfile.status, 200, 'Client GET /api/profile/me must return 200 OK');
+      assert(Array.isArray(clientProfile.data.deliveredWorkflows) && clientProfile.data.deliveredWorkflows.length === 0,
+        'Client account must receive empty deliveredWorkflows (never specialist demo reels)');
+
+      // 2. Client blocked (403) from modifying deliveredWorkflows or uploading Work Reels
+      const clientPutWf = await requestJson('/api/profile/me', {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${clientToken}` },
+        body: JSON.stringify({ deliveredWorkflows: [{ id: 'hacked-wf', title: 'Client Hack' }] })
+      });
+      eq(clientPutWf.status, 403, 'Client attempting to publish deliveredWorkflows via PUT /api/profile/me must return 403 Forbidden');
+
+      for (const endpoint of [
+        '/api/profile/workflows/video-upload',
+        '/api/profile/workflows/media-upload',
+        '/api/profile/workflows/video-signed-url',
+        '/api/profile/workflows/attach-video'
+      ]) {
+        const res = await requestJson(endpoint, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${clientToken}` },
+          body: JSON.stringify({ workflowId: 'wf-1', filename: 'reel.mp4' })
+        });
+        eq(res.status, 403, `Client calling ${endpoint} must return 403 Forbidden`);
+      }
+
+      // 3. Verified Expert (freelancer) passes RBAC role gate on Work Reels studio endpoints
+      const expertProfile = await requestJson('/api/profile/me', {
+        headers: { Authorization: `Bearer ${freelancerToken}` }
+      });
+      eq(expertProfile.status, 200, 'Freelancer GET /api/profile/me must return 200 OK');
+      const expertGateRes = await requestJson('/api/profile/workflows/attach-video', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${freelancerToken}` },
+        body: JSON.stringify({})
+      });
+      assert(expertGateRes.status !== 403 && expertGateRes.status !== 401,
+        `Freelancer must pass Work Reels RBAC gate (got status ${expertGateRes.status})`);
+
+      // 4. Frontend route & Navbar guards
+      const appSrc = readFileSync(resolve('client/src/App.tsx'), 'utf8');
+      assert(appSrc.includes("allowedRoles={['freelancer', 'admin']}"), 'App.tsx must restrict /workflows & /work-reels to freelancer/admin');
+      const privateRouteSrc = readFileSync(resolve('client/src/components/PrivateRoute.tsx'), 'utf8');
+      assert(privateRouteSrc.includes('allowedRoles') && privateRouteSrc.includes('isRoleForbidden'),
+        'PrivateRoute must enforce allowedRoles redirect');
+      const navbarSrc = readFileSync(resolve('client/src/components/Navbar.tsx'), 'utf8');
+      assert(navbarSrc.includes("user.role === 'freelancer' || user.role === 'admin'"),
+        'Navbar must expose Work Reels Studio only to freelancer/admin');
     });
 
   } finally {

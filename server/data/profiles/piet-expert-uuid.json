@@ -75,7 +75,18 @@
         "Clean Cutouts"
       ],
       "liveUrl": "https://aitag.in/#packages"
+    },
+    {
+      "title": "New Work Reel",
+      "category": "Branding & Print",
+      "businessImpact": "Delivered client outcome.",
+      "mediaType": "video",
+      "videoDurationSeconds": 0,
+      "techStack": [
+        "AI Generative"
+      ],
+      "updatedAt": "2026-11-28T09:54:16.509Z"
     }
   ],
-  "updatedAt": "2026-10-13T00:45:35.676Z"
+  "updatedAt": "2026-11-28T09:54:16.509Z"
 }
